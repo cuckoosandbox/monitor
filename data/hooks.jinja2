@@ -1,0 +1,48 @@
+HOOKDEF({{hook.apiname}}, {{hook.signature.return_value}}, {{hook.signature.calling_convention}},
+{%- for param in hook.parameters: %}
+    {{param.argtype}} {{param.argname}}
+    {%- if param != hook.parameters|last %},{% endif -%}
+{%- endfor %}
+) {
+    {%- if hook.pre: %}
+    {%- for line in hook.pre: %}
+    {{line}}
+    {%- endfor %}
+    {%- endif %}
+
+    {{hook.signature.return_value}} ret = Old_{{hook.apiname}}(
+    {%- for param in hook.parameters: %}
+        {{param.argname}}
+        {%- if param != hook.parameters|last %},{% endif -%}
+    {%- endfor %}
+    );
+
+    api_log("
+    {%- for param in hook.parameters: -%}
+        {%- if param.log == True: -%}
+            {{types[param.argtype]}}
+        {%- endif -%}
+    {%- endfor -%}
+    {%- for log in hook.logging: -%}
+        {{log.argtype}}
+    {%- endfor -%}
+    "
+    {%- for param in hook.parameters: -%}
+        {% if param.log == True: -%}
+            ,
+        "{{param.alias}}", {{param.argname}}
+        {%- endif %}
+    {%- endfor %}
+    {%- for log in hook.logging: -%}
+        ,
+        "{{log.argname}}", {{log.argvalue}}
+    {%- endfor %}
+    );
+
+    {%- if hook.post: %}
+    {% for line in hook.post: %}
+    {{line}}
+    {%- endfor %}
+    {% endif %}
+    return ret;
+}
