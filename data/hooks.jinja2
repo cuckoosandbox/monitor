@@ -1,4 +1,4 @@
-HOOKDEF({{hook.apiname}}, {{hook.signature.return_value}}, {{hook.signature.calling_convention}},
+{{hook.signature.return_value}} {{hook.signature.calling_convention}} New_{{hook.apiname}}(
 {%- for param in hook.parameters: %}
     {{param.argtype}} {{param.argname}}
     {%- if param != hook.parameters|last %},{% endif -%}
