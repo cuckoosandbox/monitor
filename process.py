@@ -3,6 +3,7 @@ import docutils.utils
 import docutils.parsers.rst
 import jinja2.environment
 import os.path
+import sys
 
 
 class DefitionProcessor(object):
@@ -52,6 +53,9 @@ class DefitionProcessor(object):
             elif line.count(' ') == 2:
                 argtype, argname, alias = line.split()
             else:
+                raise
+
+            if argname.endswith(','):
                 raise
 
             ret.append(dict(argtype=argtype.strip(),
@@ -121,6 +125,8 @@ class DefitionProcessor(object):
             POBJECT_ATTRIBUTES='O',
             PLARGE_INTEGER='Q',
             ULONG='l',
+            LPCTSTR='s',
+            LPWSTR='u',
         )
 
         for hook in hooks:
@@ -133,5 +139,10 @@ class DefitionProcessor(object):
         self.create(self.normalize(self.read_document()))
 
 if __name__ == '__main__':
-    dp = DefitionProcessor('data/sigs.rst', 'data/hooks.jinja2', '_hooks.c')
-    dp.process()
+    if len(sys.argv) < 3:
+        print 'Usage: python %s <out.c> <sigs.rst...>' % sys.argv[0]
+        exit(1)
+
+    for sig in sys.argv[2:]:
+        dp = DefitionProcessor(sig, 'data/hooks.jinja2', sys.argv[1])
+        dp.process()
