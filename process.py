@@ -1,27 +1,29 @@
 import docutils.nodes
 import docutils.utils
 import docutils.parsers.rst
-import jinja2.environment
+from jinja2.environment import Template
 import os.path
 import sys
 
 
 class DefitionProcessor(object):
-    def __init__(self, sigs, template, path):
+    def __init__(self, header, source, sigs, templ_source, templ_header):
+        self.header = header
+        self.source = source
         self.sigs = sigs
-        self.path = path
-        self.templ = jinja2.environment.Template(open(template, 'rb').read())
+        self.templ_source = Template(open(templ_source, 'rb').read())
+        self.templ_header = Template(open(templ_header, 'rb').read())
 
     def parser_settings(self):
         components = docutils.parsers.rst.Parser,
         settings = docutils.frontend.OptionParser(components=components)
         return settings.get_default_values()
 
-    def read_document(self):
-        doc = docutils.utils.new_document(os.path.basename(self.sigs),
+    def read_document(self, sig):
+        doc = docutils.utils.new_document(os.path.basename(sig),
                                           self.parser_settings())
         parser = docutils.parsers.rst.Parser()
-        parser.parse(open(self.sigs, 'rb').read(), doc)
+        parser.parse(open(sig, 'rb').read(), doc)
         return parser
 
     def _parse_signature(self, text):
@@ -107,18 +109,23 @@ class DefitionProcessor(object):
             ret.append(row)
         return ret
 
-    def header(self, f):
+    def initial_header(self, f):
+        print>>f, '#ifndef MONITOR_HOOKS_H_'
+        print>>f, '#define MONITOR_HOOKS_H_'
+        print>>f
+
+    def ending_header(self, f):
+        print>>f, '#endif'
+
+    def initial_source(self, f):
         print>>f, '#include <stdio.h>'
         print>>f, '#include <windows.h>'
         print>>f
 
-    def footer(self, f):
+    def ending_source(self, f):
         pass
 
-    def create(self, hooks):
-        f = open(self.path, 'wb')
-        self.header(f)
-
+    def write(self, h, s, hooks):
         types = dict(
             HANDLE='p',
             PHANDLE='P',
@@ -130,19 +137,31 @@ class DefitionProcessor(object):
         )
 
         for hook in hooks:
-            print>>f, self.templ.render(hook=hook, types=types)
-            print>>f
+            print>>h, self.templ_header.render(hook=hook, types=types)
+            print>>h
 
-        self.footer(f)
+            print>>s, self.templ_source.render(hook=hook, types=types)
+            print>>s
 
     def process(self):
-        self.create(self.normalize(self.read_document()))
+        h = open(self.header, 'wb')
+        s = open(self.source, 'wb')
+
+        dp.initial_header(h)
+        dp.initial_source(s)
+
+        for sig in self.sigs:
+            self.write(h, s, self.normalize(self.read_document(sig)))
+
+        dp.ending_header(h)
+        dp.ending_source(s)
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print 'Usage: python %s <out.c> <sigs.rst...>' % sys.argv[0]
+        print 'Usage: python %s <out.h> <out.c> <sigs.rst...>' % sys.argv[0]
         exit(1)
 
-    for sig in sys.argv[2:]:
-        dp = DefitionProcessor(sig, 'data/hooks.jinja2', sys.argv[1])
-        dp.process()
+    dp = DefitionProcessor(sys.argv[1], sys.argv[2], sys.argv[3:],
+                           templ_header='data/header.jinja2',
+                           templ_source='data/source.jinja2')
+    dp.process()
