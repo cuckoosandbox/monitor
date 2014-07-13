@@ -147,14 +147,14 @@ class DefitionProcessor(object):
         h = open(self.header, 'wb')
         s = open(self.source, 'wb')
 
-        dp.initial_header(h)
-        dp.initial_source(s)
+        self.initial_header(h)
+        self.initial_source(s)
 
         for sig in self.sigs:
             self.write(h, s, self.normalize(self.read_document(sig)))
 
-        dp.ending_header(h)
-        dp.ending_source(s)
+        self.ending_header(h)
+        self.ending_source(s)
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
