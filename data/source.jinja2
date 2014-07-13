@@ -1,7 +1,7 @@
 {{hook.signature.return_value}} {{hook.signature.calling_convention}} New_{{hook.apiname}}(
 {%- for param in hook.parameters: %}
     {{param.argtype}} {{param.argname}}
-    {%- if param != hook.parameters|last %},{% endif -%}
+    {%- if not loop.last %},{% endif -%}
 {%- endfor %}
 ) {
     {%- if hook.pre: %}
@@ -11,7 +11,7 @@
     {%- endif %}
 
     {%- if hook.prelog: %}
-    api_prelog("{{ hook.prelog|map(attribute='argtype')|join }}"
+    api_prelog("{{ hook.prelog|join(attribute='argtype') }}"
     {%- for log in hook.prelog: -%}
         ,
         "{{log.argname}}", {{log.argvalue}}
@@ -22,7 +22,7 @@
     {{hook.signature.return_value}} ret = Old_{{hook.apiname}}(
     {%- for param in hook.parameters: %}
         {{param.argname}}
-        {%- if param != hook.parameters|last %},{% endif -%}
+        {%- if not loop.last %},{% endif -%}
     {%- endfor %}
     );
 
