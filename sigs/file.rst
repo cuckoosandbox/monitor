@@ -232,8 +232,8 @@ Pre::
             FileInformationClass == FileDispositionInformation &&
             *(BOOLEAN *) FileInformation != FALSE) {
 
-        wchar_t path[MAX_PATH_PLUS_TOLERANCE];
-        path_from_handle(FileHandle, path, MAX_PATH_PLUS_TOLERANCE);
+        wchar_t path[MAX_PATH];
+        path_from_handle(FileHandle, path, MAX_PATH);
         pipe("FILE_DEL:%Z", path);
     }
 

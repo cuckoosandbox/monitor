@@ -1,10 +1,18 @@
 CC = i686-w64-mingw32-gcc
-CFLAGS = -m32 -Wall -O2 -Wextra
+CFLAGS = -m32 -Wall -O2 -Wextra -std=c99
 
 SIGS = $(wildcard sigs/*.rst)
+HOOKS =_hooks.h _hooks.c
+SRC = $(wildcard *.c)
+DLL = monitor.dll
 
-_hooks.h _hooks.c: $(SIGS)
-	python process.py _hooks.h _hooks.c $^
+all: $(HOOKS) $(DLL)
+
+$(HOOKS): $(SIGS) process.py
+	python process.py _hooks.h _hooks.c $(SIGS)
+
+$(DLL): $(HOOKS) $(SRC)
+	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
-	rm -f _hooks.h _hooks.c
+	rm -f $(HOOKS) $(DLL)

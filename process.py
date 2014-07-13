@@ -65,10 +65,11 @@ class DefitionProcessor(object):
             elif line.count(' ') == 2:
                 argtype, argname, alias = line.split()
             else:
-                raise
+                raise Exception('Incorrect whitespace count in parameter '
+                                'line: %s' % line)
 
             if argname.endswith(','):
-                raise
+                raise Exception('Parameter line ends with a comma: %s' % line)
 
             ret.append(dict(argtype=argtype.strip(),
                             argname=argname.strip(),
@@ -116,14 +117,15 @@ class DefitionProcessor(object):
 
             for x in xrange(1, len(children), 2):
                 if not isinstance(children[x], docutils.nodes.paragraph):
-                    raise
+                    raise Exception('Node must be a paragraph.')
 
                 if not isinstance(children[x+1], docutils.nodes.literal_block):
-                    raise
+                    raise Exception('Child node must be a literal block.')
 
                 key = children[x].astext().replace(':', '').lower()
                 if not hasattr(self, '_parse_' + key):
-                    raise
+                    raise Exception('No parser known for the %r section.'
+                                    % key)
 
                 row[key] = \
                     getattr(self, '_parse_' + key)(children[x+1].astext())
@@ -132,8 +134,10 @@ class DefitionProcessor(object):
         return ret
 
     def initial_header(self, f):
-        print>>f, '#ifndef MONITOR_HOOKS_H_'
-        print>>f, '#define MONITOR_HOOKS_H_'
+        print>>f, '#ifndef MONITOR_HOOKS_H'
+        print>>f, '#define MONITOR_HOOKS_H'
+        print>>f
+        print>>f, '#include "ntapi.h"'
         print>>f
 
     def ending_header(self, f):
@@ -142,6 +146,8 @@ class DefitionProcessor(object):
     def initial_source(self, f):
         print>>f, '#include <stdio.h>'
         print>>f, '#include <windows.h>'
+        print>>f, '#include "ntapi.h"'
+        print>>f, '#include "%s"' % os.path.basename(self.header)
         print>>f
 
     def ending_source(self, f):
@@ -149,6 +155,10 @@ class DefitionProcessor(object):
 
     def write(self, h, s, hooks):
         for hook in hooks:
+            for arg in hook['parameters']:
+                if arg['log'] and arg['argtype'] not in self.types:
+                    raise Exception('Unknown argtype %r' % arg['argtype'])
+
             print>>h, self.templ_header.render(hook=hook, types=self.types)
             print>>h
 
