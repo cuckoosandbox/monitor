@@ -7,12 +7,22 @@ import sys
 
 
 class DefitionProcessor(object):
-    def __init__(self, header, source, sigs, templ_source, templ_header):
+    def __init__(self, header, source, sigs, data_dir):
         self.header = header
         self.source = source
         self.sigs = sigs
-        self.templ_source = Template(open(templ_source, 'rb').read())
-        self.templ_header = Template(open(templ_header, 'rb').read())
+
+        templ_source_path = os.path.join(data_dir, 'source.jinja2')
+        templ_header_path = os.path.join(data_dir, 'header.jinja2')
+        types_path = os.path.join(data_dir, 'types.conf')
+
+        self.templ_source = Template(open(templ_source_path, 'rb').read())
+        self.templ_header = Template(open(templ_header_path, 'rb').read())
+
+        self.types = {}
+        for line in open(types_path, 'rb'):
+            key, value = line.split('=', 1)
+            self.types[key.strip()] = value.strip()
 
     def parser_settings(self):
         components = docutils.parsers.rst.Parser,
@@ -126,21 +136,11 @@ class DefitionProcessor(object):
         pass
 
     def write(self, h, s, hooks):
-        types = dict(
-            HANDLE='p',
-            PHANDLE='P',
-            POBJECT_ATTRIBUTES='O',
-            PLARGE_INTEGER='Q',
-            ULONG='l',
-            LPCTSTR='s',
-            LPWSTR='u',
-        )
-
         for hook in hooks:
-            print>>h, self.templ_header.render(hook=hook, types=types)
+            print>>h, self.templ_header.render(hook=hook, types=self.types)
             print>>h
 
-            print>>s, self.templ_source.render(hook=hook, types=types)
+            print>>s, self.templ_source.render(hook=hook, types=self.types)
             print>>s
 
     def process(self):
@@ -162,6 +162,5 @@ if __name__ == '__main__':
         exit(1)
 
     dp = DefitionProcessor(sys.argv[1], sys.argv[2], sys.argv[3:],
-                           templ_header='data/header.jinja2',
-                           templ_source='data/source.jinja2')
+                           data_dir='data')
     dp.process()
