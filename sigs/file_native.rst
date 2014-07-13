@@ -10,14 +10,14 @@ NtCreateFile
 Parameters::
 
     ** PHANDLE FileHandle file_handle
-    ** ACCESS_MASK DesiredAccess
+    ** ACCESS_MASK DesiredAccess desired_access
     ** POBJECT_ATTRIBUTES ObjectAttributes filepath
     *  PIO_STATUS_BLOCK IoStatusBlock
     *  PLARGE_INTEGER AllocationSize
-    ** ULONG FileAttributes
-    ** ULONG ShareAccess
-    ** ULONG CreateDisposition
-    ** ULONG CreateOptions
+    ** ULONG FileAttributes file_attributes
+    ** ULONG ShareAccess share_access
+    ** ULONG CreateDisposition create_disposition
+    ** ULONG CreateOptions create_options
     *  PVOID EaBuffer
     *  ULONG EaLength
 
@@ -45,12 +45,12 @@ NtOpenFile
 
 Parameters::
 
-    ** PHANDLE FileHandle
-    ** ACCESS_MASK DesiredAccess
+    ** PHANDLE FileHandle file_handle
+    ** ACCESS_MASK DesiredAccess desired_access
     ** POBJECT_ATTRIBUTES ObjectAttributes filepath
     *  PIO_STATUS_BLOCK IoStatusBlock
-    ** ULONG ShareAccess
-    ** ULONG OpenOptions
+    ** ULONG ShareAccess share_access
+    ** ULONG OpenOptions open_options
 
 Post::
 
@@ -64,14 +64,14 @@ NtReadFile
 
 Parameters::
 
-    ** HANDLE FileHandle
+    ** HANDLE FileHandle file_handle
     *  HANDLE Event
     *  PIO_APC_ROUTINE ApcRoutine
     *  PVOID ApcContext
     *  PIO_STATUS_BLOCK IoStatusBlock
     *  PVOID Buffer
-    ** ULONG Length
-    ** PLARGE_INTEGER ByteOffset
+    ** ULONG Length length
+    ** PLARGE_INTEGER ByteOffset offset
     *  PULONG Key
 
 Logging::
@@ -84,14 +84,14 @@ NtWriteFile
 
 Parameters::
 
-    ** HANDLE FileHandle
+    ** HANDLE FileHandle file_handle
     *  HANDLE Event
     *  PIO_APC_ROUTINE ApcRoutine
     *  PVOID ApcContext
     *  PIO_STATUS_BLOCK IoStatusBlock
     *  PVOID Buffer
     *  ULONG Length
-    ** PLARGE_INTEGER ByteOffset
+    ** PLARGE_INTEGER ByteOffset offset
     *  PULONG Key
 
 Logging::
@@ -110,12 +110,12 @@ NtDeviceIoControlFile
 
 Parameters::
 
-    ** HANDLE FileHandle
+    ** HANDLE FileHandle file_handle
     *  HANDLE Event
     *  PIO_APC_ROUTINE ApcRoutine
     *  PVOID ApcContext
     *  PIO_STATUS_BLOCK IoStatusBlock
-    ** ULONG IoControlCode
+    ** ULONG IoControlCode control_code
     *  PVOID InputBuffer
     *  ULONG InputBufferLength
     *  PVOID OutputBuffer
@@ -143,7 +143,7 @@ NtQueryDirectoryFile
 
 Parameters::
 
-    ** HANDLE FileHandle
+    ** HANDLE FileHandle file_handle
     *  HANDLE Event
     *  PIO_APC_ROUTINE ApcRoutine
     *  PVOID ApcContext
@@ -165,11 +165,11 @@ NtQueryInformationFile
 
 Parameters::
 
-    ** HANDLE FileHandle
+    ** HANDLE FileHandle file_handle
     *  PIO_STATUS_BLOCK IoStatusBlock
     *  PVOID FileInformation
     *  ULONG Length
-    ** FILE_INFORMATION_CLASS FileInformationClass
+    ** FILE_INFORMATION_CLASS FileInformationClass information_class
 
 Logging::
 
@@ -181,11 +181,11 @@ NtSetInformationFile
 
 Parameters::
 
-    ** HANDLE FileHandle
+    ** HANDLE FileHandle file_handle
     *  PIO_STATUS_BLOCK IoStatusBlock
     *  PVOID FileInformation
     *  ULONG Length
-    ** FILE_INFORMATION_CLASS FileInformationClass
+    ** FILE_INFORMATION_CLASS FileInformationClass information_class
 
 Pre::
 
@@ -208,8 +208,8 @@ NtOpenDirectoryObject
 
 Parameters::
 
-    ** PHANDLE DirectoryHandle
-    ** ACCESS_MASK DesiredAccess
+    ** PHANDLE DirectoryHandle directory_handle
+    ** ACCESS_MASK DesiredAccess desired_access
     ** POBJECT_ATTRIBUTES ObjectAttributes dirpath
 
 
@@ -218,6 +218,6 @@ NtCreateDirectoryObject
 
 Parameters::
 
-    ** PHANDLE DirectoryHandle
-    ** ACCESS_MASK DesiredAccess
+    ** PHANDLE DirectoryHandle directory_handle
+    ** ACCESS_MASK DesiredAccess desired_access
     ** POBJECT_ATTRIBUTES ObjectAttributes dirpath

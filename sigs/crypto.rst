@@ -10,7 +10,7 @@ CryptProtectData
 Parameters::
 
     *  DATA_BLOB *pDataIn
-    ** LPCWSTR szDataDescr
+    ** LPCWSTR szDataDescr description
     *  DATA_BLOB *pOptionalEntropy
     *  PVOID pvReserved
     *  CRYPTPROTECT_PROMPTSTRUCT *pPromptStruct
@@ -58,7 +58,7 @@ Parameters::
 
     *  LPVOID pData
     *  DWORD cbData
-    ** DWORD dwFlags
+    ** DWORD dwFlags flags
 
 Prelog::
 
@@ -72,7 +72,7 @@ Parameters::
 
     *  LPVOID pData
     *  DWORD cbData
-    ** DWORD dwFlags
+    ** DWORD dwFlags flags
 
 Logging::
 
@@ -84,10 +84,10 @@ CryptDecrypt
 
 Parameters::
 
-    ** HCRYPTKEY hKey
-    ** HCRYPTHASH hHash
-    ** BOOL Final
-    ** DWORD dwFlags
+    ** HCRYPTKEY hKey key_handle
+    ** HCRYPTHASH hHash hash_handle
+    ** BOOL Final final
+    ** DWORD dwFlags flags
     *  BYTE *pbData
     *  DWORD *pdwDataLen
 
@@ -101,10 +101,10 @@ CryptEncrypt
 
 Parameters::
 
-    ** HCRYPTKEY hKey
-    ** HCRYPTHASH hHash
-    ** BOOL Final
-    ** DWORD dwFlags
+    ** HCRYPTKEY hKey key_handle
+    ** HCRYPTHASH hHash hash_handle
+    ** BOOL Final final
+    ** DWORD dwFlags flags
     *  BYTE *pbData
     *  DWORD *pdwDataLen
     *  DWORD dwBufLen
@@ -119,10 +119,10 @@ CryptHashData
 
 Parameters::
 
-    ** HCRYPTHASH hHash
+    ** HCRYPTHASH hHash hash_handle
     *  BYTE *pbData
     *  DWORD dwDataLen
-    ** DWORD dwFlags
+    ** DWORD dwFlags flags
 
 Logging::
 
