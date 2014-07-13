@@ -1,10 +1,11 @@
-NtCreateFile
-============
-
 Signature::
 
     * Return value: NTSTATUS
     * Calling convention: WINAPI
+
+
+NtCreateFile
+============
 
 Parameters::
 
@@ -30,11 +31,6 @@ Post::
 NtDeleteFile
 ============
 
-Signature::
-
-    * Return value: NTSTATUS
-    * Calling convention: WINAPI
-
 Parameters::
 
     ** POBJECT_ATTRIBUTES ObjectAttributes filepath
@@ -46,11 +42,6 @@ Pre::
 
 NtOpenFile
 ==========
-
-Signature::
-
-    * Return value: NTSTATUS
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -71,11 +62,6 @@ Post::
 NtReadFile
 ==========
 
-Signature::
-
-    * Return value: NTSTATUS
-    * Calling convention: WINAPI
-
 Parameters::
 
     ** HANDLE FileHandle
@@ -95,11 +81,6 @@ Logging::
 
 NtWriteFile
 ===========
-
-Signature::
-
-    * Return value: NTSTATUS
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -126,11 +107,6 @@ Post::
 
 NtDeviceIoControlFile
 =====================
-
-Signature::
-
-    * Return value: NTSTATUS
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -165,11 +141,6 @@ Post::
 NtQueryDirectoryFile
 ====================
 
-Signature::
-
-    * Return value: NTSTATUS
-    * Calling convention: WINAPI
-
 Parameters::
 
     ** HANDLE FileHandle
@@ -192,11 +163,6 @@ Logging::
 NtQueryInformationFile
 ======================
 
-Signature::
-
-    * Return value: NTSTATUS
-    * Calling convention: WINAPI
-
 Parameters::
 
     ** HANDLE FileHandle
@@ -212,11 +178,6 @@ Logging::
 
 NtSetInformationFile
 ====================
-
-Signature::
-
-    * Return value: NTSTATUS
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -245,11 +206,6 @@ Logging::
 NtOpenDirectoryObject
 =====================
 
-Signature::
-
-    * Return value: NTSTATUS
-    * Calling convention: WINAPI
-
 Parameters::
 
     ** PHANDLE DirectoryHandle
@@ -259,11 +215,6 @@ Parameters::
 
 NtCreateDirectoryObject
 =======================
-
-Signature::
-
-    * Return value: NTSTATUS
-    * Calling convention: WINAPI
 
 Parameters::
 

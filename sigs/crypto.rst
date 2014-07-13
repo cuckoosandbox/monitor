@@ -3,6 +3,7 @@ Signature::
     * Return value: BOOL
     * Calling convention: WINAPI
 
+
 CryptProtectData
 ================
 

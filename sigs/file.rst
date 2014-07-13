@@ -1,10 +1,14 @@
+Signature::
+
+    * Calling convention: WINAPI
+
+
 CreateDirectoryW
 ================
 
 Signature::
 
     * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -18,7 +22,6 @@ CreateDirectoryExW
 Signature::
 
     * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -33,7 +36,6 @@ RemoveDirectoryA
 Signature::
 
     * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -46,7 +48,6 @@ RemoveDirectoryW
 Signature::
 
     * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -59,7 +60,6 @@ MoveFileWithProgressW
 Signature::
 
     * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -82,7 +82,6 @@ FindFirstFileExA
 Signature::
 
     * Return value: HANDLE
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -100,7 +99,6 @@ FindFirstFileExW
 Signature::
 
     * Return value: HANDLE
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -118,7 +116,6 @@ CopyFileA
 Signature::
 
     * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -133,7 +130,6 @@ CopyFileW
 Signature::
 
     * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -148,7 +144,6 @@ CopyFileExW
 Signature::
 
     * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -166,7 +161,6 @@ DeleteFileA
 Signature::
 
     * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -192,7 +186,6 @@ DeleteFileW
 Signature::
 
     * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
