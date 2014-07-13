@@ -59,6 +59,10 @@ class DefitionProcessor(object):
                 log = True
                 line = line[1:].strip()
 
+            # Certain keywords are to be ignored.
+            if line.startswith(('const ', 'CONST ')):
+                line = line[6:].strip()
+
             if line.count(' ') == 1:
                 argtype, argname = line.split()
                 alias = argname
@@ -67,6 +71,18 @@ class DefitionProcessor(object):
             else:
                 raise Exception('Incorrect whitespace count in parameter '
                                 'line: %s' % line)
+
+            alias = alias.replace('*', '').replace('[]', '').strip()
+
+            if argname.startswith('*'):
+                argname = argname[1:].strip()
+                argtype += ' *'
+
+            if argname.endswith('[]'):
+                argname = argname[:-2].strip()
+                argtype += ' *'
+
+            argtype = argtype.replace('* *', '**')
 
             if argname.endswith(','):
                 raise Exception('Parameter line ends with a comma: %s' % line)

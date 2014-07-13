@@ -36,7 +36,7 @@ Signature::
 Parameters::
 
     *  DATA_BLOB *pDataIn
-    ** LPWSTR *ppszDataDescr
+    *  LPWSTR *ppszDataDescr
     *  DATA_BLOB *pOptionalEntropy
     *  PVOID pvReserved
     *  CRYPTPROTECT_PROMPTSTRUCT *pPromptStruct
@@ -50,6 +50,7 @@ Ensure::
 
 Logging::
 
+    u description ppszDataDescr != NULL ? *ppszDataDescr : NULL
     b entropy pOptionalEntropy->cbData, pOptionalEntropy->pbData
     b buffer pDataOut->cbData, pDataOut->pbData
 
