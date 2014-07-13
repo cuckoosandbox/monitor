@@ -78,6 +78,18 @@ class DefitionProcessor(object):
     def _parse_pre(self, text):
         return text.split('\n')
 
+    def _parse_prelog(self, text):
+        return self._parse_logging(text)
+
+    def _parse_ensure(self, text):
+        ret = []
+        for line in text.split('\n'):
+            if line.startswith('*'):
+                line = line[1:].strip()
+
+            ret.append(line)
+        return ret
+
     def _parse_post(self, text):
         return text.split('\n')
 

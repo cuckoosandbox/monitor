@@ -10,6 +10,15 @@
     {%- endfor %}
     {%- endif %}
 
+    {%- if hook.prelog: %}
+    api_prelog("{{ hook.prelog|map(attribute='argtype')|join }}"
+    {%- for log in hook.prelog: -%}
+        ,
+        "{{log.argname}}", {{log.argvalue}}
+    {%- endfor %}
+    );
+    {%- endif %}
+
     {{hook.signature.return_value}} ret = Old_{{hook.apiname}}(
     {%- for param in hook.parameters: %}
         {{param.argname}}
