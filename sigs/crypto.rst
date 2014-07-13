@@ -1,10 +1,10 @@
-CryptProtectData
-================
-
 Signature::
 
     * Return value: BOOL
     * Calling convention: WINAPI
+
+CryptProtectData
+================
 
 Parameters::
 
@@ -27,11 +27,6 @@ Prelog::
 
 CryptUnprotectData
 ==================
-
-Signature::
-
-    * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -58,11 +53,6 @@ Logging::
 CryptProtectMemory
 ==================
 
-Signature::
-
-    * Return value: BOOL
-    * Calling convention: WINAPI
-
 Parameters::
 
     *  LPVOID pData
@@ -77,11 +67,6 @@ Prelog::
 CryptUnprotectMemory
 ====================
 
-Signature::
-
-    * Return value: BOOL
-    * Calling convention: WINAPI
-
 Parameters::
 
     *  LPVOID pData
@@ -95,11 +80,6 @@ Logging::
 
 CryptDecrypt
 ============
-
-Signature::
-
-    * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -117,11 +97,6 @@ Logging::
 
 CryptEncrypt
 ============
-
-Signature::
-
-    * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -141,11 +116,6 @@ Logging::
 CryptHashData
 =============
 
-Signature::
-
-    * Return value: BOOL
-    * Calling convention: WINAPI
-
 Parameters::
 
     ** HCRYPTHASH hHash
@@ -160,11 +130,6 @@ Logging::
 
 CryptDecodeMessage
 ==================
-
-Signature::
-
-    * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -190,11 +155,6 @@ Logging::
 CryptDecryptMessage
 ===================
 
-Signature::
-
-    * Return value: BOOL
-    * Calling convention: WINAPI
-
 Parameters::
 
     *  PCRYPT_DECRYPT_MESSAGE_PARA pDecryptPara
@@ -211,11 +171,6 @@ Logging::
 
 CryptEncryptMessage
 ===================
-
-Signature::
-
-    * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 
@@ -234,11 +189,6 @@ Prelog::
 
 CryptHashMessage
 ================
-
-Signature::
-
-    * Return value: BOOL
-    * Calling convention: WINAPI
 
 Parameters::
 

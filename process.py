@@ -122,29 +122,45 @@ class DefitionProcessor(object):
                             argvalue=argvalue))
         return ret
 
+    def _parse_paragraph(self, paragraph, literal_block):
+        if not isinstance(paragraph, docutils.nodes.paragraph):
+            raise Exception('Node must be a paragraph.')
+
+        if not isinstance(literal_block, docutils.nodes.literal_block):
+            raise Exception('Child node must be a literal block.')
+
+        key = paragraph.astext().replace(':', '').lower()
+        if not hasattr(self, '_parse_' + key):
+            raise Exception('No parser known for the %r section.'
+                            % key)
+
+        return key, getattr(self, '_parse_' + key)(literal_block.astext())
+
     def normalize(self, doc):
-        ret = []
+        ret, global_values, start = [], {}, 0
+
+        while isinstance(doc.document.children[start],
+                         docutils.nodes.paragraph):
+            key, value = self._parse_paragraph(doc.document.children[start],
+                                               doc.document.children[start+1])
+            global_values[key] = value
+            start += 2
+
         for index in doc.document.ids:
             entry = doc.document.ids[index]
+
+            if not isinstance(entry.children[0], docutils.nodes.title):
+                raise Exception('Node must be a title.')
+
             apiname = entry.children[0].astext()
             children = entry.children
 
-            row = dict(apiname=apiname)
+            row = global_values.copy()
+            row['apiname'] = apiname
 
             for x in xrange(1, len(children), 2):
-                if not isinstance(children[x], docutils.nodes.paragraph):
-                    raise Exception('Node must be a paragraph.')
-
-                if not isinstance(children[x+1], docutils.nodes.literal_block):
-                    raise Exception('Child node must be a literal block.')
-
-                key = children[x].astext().replace(':', '').lower()
-                if not hasattr(self, '_parse_' + key):
-                    raise Exception('No parser known for the %r section.'
-                                    % key)
-
-                row[key] = \
-                    getattr(self, '_parse_' + key)(children[x+1].astext())
+                key, value = self._parse_paragraph(children[x], children[x+1])
+                row[key] = value
 
             ret.append(row)
         return ret
