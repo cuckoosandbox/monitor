@@ -1,5 +1,6 @@
 global _asm_clean
 global _asm_clean_size
+global _asm_clean_retaddr_pop_off
 
 %define TLS_HOOK_INFO 0x44
 %define TLS_LASTERR 0x34
@@ -41,3 +42,4 @@ _clean_end:
 
 
 _asm_clean_size dd _clean_end - _asm_clean
+_asm_clean_retaddr_pop_off dd _clean_retaddr_pop - _asm_clean

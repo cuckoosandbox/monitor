@@ -2,6 +2,7 @@ global _asm_tramp
 global _asm_tramp_size
 global _asm_tramp_orig_func_off
 global _asm_tramp_retaddr_off
+global _asm_tramp_retaddr_add_off
 
 %define TLS_HOOK_INFO 0x44
 %define TLS_LASTERR 0x34
@@ -93,3 +94,4 @@ _tramp_end:
 _asm_tramp_size dd _tramp_end - _asm_tramp
 _asm_tramp_orig_func_off dd _tramp_orig_func - _asm_tramp
 _asm_tramp_retaddr_off dd _tramp_retaddr - _asm_tramp
+_asm_tramp_retaddr_add_off dd _tramp_retaddr_add - _asm_tramp

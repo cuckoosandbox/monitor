@@ -1,5 +1,7 @@
 global _asm_guide
 global _asm_guide_size
+global _asm_guide_orig_off
+global _asm_guide_eax_add_off
 
 %define TLS_HOOK_INFO 0x44
 %define TLS_LASTERR 0x34
@@ -71,3 +73,5 @@ _guide_end:
 
 
 _asm_guide_size dd _guide_end - _asm_guide
+_asm_guide_orig_off dd _guide_orig - _asm_guide
+_asm_guide_eax_add_off dd _guide_eax_add - _asm_guide
