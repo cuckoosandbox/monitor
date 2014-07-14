@@ -1,12 +1,12 @@
-global asm_guide
-global asm_guide_size
+global _asm_guide
+global _asm_guide_size
 
 %define TLS_HOOK_INFO 0x44
 %define TLS_LASTERR 0x34
 
 %define LASTERR_OFF 4
 
-asm_guide:
+_asm_guide:
 
     push eax
 
@@ -67,5 +67,7 @@ _guide_next:
     pop eax
     retn
 
+_guide_end:
 
-asm_guide_size dd $$ - asm_guide
+
+_asm_guide_size dd _guide_end - _asm_guide

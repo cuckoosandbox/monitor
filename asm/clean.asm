@@ -1,5 +1,5 @@
-global asm_clean
-global asm_clean_size
+global _asm_clean
+global _asm_clean_size
 
 %define TLS_HOOK_INFO 0x44
 %define TLS_LASTERR 0x34
@@ -7,7 +7,7 @@ global asm_clean_size
 %define HOOKCNT_OFF 0
 %define LASTERR_OFF 4
 
-asm_clean:
+_asm_clean:
 
     push eax
 
@@ -37,5 +37,7 @@ _clean_getpc:
     pop eax
     retn
 
+_clean_end:
 
-asm_clean_size dd $$ - asm_clean
+
+_asm_clean_size dd _clean_end - _asm_clean
