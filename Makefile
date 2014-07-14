@@ -1,18 +1,33 @@
 CC = i686-w64-mingw32-gcc
-CFLAGS = -m32 -Wall -O2 -Wextra -std=c99
+NASM = nasm
+CFLAGS = -m32 -Wall -O2 -Wextra -std=c99 -s
+INC = -I src/ -I objects/code/
 
 SIGS = $(wildcard sigs/*.rst)
-HOOKS =_hooks.h _hooks.c
-SRC = $(wildcard *.c)
+HOOK = objects/code/hooks.h objects/code/hooks.c
+HOOKOBJ = objects/code/hooks.o
+SRC = $(wildcard src/*.c)
+SRCOBJ = $(SRC:%.c=objects/%.o)
+ASM = $(wildcard asm/*.asm)
+ASMOBJ = $(ASM:%.asm=objects/%.o)
 DLL = monitor.dll
 
 all: $(HOOKS) $(DLL)
 
 $(HOOKS): $(SIGS) process.py
-	python process.py _hooks.h _hooks.c $(SIGS)
+	python process.py objects/code/hooks.h objects/code/hooks.c $(SIGS)
 
-$(DLL): $(HOOKS) $(SRC)
-	$(CC) -o $@ $^ $(CFLAGS)
+objects/src/%.o: src/%.c
+	$(CC) -c -o $@ $^ $(CFLAGS)
+
+objects/code/%.o: objects/code/%.c
+	$(CC) -c -o $@ $^ $(CFLAGS) $(INC)
+
+objects/asm/%.o: asm/%.asm
+	$(NASM) -f elf32 -o $@ $^
+
+$(DLL): $(HOOKOBJ) $(ASMOBJ) $(SRCOBJ)
+	$(CC) -shared -o $@ $^ $(CFLAGS)
 
 clean:
-	rm -f $(HOOKS) $(DLL)
+	rm -f $(HOOKS) $(SRCOBJ) $(ASMOBJ) $(DLL)
