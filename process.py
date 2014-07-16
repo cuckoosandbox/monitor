@@ -188,6 +188,16 @@ class DefitionProcessor(object):
                 else:
                     row[key] = value
 
+            # If no is_success handler has been defined then use one based on
+            # the return value. (This is the default behavior.)
+            if 'is_success' not in row['signature']:
+                retval = row['signature']['return_value']
+                if retval not in self.is_success:
+                    raise Exception('Unknown return_value %r for api %r.' %
+                                    (retval, row['apiname']))
+
+                row['signature']['is_success'] = self.is_success[retval]
+
             self.explain.append(row)
             yield row
 

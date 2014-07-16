@@ -50,6 +50,7 @@ GetSystemMetrics
 Signature::
 
     * Return value: int
+    * Is success: 1
 
 Parameters::
 
