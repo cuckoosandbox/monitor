@@ -160,7 +160,7 @@ class DefitionProcessor(object):
         return key, getattr(self, '_parse_' + key)(literal_block.astext())
 
     def normalize(self, doc):
-        ret, global_values, start = [], {}, 0
+        global_values, start = {}, 0
 
         while isinstance(doc.document.children[start],
                          docutils.nodes.paragraph):
@@ -189,8 +189,7 @@ class DefitionProcessor(object):
                     row[key] = value
 
             self.explain.append(row)
-            ret.append(row)
-        return ret
+            yield row
 
     def initial_header(self, f):
         print>>f, '#ifndef MONITOR_HOOKS_H'
@@ -216,18 +215,17 @@ class DefitionProcessor(object):
     def ending_source(self, f):
         pass
 
-    def write(self, h, s, hooks):
-        for hook in hooks:
-            for arg in hook.get('parameters', []):
-                if arg['log'] and arg['argtype'] not in self.types:
-                    raise Exception('Unknown argtype %r' % arg['argtype'])
+    def write(self, h, s, hook):
+        for arg in hook.get('parameters', []):
+            if arg['log'] and arg['argtype'] not in self.types:
+                raise Exception('Unknown argtype %r.' % arg['argtype'])
 
-            print>>h, self.templ_header.render(hook=hook, types=self.types)
-            print>>h
+        print>>h, self.templ_header.render(hook=hook, types=self.types)
+        print>>h
 
-            print>>s, self.templ_source.render(hook=hook, types=self.types,
-                                               is_success=self.is_success)
-            print>>s
+        print>>s, self.templ_source.render(hook=hook, types=self.types,
+                                           is_success=self.is_success)
+        print>>s
 
     def process(self):
         h = open(self.hooks_h, 'wb')
@@ -240,7 +238,8 @@ class DefitionProcessor(object):
         self.explain = self.base_sigs
 
         for sig in self.sigs:
-            self.write(h, s, self.normalize(self.read_document(sig)))
+            for hook in self.normalize(self.read_document(sig)):
+                self.write(h, s, hook)
 
         print>>e, self.templ_explain.render(sigs=self.explain,
                                             types=self.types)
