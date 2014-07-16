@@ -33,4 +33,4 @@ $(DLL): $(HOOKOBJ) $(ASMOBJ) $(SRCOBJ)
 	$(CC) -shared -o $@ $^ $(CFLAGS)
 
 clean:
-	rm -f $(HOOKS) $(SRCOBJ) $(ASMOBJ) $(DLL)
+	rm -f $(HOOK) $(HOOKOBJ) $(SRCOBJ) $(ASMOBJ) $(DLL)

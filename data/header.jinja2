@@ -1,6 +1,8 @@
 extern {{hook.signature.return_value}} {{hook.signature.calling_convention}} Old_{{hook.apiname}}(
 {%- for param in hook.parameters: %}
-    {{param.argtype}} {{param.argname}}
+    {{param.argtype}}
+    {%- if not param.argtype.endswith('*') %} {% endif -%}
+    {{param.argname}}
     {%- if not loop.last %},{% endif -%}
 {%- endfor %}
 );

@@ -1,6 +1,8 @@
 {{hook.signature.return_value}} {{hook.signature.calling_convention}} New_{{hook.apiname}}(
 {%- for param in hook.parameters: %}
-    {{param.argtype}} {{param.argname}}
+    {{param.argtype}}
+    {%- if not param.argtype.endswith('*') %} {% endif -%}
+    {{param.argname}}
     {%- if not loop.last %},{% endif -%}
 {%- endfor %}
 ) {
@@ -11,10 +13,10 @@
     {%- endif %}
 
     {%- if hook.prelog: %}
-    api_prelog("{{ hook.prelog|join(attribute='argtype') }}"
+    log_api_pre("{{ hook.prelog|join(attribute='argtype') }}"
     {%- for log in hook.prelog: -%}
         ,
-        "{{log.argname}}", {{log.argvalue}}
+        {{log.argvalue}}
     {%- endfor %}
     );
     {%- endif %}
@@ -26,7 +28,7 @@
     {%- endfor %}
     );
 
-    api_log("
+    log_api("
     {%- for param in hook.parameters: -%}
         {%- if param.log == True: -%}
             {{types[param.argtype]}}
@@ -38,13 +40,13 @@
     "
     {%- for param in hook.parameters: -%}
         {% if param.log == True: -%}
-            ,
-        "{{param.alias}}", {{param.argname}}
+        ,
+        {{param.argname}}
         {%- endif %}
     {%- endfor %}
     {%- for log in hook.logging: -%}
         ,
-        "{{log.argname}}", {{log.argvalue}}
+        {{log.argvalue}}
     {%- endfor %}
     );
 
