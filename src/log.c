@@ -6,6 +6,7 @@
 #include "bson.h"
 #include "misc.h"
 #include "ntapi.h"
+#include "log.h"
 #include "pipe.h"
 #include "utf8.h"
 
@@ -124,6 +125,44 @@ static void log_buffer(bson *b, const char *idx,
 
 void log_explain()
 {
+    for (uint32_t idx = 0; g_explain_apinames[idx] != NULL; idx++) {
+        bson b; char argidx[4];
+
+        bson_init(&b);
+        bson_append_int(&b, "I", idx);
+        bson_append_string(&b, "name", g_explain_apinames[idx]);
+        bson_append_string(&b, "type", "info");
+        bson_append_string(&b, "category", g_explain_categories[idx]);
+
+        bson_append_start_array(&b, "args");
+        bson_append_string(&b, "0", "is_success");
+        bson_append_string(&b, "1", "retval");
+
+        const char *fmt = g_explain_paramtypes[idx];
+
+        for (uint32_t argnum = 2; *fmt != 0; argnum++, fmt++) {
+            snprintf(argidx, 4, "%d", argnum);
+
+            const char *argname = g_explain_paramnames[idx][argnum-2];
+
+            // On certain formats, we need to tell cuckoo about them for
+            // nicer display / matching.
+            if(*fmt == 'p' || *fmt == 'P') {
+                bson_append_start_array(&b, argidx);
+                bson_append_string(&b, "0", argname);
+                bson_append_string(&b, "1", "p");
+                bson_append_finish_array(&b);
+            }
+            else {
+                bson_append_string(&b, argidx, argname);
+            }
+        }
+
+        bson_append_finish_array(&b);
+        bson_finish(&b);
+        log_raw_direct(bson_data(&b), bson_size(&b));
+        bson_destroy(&b);
+    }
 }
 
 void log_api(int index, int is_success, int return_value,

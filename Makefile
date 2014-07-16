@@ -18,7 +18,7 @@ dirs:
 	mkdir -p objects/asm objects/code objects/src
 
 $(HOOK): $(SIGS) process.py
-	python process.py objects/code/hooks.h objects/code/hooks.c $(SIGS)
+	python process.py data/ objects/code/ $(SIGS)
 
 objects/src/%.o: src/%.c
 	$(CC) -c -o $@ $^ $(CFLAGS)

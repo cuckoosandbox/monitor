@@ -8,18 +8,22 @@ import sys
 
 
 class DefitionProcessor(object):
-    def __init__(self, header, source, sigs, data_dir):
-        self.header = header
-        self.source = source
-        self.sigs = sigs
-
+    def __init__(self, data_dir, out_dir, sigs):
         templ_source_path = os.path.join(data_dir, 'source.jinja2')
         templ_header_path = os.path.join(data_dir, 'header.jinja2')
+        templ_explain_path = os.path.join(data_dir, 'explain.jinja2')
         base_sigs_path = os.path.join(data_dir, 'base_sigs.json')
         types_path = os.path.join(data_dir, 'types.conf')
 
+        self.hooks_c = os.path.join(out_dir, 'hooks.c')
+        self.hooks_h = os.path.join(out_dir, 'hooks.h')
+        self.explain_c = os.path.join(out_dir, 'explain.c')
+
+        self.sigs = sigs
+
         self.templ_source = Template(open(templ_source_path, 'rb').read())
         self.templ_header = Template(open(templ_header_path, 'rb').read())
+        self.templ_explain = Template(open(templ_explain_path, 'rb').read())
 
         self.types = {}
         for line in open(types_path, 'rb'):
@@ -30,6 +34,7 @@ class DefitionProcessor(object):
 
         for entry in json.load(open(base_sigs_path, 'rb')):
             entry['index'] = self.sigcnt
+            entry['log'] = True
             for param in entry['parameters']:
                 param['alias'] = param['argname']
 
@@ -176,6 +181,7 @@ class DefitionProcessor(object):
                 key, value = self._parse_paragraph(children[x], children[x+1])
                 row[key] = value
 
+            self.explain.append(row)
             ret.append(row)
         return ret
 
@@ -191,9 +197,13 @@ class DefitionProcessor(object):
 
     def initial_source(self, f):
         print>>f, '#include <stdio.h>'
+        print>>f, '#include <stdint.h>'
         print>>f, '#include <windows.h>'
         print>>f, '#include "ntapi.h"'
-        print>>f, '#include "%s"' % os.path.basename(self.header)
+        print>>f, '#include "log.h"'
+        print>>f, '#include "misc.h"'
+        print>>f, '#include "pipe.h"'
+        print>>f, '#include "%s"' % os.path.basename(self.hooks_h)
         print>>f
 
     def ending_source(self, f):
@@ -212,23 +222,28 @@ class DefitionProcessor(object):
             print>>s
 
     def process(self):
-        h = open(self.header, 'wb')
-        s = open(self.source, 'wb')
+        h = open(self.hooks_h, 'wb')
+        s = open(self.hooks_c, 'wb')
+        e = open(self.explain_c, 'wb')
 
         self.initial_header(h)
         self.initial_source(s)
 
+        self.explain = self.base_sigs
+
         for sig in self.sigs:
             self.write(h, s, self.normalize(self.read_document(sig)))
+
+        print>>e, self.templ_explain.render(sigs=self.explain,
+                                            types=self.types)
 
         self.ending_header(h)
         self.ending_source(s)
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print 'Usage: python %s <out.h> <out.c> <sigs.rst...>' % sys.argv[0]
+        print 'Usage: python %s <datadir> <outdir> <sigs.rst..>' % sys.argv[0]
         exit(1)
 
-    dp = DefitionProcessor(sys.argv[1], sys.argv[2], sys.argv[3:],
-                           data_dir='data')
+    dp = DefitionProcessor(sys.argv[1], sys.argv[2], sys.argv[3:])
     dp.process()

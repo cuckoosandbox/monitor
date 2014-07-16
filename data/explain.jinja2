@@ -1,0 +1,35 @@
+#include <stdio.h>
+
+const char *g_explain_apinames[] = {
+{%- for row in sigs: %}
+    "{{ row.apiname }}",
+{%- endfor %}
+    NULL,
+};
+
+const char *g_explain_categories[] = {
+{%- for row in sigs: %}
+    /* {{ '%-32s'|format(row.apiname) }} */ "{{ row.category }}",
+{%- endfor %}
+};
+
+const char *g_explain_paramtypes[] = {
+{%- for row in sigs: %}
+    /* {{ '%-32s'|format(row.apiname) }} */ "
+    {%- for param in row.parameters: -%}
+        {% if param.log %}{{ types[param.argtype] }}{% endif %}
+    {%- endfor -%}
+    ",
+{%- endfor %}
+};
+
+const char *g_explain_paramnames[][16] = {
+{%- for row in sigs: %}
+    /* {{ row.apiname }} */
+    {
+    {%- for param in row.parameters: -%}
+        {% if param.log %}"{{ param.alias }}", {% endif %}
+    {%- endfor -%}
+    },
+{%- endfor %}
+};
