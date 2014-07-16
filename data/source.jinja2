@@ -28,7 +28,10 @@
     {%- endfor %}
     );
 
-    log_api({{ hook.index }}, "
+    log_api({{ hook.index }},
+        {{ is_success[hook.signature.return_value] }},
+        (int)(uintptr_t) ret,
+        "
     {%- for param in hook.parameters: -%}
         {%- if param.log == True: -%}
             {{types[param.argtype]}}

@@ -14,6 +14,7 @@ class DefitionProcessor(object):
         templ_explain_path = os.path.join(data_dir, 'explain.jinja2')
         base_sigs_path = os.path.join(data_dir, 'base_sigs.json')
         types_path = os.path.join(data_dir, 'types.conf')
+        is_success_path = os.path.join(data_dir, 'is-success.conf')
 
         self.hooks_c = os.path.join(out_dir, 'hooks.c')
         self.hooks_h = os.path.join(out_dir, 'hooks.h')
@@ -29,6 +30,11 @@ class DefitionProcessor(object):
         for line in open(types_path, 'rb'):
             key, value = line.split('=', 1)
             self.types[key.strip()] = value.strip()
+
+        self.is_success = {}
+        for line in open(is_success_path, 'rb'):
+            key, value = line.split('=', 1)
+            self.is_success[key.strip()] = value.strip()
 
         self.sigcnt, self.base_sigs = 0, []
 
@@ -218,7 +224,8 @@ class DefitionProcessor(object):
             print>>h, self.templ_header.render(hook=hook, types=self.types)
             print>>h
 
-            print>>s, self.templ_source.render(hook=hook, types=self.types)
+            print>>s, self.templ_source.render(hook=hook, types=self.types,
+                                               is_success=self.is_success)
             print>>s
 
     def process(self):
