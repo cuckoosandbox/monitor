@@ -28,7 +28,7 @@
     {%- endfor %}
     );
 
-    log_api("
+    log_api({{ hook.index }}, "
     {%- for param in hook.parameters: -%}
         {%- if param.log == True: -%}
             {{types[param.argtype]}}

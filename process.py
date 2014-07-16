@@ -2,6 +2,7 @@ import docutils.nodes
 import docutils.utils
 import docutils.parsers.rst
 from jinja2.environment import Template
+import json
 import os.path
 import sys
 
@@ -14,6 +15,7 @@ class DefitionProcessor(object):
 
         templ_source_path = os.path.join(data_dir, 'source.jinja2')
         templ_header_path = os.path.join(data_dir, 'header.jinja2')
+        base_sigs_path = os.path.join(data_dir, 'base_sigs.json')
         types_path = os.path.join(data_dir, 'types.conf')
 
         self.templ_source = Template(open(templ_source_path, 'rb').read())
@@ -23,6 +25,16 @@ class DefitionProcessor(object):
         for line in open(types_path, 'rb'):
             key, value = line.split('=', 1)
             self.types[key.strip()] = value.strip()
+
+        self.sigcnt, self.base_sigs = 0, []
+
+        for entry in json.load(open(base_sigs_path, 'rb')):
+            entry['index'] = self.sigcnt
+            for param in entry['parameters']:
+                param['alias'] = param['argname']
+
+            self.base_sigs.append(entry)
+            self.sigcnt += 1
 
     def parser_settings(self):
         components = docutils.parsers.rst.Parser,
@@ -157,6 +169,8 @@ class DefitionProcessor(object):
 
             row = global_values.copy()
             row['apiname'] = apiname
+            row['index'] = self.sigcnt
+            self.sigcnt += 1
 
             for x in xrange(1, len(children), 2):
                 key, value = self._parse_paragraph(children[x], children[x+1])
