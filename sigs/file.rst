@@ -1,6 +1,7 @@
 Signature::
 
     * Calling convention: WINAPI
+    * Category: file
 
 
 CreateDirectoryW

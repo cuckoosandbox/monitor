@@ -1,7 +1,8 @@
 Signature::
 
-    * Return value: BOOL
     * Calling convention: WINAPI
+    * Category: crypto
+    * Return value: BOOL
 
 
 CryptProtectData

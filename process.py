@@ -154,8 +154,7 @@ class DefitionProcessor(object):
 
         key = paragraph.astext().replace(':', '').lower()
         if not hasattr(self, '_parse_' + key):
-            raise Exception('No parser known for the %r section.'
-                            % key)
+            raise Exception('No parser known for the %r section.' % key)
 
         return key, getattr(self, '_parse_' + key)(literal_block.astext())
 

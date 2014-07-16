@@ -1,7 +1,8 @@
 Signature::
 
-    * Return value: NTSTATUS
     * Calling convention: WINAPI
+    * Category: file
+    * Return value: NTSTATUS
 
 
 NtCreateFile
