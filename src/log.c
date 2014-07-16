@@ -46,6 +46,11 @@ static void log_int32(bson *b, const char *idx, int value)
     bson_append_int(b, idx, value);
 }
 
+static void log_int64(bson *b, const char *idx, int64_t value)
+{
+    bson_append_long(b, idx, value);
+}
+
 static void log_string(bson *b, const char *idx, const char *str, int length)
 {
     if(str == NULL) {
@@ -231,6 +236,15 @@ void log_api(int index, int is_success, int return_value,
             log_int32(&b, idx, ptr != NULL ? *ptr : 0);
         }
         else if(key == 'o') {
+            ANSI_STRING *str = va_arg(args, ANSI_STRING *);
+            if(str == NULL) {
+                log_string(&b, idx, "", 0);
+            }
+            else {
+                log_string(&b, idx, str->Buffer, str->Length);
+            }
+        }
+        else if(key == 'O') {
             UNICODE_STRING *str = va_arg(args, UNICODE_STRING *);
             if(str == NULL) {
                 log_string(&b, idx, "", 0);
@@ -239,7 +253,7 @@ void log_api(int index, int is_success, int return_value,
                 log_wstring(&b, idx, str->Buffer, str->Length / sizeof(wchar_t));
             }
         }
-        else if(key == 'O') {
+        else if(key == 'x') {
             OBJECT_ATTRIBUTES *obj = va_arg(args, OBJECT_ATTRIBUTES *);
             if(obj == NULL || obj->ObjectName == NULL) {
                 log_string(&b, idx, "", 0);
@@ -281,6 +295,10 @@ void log_api(int index, int is_success, int return_value,
             else {
                 log_buffer(&b, idx, data, 0);
             }
+        }
+        else if(key == 'q') {
+            int64_t value = va_arg(args, int64_t);
+            log_int64(&b, idx, value);
         }
     }
 

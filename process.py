@@ -218,7 +218,7 @@ class DefitionProcessor(object):
 
     def write(self, h, s, hooks):
         for hook in hooks:
-            for arg in hook['parameters']:
+            for arg in hook.get('parameters', []):
                 if arg['log'] and arg['argtype'] not in self.types:
                     raise Exception('Unknown argtype %r' % arg['argtype'])
 
