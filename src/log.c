@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <windows.h>
 #include <winsock.h>
-#include "bson.h"
+#include "bson/bson.h"
 #include "misc.h"
 #include "ntapi.h"
 #include "log.h"

@@ -15,7 +15,7 @@ DLL = monitor.dll
 all: dirs $(HOOK) $(DLL)
 
 dirs:
-	mkdir -p objects/asm objects/code objects/src
+	mkdir -p objects/asm/ objects/code/ objects/src/
 
 $(HOOK): $(SIGS) process.py
 	python process.py data/ objects/code/ $(SIGS)
@@ -29,7 +29,7 @@ objects/code/%.o: objects/code/%.c
 objects/asm/%.o: asm/%.asm
 	$(NASM) -f elf32 -o $@ $^
 
-$(DLL): $(HOOKOBJ) $(ASMOBJ) $(SRCOBJ)
+$(DLL): $(ASMOBJ) $(SRCOBJ) $(HOOKOBJ)
 	$(CC) -shared -o $@ $^ $(CFLAGS)
 
 clean:

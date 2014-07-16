@@ -169,9 +169,7 @@ class DefitionProcessor(object):
             global_values[key] = value
             start += 2
 
-        for index in doc.document.ids:
-            entry = doc.document.ids[index]
-
+        for entry in doc.document.ids.values():
             if not isinstance(entry.children[0], docutils.nodes.title):
                 raise Exception('Node must be a title.')
 
@@ -185,7 +183,10 @@ class DefitionProcessor(object):
 
             for x in xrange(1, len(children), 2):
                 key, value = self._parse_paragraph(children[x], children[x+1])
-                row[key] = value
+                if key in row:
+                    row[key].update(value)
+                else:
+                    row[key] = value
 
             self.explain.append(row)
             ret.append(row)
