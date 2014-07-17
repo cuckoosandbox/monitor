@@ -29,7 +29,7 @@
     );
 
     log_api({{ hook.index }},
-        {{ is_success[hook.signature.return_value] }},
+        {{ hook.signature.is_success }},
         (int)(uintptr_t) ret,
         "
     {%- for param in hook.parameters: -%}

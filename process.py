@@ -1,3 +1,4 @@
+import copy
 import docutils.nodes
 import docutils.utils
 import docutils.parsers.rst
@@ -62,10 +63,11 @@ class DefitionProcessor(object):
     def _parse_signature(self, text):
         ret = {}
         for line in text.split('\n'):
-            if line.startswith('*'):
-                line = line[1:]
+            if not line.startswith('*'):
+                raise Exception('Every line of the signature should start '
+                                'with an asterisks: %r.' % line)
 
-            key, value = line.split(':')
+            key, value = line[1:].split(':', 1)
             ret[key.strip().lower().replace(' ', '_')] = value.strip()
 
         return ret
@@ -73,8 +75,11 @@ class DefitionProcessor(object):
     def _parse_parameters(self, text):
         ret = []
         for line in text.split('\n'):
-            if line.startswith('*'):
-                line = line[1:].strip()
+            if not line.startswith('*'):
+                raise Exception('Parameter declaration should have at least '
+                                'one asterisks: %r.' % line)
+
+            line = line[1:].strip()
 
             # We have to log this argument.
             log = False
@@ -93,7 +98,7 @@ class DefitionProcessor(object):
                 argtype, argname, alias = line.split()
             else:
                 raise Exception('Incorrect whitespace count in parameter '
-                                'line: %s' % line)
+                                'line: %r.' % line)
 
             alias = alias.replace('*', '').replace('[]', '').strip()
 
@@ -163,8 +168,13 @@ class DefitionProcessor(object):
 
         while isinstance(doc.document.children[start],
                          docutils.nodes.paragraph):
-            key, value = self._parse_paragraph(doc.document.children[start],
-                                               doc.document.children[start+1])
+            try:
+                children = doc.document.children
+                key, value = self._parse_paragraph(children[start],
+                                                   children[start+1])
+            except Exception as e:
+                raise Exception('Error parsing global node: %s' % e.message)
+
             global_values[key] = value
             start += 2
 
@@ -175,13 +185,20 @@ class DefitionProcessor(object):
             apiname = entry.children[0].astext()
             children = entry.children
 
-            row = global_values.copy()
+            row = copy.deepcopy(global_values)
+
             row['apiname'] = apiname
             row['index'] = self.sigcnt
             self.sigcnt += 1
 
             for x in xrange(1, len(children), 2):
-                key, value = self._parse_paragraph(children[x], children[x+1])
+                try:
+                    key, value = self._parse_paragraph(children[x],
+                                                       children[x+1])
+                except Exception as e:
+                    raise Exception('Error parsing node of api %r: %s' %
+                                    (apiname, e.message))
+
                 if key in row:
                     row[key].update(value)
                 else:
@@ -232,8 +249,7 @@ class DefitionProcessor(object):
         print>>h, self.templ_header.render(hook=hook, types=self.types)
         print>>h
 
-        print>>s, self.templ_source.render(hook=hook, types=self.types,
-                                           is_success=self.is_success)
+        print>>s, self.templ_source.render(hook=hook, types=self.types)
         print>>s
 
     def process(self):

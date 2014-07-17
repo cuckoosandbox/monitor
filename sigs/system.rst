@@ -143,7 +143,7 @@ Signature::
 
 Parameters::
 
-    HANDLE Handle handle
+    ** HANDLE Handle handle
 
 Post::
 
