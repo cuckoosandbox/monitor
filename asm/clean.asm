@@ -21,12 +21,13 @@ asm_clean:
     dec dword [eax+HOOKCNT_OFF]
 
     ; restore return address
-    call _clean_getpc
+    call _clean_getpc_target
 
+_clean_getpc:
 _clean_retaddr_pop:
     dd 0x11223344
 
-_clean_getpc:
+_clean_getpc_target:
     pop eax
 
     ; fetch return address

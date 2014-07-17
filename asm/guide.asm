@@ -12,8 +12,9 @@ asm_guide:
 
     push eax
 
-    call _guide_addresses
+    call _guide_getpc2_target
 
+_guide_getpc2:
 _guide_orig_stub:
     dd 0x11223344
 
@@ -23,13 +24,13 @@ _guide_eax_add:
 ; _guide_eax_pop:
     ; dd 0x99aabbcc
 
-_guide_addresses:
+_guide_getpc2_target:
     pop eax
 
     ; temporarily store the original value of eax
     pushad
     push dword [esp+32]
-    call dword [eax+_guide_eax_add-_guide_addresses]
+    call dword [eax+_guide_eax_add-_guide_getpc2]
     popad
 
     ; store the function table pointer
@@ -42,7 +43,7 @@ _guide_addresses:
 
     ; fetch our return address
     mov eax, dword [esp]
-    add eax, _guide_next - _guide_addresses
+    add eax, _guide_next - _guide_getpc2
 
     ; spoof the return address
     mov dword [esp+4], eax
