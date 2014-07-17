@@ -16,7 +16,8 @@ extern const uint32_t asm_tramp_size, asm_guide_size, asm_clean_size;
 
 extern const uint32_t asm_tramp_hook_alloc_off, asm_tramp_orig_func_stub_off;
 extern const uint32_t asm_tramp_retaddr_off, asm_tramp_retaddr_add_off;
-extern const uint32_t asm_guide_orig_stub_off, asm_guide_eax_add_off;
+extern const uint32_t asm_guide_orig_stub_off;
+extern const uint32_t asm_guide_retaddr_add_off, asm_guide_retaddr_pop_off;
 extern const uint32_t asm_clean_retaddr_pop_off;
 
 hook_info_t *hook_alloc()
@@ -194,7 +195,8 @@ int hook2(hook_t *h)
     // in-between (for debugging purposes.)
     uint32_t mem_size =
         asm_tramp_size + asm_guide_size + asm_clean_size + 64 + 64;
-    hi->_mem = (uint8_t *) calloc(1, mem_size);
+    hi->_mem = (uint8_t *) malloc(mem_size);
+    memset(hi->_mem, 0xcc, mem_size);
 
     unsigned long old_protect;
     VirtualProtect(hi->_mem, mem_size, PAGE_EXECUTE_READWRITE, &old_protect);
@@ -203,7 +205,7 @@ int hook2(hook_t *h)
     hi->guide = hi->trampoline + 16 + asm_tramp_size;
     hi->clean = hi->guide + 16 + asm_guide_size;
     hi->func_stub = hi->clean + 16 + asm_clean_size;
-    *h->orig = (FARPROC) hi->func_stub;
+    *h->orig = (FARPROC) hi->guide;
 
     // Create the original function stub.
     if(hook_create_stub(hi->func_stub, addr, 5) < 0) {
@@ -220,7 +222,8 @@ int hook2(hook_t *h)
 
     memcpy(hi->guide, asm_guide, asm_guide_size);
     PATCH(hi->guide, asm_guide_orig_stub_off, hi->func_stub);
-    PATCH(hi->guide, asm_guide_eax_add_off, hook_eax_add);
+    PATCH(hi->guide, asm_guide_retaddr_add_off, hook_retaddr_add);
+    PATCH(hi->guide, asm_guide_retaddr_pop_off, hook_retaddr_pop);
 
     memcpy(hi->clean, asm_clean, asm_clean_size);
     PATCH(hi->clean, asm_clean_retaddr_pop_off, hook_retaddr_pop);

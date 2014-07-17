@@ -92,10 +92,7 @@ _tramp_getpc2:
     mov eax, [eax+_tramp_retaddr-_tramp_getpc2]
 
     ; actually patch the return address
-    xchg dword [esp+4], eax
-
-_tramp_cleanup:
-    pop eax
+    mov dword [esp], eax
 
     ; jump to the hook handler
     mov eax, dword [fs:TLS_HOOK_INFO]
