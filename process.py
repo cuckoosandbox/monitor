@@ -10,9 +10,9 @@ import sys
 
 class DefitionProcessor(object):
     def __init__(self, data_dir, out_dir, sigs):
-        templ_source_path = os.path.join(data_dir, 'source.jinja2')
-        templ_header_path = os.path.join(data_dir, 'header.jinja2')
-        templ_explain_path = os.path.join(data_dir, 'explain.jinja2')
+        self.data_dir = data_dir
+        self._templates = {}
+
         base_sigs_path = os.path.join(data_dir, 'base_sigs.json')
         types_path = os.path.join(data_dir, 'types.conf')
         is_success_path = os.path.join(data_dir, 'is-success.conf')
@@ -22,10 +22,6 @@ class DefitionProcessor(object):
         self.explain_c = os.path.join(out_dir, 'explain.c')
 
         self.sigs = sigs
-
-        self.templ_source = Template(open(templ_source_path, 'rb').read())
-        self.templ_header = Template(open(templ_header_path, 'rb').read())
-        self.templ_explain = Template(open(templ_explain_path, 'rb').read())
 
         self.types = {}
         for line in open(types_path, 'rb'):
@@ -59,6 +55,16 @@ class DefitionProcessor(object):
         parser = docutils.parsers.rst.Parser()
         parser.parse(open(sig, 'rb').read(), doc)
         return parser
+
+    def template(self, name):
+        if name in self._templates:
+            return self._templates[name]
+
+        path = os.path.join(self.data_dir, '%s.jinja2' % name)
+
+        ret = Template(open(path, 'rb').read())
+        self._templates[name] = ret
+        return ret
 
     def _parse_signature(self, text):
         ret = {}
@@ -248,10 +254,10 @@ class DefitionProcessor(object):
             if arg['log'] and arg['argtype'] not in self.types:
                 raise Exception('Unknown argtype %r.' % arg['argtype'])
 
-        print>>h, self.templ_header.render(hook=hook, types=self.types)
+        print>>h, self.template('header').render(hook=hook, types=self.types)
         print>>h
 
-        print>>s, self.templ_source.render(hook=hook, types=self.types)
+        print>>s, self.template('source').render(hook=hook, types=self.types)
         print>>s
 
     def process(self):
@@ -268,8 +274,8 @@ class DefitionProcessor(object):
             for hook in self.normalize(self.read_document(sig)):
                 self.write(h, s, hook)
 
-        print>>e, self.templ_explain.render(sigs=self.explain,
-                                            types=self.types)
+        print>>e, self.template('explain').render(sigs=self.explain,
+                                                  types=self.types)
 
         self.ending_header(h)
         self.ending_source(s)
