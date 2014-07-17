@@ -231,6 +231,8 @@ class DefitionProcessor(object):
         print>>f, '#include <stdio.h>'
         print>>f, '#include <stdint.h>'
         print>>f, '#include <windows.h>'
+        print>>f, '#include <windns.h>'
+        print>>f, '#include <wininet.h>'
         print>>f, '#include "ntapi.h"'
         print>>f, '#include "log.h"'
         print>>f, '#include "misc.h"'

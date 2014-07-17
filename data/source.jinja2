@@ -21,7 +21,11 @@
     );
     {%- endif %}
 
+    {% if hook.signature.return_value != 'void' %}
     {{hook.signature.return_value}} ret = Old_{{hook.apiname}}(
+    {% else %}
+    Old_{{hook.apiname}}(
+    {% endif %}
     {%- for param in hook.parameters: %}
         {{param.argname}}
         {%- if not loop.last %},{% endif -%}
@@ -30,7 +34,11 @@
 
     log_api({{ hook.index }},
         {{ hook.signature.is_success }},
+        {% if hook.signature.return_value != 'void' %}
         (int)(uintptr_t) ret,
+        {% else %}
+        0,
+        {% endif %}
         "
     {%- for param in hook.parameters: -%}
         {%- if param.log == True: -%}
@@ -58,5 +66,9 @@
     {{line}}
     {%- endfor %}
     {% endif %}
+    {% if hook.signature.return_value != 'void' %}
     return ret;
+    {% else %}
+    return;
+    {% endif %}
 }
