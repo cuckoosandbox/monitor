@@ -1,6 +1,6 @@
 CC = i686-w64-mingw32-gcc
 NASM = nasm
-CFLAGS = -m32 -Wall -O2 -Wextra -std=c99 -s
+CFLAGS = -m32 -Wall -O2 -Wextra -std=c99 -s -static
 LDFLAGS = -lws2_32
 INC = -I src/ -I objects/code/
 
