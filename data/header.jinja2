@@ -6,3 +6,12 @@ extern {{hook.signature.return_value}} ({{hook.signature.calling_convention}} *O
     {%- if not loop.last %},{% endif -%}
 {%- endfor %}
 );
+
+{{hook.signature.return_value}} {{hook.signature.calling_convention}} New_{{hook.apiname}}(
+{%- for param in hook.parameters: %}
+    {{param.argtype}}
+    {%- if not param.argtype.endswith('*') %} {% endif -%}
+    {{param.argname}}
+    {%- if not loop.last %},{% endif -%}
+{%- endfor %}
+);

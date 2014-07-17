@@ -5,8 +5,9 @@ LDFLAGS = -lws2_32
 INC = -I src/ -I objects/code/
 
 SIGS = $(wildcard sigs/*.rst)
-HOOK = objects/code/hooks.h objects/code/hooks.c
-HOOKOBJ = objects/code/hooks.o
+HOOK = objects/code/hooks.h objects/code/hooks.c \
+	   objects/code/explain.c objects/code/tables.c
+HOOKOBJ = objects/code/hooks.o objects/code/explain.o objects/code/tables.o
 
 SRC = $(wildcard src/*.c)
 SRCOBJ = $(SRC:%.c=objects/%.o)

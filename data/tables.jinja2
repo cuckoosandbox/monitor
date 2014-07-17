@@ -1,0 +1,15 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <windows.h>
+#include <windns.h>
+#include <wininet.h>
+#include "hooking.h"
+#include "hooks.h"
+
+const hook_t g_hooks[] = {
+{%- for row in sigs: %}
+    {%- if 'signature' in row: %}
+    {L"{{row.signature.library}}", "{{row.apiname}}", (FARPROC) New_{{row.apiname}}, (FARPROC *) &Old_{{row.apiname}}, NULL},
+    {%- endif %}
+{%- endfor %}
+};

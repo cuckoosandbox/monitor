@@ -2,7 +2,7 @@ import copy
 import docutils.nodes
 import docutils.utils
 import docutils.parsers.rst
-from jinja2.environment import Template
+import jinja2
 import json
 import os.path
 import sys
@@ -11,7 +11,9 @@ import sys
 class DefitionProcessor(object):
     def __init__(self, data_dir, out_dir, sigs):
         self.data_dir = data_dir
-        self._templates = {}
+
+        fs_loader = jinja2.FileSystemLoader(data_dir)
+        self.templ_env = jinja2.Environment(loader=fs_loader)
 
         base_sigs_path = os.path.join(data_dir, 'base_sigs.json')
         types_path = os.path.join(data_dir, 'types.conf')
@@ -20,6 +22,7 @@ class DefitionProcessor(object):
         self.hooks_c = os.path.join(out_dir, 'hooks.c')
         self.hooks_h = os.path.join(out_dir, 'hooks.h')
         self.explain_c = os.path.join(out_dir, 'explain.c')
+        self.tables_c = os.path.join(out_dir, 'tables.c')
 
         self.sigs = sigs
 
@@ -57,14 +60,7 @@ class DefitionProcessor(object):
         return parser
 
     def template(self, name):
-        if name in self._templates:
-            return self._templates[name]
-
-        path = os.path.join(self.data_dir, '%s.jinja2' % name)
-
-        ret = Template(open(path, 'rb').read())
-        self._templates[name] = ret
-        return ret
+        return self.templ_env.get_template('%s.jinja2' % name)
 
     def _parse_signature(self, text):
         ret = {}
@@ -264,6 +260,7 @@ class DefitionProcessor(object):
         h = open(self.hooks_h, 'wb')
         s = open(self.hooks_c, 'wb')
         e = open(self.explain_c, 'wb')
+        t = open(self.tables_c, 'wb')
 
         self.initial_header(h)
         self.initial_source(s)
@@ -276,6 +273,8 @@ class DefitionProcessor(object):
 
         print>>e, self.template('explain').render(sigs=self.explain,
                                                   types=self.types)
+
+        print>>t, self.template('tables').render(sigs=self.explain)
 
         self.ending_header(h)
         self.ending_source(s)
