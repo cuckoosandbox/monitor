@@ -1,6 +1,5 @@
 [
     {
-        "category": "__notification__",
         "apiname": "__process__",
         "parameters": [
             {"argtype": "ULONG", "argname": "time_low"},
@@ -8,23 +7,30 @@
             {"argtype": "ULONG", "argname": "process_identifier"},
             {"argtype": "ULONG", "argname": "parent_process_identifier"},
             {"argtype": "LPWSTR", "argname": "module_path"}
-        ]
+        ],
+        "signature": {
+            "category": "__notification__"
+        }
     },
     {
-        "category": "__notification__",
         "apiname": "__thread__",
         "parameters": [
             {"argtype": "ULONG", "argname": "process_identifier"}
-        ]
+        ],
+        "signature": {
+            "category": "__notification__"
+        }
     },
     {
-        "category": "__notification__",
         "apiname": "__anomaly__",
         "parameters": [
             {"argtype": "ULONG", "argname": "thread_identifier"},
             {"argtype": "LPCSTR", "argname": "subcategory"},
             {"argtype": "LPCSTR", "argname": "function_name"},
             {"argtype": "LPCSTR", "argname": "message"}
-        ]
+        ],
+        "signature": {
+            "category": "__notification__"
+        }
     }
 ]

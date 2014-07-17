@@ -9,7 +9,7 @@ const char *g_explain_apinames[] = {
 
 const char *g_explain_categories[] = {
 {%- for row in sigs: %}
-    /* {{ '%-32s'|format(row.apiname) }} */ "{{ row.category }}",
+    /* {{ '%-32s'|format(row.apiname) }} */ "{{ row.signature.category }}",
 {%- endfor %}
 };
 
