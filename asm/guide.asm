@@ -8,7 +8,7 @@ global _asm_guide_eax_add_off
 
 %define LASTERR_OFF 4
 
-_asm_guide:
+asm_guide:
 
     push eax
 
@@ -72,6 +72,7 @@ _guide_next:
 _guide_end:
 
 
-_asm_guide_size dd _guide_end - _asm_guide
-_asm_guide_orig_off dd _guide_orig - _asm_guide
-_asm_guide_eax_add_off dd _guide_eax_add - _asm_guide
+_asm_guide dd asm_guide
+_asm_guide_size dd _guide_end - asm_guide
+_asm_guide_orig_stub_off dd _guide_orig_stub - asm_guide
+_asm_guide_eax_add_off dd _guide_eax_add - asm_guide

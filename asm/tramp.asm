@@ -10,7 +10,7 @@ global _asm_tramp_retaddr_add_off
 %define HOOKCNT_OFF 0
 %define LASTERR_OFF 4
 
-_asm_tramp:
+asm_tramp:
 
     ; fetch hook-info
     push eax
@@ -91,7 +91,8 @@ _tramp_cleanup:
 _tramp_end:
 
 
-_asm_tramp_size dd _tramp_end - _asm_tramp
-_asm_tramp_orig_func_off dd _tramp_orig_func - _asm_tramp
-_asm_tramp_retaddr_off dd _tramp_retaddr - _asm_tramp
-_asm_tramp_retaddr_add_off dd _tramp_retaddr_add - _asm_tramp
+_asm_tramp dd asm_tramp
+_asm_tramp_size dd _tramp_end - asm_tramp
+_asm_tramp_orig_func_off dd _tramp_orig_func - asm_tramp
+_asm_tramp_retaddr_off dd _tramp_retaddr - asm_tramp
+_asm_tramp_retaddr_add_off dd _tramp_retaddr_add - asm_tramp

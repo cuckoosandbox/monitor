@@ -8,7 +8,7 @@ global _asm_clean_retaddr_pop_off
 %define HOOKCNT_OFF 0
 %define LASTERR_OFF 4
 
-_asm_clean:
+asm_clean:
 
     push eax
 
@@ -41,5 +41,6 @@ _clean_getpc:
 _clean_end:
 
 
-_asm_clean_size dd _clean_end - _asm_clean
-_asm_clean_retaddr_pop_off dd _clean_retaddr_pop - _asm_clean
+_asm_clean dd asm_clean
+_asm_clean_size dd _clean_end - asm_clean
+_asm_clean_retaddr_pop_off dd _clean_retaddr_pop - asm_clean
