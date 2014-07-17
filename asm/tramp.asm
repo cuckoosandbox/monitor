@@ -1,6 +1,7 @@
 global _asm_tramp
 global _asm_tramp_size
-global _asm_tramp_orig_func_off
+global _asm_tramp_hook_alloc_off
+global _asm_tramp_orig_func_stub_off
 global _asm_tramp_retaddr_off
 global _asm_tramp_retaddr_add_off
 
@@ -9,15 +10,18 @@ global _asm_tramp_retaddr_add_off
 
 %define HOOKCNT_OFF 0
 %define LASTERR_OFF 4
+%define HANDLER_OFF 8
 
 asm_tramp:
 
     ; fetch hook-info
-    push eax
     mov eax, dword [fs:TLS_HOOK_INFO]
     jmp _tramp_addresses
 
-_tramp_orig_func:
+_tramp_hook_alloc:
+    dd 0xffeeddcc
+
+_tramp_orig_func_stub:
     dd 0x11223344
 
 _tramp_retaddr:
@@ -28,16 +32,22 @@ _tramp_retaddr_add:
 
 _tramp_addresses:
 
-    ; test eax, eax
-    ; jnz _tramp_check_count
+    test eax, eax
+    jnz _tramp_check_count
 
     ; create hook-info
-    ; pushad
-    ; call hook_alloc
-    ; popad
-    ; mov eax, fs:[TLS_HOOK_INFO]
+    call _tramp_getpc3
 
-; _tramp_check_count:
+_tramp_getpc3:
+    pop eax
+
+    pushad
+    call dword [eax+_tramp_hook_alloc-_tramp_getpc3]
+    popad
+
+    mov eax, dword [fs:TLS_HOOK_INFO]
+
+_tramp_check_count:
 
 %ifndef tramp_special
 
@@ -49,11 +59,10 @@ _tramp_addresses:
 
 _tramp_getpc:
     pop eax
-    add eax, _tramp_orig_func - _tramp_getpc
+    add eax, _tramp_orig_func_stub - _tramp_getpc
 
-    ; jmp [eax] and restore eax at once
-    xchg eax, dword [esp]
-    retn
+    ; jump to the original function stub
+    jmp dword [eax]
 
 %endif
 
@@ -88,11 +97,16 @@ _tramp_getpc2:
 _tramp_cleanup:
     pop eax
 
+    ; jump to the hook handler
+    mov eax, dword [fs:TLS_HOOK_INFO]
+    jmp dword [eax+HANDLER_OFF]
+
 _tramp_end:
 
 
 _asm_tramp dd asm_tramp
 _asm_tramp_size dd _tramp_end - asm_tramp
-_asm_tramp_orig_func_off dd _tramp_orig_func - asm_tramp
+_asm_tramp_hook_alloc_off dd _tramp_hook_alloc - asm_tramp
+_asm_tramp_orig_func_stub_off dd _tramp_orig_func_stub - asm_tramp
 _asm_tramp_retaddr_off dd _tramp_retaddr - asm_tramp
 _asm_tramp_retaddr_add_off dd _tramp_retaddr_add - asm_tramp

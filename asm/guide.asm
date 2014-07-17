@@ -1,6 +1,6 @@
 global _asm_guide
 global _asm_guide_size
-global _asm_guide_orig_off
+global _asm_guide_orig_stub_off
 global _asm_guide_eax_add_off
 
 %define TLS_HOOK_INFO 0x44
@@ -14,7 +14,7 @@ asm_guide:
 
     call _guide_addresses
 
-_guide_orig:
+_guide_orig_stub:
     dd 0x11223344
 
 _guide_eax_add:
@@ -52,9 +52,9 @@ _guide_addresses:
 
 _guide_getpc:
     pop eax
-    mov eax, dword [eax+_guide_orig-_guide_getpc]
+    mov eax, dword [eax+_guide_orig_stub-_guide_getpc]
 
-    ; jump to the original function
+    ; jump to the original function stub
     mov dword [esp], eax
     retn
 
