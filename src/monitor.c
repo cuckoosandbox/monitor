@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <windows.h>
+#include "dropped.h"
 #include "hooking.h"
 #include "log.h"
 #include "misc.h"
@@ -10,6 +11,7 @@ void monitor_init()
     hook_info()->hook_count++;
 
     misc_init();
+    dropped_init();
 
     uint32_t ip_address = inet_addr("192.168.56.1");
     log_init(ip_address, 2042);

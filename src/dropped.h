@@ -9,6 +9,7 @@
     (GENERIC_WRITE | FILE_GENERIC_WRITE | FILE_WRITE_DATA | \
      FILE_APPEND_DATA | STANDARD_RIGHTS_WRITE | STANDARD_RIGHTS_ALL)
 
+void dropped_init();
 void dropped_add(HANDLE file_handle, OBJECT_ATTRIBUTES *obj);
 void dropped_wrote(HANDLE file_handle);
 void dropped_close(HANDLE file_handle);
