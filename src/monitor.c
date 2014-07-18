@@ -21,8 +21,6 @@ void monitor_init()
 
     log_init(g_config.host_ip, g_config.host_port);
 
-    log_explain();
-
     for (const hook_t *h = g_hooks; h->funcname != NULL; h++) {
         if(hook(h->library, h->funcname, h->handler, h->orig) < 0) {
             pipe("CRITICAL:Hooking %z returned failure!", h->funcname);

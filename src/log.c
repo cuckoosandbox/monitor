@@ -374,6 +374,7 @@ void log_init(unsigned int ip, unsigned short port)
     g_tls_idx = TlsAlloc();
 
     log_raw_direct("BSON\n", 5);
+    log_explain();
     log_new_process();
     log_new_thread();
 }

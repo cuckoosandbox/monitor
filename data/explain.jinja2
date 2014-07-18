@@ -19,6 +19,9 @@ const char *g_explain_paramtypes[] = {
     {%- for param in row.parameters: -%}
         {% if param.log %}{{ types[param.argtype] }}{% endif %}
     {%- endfor -%}
+    {%- for param in row.logging: -%}
+        {{ param.argtype }}
+    {%- endfor -%}
     ",
 {%- endfor %}
 };
@@ -29,6 +32,9 @@ const char *g_explain_paramnames[][16] = {
     {
     {%- for param in row.parameters: -%}
         {% if param.log %}"{{ param.alias }}", {% endif %}
+    {%- endfor -%}
+    {%- for param in row.logging: -%}
+        {% if True %}"{{ param.argname }}", {% endif %}
     {%- endfor -%}
     },
 {%- endfor %}
