@@ -83,7 +83,7 @@ _tramp_getpc2:
     push eax
 
     ; save the return address
-    push dword [esp+8]
+    push dword [esp+4]
     call dword [eax+_tramp_retaddr_add-_tramp_getpc2]
 
     pop eax
