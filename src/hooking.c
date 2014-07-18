@@ -186,6 +186,22 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
     return 0;
 }
 
+int hook_create_jump(uint8_t *addr, const uint8_t *target)
+{
+    unsigned long old_protect;
+
+    if(VirtualProtect(addr, 5, PAGE_EXECUTE_READWRITE,
+            &old_protect) == FALSE) {
+        return -1;
+    }
+
+    *addr = 0xe9;
+    *(uint32_t *)(addr + 1) = target - addr - 5;
+
+    VirtualProtect(addr, 5, old_protect, &old_protect);
+    return 0;
+}
+
 #define PATCH(buf, off, value) \
     *(uint32_t *)(buf + off) = (uint32_t) value
 
@@ -195,7 +211,11 @@ int hook2(hook_t *h)
     if(module_handle == NULL) return 0;
 
     uint8_t *addr = (uint8_t *) GetProcAddress(module_handle, h->funcname);
-    if(addr == NULL) return -1;
+    if(addr == NULL) {
+        pipe("CRITICAL:Error resolving function %z->%z!",
+            h->library, h->funcname);
+        return -1;
+    }
 
     hook_data_t *hd = h->data =
         (hook_data_t *) calloc(1, sizeof(hook_data_t));
@@ -239,9 +259,10 @@ int hook2(hook_t *h)
     PATCH(hd->clean, asm_clean_retaddr_pop_off, hook_retaddr_pop);
 
     // Patch the original function.
-    VirtualProtect(addr, 5, PAGE_EXECUTE_READWRITE, &old_protect);
-    *addr = 0xe9;
-    *(uint32_t *)(addr + 1) = hd->trampoline - addr - 5;
+    if(hook_create_jump(addr, hd->trampoline) < 0) {
+        pipe("CRITICIAL:Error creating function jump for %z!", h->funcname);
+        return -1;
+    }
     return 0;
 }
 
