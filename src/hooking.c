@@ -182,7 +182,7 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 
 int hook2(hook_t *h)
 {
-    HMODULE module_handle = GetModuleHandleW(h->library);
+    HMODULE module_handle = GetModuleHandle(h->library);
     if(module_handle == NULL) return 0;
 
     uint8_t *addr = (uint8_t *) GetProcAddress(module_handle, h->funcname);
@@ -235,7 +235,7 @@ int hook2(hook_t *h)
     return 0;
 }
 
-int hook(const wchar_t *library, const char *funcname,
+int hook(const char *library, const char *funcname,
     FARPROC handler, FARPROC *orig)
 {
     hook_t h;

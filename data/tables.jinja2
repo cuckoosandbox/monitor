@@ -9,7 +9,7 @@
 const hook_t g_hooks[] = {
 {%- for row in sigs: %}
     {%- if row.signature.category != '__notification__': %}
-    {L"{{row.signature.library}}", "{{row.apiname}}", (FARPROC) New_{{row.apiname}}, (FARPROC *) &Old_{{row.apiname}}, NULL},
+    {"{{row.signature.library}}", "{{row.apiname}}", (FARPROC) New_{{row.apiname}}, (FARPROC *) &Old_{{row.apiname}}, NULL},
     {%- endif %}
 {%- endfor %}
 };

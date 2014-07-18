@@ -22,7 +22,7 @@ typedef struct _hook_info_t {
 } hook_info_t;
 
 typedef struct _hook_t {
-    const wchar_t *library;
+    const char *library;
     const char *funcname;
     FARPROC handler;
     FARPROC *orig;
@@ -32,7 +32,7 @@ typedef struct _hook_t {
 
 hook_info_t *hook_info();
 
-int hook(const wchar_t *library, const char *funcname,
+int hook(const char *library, const char *funcname,
     FARPROC handler, FARPROC *orig);
 
 int hook2(hook_t *h);
