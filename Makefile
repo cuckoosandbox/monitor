@@ -29,8 +29,8 @@ all: dirs $(HOOK) $(DLL)
 dirs:
 	mkdir -p objects/asm/ objects/code/ objects/src/ objects/src/bson/
 
-$(HOOK): $(SIGS) process.py
-	python process.py data/ objects/code/ $(SIGS)
+$(HOOK): $(SIGS) scripts/process.py
+	python scripts/process.py data/ objects/code/ $(SIGS)
 
 objects/src/bson/%.o: src/bson/%.c
 
