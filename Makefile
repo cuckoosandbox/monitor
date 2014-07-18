@@ -1,6 +1,7 @@
 CC = i686-w64-mingw32-gcc
 NASM = nasm
-CFLAGS = -m32 -Wall -O2 -Wextra -std=c99 -s -static
+CFLAGS = -m32 -Wall -O0 -ggdb -Wextra -std=c99 -static \
+		 -Wno-missing-field-initializers
 LDFLAGS = -lws2_32 -lshlwapi
 INC = -I src/ -I objects/code/
 
@@ -54,4 +55,4 @@ $(DLL): $(ASMOBJ) $(SRCOBJ) $(HOOKOBJ) $(LIBBSON) $(LIBCAPSTONE)
 	$(CC) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 clean:
-	rm -f $(HOOK) $(HOOKOBJ) $(BSONOBJ) $(SRCOBJ) $(ASMOBJ) $(DLL)
+	rm -rf objects/ $(DLL)
