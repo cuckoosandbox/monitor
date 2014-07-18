@@ -25,7 +25,7 @@ Pre::
 
 Logging::
 
-    o sub_key unistr
+    O sub_key unistr
 
 
 NtOpenKey
@@ -43,7 +43,7 @@ Pre::
 
 Logging::
 
-    o sub_key unistr
+    O sub_key unistr
 
 
 NtOpenKeyEx
@@ -62,7 +62,7 @@ Pre::
 
 Logging::
 
-    o sub_key unistr
+    O sub_key unistr
 
 
 NtRenameKey
@@ -200,7 +200,7 @@ Pre::
 
 Logging::
 
-    o filepath unistr
+    O filepath unistr
 
 
 NtLoadKey2
@@ -218,7 +218,7 @@ Pre::
 
 Logging::
 
-    o filepath unistr
+    O filepath unistr
 
 
 NtLoadKeyEx
@@ -237,7 +237,7 @@ Pre::
 
 Logging::
 
-    o filepath unistr
+    O filepath unistr
 
 
 NtQueryKey

@@ -70,8 +70,8 @@ Parameters::
 
 Logging::
 
-    o filepath &ProcessParameters->ImagePathName
-    o command_line &ProcessParameters->CommandLine
+    O filepath &ProcessParameters->ImagePathName
+    O command_line &ProcessParameters->CommandLine
 
 Post::
 

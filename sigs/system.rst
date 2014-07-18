@@ -70,7 +70,7 @@ Pre::
 
 Logging::
 
-    o module_name &library
+    O module_name &library
 
 
 LdrGetDllHandle
