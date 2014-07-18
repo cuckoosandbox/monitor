@@ -9,6 +9,7 @@ DeviceIoControl
 
 Signature::
 
+    * Library: kernel32
     * Return value: BOOL
 
 Parameters::

@@ -2,6 +2,7 @@ Signature::
 
     * Calling convention: WINAPI
     * Category: services
+    * Library: advapi32
 
 
 OpenSCManagerA

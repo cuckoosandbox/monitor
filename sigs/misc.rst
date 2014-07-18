@@ -9,6 +9,7 @@ WriteConsoleA
 
 Signature::
 
+    * Library: kernel32
     * Return value: BOOL
 
 Parameters::
@@ -29,6 +30,7 @@ WriteConsoleW
 
 Signature::
 
+    * Library: kernel32
     * Return value: BOOL
 
 Parameters::
@@ -49,8 +51,9 @@ GetSystemMetrics
 
 Signature::
 
+    * Is success: ret != 0
+    * Library: user32
     * Return value: int
-    * Is success: 1
 
 Parameters::
 
@@ -62,6 +65,7 @@ GetCursorPos
 
 Signature::
 
+    * Library: user32
     * Return value: BOOL
 
 Parameters::

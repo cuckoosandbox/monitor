@@ -2,6 +2,7 @@ Signature::
 
     * Calling convention: WINAPI
     * Category: process
+    * Library: ntdll
     * Return value: NTSTATUS
 
 

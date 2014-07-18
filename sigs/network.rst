@@ -9,6 +9,7 @@ URLDownloadToFileW
 
 Signature::
 
+    * Library: urlmon
     * Return value: HRESULT
 
 Parameters::
@@ -31,6 +32,7 @@ InternetOpenA
 
 Signature::
 
+    * Library: wininet
     * Return value: HINTERNET
 
 Parameters::
@@ -47,6 +49,7 @@ InternetOpenW
 
 Signature::
 
+    * Library: wininet
     * Return value: HINTERNET
 
 Parameters::
@@ -63,6 +66,7 @@ InternetConnectA
 
 Signature::
 
+    * Library: wininet
     * Return value: HINTERNET
 
 Parameters::
@@ -82,6 +86,7 @@ InternetConnectW
 
 Signature::
 
+    * Library: wininet
     * Return value: HINTERNET
 
 Parameters::
@@ -101,6 +106,7 @@ InternetOpenUrlA
 
 Signature::
 
+    * Library: wininet
     * Return value: HINTERNET
 
 Parameters::
@@ -129,6 +135,7 @@ InternetOpenUrlW
 
 Signature::
 
+    * Library: wininet
     * Return value: HINTERNET
 
 Parameters::
@@ -157,6 +164,7 @@ HttpOpenRequestA
 
 Signature::
 
+    * Library: wininet
     * Return value: HINTERNET
 
 Parameters::
@@ -176,6 +184,7 @@ HttpOpenRequestW
 
 Signature::
 
+    * Library: wininet
     * Return value: HINTERNET
 
 Parameters::
@@ -195,6 +204,7 @@ HttpSendRequestA
 
 Signature::
 
+    * Library: wininet
     * Return value: BOOL
 
 Parameters::
@@ -223,6 +233,7 @@ HttpSendRequestW
 
 Signature::
 
+    * Library: wininet
     * Return value: BOOL
 
 Parameters::
@@ -251,6 +262,7 @@ InternetReadFile
 
 Signature::
 
+    * Library: wininet
     * Return value: BOOL
 
 Parameters::
@@ -270,6 +282,7 @@ InternetWriteFile
 
 Signature::
 
+    * Library: wininet
     * Return value: BOOL
 
 Parameters::
@@ -289,6 +302,7 @@ InternetCloseHandle
 
 Signature::
 
+    * Library: wininet
     * Return value: BOOL
 
 Parameters::
@@ -301,6 +315,7 @@ DnsQuery_A
 
 Signature::
 
+    * Library: dnsapi
     * Return value: DNS_STATUS
 
 Parameters::
@@ -318,6 +333,7 @@ DnsQuery_UTF8
 
 Signature::
 
+    * Library: dnsapi
     * Return value: DNS_STATUS
 
 Parameters::
@@ -339,6 +355,7 @@ DnsQuery_W
 
 Signature::
 
+    * Library: dnsapi
     * Return value: DNS_STATUS
 
 Parameters::
@@ -356,6 +373,8 @@ getaddrinfo
 
 Signature::
 
+    * Is success: ret == 0
+    * Library: ws2_32
     * Return value: int
 
 Parameters::
@@ -371,6 +390,8 @@ GetAddrInfoW
 
 Signature::
 
+    * Is success: ret == 0
+    * Library: ws2_32
     * Return value: int
 
 Parameters::

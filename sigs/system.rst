@@ -9,6 +9,7 @@ SetWindowsHookExA
 
 Signature::
 
+    * Library: user32
     * Return value: HHOOK
 
 Parameters::
@@ -24,6 +25,7 @@ SetWindowsHookExW
 
 Signature::
 
+    * Library: user32
     * Return value: HHOOK
 
 Parameters::
@@ -39,6 +41,7 @@ UnhookWindowsHookEx
 
 Signature::
 
+    * Library: user32
     * Return value: BOOL
 
 Parameters::
@@ -51,6 +54,7 @@ LdrLoadDll
 
 Signature::
 
+    * Library: ntdll
     * Return value: NTSTATUS
 
 Parameters::
@@ -74,6 +78,7 @@ LdrGetDllHandle
 
 Signature::
 
+    * Library: ntdll
     * Return value: NTSTATUS
 
 Parameters::
@@ -89,6 +94,7 @@ LdrGetProcedureAddress
 
 Signature::
 
+    * Library: ntdll
     * Return value: NTSTATUS
 
 Parameters::
@@ -104,6 +110,7 @@ ExitWindowsEx
 
 Signature::
 
+    * Library: user32
     * Return value: BOOL
 
 Parameters::
@@ -117,6 +124,7 @@ IsDebuggerPresent
 
 Signature::
 
+    * Library: kernel32
     * Return value: BOOL
 
 
@@ -125,6 +133,7 @@ LookupPrivilegeValueW
 
 Signature::
 
+    * Library: advapi32
     * Return value: BOOL
 
 Parameters::
@@ -139,6 +148,7 @@ NtClose
 
 Signature::
 
+    * Library: ntdll
     * Return value: NTSTATUS
 
 Parameters::

@@ -8,6 +8,10 @@ Signature::
 CryptProtectData
 ================
 
+Signature::
+
+    * Library: crypt32
+
 Parameters::
 
     *  DATA_BLOB *pDataIn
@@ -29,6 +33,10 @@ Prelog::
 
 CryptUnprotectData
 ==================
+
+Signature::
+
+    * Library: crypt32
 
 Parameters::
 
@@ -55,6 +63,10 @@ Logging::
 CryptProtectMemory
 ==================
 
+Signature::
+
+    * Library: crypt32
+
 Parameters::
 
     *  LPVOID pData
@@ -69,6 +81,10 @@ Prelog::
 CryptUnprotectMemory
 ====================
 
+Signature::
+
+    * Library: crypt32
+
 Parameters::
 
     *  LPVOID pData
@@ -82,6 +98,10 @@ Logging::
 
 CryptDecrypt
 ============
+
+Signature::
+
+    * Library: advapi32
 
 Parameters::
 
@@ -99,6 +119,10 @@ Logging::
 
 CryptEncrypt
 ============
+
+Signature::
+
+    * Library: advapi32
 
 Parameters::
 
@@ -118,6 +142,10 @@ Logging::
 CryptHashData
 =============
 
+Signature::
+
+    * Library: advapi32
+
 Parameters::
 
     ** HCRYPTHASH hHash hash_handle
@@ -132,6 +160,10 @@ Logging::
 
 CryptDecodeMessage
 ==================
+
+Signature::
+
+    * Library: advapi32
 
 Parameters::
 
@@ -157,6 +189,10 @@ Logging::
 CryptDecryptMessage
 ===================
 
+Signature::
+
+    * Library: crypt32
+
 Parameters::
 
     *  PCRYPT_DECRYPT_MESSAGE_PARA pDecryptPara
@@ -173,6 +209,10 @@ Logging::
 
 CryptEncryptMessage
 ===================
+
+Signature::
+
+    * Library: crypt32
 
 Parameters::
 
@@ -191,6 +231,10 @@ Prelog::
 
 CryptHashMessage
 ================
+
+Signature::
+
+    * Library: crypt32
 
 Parameters::
 

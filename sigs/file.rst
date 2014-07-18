@@ -2,6 +2,7 @@ Signature::
 
     * Calling convention: WINAPI
     * Category: file
+    * Library: kernel32
 
 
 CreateDirectoryW

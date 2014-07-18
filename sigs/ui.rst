@@ -2,6 +2,7 @@ Signature::
 
     * Calling convention: WINAPI
     * Category: ui
+    * Library: user32
     * Return value: HWND
 
 

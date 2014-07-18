@@ -2,6 +2,7 @@ Signature::
 
     * Calling convention: WINAPI
     * Category: process
+    * Library: kernel32
 
 
 CreateProcessInternalW
@@ -152,8 +153,9 @@ system
 
 Signature::
 
-    * Return value: int
     * Is success: ret == 0
+    * Library: msvcrt
+    * Return value: int
 
 Parameters::
 
