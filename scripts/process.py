@@ -40,9 +40,9 @@ class DefitionProcessor(object):
 
         for entry in json.load(open(base_sigs_path, 'rb')):
             entry['index'] = self.sigcnt
-            entry['log'] = True
             for param in entry['parameters']:
                 param['alias'] = param['argname']
+                param['log'] = True
 
             self.base_sigs.append(entry)
             self.sigcnt += 1
