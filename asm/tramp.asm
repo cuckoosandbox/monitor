@@ -11,7 +11,6 @@ global _asm_tramp_retaddr_add_off
 
 %define HOOKCNT_OFF 0
 %define LASTERR_OFF 4
-%define HANDLER_OFF 8
 
 asm_tramp:
 
@@ -83,12 +82,10 @@ _tramp_do_it:
 _tramp_getpc3:
     pop eax
 
-    pushad
-
     ; save the return address
+    pushad
     push dword [esp+32]
     call dword [eax+_tramp_retaddr_add-_tramp_getpc3]
-
     popad
 
     ; fetch the new return address
