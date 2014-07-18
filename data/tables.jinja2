@@ -12,4 +12,5 @@ const hook_t g_hooks[] = {
     {"{{row.signature.library}}", "{{row.apiname}}", (FARPROC) New_{{row.apiname}}, (FARPROC *) &Old_{{row.apiname}}, NULL},
     {%- endif %}
 {%- endfor %}
+    {NULL, NULL, NULL, NULL, NULL},
 };

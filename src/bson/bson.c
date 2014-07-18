@@ -756,7 +756,7 @@ MONGO_EXPORT void bson_destroy( bson *b ) {
         }
         b->data = NULL;
         b->dataSize = 0;
-        b->ownsData = 0;        
+        b->ownsData = 0;
         if ( b->stackPtr && b->stackPtr != b->stack ) {
             bson_free( b->stackPtr );
             b->stackPtr = NULL;
@@ -1106,6 +1106,7 @@ int _bson_errprintf( const char *format, ... ) {
  *  @param
  */
 void bson_builder_error( bson *b ) {
+    (void) b;
     if( err_handler )
         err_handler( "BSON error." );
 }

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <windows.h>
+#include "misc.h"
 #include "ntapi.h"
 #include "pipe.h"
 #include "utf8.h"

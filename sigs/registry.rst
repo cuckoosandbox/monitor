@@ -146,7 +146,7 @@ Ensure::
 
 Logging::
 
-    B buffer lpcbData, lpdata
+    B buffer lpcbData, lpData
 
 
 RegEnumValueW

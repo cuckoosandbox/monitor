@@ -31,11 +31,14 @@ typedef struct _hook_t {
     hook_data_t *data;
 } hook_t;
 
+hook_info_t *hook_alloc();
 hook_info_t *hook_info();
 
 int hook(const char *library, const char *funcname,
     FARPROC handler, FARPROC *orig);
 
 int hook2(hook_t *h);
+
+extern const hook_t g_hooks[];
 
 #endif
