@@ -1,3 +1,5 @@
+#ifndef MONITOR_PIPE_H
+#define MONITOR_PIPE_H
 
 //
 // Pipe API
@@ -13,7 +15,11 @@
 // x  -> (int) -> hexadecimal integer
 //
 
+void pipe_init(const char *pipe_name);
+
 int pipe(const char *fmt, ...);
 int pipe2(void *out, int *outlen, const char *fmt, ...);
 
 #define PIPE_MAX_TIMEOUT 10000
+
+#endif

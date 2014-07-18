@@ -5,7 +5,7 @@
 #include "pipe.h"
 #include "utf8.h"
 
-const char *g_pipe_name;
+static char g_pipe_name[MAX_PATH];
 
 static int _pipe_utf8x(char **out, unsigned short x)
 {
@@ -101,6 +101,11 @@ static int _pipe_sprintf(char *out, const char *fmt, va_list args)
         fmt++;
     }
     return ret;
+}
+
+void pipe_init(const char *pipe_name)
+{
+    strcpy(g_pipe_name, pipe_name);
 }
 
 int pipe(const char *fmt, ...)

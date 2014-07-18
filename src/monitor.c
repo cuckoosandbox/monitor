@@ -1,20 +1,25 @@
 #include <stdio.h>
 #include <windows.h>
+#include "config.h"
 #include "dropped.h"
 #include "hooking.h"
 #include "log.h"
 #include "misc.h"
 #include "pipe.h"
 
+config_t g_config;
+
 void monitor_init()
 {
     hook_info()->hook_count++;
 
+    config_read(&g_config);
+
     misc_init();
     dropped_init();
+    pipe_init(g_config.pipe_name);
 
-    uint32_t ip_address = inet_addr("192.168.56.1");
-    log_init(ip_address, 2042);
+    log_init(g_config.host_ip, g_config.host_port);
 
     log_explain();
 
