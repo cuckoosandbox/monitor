@@ -20,19 +20,19 @@ asm_tramp:
     jmp _tramp_addresses
 
 _tramp_hook_alloc:
-    dd 0xffeeddcc
+    dd 0xcccccccc
 
 _tramp_hook_handler:
-    dd 0x22778833
+    dd 0xcccccccc
 
 _tramp_orig_func_stub:
-    dd 0x11223344
+    dd 0xcccccccc
 
 _tramp_retaddr:
-    dd 0x55667788
+    dd 0xcccccccc
 
 _tramp_retaddr_add:
-    dd 0x99aabbcc
+    dd 0xcccccccc
 
 _tramp_addresses:
 

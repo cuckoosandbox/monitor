@@ -20,13 +20,13 @@ asm_guide:
 
 _guide_getpc:
 _guide_orig_stub:
-    dd 0x11223344
+    dd 0xcccccccc
 
 _guide_retaddr_add:
-    dd 0x55667788
+    dd 0xcccccccc
 
 _guide_retaddr_pop:
-    dd 0x44556677
+    dd 0xcccccccc
 
 _guide_getpc_target:
     pop eax

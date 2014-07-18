@@ -25,7 +25,7 @@ asm_clean:
 
 _clean_getpc:
 _clean_retaddr_pop:
-    dd 0x11223344
+    dd 0xcccccccc
 
 _clean_getpc_target:
     pop eax
