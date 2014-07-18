@@ -227,6 +227,11 @@ class DefitionProcessor(object):
         print>>f, '#ifndef MONITOR_HOOKS_H'
         print>>f, '#define MONITOR_HOOKS_H'
         print>>f
+        print>>f, '#include <winsock2.h>'
+        print>>f, '#include <windows.h>'
+        print>>f, '#include <wininet.h>'
+        print>>f, '#include <windns.h>'
+        print>>f, '#include <mswsock.h>'
         print>>f, '#include "ntapi.h"'
         print>>f
 
@@ -236,18 +241,13 @@ class DefitionProcessor(object):
     def initial_source(self, f):
         print>>f, '#include <stdio.h>'
         print>>f, '#include <stdint.h>'
-        print>>f, '#include <windows.h>'
-        print>>f, '#include <windns.h>'
-        print>>f, '#include <wininet.h>'
+        print>>f, '#include "%s"' % os.path.basename(self.hooks_h)
         print>>f, '#include "dropped.h"'
         print>>f, '#include "ntapi.h"'
         print>>f, '#include "log.h"'
         print>>f, '#include "misc.h"'
         print>>f, '#include "pipe.h"'
         print>>f, '#include "sleep.h"'
-        print>>f
-        print>>f, '#include "%s"' % os.path.basename(self.hooks_h)
-        print>>f
 
     def ending_source(self, f):
         pass

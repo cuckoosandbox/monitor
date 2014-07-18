@@ -19,6 +19,8 @@ int ensure_absolute_path(wchar_t *out, const wchar_t *in, int length);
 
 void hide_module_from_peb(HMODULE module_handle);
 
+void get_ip_port(const struct sockaddr *addr, const char **ip, int *port);
+
 #define COPY_UNICODE_STRING(local_name, param_name) \
     UNICODE_STRING local_name; wchar_t local_name##_buf[MAX_PATH]; \
     local_name.Length = local_name.MaximumLength = 0; \
