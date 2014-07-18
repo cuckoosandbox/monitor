@@ -24,7 +24,7 @@ Post::
 
     if(NT_SUCCESS(ret)) {
         pipe("PROCESS:%d", pid_from_process_handle(*ProcessHandle));
-        disable_sleep_skip();
+        sleep_skip_disable();
     }
 
 
@@ -47,7 +47,7 @@ Post::
 
     if(NT_SUCCESS(ret)) {
         pipe("PROCESS:%d", pid_from_process_handle(*ProcessHandle));
-        disable_sleep_skip();
+        sleep_skip_disable();
     }
 
 
@@ -78,7 +78,7 @@ Post::
     if(NT_SUCCESS(ret)) {
         pipe("PROCESS:%d,%d", pid_from_process_handle(*ProcessHandle),
             pid_from_thread_handle(*ThreadHandle));
-        disable_sleep_skip();
+        sleep_skip_disable();
     }
 
 
@@ -104,7 +104,7 @@ Post::
         pipe("PROCESS:%d,%d",
             pid_from_process_handle(ProcessInformation->ProcessHandle),
             pid_from_thread_handle(ProcessInformation->ThreadHandle));
-        disable_sleep_skip();
+        sleep_skip_disable();
     }
 
 
@@ -292,5 +292,5 @@ Post::
 
     if(NT_SUCCESS(ret)) {
         pipe("PROCESS:%d", pid_from_process_handle(ProcessHandle));
-        disable_sleep_skip();
+        sleep_skip_disable();
     }

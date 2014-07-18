@@ -170,6 +170,16 @@ void log_explain()
     }
 }
 
+void log_api_pre(const char *fmt, ...)
+{
+    (void) fmt;
+
+    va_list args;
+    va_start(args, fmt);
+    // TODO Pre-log these arguments.
+    va_end(args);
+}
+
 void log_api(int index, int is_success, int return_value,
     const char *fmt, ...)
 {
@@ -357,6 +367,7 @@ void log_init(unsigned int ip, unsigned short port)
 
     if(connect(g_sock, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
         pipe("CRITICAL:Error connecting to the host.");
+        g_sock = -1;
         return;
     }
 

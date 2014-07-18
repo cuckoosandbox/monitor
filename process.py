@@ -235,10 +235,13 @@ class DefitionProcessor(object):
         print>>f, '#include <windows.h>'
         print>>f, '#include <windns.h>'
         print>>f, '#include <wininet.h>'
+        print>>f, '#include "dropped.h"'
         print>>f, '#include "ntapi.h"'
         print>>f, '#include "log.h"'
         print>>f, '#include "misc.h"'
         print>>f, '#include "pipe.h"'
+        print>>f, '#include "sleep.h"'
+        print>>f
         print>>f, '#include "%s"' % os.path.basename(self.hooks_h)
         print>>f
 

@@ -429,4 +429,9 @@ static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
     return obj != NULL ? obj->ObjectName : NULL;
 }
 
+#define ProcessBasicInformation 0
+#define ThreadBasicInformation 0
+
+#define MAX_PATH_PLUS_TOLERANCE (MAX_PATH + 64)
+
 #endif

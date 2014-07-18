@@ -158,5 +158,5 @@ Parameters::
 Post::
 
     if(NT_SUCCESS(ret)) {
-        file_close(Handle);
+        dropped_close(Handle);
     }

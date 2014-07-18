@@ -6,6 +6,8 @@ void log_free();
 
 void log_explain();
 
+void log_api_pre(const char *fmt, ...);
+
 void log_api(int index, int is_success, int return_value,
     const char *fmt, ...);
 
