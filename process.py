@@ -90,14 +90,17 @@ class DefitionProcessor(object):
                 line = line[1:].strip()
 
             # Certain keywords are to be ignored.
-            if line.startswith(('const ', 'CONST ')):
-                line = line[6:].strip()
+            argtype = []
+            while line.startswith(('const ', 'CONST ', 'struct ')):
+                argtype.append(line.split(' ', 1)[0])
+                line = line.split(' ', 1)[1].strip()
 
             if line.count(' ') == 1:
-                argtype, argname = line.split()
-                alias = argname
+                argtype.append(line.split()[0])
+                alias = argname = line.split()[1]
             elif line.count(' ') == 2:
-                argtype, argname, alias = line.split()
+                argtype.append(line.split()[0])
+                argname, alias = line.split()[1:]
             else:
                 raise Exception('Incorrect whitespace count in parameter '
                                 'line: %r.' % line)
@@ -106,18 +109,19 @@ class DefitionProcessor(object):
 
             if argname.startswith('*'):
                 argname = argname[1:].strip()
-                argtype += ' *'
+                argtype.append('*')
 
             if argname.endswith('[]'):
                 argname = argname[:-2].strip()
-                argtype += ' *'
-
-            argtype = argtype.replace('* *', '**')
+                if argtype[-1] == '*':
+                    argtype[-1] += '*'
+                else:
+                    argtype.append('*')
 
             if argname.endswith(','):
                 raise Exception('Parameter line ends with a comma: %s' % line)
 
-            ret.append(dict(argtype=argtype.strip(),
+            ret.append(dict(argtype=' '.join(argtype).strip(),
                             argname=argname.strip(),
                             alias=alias, log=log))
         return ret
