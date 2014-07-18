@@ -52,7 +52,7 @@ _tramp_check_count:
 %ifndef tramp_special
 
     cmp dword [eax+HOOKCNT_OFF], 0
-    jle _tramp_do_it
+    jz _tramp_do_it
 
     ; we're already in a hook - abort
     call _tramp_getpc
@@ -80,13 +80,13 @@ _tramp_do_it:
 _tramp_getpc2:
     pop eax
 
-    push eax
+    pushad
 
     ; save the return address
-    push dword [esp+4]
+    push dword [esp+32]
     call dword [eax+_tramp_retaddr_add-_tramp_getpc2]
 
-    pop eax
+    popad
 
     ; fetch the new return address
     mov eax, [eax+_tramp_retaddr-_tramp_getpc2]
