@@ -1,6 +1,7 @@
 global _asm_tramp
 global _asm_tramp_size
 global _asm_tramp_hook_alloc_off
+global _asm_tramp_hook_handler_off
 global _asm_tramp_orig_func_stub_off
 global _asm_tramp_retaddr_off
 global _asm_tramp_retaddr_add_off
@@ -20,6 +21,9 @@ asm_tramp:
 
 _tramp_hook_alloc:
     dd 0xffeeddcc
+
+_tramp_hook_handler:
+    dd 0x22778833
 
 _tramp_orig_func_stub:
     dd 0x11223344
@@ -89,14 +93,13 @@ _tramp_getpc2:
     popad
 
     ; fetch the new return address
-    mov eax, [eax+_tramp_retaddr-_tramp_getpc2]
+    push dword [eax+_tramp_retaddr-_tramp_getpc2]
 
     ; actually patch the return address
-    mov dword [esp], eax
+    pop dword [esp]
 
     ; jump to the hook handler
-    mov eax, dword [fs:TLS_HOOK_INFO]
-    jmp dword [eax+HANDLER_OFF]
+    jmp dword [eax+_tramp_hook_handler-_tramp_getpc2]
 
 _tramp_end:
 
@@ -104,6 +107,7 @@ _tramp_end:
 _asm_tramp dd asm_tramp
 _asm_tramp_size dd _tramp_end - asm_tramp
 _asm_tramp_hook_alloc_off dd _tramp_hook_alloc - asm_tramp
+_asm_tramp_hook_handler_off dd _tramp_hook_handler - asm_tramp
 _asm_tramp_orig_func_stub_off dd _tramp_orig_func_stub - asm_tramp
 _asm_tramp_retaddr_off dd _tramp_retaddr - asm_tramp
 _asm_tramp_retaddr_add_off dd _tramp_retaddr_add - asm_tramp

@@ -8,7 +8,6 @@
 typedef struct _hook_info_t {
     uint32_t hook_count;
     uint32_t last_error;
-    FARPROC handler;
 
     slist_t retaddr;
     slist_t eax;

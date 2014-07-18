@@ -15,6 +15,7 @@ extern const uint8_t *asm_tramp, *asm_guide, *asm_clean;
 extern const uint32_t asm_tramp_size, asm_guide_size, asm_clean_size;
 
 extern const uint32_t asm_tramp_hook_alloc_off;
+extern const uint32_t asm_tramp_hook_handler_off;
 extern const uint32_t asm_tramp_orig_func_stub_off;
 extern const uint32_t asm_tramp_retaddr_off;
 extern const uint32_t asm_tramp_retaddr_add_off;
@@ -221,6 +222,7 @@ int hook2(hook_t *h)
     // Copy all buffers and patch a couple of pointers.
     memcpy(hd->trampoline, asm_tramp, asm_tramp_size);
     PATCH(hd->trampoline, asm_tramp_hook_alloc_off, hook_alloc);
+    PATCH(hd->trampoline, asm_tramp_hook_handler_off, h->handler);
     PATCH(hd->trampoline, asm_tramp_orig_func_stub_off, hd->func_stub);
     PATCH(hd->trampoline, asm_tramp_retaddr_off, hd->clean);
     PATCH(hd->trampoline, asm_tramp_retaddr_add_off, hook_retaddr_add);
