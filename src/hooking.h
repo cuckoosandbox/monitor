@@ -12,14 +12,16 @@ typedef struct _hook_info_t {
 
     slist_t retaddr;
     slist_t eax;
+} hook_info_t;
 
+typedef struct _hook_data_t {
     uint8_t *trampoline;
     uint8_t *guide;
     uint8_t *func_stub;
     uint8_t *clean;
 
     uint8_t *_mem;
-} hook_info_t;
+} hook_data_t;
 
 typedef struct _hook_t {
     const char *library;
@@ -27,7 +29,7 @@ typedef struct _hook_t {
     FARPROC handler;
     FARPROC *orig;
 
-    hook_info_t *hi;
+    hook_data_t *data;
 } hook_t;
 
 hook_info_t *hook_info();

@@ -193,50 +193,50 @@ int hook2(hook_t *h)
     uint8_t *addr = (uint8_t *) GetProcAddress(module_handle, h->funcname);
     if(addr == NULL) return -1;
 
-    hook_info_t *hi = h->hi = hook_alloc();
-    hi->handler = h->handler;
+    hook_data_t *hd = h->data =
+        (hook_data_t *) calloc(1, sizeof(hook_data_t));
 
     // We allocate 64 bytes for the function stub and 64 bytes for padding
     // in-between (for debugging purposes.)
     uint32_t mem_size =
         asm_tramp_size + asm_guide_size + asm_clean_size + 64 + 64;
-    hi->_mem = (uint8_t *) malloc(mem_size);
-    memset(hi->_mem, 0xcc, mem_size);
+    hd->_mem = (uint8_t *) malloc(mem_size);
+    memset(hd->_mem, 0xcc, mem_size);
 
     unsigned long old_protect;
-    VirtualProtect(hi->_mem, mem_size, PAGE_EXECUTE_READWRITE, &old_protect);
+    VirtualProtect(hd->_mem, mem_size, PAGE_EXECUTE_READWRITE, &old_protect);
 
-    hi->trampoline = hi->_mem;
-    hi->guide = hi->trampoline + 16 + asm_tramp_size;
-    hi->clean = hi->guide + 16 + asm_guide_size;
-    hi->func_stub = hi->clean + 16 + asm_clean_size;
-    *h->orig = (FARPROC) hi->guide;
+    hd->trampoline = hd->_mem;
+    hd->guide = hd->trampoline + 16 + asm_tramp_size;
+    hd->clean = hd->guide + 16 + asm_guide_size;
+    hd->func_stub = hd->clean + 16 + asm_clean_size;
+    *h->orig = (FARPROC) hd->guide;
 
     // Create the original function stub.
-    if(hook_create_stub(hi->func_stub, addr, 5) < 0) {
+    if(hook_create_stub(hd->func_stub, addr, 5) < 0) {
         pipe("CRITICAL:Error creating function stub for %z!", h->funcname);
         return -1;
     }
 
     // Copy all buffers and patch a couple of pointers.
-    memcpy(hi->trampoline, asm_tramp, asm_tramp_size);
-    PATCH(hi->trampoline, asm_tramp_hook_alloc_off, hook_alloc);
-    PATCH(hi->trampoline, asm_tramp_orig_func_stub_off, hi->func_stub);
-    PATCH(hi->trampoline, asm_tramp_retaddr_off, hi->clean);
-    PATCH(hi->trampoline, asm_tramp_retaddr_add_off, hook_retaddr_add);
+    memcpy(hd->trampoline, asm_tramp, asm_tramp_size);
+    PATCH(hd->trampoline, asm_tramp_hook_alloc_off, hook_alloc);
+    PATCH(hd->trampoline, asm_tramp_orig_func_stub_off, hd->func_stub);
+    PATCH(hd->trampoline, asm_tramp_retaddr_off, hd->clean);
+    PATCH(hd->trampoline, asm_tramp_retaddr_add_off, hook_retaddr_add);
 
-    memcpy(hi->guide, asm_guide, asm_guide_size);
-    PATCH(hi->guide, asm_guide_orig_stub_off, hi->func_stub);
-    PATCH(hi->guide, asm_guide_retaddr_add_off, hook_retaddr_add);
-    PATCH(hi->guide, asm_guide_retaddr_pop_off, hook_retaddr_pop);
+    memcpy(hd->guide, asm_guide, asm_guide_size);
+    PATCH(hd->guide, asm_guide_orig_stub_off, hd->func_stub);
+    PATCH(hd->guide, asm_guide_retaddr_add_off, hook_retaddr_add);
+    PATCH(hd->guide, asm_guide_retaddr_pop_off, hook_retaddr_pop);
 
-    memcpy(hi->clean, asm_clean, asm_clean_size);
-    PATCH(hi->clean, asm_clean_retaddr_pop_off, hook_retaddr_pop);
+    memcpy(hd->clean, asm_clean, asm_clean_size);
+    PATCH(hd->clean, asm_clean_retaddr_pop_off, hook_retaddr_pop);
 
     // Patch the original function.
     VirtualProtect(addr, 5, PAGE_EXECUTE_READWRITE, &old_protect);
     *addr = 0xe9;
-    *(uint32_t *)(addr + 1) = hi->trampoline - addr - 5;
+    *(uint32_t *)(addr + 1) = hd->trampoline - addr - 5;
     return 0;
 }
 
