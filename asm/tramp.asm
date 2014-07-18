@@ -40,13 +40,13 @@ _tramp_addresses:
     jnz _tramp_check_count
 
     ; create hook-info
-    call _tramp_getpc3
+    call _tramp_getpc
 
-_tramp_getpc3:
+_tramp_getpc:
     pop eax
 
     pushad
-    call dword [eax+_tramp_hook_alloc-_tramp_getpc3]
+    call dword [eax+_tramp_hook_alloc-_tramp_getpc]
     popad
 
     mov eax, dword [fs:TLS_HOOK_INFO]
@@ -59,14 +59,13 @@ _tramp_check_count:
     jz _tramp_do_it
 
     ; we're already in a hook - abort
-    call _tramp_getpc
+    call _tramp_getpc2
 
-_tramp_getpc:
+_tramp_getpc2:
     pop eax
-    add eax, _tramp_orig_func_stub - _tramp_getpc
 
     ; jump to the original function stub
-    jmp dword [eax]
+    jmp dword [eax+_tramp_orig_func_stub-_tramp_getpc2]
 
 %endif
 
@@ -79,27 +78,27 @@ _tramp_do_it:
     push dword [fs:TLS_LASTERR]
     pop dword [eax+LASTERR_OFF]
 
-    call _tramp_getpc2
+    call _tramp_getpc3
 
-_tramp_getpc2:
+_tramp_getpc3:
     pop eax
 
     pushad
 
     ; save the return address
     push dword [esp+32]
-    call dword [eax+_tramp_retaddr_add-_tramp_getpc2]
+    call dword [eax+_tramp_retaddr_add-_tramp_getpc3]
 
     popad
 
     ; fetch the new return address
-    push dword [eax+_tramp_retaddr-_tramp_getpc2]
+    push dword [eax+_tramp_retaddr-_tramp_getpc3]
 
     ; actually patch the return address
     pop dword [esp]
 
     ; jump to the hook handler
-    jmp dword [eax+_tramp_hook_handler-_tramp_getpc2]
+    jmp dword [eax+_tramp_hook_handler-_tramp_getpc3]
 
 _tramp_end:
 

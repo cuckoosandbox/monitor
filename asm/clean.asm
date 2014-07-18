@@ -30,14 +30,10 @@ _clean_retaddr_pop:
 _clean_getpc_target:
     pop eax
 
-    pushad
-
-    ; fetch return address
-    call [eax+_clean_retaddr_pop-_clean_getpc]
-
     ; restore original return address
+    pushad
+    call [eax+_clean_retaddr_pop-_clean_getpc]
     mov dword [esp+36], eax
-
     popad
 
     pop eax

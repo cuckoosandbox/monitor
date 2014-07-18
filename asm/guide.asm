@@ -16,9 +16,9 @@ asm_guide:
     mov eax, dword [eax+LASTERR_OFF]
     mov dword [fs:TLS_LASTERR], eax
 
-    call _guide_getpc2_target
+    call _guide_getpc_target
 
-_guide_getpc2:
+_guide_getpc:
 _guide_orig_stub:
     dd 0x11223344
 
@@ -28,32 +28,20 @@ _guide_retaddr_add:
 _guide_retaddr_pop:
     dd 0x44556677
 
-; _guide_eax_pop:
-    ; dd 0x99aabbcc
-
-_guide_getpc2_target:
+_guide_getpc_target:
     pop eax
 
     ; temporarily store the original return address
     pushad
     push dword [esp+32]
-    call dword [eax+_guide_retaddr_add-_guide_getpc2]
+    call dword [eax+_guide_retaddr_add-_guide_getpc]
     popad
 
-    ; store the function table pointer
-    ; mov dword [esp], eax
-
     ; fetch our return address
-    add eax, _guide_next - _guide_getpc2
+    add eax, _guide_next - _guide_getpc
 
     ; spoof the return address
     mov dword [esp], eax
-
-    ; fetch the original address
-    ; call _guide_getpc
-
-; _guide_getpc:
-    ; pop eax
 
     ; jump to the original function stub
     jmp dword [eax+_guide_orig_stub-_guide_next]
@@ -66,14 +54,14 @@ _guide_next:
     push dword [fs:TLS_LASTERR]
     pop dword [eax+LASTERR_OFF]
 
-    call _guide_getpc3
+    call _guide_getpc2
 
-_guide_getpc3:
+_guide_getpc2:
     pop eax
 
     ; pop the original return address
     pushad
-    call dword [eax+_guide_retaddr_pop-_guide_getpc3]
+    call dword [eax+_guide_retaddr_pop-_guide_getpc2]
     mov dword [esp+36], eax
     popad
 
