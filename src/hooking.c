@@ -28,10 +28,7 @@ extern const uint32_t asm_clean_retaddr_pop_off;
 
 hook_info_t *hook_alloc()
 {
-    hook_info_t *ret = hook_info();
-    if(ret != NULL) return ret;
-
-    ret = (hook_info_t *) calloc(1, sizeof(hook_info_t));
+    hook_info_t *ret = (hook_info_t *) calloc(1, sizeof(hook_info_t));
     slist_init(&ret->retaddr, 128);
     slist_init(&ret->eax, 128);
     writefsdword(TLS_HOOK_INFO, (uint32_t) ret);
@@ -40,7 +37,11 @@ hook_info_t *hook_alloc()
 
 hook_info_t *hook_info()
 {
-    return (hook_info_t *) readfsdword(TLS_HOOK_INFO);
+    hook_info_t *ret = (hook_info_t *) readfsdword(TLS_HOOK_INFO);
+    if(ret == NULL) {
+        ret = hook_alloc();
+    }
+    return ret;
 }
 
 void __stdcall hook_retaddr_add(uint32_t retaddr)

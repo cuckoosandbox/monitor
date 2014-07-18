@@ -7,7 +7,7 @@
 
 void monitor_init()
 {
-    hook_alloc()->hook_count++;
+    hook_info()->hook_count++;
 
     misc_init();
 
