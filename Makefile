@@ -2,7 +2,7 @@ CC = i686-w64-mingw32-gcc
 NASM = nasm
 AR = ar
 CFLAGS = -m32 -Wall -O0 -ggdb -Wextra -std=c99 -static \
-		 -Wno-missing-field-initializers -I src/ -I objects/code/
+		 -Wno-missing-field-initializers -I inc/ -I objects/code/
 LDFLAGS = -lws2_32 -lshlwapi
 
 SIGS = $(wildcard sigs/*.rst)
@@ -12,7 +12,7 @@ HOOKOBJ = objects/code/hooks.o objects/code/explain.o objects/code/tables.o
 
 SRC = $(wildcard src/*.c)
 SRCOBJ = $(SRC:%.c=objects/%.o)
-HEADER = $(wildcard src/*.h)
+HEADER = $(wildcard inc/*.h)
 
 ASM = $(wildcard asm/*.asm)
 ASMOBJ = $(ASM:%.asm=objects/%.o)
@@ -35,8 +35,6 @@ objects/:
 $(HOOK): $(SIGS) scripts/process.py
 	python scripts/process.py data/ objects/code/ $(SIGS)
 
-objects/src/bson/%.o: src/bson/%.c
-
 $(LIBBSON): $(BSONOBJ)
 	$(AR) cr $@ $^
 
@@ -45,10 +43,7 @@ $(LIBCAPSTONE):
 	cp data/capstone-config.mk src/capstone/config.mk && \
 	cd src/capstone/ && ./make.sh cross-win32
 
-objects/src/%.o: src/%.c $(HEADER)
-	$(CC) -c -o $@ $< $(CFLAGS)
-
-objects/code/%.o: objects/code/%.c $(HEADER)
+objects/%.o: %.c $(HEADER)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 objects/asm/%.o: asm/%.asm
