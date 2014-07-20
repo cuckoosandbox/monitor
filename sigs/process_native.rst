@@ -13,12 +13,20 @@ Parameters::
 
     ** PHANDLE ProcessHandle process_handle
     ** ACCESS_MASK DesiredAccess desired_access
-    ** POBJECT_ATTRIBUTES ObjectAttributes filepath
+    *  POBJECT_ATTRIBUTES ObjectAttributes
     *  HANDLE ParentProcess
     *  BOOLEAN InheritObjectTable
     *  HANDLE SectionHandle
     *  HANDLE DebugPort
     *  HANDLE ExceptionPort
+
+Pre::
+
+    COPY_OBJECT_ATTRIBUTES(filepath, ObjectAttributes);
+
+Logging::
+
+    x filepath &filepath
 
 Post::
 
@@ -35,13 +43,21 @@ Parameters::
 
     ** PHANDLE ProcessHandle process_handle
     ** ACCESS_MASK DesiredAccess desired_access
-    ** POBJECT_ATTRIBUTES ObjectAttributes filepath
+    *  POBJECT_ATTRIBUTES ObjectAttributes
     *  HANDLE ParentProcess
     *  ULONG Flags
     *  HANDLE SectionHandle
     *  HANDLE DebugPort
     *  HANDLE ExceptionPort
     *  BOOLEAN InJob
+
+Pre::
+
+    COPY_OBJECT_ATTRIBUTES(filepath, ObjectAttributes);
+
+Logging::
+
+    x filepath &filepath
 
 Post::
 
@@ -60,16 +76,23 @@ Parameters::
     ** PHANDLE ThreadHandle thread_handle
     ** ACCESS_MASK ProcessDesiredAccess desired_access_process
     ** ACCESS_MASK ThreadDesiredAccess desired_access_thread
-    ** POBJECT_ATTRIBUTES ProcessObjectAttributes process_name
-    ** POBJECT_ATTRIBUTES ThreadObjectAttributes thread_name
+    *  POBJECT_ATTRIBUTES ProcessObjectAttributes
+    *  POBJECT_ATTRIBUTES ThreadObjectAttributes
     ** ULONG ProcessFlags flags_process
     ** ULONG ThreadFlags flags_thread
     *  PRTL_USER_PROCESS_PARAMETERS ProcessParameters
     *  PPS_CREATE_INFO CreateInfo
     *  PPS_ATTRIBUTE_LIST AttributeList
 
+Pre::
+
+    COPY_OBJECT_ATTRIBUTES(process_name, ProcessObjectAttributes);
+    COPY_OBJECT_ATTRIBUTES(thread_name, ThreadObjectAttributes);
+
 Logging::
 
+    x process_name &process_name
+    x thread_name &thread_name
     O filepath &ProcessParameters->ImagePathName
     O command_line &ProcessParameters->CommandLine
 
@@ -115,10 +138,12 @@ Parameters::
 
     ** PHANDLE ProcessHandle process_handle
     ** ACCESS_MASK DesiredAccess desired_access
-    ** POBJECT_ATTRIBUTES ObjectAttributes object_attributes
+    *  POBJECT_ATTRIBUTES ObjectAttributes
     *  PCLIENT_ID ClientId
 
 Pre::
+
+    COPY_OBJECT_ATTRIBUTES(object_attributes, ObjectAttributes);
 
     uintptr_t pid = 0;
     if(ClientId != NULL) {
@@ -128,6 +153,7 @@ Pre::
 Logging::
 
     i process_identifier pid
+    x object_attributes &object_attributes
 
 
 NtTerminateProcess
@@ -146,11 +172,19 @@ Parameters::
 
     ** PHANDLE SectionHandle section_handle
     ** ACCESS_MASK DesiredAccess desired_access
-    ** POBJECT_ATTRIBUTES ObjectAttributes object_attributes
+    *  POBJECT_ATTRIBUTES ObjectAttributes
     *  PLARGE_INTEGER MaximumSize
     ** ULONG SectionPageProtection protection
     *  ULONG AllocationAttributes
     ** HANDLE FileHandle file_handle
+
+Pre::
+
+    COPY_OBJECT_ATTRIBUTES(section_name, ObjectAttributes);
+
+Logging::
+
+    x section_name &section_name
 
 
 NtMakeTemporaryObject
@@ -176,7 +210,15 @@ Parameters::
 
     ** PHANDLE SectionHandle section_handle
     ** ACCESS_MASK DesiredAccess desired_access
-    ** POBJECT_ATTRIBUTES ObjectAttributes object_attributes
+    *  POBJECT_ATTRIBUTES ObjectAttributes
+
+Pre::
+
+    COPY_OBJECT_ATTRIBUTES(section_name, ObjectAttributes);
+
+Logging::
+
+    x section_name &section_name
 
 
 NtUnmapViewOfSection
@@ -264,12 +306,8 @@ Parameters::
     ** ULONG FreeType free_type
 
 
-ZwMapViewOfSection
+NtMapViewOfSection
 ==================
-
-Signature::
-
-    * Return value: NTSTATUS
 
 Parameters::
 
@@ -283,10 +321,6 @@ Parameters::
     *  UINT InheritDisposition
     ** ULONG AllocationType allocation_type
     *  ULONG Win32Protect
-
-Logging::
-
-    P base_address BaseAddress
 
 Post::
 

@@ -15,17 +15,20 @@ Parameters::
     ** ACCESS_MASK DesiredAccess access
     *  POBJECT_ATTRIBUTES ObjectAttributes
     ** ULONG TitleIndex index
-    ** PUNICODE_STRING Class class
+    *  PUNICODE_STRING Class
     ** ULONG CreateOptions options
     *  PULONG Disposition
 
 Pre::
 
     UNICODE_STRING *unistr = unistr_from_objattr(ObjectAttributes);
+    COPY_UNICODE_STRING(sub_key, unistr);
+    COPY_UNICODE_STRING(class, Class);
 
 Logging::
 
-    O sub_key unistr
+    O sub_key &sub_key
+    O class &class
 
 
 NtOpenKey
@@ -40,10 +43,11 @@ Parameters::
 Pre::
 
     UNICODE_STRING *unistr = unistr_from_objattr(ObjectAttributes);
+    COPY_UNICODE_STRING(sub_key, unistr);
 
 Logging::
 
-    O sub_key unistr
+    O sub_key &sub_key
 
 
 NtOpenKeyEx
@@ -59,10 +63,11 @@ Parameters::
 Pre::
 
     UNICODE_STRING *unistr = unistr_from_objattr(ObjectAttributes);
+    COPY_UNICODE_STRING(sub_key, unistr);
 
 Logging::
 
-    O sub_key unistr
+    O sub_key &sub_key
 
 
 NtRenameKey
@@ -71,7 +76,15 @@ NtRenameKey
 Parameters::
 
     ** HANDLE KeyHandle key_handle
-    ** PUNICODE_STRING NewName new_name
+    *  PUNICODE_STRING NewName
+
+Pre::
+
+    COPY_UNICODE_STRING(new_name, NewName);
+
+Logging::
+
+    O new_name &new_name
 
 
 NtReplaceKey
@@ -79,9 +92,19 @@ NtReplaceKey
 
 Parameters::
 
-    ** POBJECT_ATTRIBUTES NewHiveFileName newfilepath
+    *  POBJECT_ATTRIBUTES NewHiveFileName
     ** HANDLE KeyHandle
-    ** POBJECT_ATTRIBUTES BackupHiveFileName backup_filepath
+    *  POBJECT_ATTRIBUTES BackupHiveFileName
+
+Pre::
+
+    COPY_OBJECT_ATTRIBUTES(newfilepath, NewHiveFileName);
+    COPY_OBJECT_ATTRIBUTES(backupfilepath, BackupHiveFileName);
+
+Logging::
+
+    x newfilepath &newfilepath
+    x backupfilepath &backupfilepath
 
 
 NtEnumerateKey
@@ -124,15 +147,20 @@ NtSetValueKey
 Parameters::
 
     ** HANDLE KeyHandle key_handle
-    ** PUNICODE_STRING ValueName value_name
+    *  PUNICODE_STRING ValueName
     ** ULONG TitleIndex index
     ** ULONG Type reg_type
     *  PVOID Data
     *  ULONG DataSize
 
+Pre::
+
+    COPY_UNICODE_STRING(value_name, ValueName);
+
 Logging::
 
     b buffer DataSize, Data
+    O value_name &value_name
 
 
 NtQueryValueKey
@@ -141,15 +169,24 @@ NtQueryValueKey
 Parameters::
 
     ** HANDLE KeyHandle key_handle
-    ** PUNICODE_STRING ValueName value_name
+    *  PUNICODE_STRING ValueName
     ** KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass class
     *  PVOID KeyValueInformation
     *  ULONG Length
     *  PULONG ResultLength
 
+Ensure::
+
+    ResultLength
+
+Pre::
+
+    COPY_UNICODE_STRING(value_name, ValueName);
+
 Logging::
 
     B buffer ResultLength, KeyValueInformation
+    O value_name &value_name
 
 
 NtQueryMultipleValueKey
@@ -183,7 +220,15 @@ NtDeleteValueKey
 Parameters::
 
     ** HANDLE KeyHandle key_handle
-    ** PUNICODE_STRING ValueName value_name
+    * PUNICODE_STRING ValueName
+
+Pre::
+
+    COPY_UNICODE_STRING(value_name, ValueName);
+
+Logging::
+
+    O value_name &value_name
 
 
 NtLoadKey
@@ -191,16 +236,19 @@ NtLoadKey
 
 Parameters::
 
-    ** POBJECT_ATTRIBUTES TargetKey target_key
+    *  POBJECT_ATTRIBUTES TargetKey
     *  POBJECT_ATTRIBUTES SourceFile
 
 Pre::
 
-    UNICODE_STRING *unistr = unistr_from_objattr(SourceFile);
+    UNICODE_STRING *unistr = unistr_from_objattr(TargetKey);
+    COPY_UNICODE_STRING(target_key, unistr);
+    COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
 
 Logging::
 
-    O filepath unistr
+    x filepath &source_file
+    O target_key &target_key
 
 
 NtLoadKey2
@@ -208,17 +256,20 @@ NtLoadKey2
 
 Parameters::
 
-    ** POBJECT_ATTRIBUTES TargetKey target_key
+    *  POBJECT_ATTRIBUTES TargetKey
     *  POBJECT_ATTRIBUTES SourceFile
     ** ULONG Flags flags
 
 Pre::
 
-    UNICODE_STRING *unistr = unistr_from_objattr(SourceFile);
+    UNICODE_STRING *unistr = unistr_from_objattr(TargetKey);
+    COPY_UNICODE_STRING(target_key, unistr);
+    COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
 
 Logging::
 
-    O filepath unistr
+    x filepath &source_file
+    O target_key &target_key
 
 
 NtLoadKeyEx
@@ -226,18 +277,22 @@ NtLoadKeyEx
 
 Parameters::
 
-    ** POBJECT_ATTRIBUTES TargetKey target_key
+    *  POBJECT_ATTRIBUTES TargetKey
     *  POBJECT_ATTRIBUTES SourceFile
     ** ULONG Flags flags
     ** HANDLE TrustClassKey trust_class_key
 
 Pre::
 
-    UNICODE_STRING *unistr = unistr_from_objattr(SourceFile);
+    UNICODE_STRING *unistr = unistr_from_objattr(TargetKey);
+    COPY_UNICODE_STRING(target_key, unistr);
+    COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
 
 Logging::
 
-    O filepath unistr
+    x filepath &source_file
+    O target_key &target_key
+
 
 
 NtQueryKey

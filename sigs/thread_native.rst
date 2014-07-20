@@ -13,7 +13,7 @@ Parameters::
 
     ** PHANDLE ThreadHandle thread_handle
     ** ACCESS_MASK DesiredAccess access
-    ** POBJECT_ATTRIBUTES ObjectAttributes thread_name
+    *  POBJECT_ATTRIBUTES ObjectAttributes
     ** HANDLE ProcessHandle process_handle
     *  PCLIENT_ID ClientId
     *  PCONTEXT ThreadContext
@@ -22,7 +22,13 @@ Parameters::
 
 Pre::
 
+    UNICODE_STRING *unistr = unistr_from_objattr(ObjectAttributes);
+    COPY_UNICODE_STRING(thread_name, unistr);
     pipe("PROCESS:%d", pid_from_process_handle(ProcessHandle));
+
+Logging::
+
+    O thread_name &thread_name
 
 Post::
 
@@ -56,8 +62,17 @@ Parameters::
 
     ** PHANDLE ThreadHandle thread_handle
     ** ACCESS_MASK DesiredAccess access
-    ** POBJECT_ATTRIBUTES ObjectAttributes thread_name
+    *  POBJECT_ATTRIBUTES ObjectAttributes
     *  PCLIENT_ID ClientId
+
+Pre::
+
+    UNICODE_STRING *unistr = unistr_from_objattr(ObjectAttributes);
+    COPY_UNICODE_STRING(thread_name, unistr);
+
+Logging::
+
+    O thread_name &thread_name
 
 Post::
 

@@ -13,7 +13,7 @@ Parameters::
 
     ** PHANDLE FileHandle file_handle
     ** ACCESS_MASK DesiredAccess desired_access
-    ** POBJECT_ATTRIBUTES ObjectAttributes filepath
+    *  POBJECT_ATTRIBUTES ObjectAttributes
     *  PIO_STATUS_BLOCK IoStatusBlock
     *  PLARGE_INTEGER AllocationSize
     ** ULONG FileAttributes file_attributes
@@ -23,10 +23,18 @@ Parameters::
     *  PVOID EaBuffer
     *  ULONG EaLength
 
+Pre::
+
+    COPY_OBJECT_ATTRIBUTES(filepath, ObjectAttributes);
+
+Logging::
+
+    x filepath &filepath
+
 Post::
 
     if(NT_SUCCESS(ret) && (DesiredAccess & DUMP_FILE_MASK) != 0) {
-        dropped_add(*FileHandle, ObjectAttributes);
+        dropped_add(*FileHandle, &filepath);
     }
 
 
@@ -35,11 +43,16 @@ NtDeleteFile
 
 Parameters::
 
-    ** POBJECT_ATTRIBUTES ObjectAttributes filepath
+    *  POBJECT_ATTRIBUTES ObjectAttributes
 
 Pre::
 
-    pipe("FILE_DEL:%O", ObjectAttributes);
+    COPY_OBJECT_ATTRIBUTES(filepath, ObjectAttributes);
+    pipe("FILE_DEL:%O", &filepath);
+
+Logging::
+
+    x filepath &filepath
 
 
 NtOpenFile
@@ -49,15 +62,23 @@ Parameters::
 
     ** PHANDLE FileHandle file_handle
     ** ACCESS_MASK DesiredAccess desired_access
-    ** POBJECT_ATTRIBUTES ObjectAttributes filepath
+    *  POBJECT_ATTRIBUTES ObjectAttributes
     *  PIO_STATUS_BLOCK IoStatusBlock
     ** ULONG ShareAccess share_access
     ** ULONG OpenOptions open_options
 
+Pre::
+
+    COPY_OBJECT_ATTRIBUTES(filepath, ObjectAttributes);
+
+Logging::
+
+    x filepath &filepath
+
 Post::
 
     if(NT_SUCCESS(ret) && (DesiredAccess & DUMP_FILE_MASK) != 0) {
-        dropped_add(*FileHandle, ObjectAttributes);
+        dropped_add(*FileHandle, &filepath);
     }
 
 
@@ -212,7 +233,15 @@ Parameters::
 
     ** PHANDLE DirectoryHandle directory_handle
     ** ACCESS_MASK DesiredAccess desired_access
-    ** POBJECT_ATTRIBUTES ObjectAttributes dirpath
+    *  POBJECT_ATTRIBUTES ObjectAttributes
+
+Pre::
+
+    COPY_OBJECT_ATTRIBUTES(dirpath, ObjectAttributes);
+
+Logging::
+
+    x dirpath &dirpath
 
 
 NtCreateDirectoryObject
@@ -222,4 +251,12 @@ Parameters::
 
     ** PHANDLE DirectoryHandle directory_handle
     ** ACCESS_MASK DesiredAccess desired_access
-    ** POBJECT_ATTRIBUTES ObjectAttributes dirpath
+    *  POBJECT_ATTRIBUTES ObjectAttributes
+
+Pre::
+
+    COPY_OBJECT_ATTRIBUTES(dirpath, ObjectAttributes);
+
+Logging::
+
+    x dirpath &dirpath

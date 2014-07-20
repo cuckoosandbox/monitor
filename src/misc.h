@@ -22,15 +22,25 @@ void hide_module_from_peb(HMODULE module_handle);
 void get_ip_port(const struct sockaddr *addr, const char **ip, int *port);
 
 #define COPY_UNICODE_STRING(local_name, param_name) \
-    UNICODE_STRING local_name; wchar_t local_name##_buf[MAX_PATH]; \
+    UNICODE_STRING local_name; wchar_t local_name##_buf[MAX_PATH+128]; \
     local_name.Length = local_name.MaximumLength = 0; \
     local_name.Buffer = local_name##_buf; \
+    memset(local_name##_buf, 0, sizeof(local_name##_buf)); \
     if(param_name != NULL && \
-            param_name->MaximumLength < sizeof(local_name)) { \
+            param_name->MaximumLength < sizeof(local_name##_buf)) { \
         local_name.Length = param_name->Length; \
         local_name.MaximumLength = param_name->MaximumLength; \
         memcpy(local_name.Buffer, param_name->Buffer, \
             local_name.MaximumLength); \
+    }
+
+#define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
+    OBJECT_ATTRIBUTES local_name; \
+    memset(&local_name, 0, sizeof(local_name)); \
+    COPY_UNICODE_STRING(local_name##_str, unistr_from_objattr(param_name)); \
+    if(param_name != NULL) { \
+        memcpy(&local_name, param_name, sizeof(local_name)); \
+        local_name.ObjectName = &local_name##_str; \
     }
 
 #define FILE_NAME_INFORMATION_REQUIRED_SIZE \

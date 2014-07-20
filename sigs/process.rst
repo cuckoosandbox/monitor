@@ -56,6 +56,7 @@ ShellExecuteExW
 
 Signature::
 
+    * Library: shell32
     * Return value: BOOL
 
 Parameters::

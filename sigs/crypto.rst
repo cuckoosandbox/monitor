@@ -163,7 +163,7 @@ CryptDecodeMessage
 
 Signature::
 
-    * Library: advapi32
+    * Library: crypt32
 
 Parameters::
 
