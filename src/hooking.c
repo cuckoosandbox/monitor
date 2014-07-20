@@ -90,6 +90,8 @@ int lde(const void *addr)
 
 int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 {
+    const uint8_t *base_addr = addr;
+
     while (len > 0) {
         int length = lde(addr);
         if(length == 0) return -1;
@@ -184,22 +186,25 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
     // Jump to the original function at the point where our stub ends.
     *tramp++ = 0xe9;
     *(uint32_t *) tramp = (uint32_t) addr - (uint32_t) tramp - 4;
-    return 0;
+    return addr - base_addr;
 }
 
-int hook_create_jump(uint8_t *addr, const uint8_t *target)
+int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 {
     unsigned long old_protect;
 
-    if(VirtualProtect(addr, 5, PAGE_EXECUTE_READWRITE,
+    if(VirtualProtect(addr, stub_used, PAGE_EXECUTE_READWRITE,
             &old_protect) == FALSE) {
         return -1;
     }
 
+    // Nop all used bytes out with int3's.
+    memset(addr, 0xcc, stub_used);
+
     *addr = 0xe9;
     *(uint32_t *)(addr + 1) = target - addr - 5;
 
-    VirtualProtect(addr, 5, old_protect, &old_protect);
+    VirtualProtect(addr, stub_used, old_protect, &old_protect);
     return 0;
 }
 
@@ -238,7 +243,8 @@ int hook2(hook_t *h)
     *h->orig = (FARPROC) hd->guide;
 
     // Create the original function stub.
-    if(hook_create_stub(hd->func_stub, addr, 5) < 0) {
+    int stub_used = hook_create_stub(hd->func_stub, addr, 5);
+    if(stub_used < 0) {
         pipe("CRITICAL:Error creating function stub for %z!", h->funcname);
         return -1;
     }
@@ -260,7 +266,7 @@ int hook2(hook_t *h)
     PATCH(hd->clean, asm_clean_retaddr_pop_off, hook_retaddr_pop);
 
     // Patch the original function.
-    if(hook_create_jump(addr, hd->trampoline) < 0) {
+    if(hook_create_jump(addr, hd->trampoline, stub_used) < 0) {
         pipe("CRITICIAL:Error creating function jump for %z!", h->funcname);
         return -1;
     }
