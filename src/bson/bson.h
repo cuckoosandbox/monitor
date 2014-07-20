@@ -691,7 +691,7 @@ int bson_init_size( bson *b, int size );
  * See also bson_init_finished_data( )
  *
  * @note When done using the BSON object, you must pass
- *      it to bson_destroy( ). 
+ *      it to bson_destroy( ).
  *
  * @param b the BSON object to initialize.
  * @param data the raw BSON data.

@@ -7,24 +7,37 @@
 #include "misc.h"
 #include "pipe.h"
 
-config_t g_config;
-
-void monitor_init()
+void monitor_init(HMODULE module_handle)
 {
     hook_info()->hook_count++;
 
-    config_read(&g_config);
+    config_t cfg;
+    config_read(&cfg);
 
     misc_init();
     dropped_init();
-    pipe_init(g_config.pipe_name);
+    pipe_init(cfg.pipe_name);
 
-    log_init(g_config.host_ip, g_config.host_port);
+    log_init(cfg.host_ip, cfg.host_port);
+
+    // Make sure advapi32 is loaded.
+    LoadLibrary("advapi32.dll");
+
+    hide_module_from_peb(module_handle);
 
     for (const hook_t *h = g_hooks; h->funcname != NULL; h++) {
         if(hook(h->library, h->funcname, h->handler, h->orig) < 0) {
             pipe("CRITICAL:Hooking %z returned failure!", h->funcname);
         }
+    }
+
+    // Notify Cuckoo that we're good to go.
+    char name[64];
+    sprintf(name, "CuckooEvent%ld", GetCurrentProcessId());
+    HANDLE event_handle = OpenEvent(EVENT_ALL_ACCESS, FALSE, name);
+    if(event_handle != NULL) {
+        SetEvent(event_handle);
+        CloseHandle(event_handle);
     }
 
     hook_info()->hook_count--;
@@ -36,7 +49,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
 
     switch (dwReason) {
     case DLL_PROCESS_ATTACH:
-        monitor_init();
+        monitor_init(hModule);
         break;
     }
 

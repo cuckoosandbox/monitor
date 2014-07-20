@@ -10,21 +10,19 @@
 #include "pipe.h"
 #include "utf8.h"
 
-// TLS index of the bson object
+// TLS index of the bson object.
 static int g_tls_idx;
 
-// the size of the logging buffer
-#define BUFFERSIZE 1024 * 1024
+// Maximum length of a buffer so we try to avoid polluting logs with garbage.
 #define BUFFER_LOG_MAX 4096
 
 static CRITICAL_SECTION g_mutex;
-static int g_sock;
+static SOCKET g_sock = INVALID_SOCKET;
 static unsigned int g_starttick;
 
-
-static void log_raw_direct(const char *buf, size_t length)
+static void log_raw(const char *buf, size_t length)
 {
-    if(g_sock < 0) return;
+    if(g_sock == INVALID_SOCKET) return;
 
     EnterCriticalSection(&g_mutex);
 
@@ -165,7 +163,7 @@ void log_explain()
 
         bson_append_finish_array(&b);
         bson_finish(&b);
-        log_raw_direct(bson_data(&b), bson_size(&b));
+        log_raw(bson_data(&b), bson_size(&b));
         bson_destroy(&b);
     }
 }
@@ -209,7 +207,7 @@ void log_api(int index, int is_success, int return_value,
         else if(key == 'S') {
             int len = va_arg(args, int);
             const char *s = va_arg(args, const char *);
-            if(s == NULL) { s = ""; len = 0; }
+            if(s == NULL) s = "", len = 0;
             log_string(&b, idx, s, len);
         }
         else if(key == 'u') {
@@ -260,7 +258,8 @@ void log_api(int index, int is_success, int return_value,
                 log_string(&b, idx, "", 0);
             }
             else {
-                log_wstring(&b, idx, str->Buffer, str->Length / sizeof(wchar_t));
+                log_wstring(&b, idx, str->Buffer,
+                    str->Length / sizeof(wchar_t));
             }
         }
         else if(key == 'x') {
@@ -316,7 +315,7 @@ void log_api(int index, int is_success, int return_value,
 
     bson_append_finish_array(&b);
     bson_finish(&b);
-    log_raw_direct(bson_data(&b), bson_size(&b));
+    log_raw(bson_data(&b), bson_size(&b));
     bson_destroy(&b);
 }
 
@@ -354,7 +353,7 @@ void log_init(unsigned int ip, unsigned short port)
     WSAStartup(MAKEWORD(2, 2), &wsa);
 
     g_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(g_sock < 0) {
+    if(g_sock == INVALID_SOCKET) {
         pipe("CRITICAL:Error creating logging socket.");
         return;
     }
@@ -365,7 +364,8 @@ void log_init(unsigned int ip, unsigned short port)
         .sin_port           = htons(port),
     };
 
-    if(connect(g_sock, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+    if(connect(g_sock, (struct sockaddr *) &addr,
+            sizeof(addr)) == SOCKET_ERROR) {
         pipe("CRITICAL:Error connecting to the host.");
         g_sock = -1;
         return;
@@ -373,7 +373,7 @@ void log_init(unsigned int ip, unsigned short port)
 
     g_tls_idx = TlsAlloc();
 
-    log_raw_direct("BSON\n", 5);
+    log_raw("BSON\n", 5);
     log_explain();
     log_new_process();
     log_new_thread();

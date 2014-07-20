@@ -9,6 +9,8 @@ void config_read(config_t *cfg)
     sprintf(config_fname, "%s\\%lu.ini",
         getenv("TEMP"), GetCurrentProcessId());
 
+    memset(cfg, 0, sizeof(config_t));
+
     FILE *fp = fopen(config_fname, "rb");
     if(fp != NULL) {
         while (fgets(buf, sizeof(buf), fp) != NULL) {
