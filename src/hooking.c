@@ -79,13 +79,14 @@ int lde(const void *addr)
 
     cs_insn *insn;
 
-    size_t ret = cs_disasm_ex(capstone, addr, 16, (uintptr_t) addr, 1, &insn);
-    if(ret == 0) return 0;
+    size_t count =
+        cs_disasm_ex(capstone, addr, 16, (uintptr_t) addr, 1, &insn);
+    if(count == 0) return 0;
 
-    ret = insn->size;
+    int size = insn->size;
 
-    cs_free(insn, 1);
-    return ret;
+    cs_free(insn, count);
+    return size;
 }
 
 int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
