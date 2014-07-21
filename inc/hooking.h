@@ -10,7 +10,6 @@ typedef struct _hook_info_t {
     uint32_t last_error;
 
     slist_t retaddr;
-    slist_t eax;
 } hook_info_t;
 
 typedef struct _hook_data_t {
