@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "asm_global.h"
 #include "capstone/include/capstone.h"
 #include "capstone/include/x86.h"
 #include "hooking.h"
@@ -10,21 +11,6 @@
 #include "slist.h"
 
 #define TLS_HOOK_INFO 0x44
-
-extern const uint8_t *asm_tramp, *asm_guide, *asm_clean;
-extern const uint32_t asm_tramp_size, asm_guide_size, asm_clean_size;
-
-extern const uint32_t asm_tramp_hook_alloc_off;
-extern const uint32_t asm_tramp_hook_handler_off;
-extern const uint32_t asm_tramp_orig_func_stub_off;
-extern const uint32_t asm_tramp_retaddr_off;
-extern const uint32_t asm_tramp_retaddr_add_off;
-
-extern const uint32_t asm_guide_orig_stub_off;
-extern const uint32_t asm_guide_retaddr_add_off;
-extern const uint32_t asm_guide_retaddr_pop_off;
-
-extern const uint32_t asm_clean_retaddr_pop_off;
 
 hook_info_t *hook_alloc()
 {
