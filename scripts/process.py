@@ -220,6 +220,11 @@ class DefitionProcessor(object):
 
                 row['signature']['is_success'] = self.is_success[retval]
 
+            # Check the calling convention.
+            if row['signature'].get('calling_convention') != 'WINAPI':
+                raise Exception('Calling convention of %r must be WINAPI.' %
+                                row['apiname'])
+
             self.explain.append(row)
             yield row
 
