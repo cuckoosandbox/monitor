@@ -187,16 +187,6 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 
 int hook2(hook_t *h)
 {
-    HMODULE module_handle = GetModuleHandle(h->library);
-    if(module_handle == NULL) return 0;
-
-    uint8_t *addr = (uint8_t *) GetProcAddress(module_handle, h->funcname);
-    if(addr == NULL) {
-        pipe("CRITICAL:Error resolving function %z->%z!",
-            h->library, h->funcname);
-        return -1;
-    }
-
     hook_data_t *hd = h->data =
         (hook_data_t *) calloc(1, sizeof(hook_data_t));
 
@@ -217,9 +207,10 @@ int hook2(hook_t *h)
     *h->orig = (FARPROC) hd->guide;
 
     // Create the original function stub.
-    int stub_used = hook_create_stub(hd->func_stub, addr, 5);
+    int stub_used = hook_create_stub(hd->func_stub, (uint8_t *) h->addr, 5);
     if(stub_used < 0) {
-        pipe("CRITICAL:Error creating function stub for %z!", h->funcname);
+        pipe("CRITICAL:Error creating function stub for %z!%z.",
+            h->library, h->funcname);
         return -1;
     }
 
@@ -240,8 +231,9 @@ int hook2(hook_t *h)
     PATCH(hd->clean, asm_clean_retaddr_pop_off, hook_retaddr_pop);
 
     // Patch the original function.
-    if(hook_create_jump(addr, hd->trampoline, stub_used) < 0) {
-        pipe("CRITICIAL:Error creating function jump for %z!", h->funcname);
+    if(hook_create_jump((uint8_t *) h->addr, hd->trampoline, stub_used) < 0) {
+        pipe("CRITICIAL:Error creating function jump for %z!%z.",
+            h->library, h->funcname);
         return -1;
     }
     return 0;
@@ -250,10 +242,20 @@ int hook2(hook_t *h)
 int hook(const char *library, const char *funcname,
     FARPROC handler, FARPROC *orig)
 {
+    HMODULE module_handle = GetModuleHandle(library);
+    if(module_handle == NULL) return 0;
+
+    FARPROC addr = GetProcAddress(module_handle, funcname);
+    if(addr == NULL) {
+        pipe("CRITICAL:Error resolving function %z!%z.", library, funcname);
+        return -1;
+    }
+
     hook_t h;
     h.library = library;
     h.funcname = funcname;
     h.handler = handler;
     h.orig = orig;
+    h.addr = addr;
     return hook2(&h);
 }
