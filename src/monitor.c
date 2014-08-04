@@ -27,7 +27,7 @@ void monitor_init(HMODULE module_handle)
 
 void monitor_hook()
 {
-    hook_info()->hook_count++;
+    hook_disable();
 
     for (const hook_t *h = g_hooks; h->funcname != NULL; h++) {
         if(hook(h->library, h->funcname, h->handler, h->orig) < 0) {
@@ -35,12 +35,12 @@ void monitor_hook()
         }
     }
 
-    hook_info()->hook_count--;
+    hook_enable();
 }
 
 void monitor_notify()
 {
-    hook_info()->hook_count++;
+    hook_disable();
 
     // Notify Cuckoo that we're good to go.
     char name[64];
@@ -51,7 +51,7 @@ void monitor_notify()
         CloseHandle(event_handle);
     }
 
-    hook_info()->hook_count--;
+    hook_enable();
 }
 
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)

@@ -41,6 +41,16 @@ uint32_t __stdcall hook_retaddr_pop()
     return slist_pop(&h->retaddr);
 }
 
+void hook_disable()
+{
+    hook_info()->hook_count++;
+}
+
+void hook_enable()
+{
+    hook_info()->hook_count--;
+}
+
 int lde(const void *addr)
 {
     static int capstone_init = 0; static csh capstone;

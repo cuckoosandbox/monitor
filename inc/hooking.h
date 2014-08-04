@@ -34,6 +34,9 @@ typedef struct _hook_t {
 hook_info_t *hook_alloc();
 hook_info_t *hook_info();
 
+void hook_disable();
+void hook_enable();
+
 int hook(const char *library, const char *funcname,
     FARPROC handler, FARPROC *orig);
 
