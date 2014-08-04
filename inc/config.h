@@ -8,7 +8,7 @@ typedef struct _config_t {
     // Pipe name to communicate with Cuckoo.
     char pipe_name[MAX_PATH];
 
-    // If this mutex exists then we're shutting down.
+    // If this mutex exists then the Virtual Machine is shutting down.
     char shutdown_mutex[MAX_PATH];
 
     // Whether this is the first process.

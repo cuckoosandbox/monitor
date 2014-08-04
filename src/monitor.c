@@ -13,7 +13,7 @@ void monitor_init(HMODULE module_handle)
     config_t cfg;
     config_read(&cfg);
 
-    misc_init();
+    misc_init(cfg.shutdown_mutex);
     dropped_init();
     pipe_init(cfg.pipe_name);
 

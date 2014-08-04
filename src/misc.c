@@ -5,6 +5,8 @@
 #include "misc.h"
 #include "ntapi.h"
 
+static char g_shutdown_mutex[MAX_PATH];
+
 static LONG (WINAPI *pNtQueryInformationProcess)(
     HANDLE ProcessHandle,
     ULONG ProcessInformationClass,
@@ -42,7 +44,7 @@ static NTSTATUS (WINAPI *pNtQueryInformationFile)(
     FILE_INFORMATION_CLASS FileInformationClass
 );
 
-void misc_init()
+void misc_init(const char *shutdown_mutex)
 {
     HMODULE mod = GetModuleHandle("ntdll");
 
@@ -60,6 +62,8 @@ void misc_init()
 
     *(FARPROC *) &pNtQueryInformationFile =
         GetProcAddress(mod, "NtQueryInformationFile");
+
+    strncpy(g_shutdown_mutex, shutdown_mutex, sizeof(g_shutdown_mutex));
 }
 
 uint32_t pid_from_process_handle(HANDLE process_handle)
@@ -233,4 +237,14 @@ void get_ip_port(const struct sockaddr *addr, const char **ip, int *port)
         *ip = inet_ntoa(addr4->sin_addr);
         *port = htons(addr4->sin_port);
     }
+}
+
+int is_shutting_down()
+{
+    HANDLE mutex_handle = OpenMutex(SYNCHRONIZE, FALSE, g_shutdown_mutex);
+    if(mutex_handle != NULL) {
+        CloseHandle(mutex_handle);
+        return 1;
+    }
+    return 0;
 }

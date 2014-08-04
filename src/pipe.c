@@ -105,7 +105,7 @@ static int _pipe_sprintf(char *out, const char *fmt, va_list args)
 
 void pipe_init(const char *pipe_name)
 {
-    strcpy(g_pipe_name, pipe_name);
+    strncpy(g_pipe_name, pipe_name, sizeof(g_pipe_name));
 }
 
 int pipe(const char *fmt, ...)
