@@ -34,7 +34,7 @@ dirs: | objects/
 objects/:
 	mkdir -p objects/asm/ objects/code/ objects/src/ objects/src/bson/
 
-$(HOOK): $(SIGS) utils/process.py
+$(HOOK): $(SIGS) utils/process.py data/types.conf
 	python utils/process.py data/ objects/code/ $(SIGS)
 
 $(LIBBSON): $(BSONOBJ)

@@ -309,6 +309,10 @@ void log_api(int index, int is_success, int return_value,
             int64_t value = va_arg(args, int64_t);
             log_int64(&b, idx, value);
         }
+        else if(key == 'Q') {
+            LARGE_INTEGER *value = va_arg(args, LARGE_INTEGER *);
+            log_int64(&b, idx, value != NULL ? value->QuadPart : 0);
+        }
     }
 
     va_end(args);
