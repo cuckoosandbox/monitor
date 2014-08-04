@@ -27,6 +27,7 @@ DLL = monitor.dll
 
 all: dirs $(HOOK) $(DLL)
 	make -C test/
+	make -C utils/
 
 dirs: | objects/
 
@@ -56,3 +57,4 @@ $(DLL): $(ASMOBJ) $(SRCOBJ) $(HOOKOBJ) $(LIBBSON) $(LIBCAPSTONE)
 clean:
 	rm -rf objects/ $(DLL)
 	make -C test/ clean
+	make -C utils/ clean
