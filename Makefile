@@ -43,11 +43,11 @@ $(LIBCAPSTONE):
 	cp data/capstone-config.mk src/capstone/config.mk && \
 	cd src/capstone/ && ./make.sh cross-win32
 
-objects/%.o: %.c $(HEADER)
+objects/%.o: %.c $(HEADER) Makefile
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-objects/asm/%.o: asm/%.asm
-	$(NASM) -f elf32 -o $@ $^
+objects/asm/%.o: asm/%.asm Makefile
+	$(NASM) -f elf32 -o $@ $<
 
 $(DLL): $(ASMOBJ) $(SRCOBJ) $(HOOKOBJ) $(LIBBSON) $(LIBCAPSTONE)
 	$(CC) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
