@@ -33,8 +33,8 @@ dirs: | objects/
 objects/:
 	mkdir -p objects/asm/ objects/code/ objects/src/ objects/src/bson/
 
-$(HOOK): $(SIGS) scripts/process.py
-	python scripts/process.py data/ objects/code/ $(SIGS)
+$(HOOK): $(SIGS) utils/process.py
+	python utils/process.py data/ objects/code/ $(SIGS)
 
 $(LIBBSON): $(BSONOBJ)
 	$(AR) cr $@ $^
