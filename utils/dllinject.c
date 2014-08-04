@@ -92,7 +92,19 @@ int main(int argc, char *argv[])
 
     ptr = cmdline;
     for (int idx = 0; args[idx] != NULL; idx++) {
-        *ptr++ = '"';
+        // Only apply quotation marks if a cmdline argument has at least one
+        // space or quotation mark.
+        int quotate = 0;
+        for (const char *p = args[idx]; *p != 0; p++) {
+            if(*p == ' ' || *p == '"') {
+                quotate = 1;
+                break;
+            }
+        }
+
+        if(quotate != 0) {
+            *ptr++ = '"';
+        }
 
         printf("[x] Arg[%d]: '%s'\n", idx, args[idx]);
 
@@ -104,7 +116,11 @@ int main(int argc, char *argv[])
             *ptr++ = *p;
         }
 
-        *ptr++ = '"', *ptr++ = ' ';
+        if(quotate != 0) {
+            *ptr++ = '"';
+        }
+
+        *ptr++ = ' ';
     }
     *ptr = 0;
 
