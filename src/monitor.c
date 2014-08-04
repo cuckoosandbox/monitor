@@ -6,6 +6,7 @@
 #include "log.h"
 #include "misc.h"
 #include "pipe.h"
+#include "unhook.h"
 
 void monitor_init(HMODULE module_handle)
 {
@@ -18,6 +19,8 @@ void monitor_init(HMODULE module_handle)
     pipe_init(cfg.pipe_name);
 
     log_init(cfg.host_ip, cfg.host_port);
+
+    unhook_init_detection();
 
     // Make sure advapi32 is loaded.
     LoadLibrary("advapi32.dll");

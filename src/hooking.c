@@ -9,6 +9,7 @@
 #include "ntapi.h"
 #include "pipe.h"
 #include "slist.h"
+#include "unhook.h"
 
 #define TLS_HOOK_INFO 0x44
 
@@ -240,12 +241,19 @@ int hook2(hook_t *h)
     memcpy(hd->clean, asm_clean, asm_clean_size);
     PATCH(hd->clean, asm_clean_retaddr_pop_off, hook_retaddr_pop);
 
+    uint8_t region_original[32];
+    memcpy(region_original, h->addr, stub_used);
+
     // Patch the original function.
     if(hook_create_jump((uint8_t *) h->addr, hd->trampoline, stub_used) < 0) {
         pipe("CRITICIAL:Error creating function jump for %z!%z.",
             h->library, h->funcname);
         return -1;
     }
+
+    unhook_detect_add_region(h->funcname, (uint8_t *) h->addr,
+        region_original, (uint8_t *) h->addr, stub_used);
+
     return 0;
 }
 
