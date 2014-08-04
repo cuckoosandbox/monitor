@@ -193,6 +193,43 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
     return 0;
 }
 
+static uint8_t *_hook_follow_jumps(const char *funcname, uint8_t *addr)
+{
+    // Under Windows 7 some functions have been replaced by a function stub
+    // which in turn calls the original function. E.g., a lot of functions
+    // which originaly went through kernel32.dll now make a pass through
+    // kernelbase.dll before reaching kernel32.dll.
+    // We follow these jumps and add the regions to the list for unhook
+    // detection.
+
+    while (1) {
+        // jmp short imm8
+        if(*addr == 0xeb) {
+            unhook_detect_add_region(funcname, addr, addr, addr, 2);
+            addr = addr + 2 + *(signed char *)(addr + 1);
+            continue;
+        }
+
+        // jmp dword [addr]
+        if(*addr == 0xff && addr[1] == 0x25) {
+            unhook_detect_add_region(funcname, addr, addr, addr, 6);
+            addr = **(uint8_t ***)(addr + 2);
+            continue;
+        }
+
+        // mov edi, edi ; push ebp ; mov ebp, esp ; pop ebp ; jmp short imm8
+        if(!memcmp(addr, "\x8b\xff\x55\x8b\xec\x5d\xeb", 7)) {
+            unhook_detect_add_region(funcname, addr, addr, addr, 8);
+            addr = addr + 8 + *(signed char *)(addr + 7);
+            continue;
+        }
+
+        break;
+    }
+
+    return addr;
+}
+
 #define PATCH(buf, off, value) \
     *(uint32_t *)(buf + off) = (uint32_t) value
 
@@ -274,6 +311,6 @@ int hook(const char *library, const char *funcname,
     h.funcname = funcname;
     h.handler = handler;
     h.orig = orig;
-    h.addr = (uint8_t *) addr;
+    h.addr = _hook_follow_jumps(funcname, (uint8_t *) addr);
     return hook2(&h);
 }
