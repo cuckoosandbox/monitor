@@ -17,9 +17,76 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
+#include <stdint.h>
 #include <windows.h>
+#include "sleep.h"
+
+static uint32_t g_sleep_skip_active;
+static uint32_t g_sleep_max_skip;
+static uint32_t g_sleep_force_skip;
+
+static LARGE_INTEGER g_time_skipped;
+static LARGE_INTEGER g_time_start;
+
+void sleep_init(int first_process, uint32_t force_skip, uint32_t startup_time)
+{
+    g_sleep_skip_active = 1;
+
+    // TODO Make this configurable.
+    g_sleep_max_skip = 5000;
+
+    g_sleep_force_skip = force_skip;
+
+    g_time_skipped.QuadPart = (uint64_t) startup_time * 10000;
+
+    if(first_process == 0) {
+        sleep_skip_disable();
+    }
+}
+
+int sleep_skip(LARGE_INTEGER *delay)
+{
+    FILETIME ft; LARGE_INTEGER li;
+
+    if(g_sleep_skip_active != 0) {
+        GetSystemTimeAsFileTime(&ft);
+        li.HighPart = ft.dwHighDateTime;
+        li.LowPart = ft.dwLowDateTime;
+
+        // Check whether we're within the maximum limit of skipping.
+        if(li.QuadPart < g_time_start.QuadPart + g_sleep_max_skip * 10000) {
+            g_time_skipped.QuadPart += -delay->QuadPart;
+            return 1;
+        }
+
+        // TODO Should this depend on 'force-skip' or not?
+        sleep_skip_disable();
+    }
+
+    return 0;
+}
 
 void sleep_skip_disable()
 {
-    // TODO Disable Sleep skipping.
+    if(g_sleep_force_skip == 0) {
+        g_sleep_skip_active = 0;
+    }
+}
+
+void sleep_apply_systemtime(SYSTEMTIME *st)
+{
+    LARGE_INTEGER li; FILETIME ft;
+
+    SystemTimeToFileTime(st, &ft);
+    li.HighPart = ft.dwHighDateTime;
+    li.LowPart = ft.dwLowDateTime;
+    li.QuadPart += g_time_skipped.QuadPart;
+    ft.dwHighDateTime = li.HighPart;
+    ft.dwLowDateTime = li.LowPart;
+    FileTimeToSystemTime(&ft, st);
+}
+
+uint64_t sleep_skipped()
+{
+    return g_time_skipped.QuadPart;
 }

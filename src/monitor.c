@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "log.h"
 #include "misc.h"
 #include "pipe.h"
+#include "sleep.h"
 #include "unhook.h"
 
 void monitor_init(HMODULE module_handle)
@@ -37,6 +38,8 @@ void monitor_init(HMODULE module_handle)
     pipe_init(cfg.pipe_name);
 
     log_init(cfg.host_ip, cfg.host_port);
+
+    sleep_init(cfg.first_process, cfg.force_sleep_skip, cfg.startup_time);
 
     unhook_init_detection();
 

@@ -65,6 +65,9 @@ void config_read(config_t *cfg)
             else if(!strcmp(key, "host-port")) {
                 cfg->host_port = atoi(value);
             }
+            else if(!strcmp(key, "force-sleepskip")) {
+                cfg->force_sleep_skip = value[0] == '1';
+            }
         }
         fclose(fp);
         DeleteFile(config_fname);

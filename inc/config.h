@@ -34,6 +34,7 @@ typedef struct _config_t {
 
     // Randomized amount of milliseconds since startup.
     uint32_t startup_time;
+    uint32_t force_sleep_skip;
 
     // Server ip and port.
     uint32_t host_ip;

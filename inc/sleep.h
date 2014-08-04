@@ -19,6 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MONITOR_SLEEP_H
 #define MONITOR_SLEEP_H
 
+#include <stdint.h>
+#include <windows.h>
+
+void sleep_init(int first_process, uint32_t force_skip,
+    uint32_t startup_time);
+
+int sleep_skip(LARGE_INTEGER *delay);
+
 void sleep_skip_disable();
+
+void sleep_apply_systemtime(SYSTEMTIME *st);
+uint64_t sleep_skipped();
 
 #endif
