@@ -92,3 +92,16 @@ Pre::
 Logging::
 
     s class_name class_name
+
+
+MessageBoxTimeoutW
+==================
+
+Parameters::
+
+    ** HWND hWnd window_handle
+    ** LPWSTR lpText text
+    ** LPWSTR lpCaption caption
+    ** UINT uType flags
+    ** WORD wLanguageId language_identifier
+    *  INT Unknown
