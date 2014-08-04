@@ -19,7 +19,7 @@
     {%- for line in hook.pre: %}
     {{line}}
     {%- endfor %}
-    {%- endif %}
+    {% endif %}
 
     {%- if hook.prelog: %}
     log_api_pre("{{ hook.prelog|join(attribute='argtype') }}"

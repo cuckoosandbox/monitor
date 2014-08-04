@@ -17,7 +17,7 @@ typedef struct _config_t {
     // Randomized amount of milliseconds since startup.
     uint32_t startup_time;
 
-    // server ip and port
+    // Server ip and port.
     uint32_t host_ip;
     uint16_t host_port;
 } config_t;
