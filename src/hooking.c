@@ -218,7 +218,7 @@ int hook2(hook_t *h)
     *h->orig = (FARPROC) hd->guide;
 
     // Create the original function stub.
-    int stub_used = hook_create_stub(hd->func_stub, (uint8_t *) h->addr, 5);
+    int stub_used = hook_create_stub(hd->func_stub, h->addr, 5);
     if(stub_used < 0) {
         pipe("CRITICAL:Error creating function stub for %z!%z.",
             h->library, h->funcname);
@@ -245,14 +245,14 @@ int hook2(hook_t *h)
     memcpy(region_original, h->addr, stub_used);
 
     // Patch the original function.
-    if(hook_create_jump((uint8_t *) h->addr, hd->trampoline, stub_used) < 0) {
+    if(hook_create_jump(h->addr, hd->trampoline, stub_used) < 0) {
         pipe("CRITICIAL:Error creating function jump for %z!%z.",
             h->library, h->funcname);
         return -1;
     }
 
-    unhook_detect_add_region(h->funcname, (uint8_t *) h->addr,
-        region_original, (uint8_t *) h->addr, stub_used);
+    unhook_detect_add_region(h->funcname, h->addr, region_original,
+        h->addr, stub_used);
 
     return 0;
 }
@@ -274,6 +274,6 @@ int hook(const char *library, const char *funcname,
     h.funcname = funcname;
     h.handler = handler;
     h.orig = orig;
-    h.addr = addr;
+    h.addr = (uint8_t *) addr;
     return hook2(&h);
 }
