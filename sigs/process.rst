@@ -2,7 +2,6 @@ Signature::
 
     * Calling convention: WINAPI
     * Category: process
-    * Library: kernel32
 
 
 CreateProcessInternalW
@@ -10,6 +9,7 @@ CreateProcessInternalW
 
 Signature::
 
+    * Library: kernel32
     * Return value: BOOL
 
 Parameters::
@@ -44,6 +44,7 @@ ExitProcess
 
 Signature::
 
+    * Library: kernel32
     * Return value: void
 
 Parameters::
@@ -75,6 +76,7 @@ ReadProcessMemory
 
 Signature::
 
+    * Library: kernel32
     * Return value: BOOL
 
 Parameters::
@@ -99,6 +101,7 @@ WriteProcessMemory
 
 Signature::
 
+    * Library: kernel32
     * Return value: BOOL
 
 Parameters::
@@ -123,6 +126,7 @@ VirtualProtectEx
 
 Signature::
 
+    * Library: kernel32
     * Return value: BOOL
 
 Parameters::
@@ -139,6 +143,7 @@ VirtualFreeEx
 
 Signature::
 
+    * Library: kernel32
     * Return value: BOOL
 
 Parameters::

@@ -187,6 +187,21 @@ class DefitionProcessor(object):
 
         return key, getattr(self, '_parse_' + key)(literal_block.astext())
 
+    def _prevent_overwrite(self, key, value, global_values):
+        if key != 'signature' or key not in global_values:
+            return
+
+        prevents = dict(
+            library='Library',
+            calling_convention='Calling convention',
+            category='Category',
+            return_value='Return value',
+        )
+
+        for k, v in prevents.items():
+            if k in global_values[key] and k in value:
+                raise Exception('Please do not overwrite %r values.' % v)
+
     def normalize(self, doc):
         global_values, start = {}, 0
 
@@ -219,14 +234,16 @@ class DefitionProcessor(object):
                 try:
                     key, value = self._parse_paragraph(children[x],
                                                        children[x+1])
+
+                    if key in row:
+                        self._prevent_overwrite(key, value, global_values)
+                        row[key].update(value)
+                    else:
+                        row[key] = value
+
                 except Exception as e:
                     raise Exception('Error parsing node of api %r: %s' %
                                     (apiname, e.message))
-
-                if key in row:
-                    row[key].update(value)
-                else:
-                    row[key] = value
 
             # If no is_success handler has been defined then use one based on
             # the return value. (This is the default behavior.)
