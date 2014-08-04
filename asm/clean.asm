@@ -3,6 +3,7 @@ global _asm_clean_size
 global _asm_clean_retaddr_pop_off
 
 %define TLS_HOOK_INFO 0x44
+%define TLS_TEMPORARY 0x48
 %define TLS_LASTERR 0x34
 
 %define HOOKCNT_OFF 0
@@ -33,11 +34,11 @@ _clean_getpc_target:
     ; restore original return address
     pushad
     call [eax+_clean_retaddr_pop-_clean_getpc]
-    mov dword [esp+36], eax
+    mov dword [fs:TLS_TEMPORARY], eax
     popad
 
     pop eax
-    jmp dword [esp]
+    jmp dword [fs:TLS_TEMPORARY]
 
 _clean_end:
 

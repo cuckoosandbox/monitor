@@ -5,6 +5,7 @@ global _asm_guide_retaddr_add_off
 global _asm_guide_retaddr_pop_off
 
 %define TLS_HOOK_INFO 0x44
+%define TLS_TEMPORARY 0x48
 %define TLS_LASTERR 0x34
 
 %define LASTERR_OFF 4
@@ -62,11 +63,11 @@ _guide_getpc2:
     ; pop the original return address
     pushad
     call dword [eax+_guide_retaddr_pop-_guide_getpc2]
-    mov dword [esp+36], eax
+    mov dword [fs:TLS_TEMPORARY], eax
     popad
 
     pop eax
-    retn
+    jmp dword [fs:TLS_TEMPORARY]
 
 _guide_end:
 
