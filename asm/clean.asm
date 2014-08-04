@@ -37,7 +37,7 @@ _clean_getpc_target:
     popad
 
     pop eax
-    retn
+    jmp dword [esp]
 
 _clean_end:
 
