@@ -3,9 +3,38 @@
 
 int main(int argc, char *argv[])
 {
-    if(argc < 3) {
-        printf("Usage: %s <dll> <app> [dbg]\n", argv[0]);
-        printf("(args currently not supported!)\n");
+    if(argc < 4) {
+        printf("Usage: %s <dll> [dbg] -- <app> [args..]\n", argv[0]);
+        return 1;
+    }
+
+    const char *dll_path = NULL, *app_path = NULL, *dbg_path = NULL;
+    char **args = NULL;
+
+    int at_opt = 0;
+    for (int idx = 1; idx < argc; idx++) {
+        if(strcmp(argv[idx], "--") == 0) {
+            at_opt = 1;
+            continue;
+        }
+
+        if(dll_path == NULL && at_opt == 0) {
+            dll_path = argv[idx];
+            continue;
+        }
+
+        if(dbg_path == NULL && at_opt == 0) {
+            dbg_path = argv[idx];
+            continue;
+        }
+
+        app_path = argv[idx];
+        args = &argv[idx];
+        break;
+    }
+
+    if(app_path == NULL) {
+        printf("[-] The application path has not been set!\n");
         return 1;
     }
 
@@ -17,8 +46,8 @@ int main(int argc, char *argv[])
     }
 
     OFSTRUCT of; memset(&of, 0, sizeof(of)); of.cBytes = sizeof(of);
-    if(OpenFile(argv[1], &of, OF_EXIST) == HFILE_ERROR) {
-        fprintf(stderr, "Dll file does not exist!\n");
+    if(OpenFile(dll_path, &of, OF_EXIST) == HFILE_ERROR) {
+        fprintf(stderr, "DLL file does not exist!\n");
         return 1;
     }
 
@@ -29,6 +58,8 @@ int main(int argc, char *argv[])
 
     char fname[MAX_PATH];
     sprintf(fname, "%ld-out.txt", GetCurrentProcessId());
+
+    printf("[x] Log files at %ld-{out,err}.txt!\n", GetCurrentProcessId());
 
     HANDLE out_file = CreateFile(fname, GENERIC_WRITE, 0, &sa,
         CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -54,13 +85,36 @@ int main(int argc, char *argv[])
     si.hStdOutput = out_file;
     si.hStdError = err_file;
 
-    if(CreateProcessA(argv[2], argv[2], NULL, NULL, TRUE, CREATE_SUSPENDED,
+    printf("[x] DLL: '%s'\n", dll_path);
+    printf("[x] App: '%s'\n", app_path);
+
+    char cmdline[512], *ptr;
+
+    ptr = cmdline;
+    for (int idx = 0; args[idx] != NULL; idx++) {
+        *ptr++ = '"';
+
+        printf("[x] Arg[%d]: '%s'\n", idx, args[idx]);
+
+        for (const char *p = args[idx]; *p != 0; p++) {
+            if(*p == '"') {
+                *ptr++ = '\\';
+            }
+
+            *ptr++ = *p;
+        }
+
+        *ptr++ = '"', *ptr++ = ' ';
+    }
+    *ptr = 0;
+
+    if(CreateProcessA(app_path, cmdline, NULL, NULL, TRUE, CREATE_SUSPENDED,
             NULL, NULL, &si, &pi) == FALSE) {
         fprintf(stderr, "Error launching process: %ld!\n", GetLastError());
         return 1;
     }
 
-    void *lib = VirtualAllocEx(pi.hProcess, NULL, strlen(argv[1]) + 1,
+    void *lib = VirtualAllocEx(pi.hProcess, NULL, strlen(dll_path) + 1,
         MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if(lib == NULL) {
         fprintf(stderr, "Error allocating memory in the process: %ld!\n",
@@ -69,9 +123,9 @@ int main(int argc, char *argv[])
     }
 
     unsigned long bytes_written;
-    if(WriteProcessMemory(pi.hProcess, lib, argv[1], strlen(argv[1]) + 1,
+    if(WriteProcessMemory(pi.hProcess, lib, dll_path, strlen(dll_path) + 1,
             &bytes_written) == FALSE ||
-            bytes_written != strlen(argv[1]) + 1) {
+            bytes_written != strlen(dll_path) + 1) {
         fprintf(stderr, "Error writing lib to the process: %ld\n",
             GetLastError());
         goto error;
@@ -86,12 +140,12 @@ int main(int argc, char *argv[])
 
     printf("[x] Injected successfully!\n");
 
-    if(argc > 3) {
-        sprintf(fname, "\"%s\" -p %ld", argv[3], pi.dwProcessId);
+    if(dbg_path != NULL) {
+        sprintf(fname, "\"%s\" -p %ld", dbg_path, pi.dwProcessId);
 
         STARTUPINFO si2; PROCESS_INFORMATION pi2;
         memset(&si2, 0, sizeof(si2)); si2.cb = sizeof(si2);
-        CreateProcess(argv[3], fname, NULL, NULL, FALSE, 0,
+        CreateProcess(dbg_path, fname, NULL, NULL, FALSE, 0,
             NULL, NULL, &si2, &pi2);
 
         CloseHandle(pi2.hThread);
