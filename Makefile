@@ -6,9 +6,8 @@ CFLAGS = -m32 -Wall -O0 -ggdb -Wextra -std=c99 -static \
 LDFLAGS = -lws2_32 -lshlwapi
 
 SIGS = $(wildcard sigs/*.rst)
-HOOK = objects/code/hooks.h objects/code/hooks.c \
-	   objects/code/explain.c objects/code/tables.c
-HOOKOBJ = objects/code/hooks.o objects/code/explain.o objects/code/tables.o
+HOOK = objects/code/hooks.h objects/code/hooks.c objects/code/explain.c
+HOOKOBJ = objects/code/hooks.o objects/code/explain.o
 
 SRC = $(wildcard src/*.c)
 SRCOBJ = $(SRC:%.c=objects/%.o)

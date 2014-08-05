@@ -17,6 +17,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
+#include <stdint.h>
+#include "hooks.h"
+#include "hooking.h"
 
 const char *g_explain_apinames[] = {
 {%- for row in sigs: %}
@@ -62,4 +65,13 @@ const char *g_explain_paramnames[][16] = {
     {%- endfor -%}
     },
 {%- endfor %}
+};
+
+const hook_t g_hooks[] = {
+{%- for row in sigs: %}
+    {%- if row.signature.category != '__notification__': %}
+    {"{{row.signature.library}}", "{{row.apiname}}", (FARPROC) New_{{row.apiname}}, (FARPROC *) &Old_{{row.apiname}}, NULL},
+    {%- endif %}
+{%- endfor %}
+    {NULL, NULL, NULL, NULL, NULL},
 };

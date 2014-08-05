@@ -40,7 +40,6 @@ class DefitionProcessor(object):
         self.hooks_c = os.path.join(out_dir, 'hooks.c')
         self.hooks_h = os.path.join(out_dir, 'hooks.h')
         self.explain_c = os.path.join(out_dir, 'explain.c')
-        self.tables_c = os.path.join(out_dir, 'tables.c')
 
         self.sigs = sigs
 
@@ -307,7 +306,6 @@ class DefitionProcessor(object):
         h = open(self.hooks_h, 'wb')
         s = open(self.hooks_c, 'wb')
         e = open(self.explain_c, 'wb')
-        t = open(self.tables_c, 'wb')
 
         self.initial_header(h)
         self.initial_source(s)
@@ -320,8 +318,6 @@ class DefitionProcessor(object):
 
         print>>e, self.template('explain').render(sigs=self.explain,
                                                   types=self.types)
-
-        print>>t, self.template('tables').render(sigs=self.explain)
 
         self.ending_header(h)
         self.ending_source(s)
