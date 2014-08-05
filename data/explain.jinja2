@@ -34,6 +34,9 @@ const char *g_explain_categories[] = {
 const char *g_explain_paramtypes[] = {
 {%- for row in sigs: %}
     /* {{ '%-32s'|format(row.apiname) }} */ "
+    {%- for param in row.prelog: -%}
+        {{ param.argtype }}
+    {%- endfor -%}
     {%- for param in row.parameters: -%}
         {% if param.log %}{{ types[param.argtype] }}{% endif %}
     {%- endfor -%}
@@ -48,6 +51,9 @@ const char *g_explain_paramnames[][16] = {
 {%- for row in sigs: %}
     /* {{ row.apiname }} */
     {
+    {%- for param in row.prelog: -%}
+        {% if True %}"{{ param.argname }}", {% endif %}
+    {%- endfor -%}
     {%- for param in row.parameters: -%}
         {% if param.log %}"{{ param.alias }}", {% endif %}
     {%- endfor -%}
