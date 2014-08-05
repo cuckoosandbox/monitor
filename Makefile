@@ -6,6 +6,7 @@ CFLAGS = -m32 -Wall -O0 -ggdb -Wextra -std=c99 -static \
 LDFLAGS = -lws2_32 -lshlwapi
 
 SIGS = $(wildcard sigs/*.rst)
+JINJA2 = $(wildcard data/*.jinja2)
 HOOK = objects/code/hooks.h objects/code/hooks.c objects/code/explain.c
 HOOKOBJ = objects/code/hooks.o objects/code/explain.o
 
@@ -33,7 +34,7 @@ dirs: | objects/
 objects/:
 	mkdir -p objects/asm/ objects/code/ objects/src/ objects/src/bson/
 
-$(HOOK): $(SIGS) utils/process.py data/types.conf
+$(HOOK): $(SIGS) $(JINJA2) utils/process.py data/types.conf
 	python utils/process.py data/ objects/code/ $(SIGS)
 
 $(LIBBSON): $(BSONOBJ)
