@@ -30,6 +30,11 @@ static LARGE_INTEGER g_time_start;
 
 void sleep_init(int first_process, uint32_t force_skip, uint32_t startup_time)
 {
+    FILETIME ft;
+    GetSystemTimeAsFileTime(&ft);
+    g_time_start.HighPart = ft.dwHighDateTime;
+    g_time_start.LowPart = ft.dwLowDateTime;
+
     g_sleep_skip_active = 1;
 
     // TODO Make this configurable.

@@ -23,13 +23,15 @@ Ensure::
 
 Pre::
 
+    const char *status = "Not skipped";
     if(sleep_skip(DelayInterval) != 0) {
-        return 0;
+        status = "Skipped";
     }
 
 Logging::
 
     q milliseconds -DelayInterval->QuadPart / 10000
+    s status status
 
 
 GetLocalTime
