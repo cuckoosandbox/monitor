@@ -231,7 +231,9 @@ static uint8_t *_hook_follow_jumps(const char *funcname, uint8_t *addr)
         // jmp dword [addr]
         if(*addr == 0xff && addr[1] == 0x25) {
             unhook_detect_add_region(funcname, addr, addr, addr, 6);
-            addr = **(uint8_t ***)(addr + 2);
+            addr = *(uint8_t **)(addr + 2);
+            unhook_detect_add_region(funcname, addr, addr, addr, 4);
+            addr = *(uint8_t **) addr;
             continue;
         }
 
