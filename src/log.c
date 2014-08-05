@@ -188,11 +188,36 @@ void log_explain()
 
 void log_api_pre(const char *fmt, ...)
 {
-    (void) fmt;
+    // For now we only require support for a single buffer object.
+    if(strcmp(fmt, "b") != 0) {
+        pipe("CRITICAL:Unsupported log-api-pre format string found: %z!",
+            fmt);
+        return;
+    }
 
     va_list args;
     va_start(args, fmt);
-    // TODO Pre-log these arguments.
+
+    bson *b = bson_alloc();
+    if(b == NULL) return;
+
+    bson_init(b);
+
+    char idx[4];
+
+    // Allow easy addition of other format specifiers later on.
+    for (uint32_t argnum = 2; *fmt != 0; argnum++, fmt++) {
+        snprintf(idx, 4, "%d", argnum);
+
+        if(*fmt == 'b') {
+            size_t len = va_arg(args, size_t);
+            const uint8_t *s = va_arg(args, const uint8_t *);
+            log_buffer(b, idx, s, len);
+        }
+    }
+
+    TlsSetValue(g_tls_idx, b);
+
     va_end(args);
 }
 
@@ -212,10 +237,32 @@ void log_api(int index, int is_success, int return_value,
     bson_append_int(&b, "0", is_success);
     bson_append_int(&b, "1", return_value);
 
-    for (int argnum = 2; *fmt != 0; argnum++) {
+    int argnum = 2;
+
+    bson *pre = (bson *) TlsGetValue(g_tls_idx);
+    if(pre != NULL) {
+        bson_iterator *it = bson_iterator_alloc();
+        if(it != NULL) {
+            bson_iterator_init(it, pre);
+
+            while (bson_iterator_next(it) != BSON_EOO) {
+                bson_append_element(&b, NULL, it);
+                argnum++;
+            }
+
+            bson_iterator_dealloc(it);
+        }
+
+        bson_destroy(pre);
+        bson_dealloc(pre);
+
+        TlsSetValue(g_tls_idx, NULL);
+    }
+
+    while (*fmt != 0) {
         key = *fmt++;
 
-        snprintf(idx, 4, "%u", argnum);
+        snprintf(idx, 4, "%u", argnum++);
 
         if(key == 's') {
             const char *s = va_arg(args, const char *);
