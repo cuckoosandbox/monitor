@@ -246,8 +246,8 @@ Parameters::
     ** PLARGE_INTEGER lpFileSize file_size
 
 
-GetFileInformationsByHandle
-===========================
+GetFileInformationByHandle
+==========================
 
 Signature::
 
@@ -259,8 +259,8 @@ Parameters::
     *  LPBY_HANDLE_FILE_INFORMATION lpFIleInformation
 
 
-GetFileInformationsByHandleEx
-=============================
+GetFileInformationByHandleEx
+============================
 
 Signature::
 
