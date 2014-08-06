@@ -35,26 +35,26 @@ hook_info_t *hook_alloc()
 {
     hook_info_t *ret = (hook_info_t *) calloc(1, sizeof(hook_info_t));
     slist_init(&ret->retaddr, 128);
-    writefsdword(TLS_HOOK_INFO, (uint32_t) ret);
+    writetls(TLS_HOOK_INFO, (uintptr_t) ret);
     return ret;
 }
 
 hook_info_t *hook_info()
 {
-    hook_info_t *ret = (hook_info_t *) readfsdword(TLS_HOOK_INFO);
+    hook_info_t *ret = (hook_info_t *) readtls(TLS_HOOK_INFO);
     if(ret == NULL) {
         ret = hook_alloc();
     }
     return ret;
 }
 
-void __stdcall hook_retaddr_add(uint32_t retaddr)
+void __stdcall hook_retaddr_add(uintptr_t retaddr)
 {
     hook_info_t *h = hook_info();
     slist_push(&h->retaddr, retaddr);
 }
 
-uint32_t __stdcall hook_retaddr_pop()
+uintptr_t __stdcall hook_retaddr_pop()
 {
     hook_info_t *h = hook_info();
     return slist_pop(&h->retaddr);
@@ -123,12 +123,12 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
             // As we have already written the first one or two bytes of the
             // instruction we only have the relative address left - four bytes
             // in total.
-            uint32_t target = *(uint32_t *) addr + 4 + (uint32_t) addr;
+            uintptr_t target = *(uint32_t *) addr + 4 + (uintptr_t) addr;
             addr += 4;
 
             // We have already copied the instruction opcode(s) itself so we
             // just have to calculate the relative address now.
-            *(uint32_t *) tramp = target - (uint32_t) tramp - 4;
+            *(uintptr_t *) tramp = target - (uintptr_t) tramp - 4;
             tramp += 4;
 
             // Because an unconditional jump denotes the end of a basic block
@@ -162,10 +162,10 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 
             // 8bit relative offset - we have to sign-extend it, by casting it
             // as signed char, in order to calculate the correct address.
-            uint32_t target = (uint32_t) addr + 1 + *(signed char *) addr;
+            uintptr_t target = (uintptr_t) addr + 1 + *(signed char *) addr;
 
             // Calculate the relative address.
-            *(uint32_t *) tramp = target - (uint32_t) tramp - 4;
+            *(uintptr_t *) tramp = target - (uintptr_t) tramp - 4;
             tramp += 4;
 
             // Again, check the length as this is the end of the basic block.
@@ -188,7 +188,7 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 
     // Jump to the original function at the point where our stub ends.
     *tramp++ = 0xe9;
-    *(uint32_t *) tramp = (uint32_t) addr - (uint32_t) tramp - 4;
+    *(uintptr_t *) tramp = (uintptr_t) addr - (uintptr_t) tramp - 4;
     return addr - base_addr;
 }
 
@@ -205,7 +205,7 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
     memset(addr, 0xcc, stub_used);
 
     *addr = 0xe9;
-    *(uint32_t *)(addr + 1) = target - addr - 5;
+    *(uintptr_t *)(addr + 1) = target - addr - 5;
 
     VirtualProtect(addr, stub_used, old_protect, &old_protect);
     return 0;
@@ -251,7 +251,7 @@ static uint8_t *_hook_follow_jumps(const char *funcname, uint8_t *addr)
 }
 
 #define PATCH(buf, off, value) \
-    *(uint32_t *)(buf + off) = (uint32_t) value
+    *(uintptr_t *)(buf + off) = (uintptr_t) value
 
 int hook2(hook_t *h)
 {

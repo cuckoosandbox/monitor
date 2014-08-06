@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MONITOR_NTAPI_H__
 #define MONITOR_NTAPI_H__
 
+#include <stdint.h>
 #include <windows.h>
 #include <wincrypt.h>
-#include <stdint.h>
 
 typedef LONG NTSTATUS;
 typedef void *PIO_APC_ROUTINE;
@@ -361,17 +361,35 @@ typedef struct _PEB {
     ULONG   SessionId;
 } PEB, *PPEB;
 
-static inline unsigned int readfsdword(unsigned int index)
+#if __x86_64__
+
+static inline uintptr_t readtls(uint32_t index)
 {
-    unsigned int ret;
+    uintptr_t ret;
+    __asm__("movq %%gs:(%1), %0" : "=r" (ret) : "r" (index));
+    return ret;
+}
+
+static inline void writetls(uint32_t index, uintptr_t value)
+{
+    __asm__("movq %0, %%gs:(%1)" :: "r" (value), "r" (index));
+}
+
+#else
+
+static inline uintptr_t readtls(uint32_t index)
+{
+    uintptr_t ret;
     __asm__("movl %%fs:(%1), %0" : "=r" (ret) : "r" (index));
     return ret;
 }
 
-static inline void writefsdword(unsigned int index, unsigned int value)
+static inline void writetls(uint32_t index, uintptr_t value)
 {
     __asm__("movl %0, %%fs:(%1)" :: "r" (value), "r" (index));
 }
+
+#endif
 
 typedef struct _SECTION_IMAGE_INFORMATION {
     PVOID               TransferAddress;

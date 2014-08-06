@@ -24,11 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef struct _slist_t {
     uint32_t index;
     uint32_t length;
-    uint32_t *value;
+    uintptr_t *value;
 } slist_t;
 
-void slist_init(slist_t *s, uint32_t length);
-void slist_push(slist_t *s, uint32_t value);
-uint32_t slist_pop(slist_t *s);
+void slist_init(slist_t *s, uintptr_t length);
+void slist_push(slist_t *s, uintptr_t value);
+uintptr_t slist_pop(slist_t *s);
 
 #endif

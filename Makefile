@@ -1,58 +1,99 @@
-CC = i686-w64-mingw32-gcc
+CC32 = i686-w64-mingw32-gcc
+CC64 = x86_64-w64-mingw32-gcc
 NASM = nasm
 AR = ar
-CFLAGS = -m32 -Wall -O0 -ggdb -Wextra -std=c99 -static \
-		 -Wno-missing-field-initializers -I inc/ -I objects/code/
+CFLAGS = -Wall -O0 -ggdb -Wextra -std=c99 -static \
+		 -Wno-missing-field-initializers -I inc/ -I objects/x86/code/
 LDFLAGS = -lws2_32 -lshlwapi
 
 SIGS = $(wildcard sigs/*.rst)
 JINJA2 = $(wildcard data/*.jinja2)
-HOOK = objects/code/hooks.h objects/code/hooks.c
-HOOKOBJ = objects/code/hooks.o
+
+HOOK32 = objects/x86/code/hooks.h objects/x86/code/hooks.c
+HOOK64 = objects/x64/code/hooks.h objects/x64/code/hooks.c
+HOOKOBJ32 = objects/x86/code/hooks.o
+HOOKOBJ64 = objects/x64/code/hooks.o
 
 SRC = $(wildcard src/*.c)
-SRCOBJ = $(SRC:%.c=objects/%.o)
+SRCOBJ32 = $(SRC:%.c=objects/x86/%.o)
+SRCOBJ64 = $(SRC:%.c=objects/x64/%.o)
 HEADER = $(wildcard inc/*.h)
 
-ASM = $(wildcard asm/*.asm)
-ASMOBJ = $(ASM:%.asm=objects/%.o)
+ASM32 = $(wildcard asm/x86/*.asm)
+ASM64 = $(wildcard asm/x64/*.asm)
+ASMOBJ32 = $(ASM32:asm/x86/%.asm=objects/x86/asm/%.o)
+ASMOBJ64 = $(ASM64:asm/x64/%.asm=objects/x64/asm/%.o)
 
 BSON = $(wildcard src/bson/*.c)
-BSONOBJ = $(BSON:%.c=objects/%.o)
-LIBBSON = objects/src/libbson.a
+BSONOBJ32 = $(BSON:%.c=objects/x86/%.o)
+BSONOBJ64 = $(BSON:%.c=objects/x64/%.o)
+LIBBSON32 = objects/x86/src/libbson.a
+LIBBSON64 = objects/x64/src/libbson.a
 
-LIBCAPSTONE = src/capstone/capstone.lib
+LIBCAPSTONE32 = objects/x86/capstone.lib
+LIBCAPSTONE64 = objects/x64/capstone.lib
 
-DLL = monitor.dll
+DLL32 = monitor-x86.dll
+DLL64 = monitor-x64.dll
 
-all: dirs $(HOOK) $(DLL)
+all: dirs $(HOOK32) $(HOOK64) $(DLL32) $(DLL64)
 	make -C test/
 	make -C utils/
 
 dirs: | objects/
 
 objects/:
-	mkdir -p objects/asm/ objects/code/ objects/src/ objects/src/bson/
+	mkdir -p objects/x86/asm/ objects/x64/asm/
+	mkdir -p objects/x86/code/ objects/x64/code/
+	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
 
-$(HOOK): $(SIGS) $(JINJA2) utils/process.py data/types.conf
-	python utils/process.py data/ objects/code/ $(SIGS)
+$(HOOK32): $(SIGS) $(JINJA2) utils/process.py data/types.conf
+	python utils/process.py data/ objects/x86/code/ $(SIGS)
 
-$(LIBBSON): $(BSONOBJ)
+$(HOOK64): $(SIGS) $(JINJA2) utils/process.py data/types.conf
+	python utils/process.py data/ objects/x64/code/ $(SIGS)
+
+$(LIBBSON32): $(BSONOBJ32)
 	$(AR) cr $@ $^
 
-$(LIBCAPSTONE):
+$(LIBBSON64): $(BSONOBJ64)
+	$(AR) cr $@ $^
+
+$(LIBCAPSTONE32):
 	git submodule update --init && \
 	cp data/capstone-config.mk src/capstone/config.mk && \
-	cd src/capstone/ && ./make.sh cross-win32
+	(cd src/capstone/ && ./make.sh cross-win32) && \
+	cp src/capstone/capstone.lib $@
 
-objects/%.o: %.c $(HEADER) Makefile
-	$(CC) -c -o $@ $< $(CFLAGS)
+$(LIBCAPSTONE64):
+	git submodule update --init && \
+	cp data/capstone-config.mk src/capstone/config.mk && \
+	(cd src/capstone/ && ./make.sh cross-win64) && \
+	cp src/capstone/capstone.lib $@
 
-objects/asm/%.o: asm/%.asm Makefile
-	$(NASM) -f elf32 -o $@ $<
+objects/x86/%.o: %.c $(HEADER) Makefile
+	$(CC32) -c -o $@ $< $(CFLAGS) -m32
 
-$(DLL): $(ASMOBJ) $(SRCOBJ) $(HOOKOBJ) $(LIBBSON) $(LIBCAPSTONE)
-	$(CC) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
+objects/x86/%.o: objects/x86/%.c $(HEADER) Makefile
+	$(CC32) -c -o $@ $< $(CFLAGS) -m32
+
+objects/x64/%.o: %.c $(HEADER) Makefile
+	$(CC64) -c -o $@ $< $(CFLAGS) -m64
+
+objects/x64/%.o: objects/x64/%.c $(HEADER) Makefile
+	$(CC64) -c -o $@ $< $(CFLAGS) -m64
+
+objects/x86/asm/%.o: asm/x86/%.asm Makefile
+	$(NASM) -f elf32 -i asm/x86/ -o $@ $<
+
+objects/x64/asm/%.o: asm/x64/%.asm Makefile
+	$(NASM) -f elf64 -i asm/x64/ -o $@ $<
+
+$(DLL32): $(ASMOBJ32) $(SRCOBJ32) $(HOOKOBJ32) $(LIBBSON32) $(LIBCAPSTONE32)
+	$(CC32) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS) -m32
+
+$(DLL64): $(ASMOBJ64) $(SRCOBJ64) $(HOOKOBJ64) $(LIBBSON64) $(LIBCAPSTONE64)
+	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS) -m64
 
 clean:
 	rm -rf objects/ $(DLL)

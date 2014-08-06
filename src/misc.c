@@ -133,7 +133,7 @@ BOOL is_directory_objattr(const OBJECT_ATTRIBUTES *obj)
 
 void hide_module_from_peb(HMODULE module_handle)
 {
-    LDR_MODULE *mod; PEB *peb = (PEB *) readfsdword(0x30);
+    LDR_MODULE *mod; PEB *peb = (PEB *) readtls(0x30);
 
     for (mod = (LDR_MODULE *) peb->LoaderData->InLoadOrderModuleList.Flink;
          mod->BaseAddress != NULL;
