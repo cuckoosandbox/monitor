@@ -30,8 +30,8 @@ BSONOBJ64 = $(BSON:%.c=objects/x64/%.o)
 LIBBSON32 = objects/x86/src/libbson.a
 LIBBSON64 = objects/x64/src/libbson.a
 
-LIBCAPSTONE32 = objects/x86/capstone.lib
-LIBCAPSTONE64 = objects/x64/capstone.lib
+LIBCAPSTONE32 = objects/x86/capstone/capstone.lib
+LIBCAPSTONE64 = objects/x64/capstone/capstone.lib
 
 DLL32 = monitor-x86.dll
 DLL64 = monitor-x64.dll
@@ -62,14 +62,14 @@ $(LIBBSON64): $(BSONOBJ64)
 $(LIBCAPSTONE32):
 	git submodule update --init && \
 	cp data/capstone-config.mk src/capstone/config.mk && \
-	(cd src/capstone/ && ./make.sh cross-win32) && \
-	cp src/capstone/capstone.lib $@
+	cd src/capstone/ && \
+	BUILDDIR=../../objects/x86/capstone/ ./make.sh cross-win32
 
 $(LIBCAPSTONE64):
 	git submodule update --init && \
 	cp data/capstone-config.mk src/capstone/config.mk && \
-	(cd src/capstone/ && ./make.sh cross-win64) && \
-	cp src/capstone/capstone.lib $@
+	cd src/capstone/ && \
+	BUILDDIR=../../objects/x64/capstone/ ./make.sh cross-win64
 
 objects/x86/%.o: %.c $(HEADER) Makefile
 	$(CC32) -c -o $@ $< $(CFLAGS) -m32
