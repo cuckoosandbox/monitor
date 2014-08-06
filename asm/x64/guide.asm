@@ -22,11 +22,11 @@ global asm_guide_orig_stub_off
 global asm_guide_retaddr_add_off
 global asm_guide_retaddr_pop_off
 
-%define TLS_HOOK_INFO 0x44
-%define TLS_TEMPORARY 0x48
+%define TLS_HOOK_INFO 0x80
+%define TLS_TEMPORARY 0x88
 %define TLS_LASTERR 0x34
 
-%define LASTERR_OFF 4
+%define LASTERR_OFF 8
 
 _asm_guide:
 
@@ -52,7 +52,7 @@ _guide_getpc_target:
 
     ; temporarily store the original return address
     pushad
-    push qword [rsp+32]
+    push qword [rsp+128]
     call qword [rax+_guide_retaddr_add-_guide_getpc]
     popad
 

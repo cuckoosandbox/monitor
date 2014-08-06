@@ -24,11 +24,11 @@ global asm_tramp_orig_func_stub_off
 global asm_tramp_retaddr_off
 global asm_tramp_retaddr_add_off
 
-%define TLS_HOOK_INFO 0x44
+%define TLS_HOOK_INFO 0x80
 %define TLS_LASTERR 0x34
 
 %define HOOKCNT_OFF 0
-%define LASTERR_OFF 4
+%define LASTERR_OFF 8
 
 _asm_tramp:
 
@@ -102,7 +102,7 @@ _tramp_getpc3:
 
     ; save the return address
     pushad
-    push qword [rsp+32]
+    push qword [rsp+128]
     call qword [rax+_tramp_retaddr_add-_tramp_getpc3]
     popad
 

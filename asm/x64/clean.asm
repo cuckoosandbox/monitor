@@ -20,12 +20,12 @@ global asm_clean
 global asm_clean_size
 global asm_clean_retaddr_pop_off
 
-%define TLS_HOOK_INFO 0x44
-%define TLS_TEMPORARY 0x48
+%define TLS_HOOK_INFO 0x80
+%define TLS_TEMPORARY 0x88
 %define TLS_LASTERR 0x34
 
 %define HOOKCNT_OFF 0
-%define LASTERR_OFF 4
+%define LASTERR_OFF 8
 
 _asm_clean:
 

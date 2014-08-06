@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include "slist.h"
 
-void slist_init(slist_t *s, uint32_t length)
+void slist_init(slist_t *s, uintptr_t length)
 {
     s->index = 0;
     s->length = length;

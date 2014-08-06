@@ -29,7 +29,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "slist.h"
 #include "unhook.h"
 
+#if __x64_86__
+#define TLS_HOOK_INFO 0x80
+#else
 #define TLS_HOOK_INFO 0x44
+#endif
 
 hook_info_t *hook_alloc()
 {
@@ -75,7 +79,11 @@ int lde(const void *addr)
     static int capstone_init = 0; static csh capstone;
 
     if(capstone_init == 0) {
+#if __x64_86__
+        cs_open(CS_ARCH_X86, CS_MODE_64, &capstone);
+#else
         cs_open(CS_ARCH_X86, CS_MODE_32, &capstone);
+#endif
         capstone_init = 1;
     }
 
