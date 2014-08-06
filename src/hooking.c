@@ -200,6 +200,83 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
     return addr - base_addr;
 }
 
+#if __x64_86__
+
+// We scan 500mb below and above the module - in general this should be
+// more than enough.
+#define CLOSEBY_RANGE 0x20000000
+
+static uint8_t *_hook_alloc_closeby(const char *target, uint32_t size)
+{
+    static uint8_t *last_ptr = NULL;
+    DWORD old_protect; SYSTEM_INFO si; MEMORYINFO mi;
+
+    GetSystemInfo(&si);
+
+    if(last_ptr != NULL && last_ptr >= target - CLOSEBY_RANGE &&
+            last_ptr < target + CLOSEBY_RANGE) {
+        return last_ptr += size, last_ptr - size;
+    }
+
+    for (uint8_t *addr = target - CLOSEBY_RANGE;
+            addr < target + CLOSEBY_RANGE;
+            addr += sysinfo.dwAllocationGranularity) {
+
+        if(VirtualQueryEx(GetCurrentProcess(), addr, &mi,
+                sizeof(mi)) == FALSE || mi.State != MEM_FREE) {
+            continue;
+        }
+
+        if(VirtualAllocEx(GetCurrentProcess(), mi.BaseAddress, mi.dwPageSize,
+                MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE) == NULL) {
+            continue;
+        }
+
+        // TODO Do we really need this?
+        if(VirtualProtectEx(GetCurrentProcess(), mi.BaseAddress,
+                mi.dwPageSize, PAGE_EXECUTE_READWRITE,
+                &old_protect) != FALSE) {
+            last_ptr = mi.BaseAddress + size;
+            return last_ptr - size;
+        }
+    }
+    return NULL;
+}
+
+int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
+{
+    unsigned long old_protect;
+
+    if(VirtualProtect(addr, stub_used, PAGE_EXECUTE_READWRITE,
+            &old_protect) == FALSE) {
+        return -1;
+    }
+
+    // Nop all used bytes out with int3's.
+    memset(addr, 0xcc, stub_used);
+
+    // As the target is probably not close enough addr for a 32-bit relative
+    // jump we allocate a separate page for an intermediate jump.
+    uint8_t *closeby = _hook_alloc_closeby(addr, 12);
+
+    *addr = 0xe9;
+    *(uintptr_t *)(addr + 1) = closeby - addr - 5;
+
+    VirtualProtect(addr, stub_used, old_protect, &old_protect);
+
+    // mov rax, target
+    closeby[0] = 0x48;
+    closeby[1] = 0xb8;
+    *(uint64_t *)(closeby + 2) = target;
+
+    // jmp rax
+    closeby[10] = 0xff;
+    closeby[11] = 0xe0;
+    return 0;
+}
+
+#else
+
 int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 {
     unsigned long old_protect;
@@ -218,6 +295,8 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
     VirtualProtect(addr, stub_used, old_protect, &old_protect);
     return 0;
 }
+
+#endif
 
 static uint8_t *_hook_follow_jumps(const char *funcname, uint8_t *addr)
 {
