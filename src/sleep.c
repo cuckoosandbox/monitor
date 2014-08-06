@@ -61,6 +61,9 @@ int sleep_skip(LARGE_INTEGER *delay)
         // Check whether we're within the maximum limit of skipping.
         if(li.QuadPart < g_time_start.QuadPart + g_sleep_max_skip * 10000) {
             g_time_skipped.QuadPart += -delay->QuadPart;
+
+            // Replace the time by a tenth of a millisecond.
+            delay->QuadPart = -1000;
             return 1;
         }
 
