@@ -442,6 +442,31 @@ typedef struct _FILE_FS_VOLUME_INFORMATION {
     WCHAR         VolumeLabel[1];
 } FILE_FS_VOLUME_INFORMATION, *PFILE_FS_VOLUME_INFORMATION;
 
+typedef enum _FILE_INFO_BY_HANDLE_CLASS {
+    FileBasicInfo                   = 0,
+    FileStandardInfo                = 1,
+    FileNameInfo                    = 2,
+    FileRenameInfo                  = 3,
+    FileDispositionInfo             = 4,
+    FileAllocationInfo              = 5,
+    FileEndOfFileInfo               = 6,
+    FileStreamInfo                  = 7,
+    FileCompressionInfo             = 8,
+    FileAttributeTagInfo            = 9,
+    FileIdBothDirectoryInfo         = 10, // 0xA
+    FileIdBothDirectoryRestartInfo  = 11, // 0xB
+    FileIoPriorityHintInfo          = 12, // 0xC
+    FileRemoteProtocolInfo          = 13, // 0xD
+    FileFullDirectoryInfo           = 14, // 0xE
+    FileFullDirectoryRestartInfo    = 15, // 0xF
+    FileStorageInfo                 = 16, // 0x10
+    FileAlignmentInfo               = 17, // 0x11
+    FileIdInfo                      = 18, // 0x12
+    FileIdExtdDirectoryInfo         = 19, // 0x13
+    FileIdExtdDirectoryRestartInfo  = 20, // 0x14
+    MaximumFileInfoByHandlesClass
+} FILE_INFO_BY_HANDLE_CLASS, *PFILE_INFO_BY_HANDLE_CLASS;
+
 static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
 {
     return obj != NULL ? obj->ObjectName : NULL;

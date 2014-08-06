@@ -166,3 +166,73 @@ Signature::
 Parameters::
 
     ** const char *command
+
+
+CreateToolhelp32Snapshot
+========================
+
+Signature::
+
+    * Library: kernel32
+    * Return value: HANDLE
+
+Parameters::
+
+    ** DWORD dwFlags flags
+    ** DWORD th32ProcessID process_identifier
+
+
+Process32FirstW
+===============
+
+Signature::
+
+    * Library: kernel32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hSnapshot snapshot_handle
+    *  LPPROCESSENTRY32W lppe
+
+
+Process32NextW
+==============
+
+Signature::
+
+    * Library: kernel32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hSnapshot snapshot_handle
+    *  LPPROCESSENTRY32W lppe
+
+
+Module32FirstW
+==============
+
+Signature::
+
+    * Library: kernel32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hSnapshot snapshot_handle
+    *  LPMODULEENTRY32W lpme
+
+
+Module32NextW
+=============
+
+Signature::
+
+    * Library: kernel32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hSnapshot snapshot_handle
+    *  LPMODULEENTRY32W lpme

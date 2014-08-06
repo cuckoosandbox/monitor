@@ -271,6 +271,7 @@ class DefitionProcessor(object):
         print>>f, '#include <wininet.h>'
         print>>f, '#include <windns.h>'
         print>>f, '#include <mswsock.h>'
+        print>>f, '#include <tlhelp32.h>'
         print>>f, '#include "ntapi.h"'
         print>>f
 

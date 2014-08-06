@@ -66,3 +66,29 @@ Signature::
 Parameters::
 
     ** DWORD dwExitCode status_code
+
+
+Thread32First
+=============
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hSnapshot snapshot_handle
+    *  LPTHREADENTRY32 lpte
+
+
+Thread32Next
+============
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hSnapshot snapshot_handle
+    *  LPTHREADENTRY32 lpte

@@ -200,3 +200,75 @@ Pre::
     ensure_absolute_path(path, lpFileName, lstrlenW(lpFileName));
 
     pipe("FILE_DEL:%Z", path);
+
+
+GetFileType
+===========
+
+Signature::
+
+    * Is success: 1
+    * Return value: DWORD
+
+Parameters::
+
+    ** HANDLE hFile file_handle
+
+
+GetFileSize
+===========
+
+Signature::
+
+    * Is success: ret != INVALID_FILE_SIZE && lpFileSizeHigh != NULL
+    * Return value: DWORD
+
+Parameters::
+
+    ** HANDLE hFile file_handle
+    *  LPDWORD lpFileSizeHigh file_size_high
+
+Logging::
+
+    i file_size_low ret
+
+
+GetFileSizeEx
+=============
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hFile file_handle
+    ** PLARGE_INTEGER lpFileSize file_size
+
+
+GetFileInformationsByHandle
+===========================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hFile file_handle
+    *  LPBY_HANDLE_FILE_INFORMATION lpFIleInformation
+
+
+GetFileInformationsByHandleEx
+=============================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hFile file_handle
+    ** FILE_INFO_BY_HANDLE_CLASS FileInformationClass information_class
+    *  LPVOID lpFIleInformation
+    *  DWORD dwBufferSize
