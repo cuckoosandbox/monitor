@@ -135,7 +135,7 @@ void hide_module_from_peb(HMODULE module_handle)
 {
     LDR_MODULE *mod; PEB *peb;
 
-#if __x64_86__
+#if __x86_64__
     peb = (PEB *) readtls(0x60);
 #else
     peb = (PEB *) readtls(0x30);

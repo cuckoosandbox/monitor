@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <windows.h>
+#include <psapi.h>
 #include "asm_global.h"
 #include "capstone/include/capstone.h"
 #include "capstone/include/x86.h"
@@ -29,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "slist.h"
 #include "unhook.h"
 
-#if __x64_86__
+#if __x86_64__
 #define TLS_HOOK_INFO 0x80
 #else
 #define TLS_HOOK_INFO 0x44
@@ -79,7 +81,7 @@ int lde(const void *addr)
     static int capstone_init = 0; static csh capstone;
 
     if(capstone_init == 0) {
-#if __x64_86__
+#if __x86_64__
         cs_open(CS_ARCH_X86, CS_MODE_64, &capstone);
 #else
         cs_open(CS_ARCH_X86, CS_MODE_32, &capstone);
@@ -200,16 +202,16 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
     return addr - base_addr;
 }
 
-#if __x64_86__
+#if __x86_64__
 
-// We scan 500mb below and above the module - in general this should be
-// more than enough.
+// We scan 500mb below and above the address - in general this should be
+// more than enough to find a hole in which we place our intermediate jumps.
 #define CLOSEBY_RANGE 0x20000000
 
-static uint8_t *_hook_alloc_closeby(const char *target, uint32_t size)
+static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
 {
     static uint8_t *last_ptr = NULL;
-    DWORD old_protect; SYSTEM_INFO si; MEMORYINFO mi;
+    DWORD old_protect; SYSTEM_INFO si; MEMORY_BASIC_INFORMATION mbi;
 
     GetSystemInfo(&si);
 
@@ -220,30 +222,31 @@ static uint8_t *_hook_alloc_closeby(const char *target, uint32_t size)
 
     for (uint8_t *addr = target - CLOSEBY_RANGE;
             addr < target + CLOSEBY_RANGE;
-            addr += sysinfo.dwAllocationGranularity) {
+            addr += si.dwAllocationGranularity) {
 
-        if(VirtualQueryEx(GetCurrentProcess(), addr, &mi,
-                sizeof(mi)) == FALSE || mi.State != MEM_FREE) {
+        if(VirtualQueryEx(GetCurrentProcess(), addr, &mbi,
+                sizeof(mbi)) == FALSE || mbi.State != MEM_FREE) {
             continue;
         }
 
-        if(VirtualAllocEx(GetCurrentProcess(), mi.BaseAddress, mi.dwPageSize,
-                MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE) == NULL) {
+        if(VirtualAllocEx(GetCurrentProcess(), mbi.BaseAddress,
+                si.dwPageSize, MEM_RESERVE | MEM_COMMIT,
+                PAGE_EXECUTE_READWRITE) == NULL) {
             continue;
         }
 
         // TODO Do we really need this?
-        if(VirtualProtectEx(GetCurrentProcess(), mi.BaseAddress,
-                mi.dwPageSize, PAGE_EXECUTE_READWRITE,
+        if(VirtualProtectEx(GetCurrentProcess(), mbi.BaseAddress,
+                si.dwPageSize, PAGE_EXECUTE_READWRITE,
                 &old_protect) != FALSE) {
-            last_ptr = mi.BaseAddress + size;
+            last_ptr = mbi.BaseAddress + size;
             return last_ptr - size;
         }
     }
     return NULL;
 }
 
-int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
+int hook_create_jump(uint8_t *addr, uint8_t *target, int stub_used)
 {
     unsigned long old_protect;
 
@@ -267,7 +270,7 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
     // mov rax, target
     closeby[0] = 0x48;
     closeby[1] = 0xb8;
-    *(uint64_t *)(closeby + 2) = target;
+    *(uint8_t **)(closeby + 2) = target;
 
     // jmp rax
     closeby[10] = 0xff;

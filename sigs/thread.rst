@@ -23,7 +23,7 @@ Parameters::
 
 Post::
 
-    if(NT_SUCCESS(ret)) {
+    if(ret != NULL) {
         sleep_skip_disable();
     }
 
@@ -51,7 +51,7 @@ Pre::
 
 Post::
 
-    if(NT_SUCCESS(ret)) {
+    if(ret != NULL) {
         sleep_skip_disable();
     }
 
