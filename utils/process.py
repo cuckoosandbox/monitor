@@ -39,7 +39,6 @@ class DefitionProcessor(object):
 
         self.hooks_c = os.path.join(out_dir, 'hooks.c')
         self.hooks_h = os.path.join(out_dir, 'hooks.h')
-        self.explain_c = os.path.join(out_dir, 'explain.c')
 
         self.sigs = sigs
 
@@ -283,6 +282,7 @@ class DefitionProcessor(object):
         print>>f, '#include <stdint.h>'
         print>>f, '#include "%s"' % os.path.basename(self.hooks_h)
         print>>f, '#include "dropped.h"'
+        print>>f, '#include "hooking.h"'
         print>>f, '#include "ntapi.h"'
         print>>f, '#include "log.h"'
         print>>f, '#include "misc.h"'
@@ -306,7 +306,6 @@ class DefitionProcessor(object):
     def process(self):
         h = open(self.hooks_h, 'wb')
         s = open(self.hooks_c, 'wb')
-        e = open(self.explain_c, 'wb')
 
         self.initial_header(h)
         self.initial_source(s)
@@ -317,7 +316,7 @@ class DefitionProcessor(object):
             for hook in self.normalize(self.read_document(sig)):
                 self.write(h, s, hook)
 
-        print>>e, self.template('explain').render(sigs=self.explain,
+        print>>s, self.template('explain').render(sigs=self.explain,
                                                   types=self.types)
 
         self.ending_header(h)
