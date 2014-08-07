@@ -32,9 +32,9 @@ _asm_clean:
     push rax
 
     ; restore last error
-    mov rax, qword [fs:TLS_HOOK_INFO]
+    mov rax, qword [gs:TLS_HOOK_INFO]
     push qword [rax+LASTERR_OFF]
-    pop qword [fs:TLS_LASTERR]
+    pop qword [gs:TLS_LASTERR]
 
     ; decrease hook count
     dec qword [rax+HOOKCNT_OFF]
@@ -52,11 +52,11 @@ _clean_getpc_target:
     ; restore original return address
     pushad
     call [rax+_clean_retaddr_pop-_clean_getpc]
-    mov qword [fs:TLS_TEMPORARY], rax
+    mov qword [gs:TLS_TEMPORARY], rax
     popad
 
     pop rax
-    jmp qword [fs:TLS_TEMPORARY]
+    jmp qword [gs:TLS_TEMPORARY]
 
 _clean_end:
 

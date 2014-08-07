@@ -33,7 +33,7 @@ global asm_tramp_retaddr_add_off
 _asm_tramp:
 
     ; fetch hook-info
-    mov rax, qword [fs:TLS_HOOK_INFO]
+    mov rax, qword [gs:TLS_HOOK_INFO]
     jmp _tramp_addresses
 
 _tramp_hook_alloc:
@@ -66,7 +66,7 @@ _tramp_getpc:
     call qword [rax+_tramp_hook_alloc-_tramp_getpc]
     popad
 
-    mov rax, qword [fs:TLS_HOOK_INFO]
+    mov rax, qword [gs:TLS_HOOK_INFO]
 
 _tramp_check_count:
 
@@ -92,7 +92,7 @@ _tramp_do_it:
     inc qword [rax+HOOKCNT_OFF]
 
     ; save last error
-    push qword [fs:TLS_LASTERR]
+    push qword [gs:TLS_LASTERR]
     pop qword [rax+LASTERR_OFF]
 
     call _tramp_getpc3

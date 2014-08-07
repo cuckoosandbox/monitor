@@ -31,9 +31,9 @@ global asm_guide_retaddr_pop_off
 _asm_guide:
 
     ; restore the last error
-    mov rax, qword [fs:TLS_HOOK_INFO]
+    mov rax, qword [gs:TLS_HOOK_INFO]
     mov rax, qword [eax+LASTERR_OFF]
-    mov qword [fs:TLS_LASTERR], rax
+    mov qword [gs:TLS_LASTERR], rax
 
     call _guide_getpc_target
 
@@ -69,8 +69,8 @@ _guide_next:
     push rax
 
     ; save last error
-    mov rax, qword [fs:TLS_HOOK_INFO]
-    push qword [fs:TLS_LASTERR]
+    mov rax, qword [gs:TLS_HOOK_INFO]
+    push qword [gs:TLS_LASTERR]
     pop qword [rax+LASTERR_OFF]
 
     call _guide_getpc2
@@ -81,11 +81,11 @@ _guide_getpc2:
     ; pop the original return address
     pushad
     call qword [rax+_guide_retaddr_pop-_guide_getpc2]
-    mov qword [fs:TLS_TEMPORARY], rax
+    mov qword [gs:TLS_TEMPORARY], rax
     popad
 
     pop rax
-    jmp qword [fs:TLS_TEMPORARY]
+    jmp qword [gs:TLS_TEMPORARY]
 
 _guide_end:
 

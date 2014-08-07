@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
         goto error;
     }
 
-    unsigned long bytes_written;
+    DWORD_PTR bytes_written;
     if(WriteProcessMemory(pi.hProcess, lib, dll_path, strlen(dll_path) + 1,
             &bytes_written) == FALSE ||
             bytes_written != strlen(dll_path) + 1) {
