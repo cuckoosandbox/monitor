@@ -22,7 +22,8 @@ global asm_clean_retaddr_pop_off
 
 %define TLS_HOOK_INFO 0x80
 %define TLS_TEMPORARY 0x88
-%define TLS_LASTERR 0x34
+%define TLS_TEB       0x30
+%define TEB_LASTERR   0x68
 
 %define HOOKCNT_OFF 0
 %define LASTERR_OFF 8
@@ -33,8 +34,14 @@ _asm_clean:
 
     ; restore last error
     mov rax, qword [gs:TLS_HOOK_INFO]
-    push qword [rax+LASTERR_OFF]
-    pop qword [gs:TLS_LASTERR]
+
+    push rax
+    push rbx
+    mov rbx, qword [gs:TLS_TEB]
+    mov eax, dword [rax+LASTERR_OFF]
+    mov dword [rbx+TEB_LASTERR], eax
+    pop rbx
+    pop rax
 
     ; decrease hook count
     dec qword [rax+HOOKCNT_OFF]

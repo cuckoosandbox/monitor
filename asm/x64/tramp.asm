@@ -25,7 +25,8 @@ global asm_tramp_retaddr_off
 global asm_tramp_retaddr_add_off
 
 %define TLS_HOOK_INFO 0x80
-%define TLS_LASTERR 0x34
+%define TLS_TEB       0x30
+%define TEB_LASTERR   0x68
 
 %define HOOKCNT_OFF 0
 %define LASTERR_OFF 8
@@ -94,8 +95,11 @@ _tramp_do_it:
     inc qword [rax+HOOKCNT_OFF]
 
     ; save last error
-    push qword [gs:TLS_LASTERR]
-    pop qword [rax+LASTERR_OFF]
+    push rbx
+    mov rbx, qword [gs:TLS_TEB]
+    mov ebx, dword [rbx+TEB_LASTERR]
+    mov dword [rax+LASTERR_OFF], ebx
+    pop rbx
 
     call _tramp_getpc3
 

@@ -24,16 +24,20 @@ global asm_guide_retaddr_pop_off
 
 %define TLS_HOOK_INFO 0x80
 %define TLS_TEMPORARY 0x88
-%define TLS_LASTERR 0x34
+%define TLS_TEB       0x30
+%define TEB_LASTERR   0x68
 
 %define LASTERR_OFF 8
 
 _asm_guide:
 
     ; restore the last error
+    push rbx
     mov rax, qword [gs:TLS_HOOK_INFO]
-    mov rax, qword [eax+LASTERR_OFF]
-    mov qword [gs:TLS_LASTERR], rax
+    mov rbx, qword [gs:TLS_TEB]
+    mov eax, dword [rax+LASTERR_OFF]
+    mov dword [rbx+TEB_LASTERR], eax
+    pop rbx
 
     call _guide_getpc_target
 
@@ -72,9 +76,12 @@ _guide_next:
     push rax
 
     ; save last error
+    push rbx
     mov rax, qword [gs:TLS_HOOK_INFO]
-    push qword [gs:TLS_LASTERR]
-    pop qword [rax+LASTERR_OFF]
+    mov rbx, qword [gs:TLS_TEB]
+    mov ebx, dword [rbx+TEB_LASTERR]
+    mov dword [rax+LASTERR_OFF], ebx
+    pop rbx
 
     call _guide_getpc2
 
