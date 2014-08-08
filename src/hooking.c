@@ -364,10 +364,19 @@ int hook2(hook_t *h)
     unsigned long old_protect;
     VirtualProtect(hd->_mem, mem_size, PAGE_EXECUTE_READWRITE, &old_protect);
 
+    // Assign memory for each stub. Do note that for 64-bit support we require
+    // that every stub is 8-byte aligned - we enforce this also for x86.
     hd->trampoline = hd->_mem;
+
     hd->guide = hd->trampoline + 16 + asm_tramp_size;
+    hd->guide = (uint8_t *)((uintptr_t) hd->guide & ~7);
+
     hd->clean = hd->guide + 16 + asm_guide_size;
+    hd->clean = (uint8_t *)((uintptr_t) hd->clean & ~7);
+
     hd->func_stub = hd->clean + 16 + asm_clean_size;
+    hd->func_stub = (uint8_t *)((uintptr_t) hd->func_stub & ~7);
+
     *h->orig = (FARPROC) hd->guide;
 
     // Create the original function stub.
