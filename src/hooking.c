@@ -101,6 +101,33 @@ int lde(const void *addr)
     return size;
 }
 
+static int _hook_jump_address(uint8_t *tramp, const uint8_t *addr)
+{
+#if __x86_64__
+    // push 32-bit - lower 32-bits of the address
+    tramp[0] = 0x68;
+    *(uint32_t *)(tramp + 1) = (uint32_t) (uintptr_t) addr;
+
+    // mov dword [rsp+4], 32-bit - higher 32-bits of the address
+    tramp[5] = 0xc7;
+    tramp[6] = 0x44;
+    tramp[7] = 0x24;
+    tramp[8] = 0x04;
+    *(uint32_t *)(tramp + 9) = (uint32_t) ((uintptr_t) addr >> 32);
+
+    tramp[13] = 0xc3;
+    return 14;
+#else
+    // push address
+    *tramp = 0x68;
+    *(const uint8_t **)(tramp + 1) = addr;
+
+    // retn
+    tramp[5] = 0xc3;
+    return 6;
+#endif
+}
+
 int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 {
     const uint8_t *base_addr = addr;
@@ -112,13 +139,23 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
         // How many bytes left?
         len -= length;
 
-        // (Un)conditional jump or call with 32bit relative offset.
-        if(*addr == 0xe9 || *addr == 0xe8 || (*addr == 0x0f &&
+        // Unconditional jump or call with 32bit relative offset.
+        if(*addr == 0xe9) {
+            const uint8_t *target = addr + *(uint32_t *) addr + 5;
+            tramp += _hook_jump_address(tramp, target);
+        }
+        // Conditional jump or call with 32bit relative offset.
+        else if(*addr == 0xe8 || (*addr == 0x0f &&
                 addr[1] >= 0x80 && addr[1] < 0x90)) {
+
+#if __x86_64__
+            pipe("CRITICAL:Conditional jump and calls in 64-bit are "
+                 "considered unstable!");
+#endif
 
             // Copy the jmp or call instruction.
             // Unconditional jumps and calls consist of one byte.
-            if(*addr == 0xe9 || *addr == 0xe8) {
+            if(*addr == 0xe8) {
                 *tramp++ = *addr++;
             }
             // Conditional jumps consist of two bytes.
@@ -146,27 +183,31 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
             // to store our hook code.
             if(tramp[-5] == 0xe9 && len > 0) return -1;
         }
-        // (Un)conditional jump with 8bit relative offset.
-        else if(*addr == 0xeb || (*addr >= 0x70 && *addr < 0x80)) {
+        // Unconditional jump with 8bit relative offset.
+        else if(*addr == 0xeb) {
+            const uint8_t *target = addr + 2 + *(signed char *) addr;
+            tramp += _hook_jump_address(tramp, target);
+        }
+        // Conditional jump with 8bit relative offset.
+        else if(*addr >= 0x70 && *addr < 0x80) {
+
+#if __x86_64__
+            pipe("CRITICAL:Conditional jumps in 64-bit are "
+                 "considered unstable!");
+#endif
 
             // Same rules apply as with the 32bit relative offsets, except
             // for the fact that both conditional and unconditional 8bit
             // relative jumps take only one byte for the opcode.
 
-            // We translate the 8-bit branch into a 32-bit one.
-            if(*addr == 0xeb) {
-                *tramp++ = 0xe9;
-            }
-            else {
-                // Hex representation of the two types of 32bit jumps;
-                // 8bit relative conditional jumps:     70..80
-                // 32bit relative conditional jumps: 0f 80..90
-                // Thus we have to add 0x10 to the opcode of 8bit relative
-                // offset jump to obtain the 32bit relative offset jump
-                // opcode.
-                *tramp++ = 0x0f;
-                *tramp++ = *addr + 0x10;
-            }
+            // Hex representation of the two types of 32bit jumps;
+            // 8bit relative conditional jumps:     70..80
+            // 32bit relative conditional jumps: 0f 80..90
+            // Thus we have to add 0x10 to the opcode of 8bit relative
+            // offset jump to obtain the 32bit relative offset jump
+            // opcode.
+            *tramp++ = 0x0f;
+            *tramp++ = *addr + 0x10;
 
             addr++;
 
@@ -197,8 +238,7 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
     }
 
     // Jump to the original function at the point where our stub ends.
-    *tramp++ = 0xe9;
-    *(uintptr_t *) tramp = (uintptr_t) addr - (uintptr_t) tramp - 4;
+    tramp += _hook_jump_address(tramp, addr);
     return addr - base_addr;
 }
 
