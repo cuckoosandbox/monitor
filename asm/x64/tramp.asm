@@ -104,7 +104,7 @@ _tramp_getpc3:
 
     ; save the return address
     pushad
-    push qword [rsp+128]
+    mov rcx, qword [rsp+128]
     call qword [rax+_tramp_retaddr_add-_tramp_getpc3]
     popad
 

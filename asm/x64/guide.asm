@@ -55,7 +55,7 @@ _guide_getpc_target:
 
     ; temporarily store the original return address
     pushad
-    push qword [rsp+128]
+    mov rcx, qword [rsp+128]
     call qword [rax+_guide_retaddr_add-_guide_getpc]
     popad
 
