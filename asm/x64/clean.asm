@@ -43,6 +43,9 @@ _asm_clean:
     call _clean_getpc_target
 
 _clean_getpc:
+
+align 8
+
 _clean_retaddr_pop:
     dq 0xcccccccccccccccc
 

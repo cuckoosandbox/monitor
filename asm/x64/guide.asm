@@ -38,6 +38,9 @@ _asm_guide:
     call _guide_getpc_target
 
 _guide_getpc:
+
+align 8
+
 _guide_orig_stub:
     dq 0xcccccccccccccccc
 

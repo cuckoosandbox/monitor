@@ -36,6 +36,8 @@ _asm_tramp:
     mov rax, qword [gs:TLS_HOOK_INFO]
     jmp _tramp_addresses
 
+align 8
+
 _tramp_hook_alloc:
     dq 0xcccccccccccccccc
 
