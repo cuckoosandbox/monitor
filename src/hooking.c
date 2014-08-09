@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include <psapi.h>
 #include "asm_global.h"
+#include "assembly.h"
 #include "capstone/include/capstone.h"
 #include "capstone/include/x86.h"
 #include "hooking.h"
@@ -101,38 +102,6 @@ int lde(const void *addr)
     return size;
 }
 
-static int _hook_jump_address(uint8_t *tramp, const uint8_t *addr)
-{
-#if __x86_64__
-
-#define HOOK_JUMP_SIZE 14
-
-    // push 32-bit - lower 32-bits of the address
-    tramp[0] = 0x68;
-    *(uint32_t *)(tramp + 1) = (uint32_t) (uintptr_t) addr;
-
-    // mov dword [rsp+4], 32-bit - higher 32-bits of the address
-    tramp[5] = 0xc7;
-    tramp[6] = 0x44;
-    tramp[7] = 0x24;
-    tramp[8] = 0x04;
-    *(uint32_t *)(tramp + 9) = (uint32_t) ((uintptr_t) addr >> 32);
-
-    tramp[13] = 0xc3;
-#else
-
-#define HOOK_JUMP_SIZE 6
-
-    // push address
-    *tramp = 0x68;
-    *(const uint8_t **)(tramp + 1) = addr;
-
-    // retn
-    tramp[5] = 0xc3;
-#endif
-    return HOOK_JUMP_SIZE;
-}
-
 int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 {
     const uint8_t *base_addr = addr;
@@ -147,29 +116,12 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
         // Unconditional jump with 32-bit relative offset.
         if(*addr == 0xe9) {
             const uint8_t *target = addr + *(uint32_t *) addr + 5;
-            tramp += _hook_jump_address(tramp, target);
+            tramp += asm_jump_addr(tramp, target);
         }
         // Call with 32-bit relative offset.
         else if(*addr == 0xe8) {
             const uint8_t *target = addr + *(uint32_t *) addr + 5;
-
-#if __x86_64__
-            // In 64-bit mode we push the return address manually followed
-            // by a jump.
-            uint8_t *return_address = tramp + HOOK_JUMP_SIZE + HOOK_JUMP_SIZE;
-            return_address += 8 - ((uintptr_t) return_address & 7);
-
-            // We create an inline jump using the following functionality but
-            // then omit the return instruction. This way we only push the
-            // return address on the stack.
-            tramp += _hook_jump_address(tramp, return_address) - 1;
-            tramp += _hook_jump_address(tramp, target);
-#else
-            // In 32-bit mode we rewrite the call instruction directly.
-            *tramp = 0xe8;
-            *(uint32_t *)(tramp + 1) = target - tramp - 5;
-            tramp += 5;
-#endif
+            tramp += asm_call_addr(tramp, target);
         }
         // Conditional jump with 32bit relative offset.
         else if(*addr == 0x0f && addr[1] >= 0x80 && addr[1] < 0x90) {
@@ -212,7 +164,7 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
         // Unconditional jump with 8bit relative offset.
         else if(*addr == 0xeb) {
             const uint8_t *target = addr + 2 + *(signed char *) addr;
-            tramp += _hook_jump_address(tramp, target);
+            tramp += asm_jump_addr(tramp, target);
         }
         // Conditional jump with 8bit relative offset.
         else if(*addr >= 0x70 && *addr < 0x80) {
@@ -264,7 +216,7 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
     }
 
     // Jump to the original function at the point where our stub ends.
-    tramp += _hook_jump_address(tramp, addr);
+    tramp += asm_jump_addr(tramp, addr);
     return addr - base_addr;
 }
 
@@ -339,12 +291,15 @@ int hook_create_jump(uint8_t *addr, uint8_t *target, int stub_used)
 
     // As the target is probably not close enough addr for a 32-bit relative
     // jump we allocate a separate page for an intermediate jump.
-    uint8_t *closeby = _hook_alloc_closeby(addr, HOOK_JUMP_SIZE);
+    uint8_t *closeby = _hook_alloc_closeby(addr, ASM_JUMP_ADDR_SIZE);
 
-    *addr = 0xe9;
-    *(uint32_t *)(addr + 1) = (uint32_t)(closeby - addr - 5);
+    // Jump from the hooked address to our intermediate jump. The intermediate
+    // jump address is within the 32-bit range a 32-bit jump can handle.
+    asm_jump_32bit(addr, closeby);
 
-    _hook_jump_address(closeby, target);
+    // Jump from the intermediate jump to the target address. This is a full
+    // 64-bit jump.
+    asm_jump_addr(closeby, target);
 
     VirtualProtect(addr, stub_used, old_protect, &old_protect);
     return 0;
@@ -361,11 +316,11 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
         return -1;
     }
 
-    // Nop all used bytes out with int3's.
+    // Pad all used bytes out with int3's.
     memset(addr, 0xcc, stub_used);
 
-    *addr = 0xe9;
-    *(uintptr_t *)(addr + 1) = target - addr - 5;
+    // Jump from the hooked address to the target address.
+    asm_jump_32bit(addr, target);
 
     VirtualProtect(addr, stub_used, old_protect, &old_protect);
     return 0;
