@@ -218,10 +218,10 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 
             // 8bit relative offset - we have to sign-extend it, by casting it
             // as signed char, in order to calculate the correct address.
-            uintptr_t target = (uintptr_t) addr + 1 + *(signed char *) addr;
+            const uint8_t *target = addr + 1 + *(signed char *) addr;
 
             // Calculate the relative address.
-            *(uintptr_t *) tramp = target - (uintptr_t) tramp - 4;
+            *(uint32_t *) tramp = (uint32_t)(target - tramp - 4);
             tramp += 4;
 
             // Again, check the length as this is the end of the basic block.
