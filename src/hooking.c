@@ -323,9 +323,9 @@ int hook_create_jump(uint8_t *addr, uint8_t *target, int stub_used)
     *addr = 0xe9;
     *(uint32_t *)(addr + 1) = (uint32_t)(closeby - addr - 5);
 
-    VirtualProtect(addr, stub_used, old_protect, &old_protect);
-
     _hook_jump_address(closeby, target);
+
+    VirtualProtect(addr, stub_used, old_protect, &old_protect);
     return 0;
 }
 
