@@ -104,6 +104,9 @@ int lde(const void *addr)
 static int _hook_jump_address(uint8_t *tramp, const uint8_t *addr)
 {
 #if __x86_64__
+
+#define HOOK_JUMP_SIZE 14
+
     // push 32-bit - lower 32-bits of the address
     tramp[0] = 0x68;
     *(uint32_t *)(tramp + 1) = (uint32_t) (uintptr_t) addr;
@@ -116,16 +119,18 @@ static int _hook_jump_address(uint8_t *tramp, const uint8_t *addr)
     *(uint32_t *)(tramp + 9) = (uint32_t) ((uintptr_t) addr >> 32);
 
     tramp[13] = 0xc3;
-    return 14;
 #else
+
+#define HOOK_JUMP_SIZE 6
+
     // push address
     *tramp = 0x68;
     *(const uint8_t **)(tramp + 1) = addr;
 
     // retn
     tramp[5] = 0xc3;
-    return 6;
 #endif
+    return HOOK_JUMP_SIZE;
 }
 
 int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
@@ -300,21 +305,14 @@ int hook_create_jump(uint8_t *addr, uint8_t *target, int stub_used)
 
     // As the target is probably not close enough addr for a 32-bit relative
     // jump we allocate a separate page for an intermediate jump.
-    uint8_t *closeby = _hook_alloc_closeby(addr, 12);
+    uint8_t *closeby = _hook_alloc_closeby(addr, HOOK_JUMP_SIZE);
 
     *addr = 0xe9;
     *(uintptr_t *)(addr + 1) = closeby - addr - 5;
 
     VirtualProtect(addr, stub_used, old_protect, &old_protect);
 
-    // mov rax, target
-    closeby[0] = 0x48;
-    closeby[1] = 0xb8;
-    *(uint8_t **)(closeby + 2) = target;
-
-    // jmp rax
-    closeby[10] = 0xff;
-    closeby[11] = 0xe0;
+    _hook_jump_address(closeby, target);
     return 0;
 }
 
