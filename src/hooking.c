@@ -144,14 +144,35 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
         // How many bytes left?
         len -= length;
 
-        // Unconditional jump or call with 32bit relative offset.
+        // Unconditional jump with 32-bit relative offset.
         if(*addr == 0xe9) {
             const uint8_t *target = addr + *(uint32_t *) addr + 5;
             tramp += _hook_jump_address(tramp, target);
         }
-        // Conditional jump or call with 32bit relative offset.
-        else if(*addr == 0xe8 || (*addr == 0x0f &&
-                addr[1] >= 0x80 && addr[1] < 0x90)) {
+        // Call with 32-bit relative offset.
+        else if(*addr == 0xe8) {
+            const uint8_t *target = addr + *(uint32_t *) addr + 5;
+
+#if __x86_64__
+            // In 64-bit mode we push the return address manually followed
+            // by a jump.
+            uint8_t *return_address = tramp + HOOK_JUMP_SIZE + HOOK_JUMP_SIZE;
+            return_address += 8 - ((uintptr_t) return_address & 7);
+
+            // We create an inline jump using the following functionality but
+            // then omit the return instruction. This way we only push the
+            // return address on the stack.
+            tramp += _hook_jump_address(tramp, return_address) - 1;
+            tramp += _hook_jump_address(tramp, target);
+#else
+            // In 32-bit mode we rewrite the call instruction directly.
+            *tramp = 0xe8;
+            *(uint32_t *)(tramp + 1) = target - tramp - 5;
+            tramp += 5;
+#endif
+        }
+        // Conditional jump with 32bit relative offset.
+        else if(*addr == 0x0f && addr[1] >= 0x80 && addr[1] < 0x90) {
 
 #if __x86_64__
             pipe("CRITICAL:Conditional jump and calls in 64-bit are "
