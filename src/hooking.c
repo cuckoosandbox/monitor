@@ -253,6 +253,18 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 // more than enough to find a hole in which we place our intermediate jumps.
 #define CLOSEBY_RANGE 0x20000000
 
+static uint8_t *_hook_alloc_closeby_ptr(uint8_t **last_ptr, uint32_t size)
+{
+    uint8_t *ret = *last_ptr;
+    *last_ptr += size + (8 - (size & 7));
+
+    // We reached the next page - reset the pointer.
+    if(((uintptr_t) *last_ptr & 0xfff) == 0) {
+        *last_ptr = NULL;
+    }
+    return ret;
+}
+
 static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
 {
     static uint8_t *last_ptr = NULL;
@@ -262,7 +274,7 @@ static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
 
     if(last_ptr != NULL && last_ptr >= target - CLOSEBY_RANGE &&
             last_ptr < target + CLOSEBY_RANGE) {
-        return last_ptr += size, last_ptr - size;
+        return _hook_alloc_closeby_ptr(&last_ptr, size);
     }
 
     for (uint8_t *addr = target - CLOSEBY_RANGE;
@@ -284,8 +296,9 @@ static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
         if(VirtualProtectEx(GetCurrentProcess(), mbi.BaseAddress,
                 si.dwPageSize, PAGE_EXECUTE_READWRITE,
                 &old_protect) != FALSE) {
-            last_ptr = mbi.BaseAddress + size;
-            return last_ptr - size;
+            memset(mbi.BaseAddress, 0xcc, si.dwPageSize);
+            last_ptr = mbi.BaseAddress;
+            return _hook_alloc_closeby_ptr(&last_ptr, size);
         }
     }
     return NULL;
