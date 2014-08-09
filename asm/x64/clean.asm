@@ -26,7 +26,7 @@ global asm_clean_retaddr_pop_off
 %define TEB_LASTERR   0x68
 
 %define HOOKCNT_OFF 0
-%define LASTERR_OFF 8
+%define LASTERR_OFF 4
 
 _asm_clean:
 
@@ -44,7 +44,7 @@ _asm_clean:
     pop rax
 
     ; decrease hook count
-    dec qword [rax+HOOKCNT_OFF]
+    dec dword [rax+HOOKCNT_OFF]
 
     ; restore return address
     call _clean_getpc_target

@@ -29,7 +29,7 @@ global asm_tramp_retaddr_add_off
 %define TEB_LASTERR   0x68
 
 %define HOOKCNT_OFF 0
-%define LASTERR_OFF 8
+%define LASTERR_OFF 4
 
 _asm_tramp:
 
@@ -75,7 +75,7 @@ _tramp_check_count:
 
 %ifndef tramp_special
 
-    cmp qword [rax+HOOKCNT_OFF], 0
+    cmp dword [rax+HOOKCNT_OFF], 0
     jz _tramp_do_it
 
     ; we're already in a hook - abort
@@ -92,7 +92,7 @@ _tramp_getpc2:
 _tramp_do_it:
 
     ; increase hook count
-    inc qword [rax+HOOKCNT_OFF]
+    inc dword [rax+HOOKCNT_OFF]
 
     ; save last error
     push rbx

@@ -24,8 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "slist.h"
 
 typedef struct _hook_info_t {
-    uintptr_t hook_count;
-    uintptr_t last_error;
+    uint32_t hook_count;
+    uint32_t last_error;
 
     slist_t retaddr;
 } hook_info_t;

@@ -27,7 +27,7 @@ global asm_guide_retaddr_pop_off
 %define TLS_TEB       0x30
 %define TEB_LASTERR   0x68
 
-%define LASTERR_OFF 8
+%define LASTERR_OFF 4
 
 _asm_guide:
 
