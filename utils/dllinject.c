@@ -182,6 +182,7 @@ int main(int argc, char *argv[])
             goto error;
         }
 
+        WaitForSingleObject(thread_handle, INFINITE);
         CloseHandle(thread_handle);
         break;
 
