@@ -284,12 +284,12 @@ int hook_create_jump(uint8_t *addr, uint8_t *target, int stub_used)
         return -1;
     }
 
-    // Nop all used bytes out with int3's.
-    memset(addr, 0xcc, stub_used);
-
     // As the target is probably not close enough addr for a 32-bit relative
     // jump we allocate a separate page for an intermediate jump.
     uint8_t *closeby = _hook_alloc_closeby(addr, ASM_JUMP_ADDR_SIZE);
+
+    // Nop all used bytes out with int3's.
+    memset(addr, 0xcc, stub_used);
 
     // Jump from the hooked address to our intermediate jump. The intermediate
     // jump address is within the 32-bit range a 32-bit jump can handle.
