@@ -24,9 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 void misc_init();
 
-uint32_t pid_from_process_handle(HANDLE process_handle);
-uint32_t pid_from_thread_handle(HANDLE thread_handle);
-uint32_t parent_process_id();
+uintptr_t pid_from_process_handle(HANDLE process_handle);
+uintptr_t pid_from_thread_handle(HANDLE thread_handle);
+uintptr_t parent_process_id();
 
 BOOL is_directory_objattr(const OBJECT_ATTRIBUTES *obj);
 uint32_t path_from_handle(HANDLE handle,

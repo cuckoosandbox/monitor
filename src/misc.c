@@ -84,7 +84,7 @@ void misc_init(const char *shutdown_mutex)
     strncpy(g_shutdown_mutex, shutdown_mutex, sizeof(g_shutdown_mutex));
 }
 
-uint32_t pid_from_process_handle(HANDLE process_handle)
+uintptr_t pid_from_process_handle(HANDLE process_handle)
 {
     PROCESS_BASIC_INFORMATION pbi; ULONG size;
 
@@ -96,19 +96,19 @@ uint32_t pid_from_process_handle(HANDLE process_handle)
     return 0;
 }
 
-uint32_t pid_from_thread_handle(HANDLE thread_handle)
+uintptr_t pid_from_thread_handle(HANDLE thread_handle)
 {
     THREAD_BASIC_INFORMATION tbi; ULONG size;
 
     if(NT_SUCCESS(pNtQueryInformationThread(thread_handle,
             ThreadBasicInformation, &tbi, sizeof(tbi), &size)) &&
             size == sizeof(tbi)) {
-        return (uint32_t) tbi.ClientId.UniqueProcess;
+        return (uintptr_t) tbi.ClientId.UniqueProcess;
     }
     return 0;
 }
 
-uint32_t parent_process_id()
+uintptr_t parent_process_id()
 {
     return pid_from_process_handle(GetCurrentProcess());
 }
