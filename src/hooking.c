@@ -115,13 +115,15 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 
         // Unconditional jump with 32-bit relative offset.
         if(*addr == 0xe9) {
-            const uint8_t *target = addr + *(uint32_t *) addr + 5;
+            const uint8_t *target = addr + *(uint32_t *)(addr + 1) + 5;
             tramp += asm_jump_addr(tramp, target);
+            addr += 5;
         }
         // Call with 32-bit relative offset.
         else if(*addr == 0xe8) {
-            const uint8_t *target = addr + *(uint32_t *) addr + 5;
+            const uint8_t *target = addr + *(uint32_t *)(addr + 1) + 5;
             tramp += asm_call_addr(tramp, target);
+            addr += 5;
         }
         // Conditional jump with 32bit relative offset.
         else if(*addr == 0x0f && addr[1] >= 0x80 && addr[1] < 0x90) {
@@ -163,8 +165,9 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
         }
         // Unconditional jump with 8bit relative offset.
         else if(*addr == 0xeb) {
-            const uint8_t *target = addr + 2 + *(signed char *) addr;
+            const uint8_t *target = addr + 2 + *(signed char *)(addr + 1);
             tramp += asm_jump_addr(tramp, target);
+            addr += 2;
         }
         // Conditional jump with 8bit relative offset.
         else if(*addr >= 0x70 && *addr < 0x80) {
@@ -187,20 +190,15 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
             *tramp++ = 0x0f;
             *tramp++ = *addr + 0x10;
 
-            addr++;
-
             // 8bit relative offset - we have to sign-extend it, by casting it
             // as signed char, in order to calculate the correct address.
-            const uint8_t *target = addr + 1 + *(signed char *) addr;
+            const uint8_t *target = addr + 2 + *(signed char *)(addr + 1);
 
             // Calculate the relative address.
             *(uint32_t *) tramp = (uint32_t)(target - tramp - 4);
             tramp += 4;
 
-            // Again, check the length as this is the end of the basic block.
-            if(*addr == 0xeb && len > 0) return -1;
-
-            addr++;
+            addr += 2;
         }
         // Return instruction indicates the end of basic block as well so we
         // have to check if we already have enough space for our hook..
