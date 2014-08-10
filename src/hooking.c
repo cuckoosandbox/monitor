@@ -115,13 +115,13 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 
         // Unconditional jump with 32-bit relative offset.
         if(*addr == 0xe9) {
-            const uint8_t *target = addr + *(uint32_t *)(addr + 1) + 5;
+            const uint8_t *target = addr + *(int32_t *)(addr + 1) + 5;
             tramp += asm_jump_addr(tramp, target);
             addr += 5;
         }
         // Call with 32-bit relative offset.
         else if(*addr == 0xe8) {
-            const uint8_t *target = addr + *(uint32_t *)(addr + 1) + 5;
+            const uint8_t *target = addr + *(int32_t *)(addr + 1) + 5;
             tramp += asm_call_addr(tramp, target);
             addr += 5;
         }
@@ -150,12 +150,12 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
             // As we have already written the first one or two bytes of the
             // instruction we only have the relative address left - four bytes
             // in total.
-            uintptr_t target = *(uint32_t *) addr + 4 + (uintptr_t) addr;
+            const uint8_t *target = addr + *(int32_t *) addr + 4;
             addr += 4;
 
             // We have already copied the instruction opcode(s) itself so we
             // just have to calculate the relative address now.
-            *(uintptr_t *) tramp = target - (uintptr_t) tramp - 4;
+            *(uint32_t *) tramp = target - tramp - 4;
             tramp += 4;
 
             // Because an unconditional jump denotes the end of a basic block
@@ -165,7 +165,7 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
         }
         // Unconditional jump with 8bit relative offset.
         else if(*addr == 0xeb) {
-            const uint8_t *target = addr + 2 + *(signed char *)(addr + 1);
+            const uint8_t *target = addr + *(int8_t *)(addr + 1) + 2;
             tramp += asm_jump_addr(tramp, target);
             addr += 2;
         }
@@ -192,7 +192,7 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 
             // 8bit relative offset - we have to sign-extend it, by casting it
             // as signed char, in order to calculate the correct address.
-            const uint8_t *target = addr + 2 + *(signed char *)(addr + 1);
+            const uint8_t *target = addr + *(int8_t *)(addr + 1) + 2;
 
             // Calculate the relative address.
             *(uint32_t *) tramp = (uint32_t)(target - tramp - 4);
