@@ -4,14 +4,15 @@
 int main(int argc, char *argv[])
 {
     if(argc < 4) {
-        printf("Usage: %s <dll> [dbg] -- <app> [args..]\n", argv[0]);
+        printf("Usage: %s <dll> [dbg] [--crt] [--apc] -- <app> [args..]\n",
+            argv[0]);
         return 1;
     }
 
     const char *dll_path = NULL, *app_path = NULL, *dbg_path = NULL;
     char **args = NULL;
 
-    int at_opt = 0;
+    int at_opt = 0, inj_mode = 0;
     for (int idx = 1; idx < argc; idx++) {
         if(strcmp(argv[idx], "--") == 0) {
             at_opt = 1;
@@ -20,6 +21,16 @@ int main(int argc, char *argv[])
 
         if(dll_path == NULL && at_opt == 0) {
             dll_path = argv[idx];
+            continue;
+        }
+
+        if(strcmp(argv[idx], "--crt") == 0) {
+            inj_mode = 1;
+            continue;
+        }
+
+        if(strcmp(argv[idx], "--apc") == 0) {
+            inj_mode = 2;
             continue;
         }
 
@@ -36,6 +47,18 @@ int main(int argc, char *argv[])
     if(app_path == NULL) {
         printf("[-] The application path has not been set!\n");
         return 1;
+    }
+
+    if(inj_mode == 0) {
+#if __x86_64__
+        inj_mode = 1;
+        printf("[x] No injection mode specified, using "
+               "create remote thread.\n");
+#else
+        inj_mode = 2;
+        printf("[x] No injection method specified, using "
+               "asynchronous procedure call.\n");
+#endif
     }
 
     FARPROC load_library_a =
@@ -147,11 +170,29 @@ int main(int argc, char *argv[])
         goto error;
     }
 
-    if(QueueUserAPC((PAPCFUNC) load_library_a, pi.hThread,
-            (ULONG_PTR) lib) == 0) {
-        fprintf(stderr, "Error queueing APC to the process: %ld\n",
-            GetLastError());
-        goto error;
+    HANDLE thread_handle;
+
+    switch (inj_mode) {
+    case 1:
+        thread_handle = CreateRemoteThread(pi.hProcess, NULL, 0,
+            (LPTHREAD_START_ROUTINE) load_library_a, lib, 0, NULL);
+        if(thread_handle == NULL) {
+            fprintf(stderr, "Error injecting remote thread: %ld\n",
+                GetLastError());
+            goto error;
+        }
+
+        CloseHandle(thread_handle);
+        break;
+
+    case 2:
+        if(QueueUserAPC((PAPCFUNC) load_library_a, pi.hThread,
+                (ULONG_PTR) lib) == 0) {
+            fprintf(stderr, "Error queueing APC to the process: %ld\n",
+                GetLastError());
+            goto error;
+        }
+        break;
     }
 
     printf("[x] Injected successfully!\n");
