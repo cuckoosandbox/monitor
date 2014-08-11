@@ -59,7 +59,7 @@ Signature::
 
 Parameters::
 
-    ** PWCHAR PathToFile filepath
+    *  PWCHAR PathToFile
     ** ULONG Flags flags
     *  PUNICODE_STRING ModuleFileName
     ** PHANDLE ModuleHandle module_address
