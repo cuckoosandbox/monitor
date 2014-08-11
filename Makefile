@@ -36,7 +36,8 @@ LIBCAPSTONE64 = objects/x64/capstone/capstone.lib
 DLL32 = monitor-x86.dll
 DLL64 = monitor-x64.dll
 
-all: dirs $(HOOK32) $(HOOK64) $(DLL32) $(DLL64)
+all: dirs $(LIBCAPSTONE32) $(LIBCAPSTONE64) \
+		$(HOOK32) $(HOOK64) $(DLL32) $(DLL64)
 	make -C test/
 	make -C utils/
 
