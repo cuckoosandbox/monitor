@@ -316,6 +316,8 @@ class DefitionProcessor(object):
             for hook in self.normalize(self.read_document(sig)):
                 self.write(h, s, hook)
 
+        print>>h, '#define MONITOR_HOOKCNT %d' % self.sigcnt
+
         print>>s, self.template('explain').render(sigs=self.explain,
                                                   types=self.types)
 

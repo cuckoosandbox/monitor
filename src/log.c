@@ -19,9 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <winsock2.h>
 #include <windows.h>
 #include <winsock.h>
 #include "bson/bson.h"
+#include "hooking.h"
+#include "hooks.h"
 #include "misc.h"
 #include "ntapi.h"
 #include "log.h"
@@ -37,6 +40,7 @@ static int g_tls_idx;
 static CRITICAL_SECTION g_mutex;
 static SOCKET g_sock = INVALID_SOCKET;
 static unsigned int g_starttick;
+static uint8_t g_api_init[MONITOR_HOOKCNT];
 
 static void log_raw(const char *buf, size_t length)
 {
@@ -144,46 +148,44 @@ static void log_buffer(bson *b, const char *idx,
         (const char *) buf, trunclength);
 }
 
-void log_explain()
+void log_explain(int index)
 {
-    for (uint32_t idx = 0; g_explain_apinames[idx] != NULL; idx++) {
-        bson b; char argidx[4];
+    bson b; char argidx[4];
 
-        bson_init(&b);
-        bson_append_int(&b, "I", idx);
-        bson_append_string(&b, "name", g_explain_apinames[idx]);
-        bson_append_string(&b, "type", "info");
-        bson_append_string(&b, "category", g_explain_categories[idx]);
+    bson_init(&b);
+    bson_append_int(&b, "I", index);
+    bson_append_string(&b, "name", g_explain_apinames[index]);
+    bson_append_string(&b, "type", "info");
+    bson_append_string(&b, "category", g_explain_categories[index]);
 
-        bson_append_start_array(&b, "args");
-        bson_append_string(&b, "0", "is_success");
-        bson_append_string(&b, "1", "retval");
+    bson_append_start_array(&b, "args");
+    bson_append_string(&b, "0", "is_success");
+    bson_append_string(&b, "1", "retval");
 
-        const char *fmt = g_explain_paramtypes[idx];
+    const char *fmt = g_explain_paramtypes[index];
 
-        for (uint32_t argnum = 2; *fmt != 0; argnum++, fmt++) {
-            snprintf(argidx, 4, "%d", argnum);
+    for (uint32_t argnum = 2; *fmt != 0; argnum++, fmt++) {
+        snprintf(argidx, 4, "%d", argnum);
 
-            const char *argname = g_explain_paramnames[idx][argnum-2];
+        const char *argname = g_explain_paramnames[index][argnum-2];
 
-            // On certain formats, we need to tell cuckoo about them for
-            // nicer display / matching.
-            if(*fmt == 'p' || *fmt == 'P') {
-                bson_append_start_array(&b, argidx);
-                bson_append_string(&b, "0", argname);
-                bson_append_string(&b, "1", "p");
-                bson_append_finish_array(&b);
-            }
-            else {
-                bson_append_string(&b, argidx, argname);
-            }
+        // On certain formats, we need to tell cuckoo about them for
+        // nicer display / matching.
+        if(*fmt == 'p' || *fmt == 'P') {
+            bson_append_start_array(&b, argidx);
+            bson_append_string(&b, "0", argname);
+            bson_append_string(&b, "1", "p");
+            bson_append_finish_array(&b);
         }
-
-        bson_append_finish_array(&b);
-        bson_finish(&b);
-        log_raw(bson_data(&b), bson_size(&b));
-        bson_destroy(&b);
+        else {
+            bson_append_string(&b, argidx, argname);
+        }
     }
+
+    bson_append_finish_array(&b);
+    bson_finish(&b);
+    log_raw(bson_data(&b), bson_size(&b));
+    bson_destroy(&b);
 }
 
 void log_api_pre(const char *fmt, ...)
@@ -226,6 +228,15 @@ void log_api(int index, int is_success, int return_value,
 {
     va_list args; char key = 0; char idx[4];
     va_start(args, fmt);
+
+    EnterCriticalSection(&g_mutex);
+
+    if(g_api_init[index] == 0) {
+        log_explain(index);
+        g_api_init[index] = 1;
+    }
+
+    LeaveCriticalSection(&g_mutex);
 
     bson b;
 
@@ -443,7 +454,6 @@ void log_init(unsigned int ip, unsigned short port)
     g_tls_idx = TlsAlloc();
 
     log_raw("BSON\n", 5);
-    log_explain();
     log_new_process();
     log_new_thread();
 }
