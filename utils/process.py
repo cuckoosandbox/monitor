@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Cuckoo Sandbox - Automated Malware Analysis
 Copyright (C) 2010-2014 Cuckoo Foundation
@@ -27,7 +28,7 @@ import sys
 
 
 class DefitionProcessor(object):
-    def __init__(self, data_dir, out_dir, sigs):
+    def __init__(self, data_dir, out_dir, sig_files):
         self.data_dir = data_dir
 
         fs_loader = jinja2.FileSystemLoader(data_dir)
@@ -40,7 +41,7 @@ class DefitionProcessor(object):
         self.hooks_c = os.path.join(out_dir, 'hooks.c')
         self.hooks_h = os.path.join(out_dir, 'hooks.h')
 
-        self.sigs = sigs
+        self.sig_files = sig_files
 
         self.types = {}
         for line in open(types_path, 'rb'):
@@ -55,6 +56,7 @@ class DefitionProcessor(object):
         self.sigcnt, self.base_sigs = 0, []
 
         for entry in json.load(open(base_sigs_path, 'rb')):
+            entry['is_hook'] = False
             entry['index'] = self.sigcnt
             for param in entry['parameters']:
                 param['alias'] = param['argname']
@@ -258,71 +260,41 @@ class DefitionProcessor(object):
                 raise Exception('Calling convention of %r must be WINAPI.' %
                                 row['apiname'])
 
-            self.explain.append(row)
+            # Check the types of each parameter.
+            for arg in row.get('parameters', []):
+                if arg['log'] and arg['argtype'] not in self.types:
+                    raise Exception('Unknown argtype %r.' % arg['argtype'])
+
             yield row
-
-    def initial_header(self, f):
-        print>>f, '#ifndef MONITOR_HOOKS_H'
-        print>>f, '#define MONITOR_HOOKS_H'
-        print>>f
-        print>>f, '#include <winsock2.h>'
-        print>>f, '#include <windows.h>'
-        print>>f, '#include <wininet.h>'
-        print>>f, '#include <windns.h>'
-        print>>f, '#include <mswsock.h>'
-        print>>f, '#include <tlhelp32.h>'
-        print>>f, '#include "ntapi.h"'
-        print>>f
-
-    def ending_header(self, f):
-        print>>f, '#endif'
-
-    def initial_source(self, f):
-        print>>f, '#include <stdio.h>'
-        print>>f, '#include <stdint.h>'
-        print>>f, '#include "%s"' % os.path.basename(self.hooks_h)
-        print>>f, '#include "dropped.h"'
-        print>>f, '#include "hooking.h"'
-        print>>f, '#include "ntapi.h"'
-        print>>f, '#include "log.h"'
-        print>>f, '#include "misc.h"'
-        print>>f, '#include "pipe.h"'
-        print>>f, '#include "sleep.h"'
-
-    def ending_source(self, f):
-        pass
-
-    def write(self, h, s, hook):
-        for arg in hook.get('parameters', []):
-            if arg['log'] and arg['argtype'] not in self.types:
-                raise Exception('Unknown argtype %r.' % arg['argtype'])
-
-        print>>h, self.template('header').render(hook=hook, types=self.types)
-        print>>h
-
-        print>>s, self.template('source').render(hook=hook, types=self.types)
-        print>>s
 
     def process(self):
         h = open(self.hooks_h, 'wb')
         s = open(self.hooks_c, 'wb')
 
-        self.initial_header(h)
-        self.initial_source(s)
+        # Fetch all available signatures.
+        sigs = []
+        for sig_file in self.sig_files:
+            for sig in self.normalize(self.read_document(sig_file)):
+                sig['is_hook'] = True
+                sigs.append(sig)
 
-        self.explain = self.base_sigs
+        # Get all hooked API functions per library.
+        siglibs = {}
+        for sig in sigs:
+            library = sig['signature']['library']
+            if library not in siglibs:
+                siglibs[library] = []
 
-        for sig in self.sigs:
-            for hook in self.normalize(self.read_document(sig)):
-                self.write(h, s, hook)
+            siglibs[library].append(sig)
 
-        print>>h, '#define MONITOR_HOOKCNT %d' % self.sigcnt
+        # Create a list of all signatures in a sorted manner.
+        sigs = self.base_sigs[:]
+        for library in sorted(siglibs.keys()):
+            sigs.extend(sorted(siglibs[library], key=lambda x: x['apiname']))
 
-        print>>s, self.template('explain').render(sigs=self.explain,
-                                                  types=self.types)
+        print>>h, self.template('header').render(sigs=sigs)
+        print>>s, self.template('source').render(sigs=sigs, types=self.types)
 
-        self.ending_header(h)
-        self.ending_source(s)
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
