@@ -53,17 +53,15 @@ class DefitionProcessor(object):
             key, value = line.split('=', 1)
             self.is_success[key.strip()] = value.strip()
 
-        self.sigcnt, self.base_sigs = 0, []
+        self.base_sigs = []
 
         for entry in json.load(open(base_sigs_path, 'rb')):
             entry['is_hook'] = False
-            entry['index'] = self.sigcnt
             for param in entry['parameters']:
                 param['alias'] = param['argname']
                 param['log'] = True
 
             self.base_sigs.append(entry)
-            self.sigcnt += 1
 
     def parser_settings(self):
         components = docutils.parsers.rst.Parser,
@@ -227,8 +225,6 @@ class DefitionProcessor(object):
             row = copy.deepcopy(global_values)
 
             row['apiname'] = apiname
-            row['index'] = self.sigcnt
-            self.sigcnt += 1
 
             for x in xrange(1, len(children), 2):
                 try:
@@ -291,6 +287,10 @@ class DefitionProcessor(object):
         sigs = self.base_sigs[:]
         for library in sorted(siglibs.keys()):
             sigs.extend(sorted(siglibs[library], key=lambda x: x['apiname']))
+
+        # Assign hook indices accordingly.
+        for idx, sig in enumerate(sigs):
+            sig['index'] = idx
 
         print>>h, self.template('header').render(sigs=sigs)
         print>>s, self.template('source').render(sigs=sigs, types=self.types)
