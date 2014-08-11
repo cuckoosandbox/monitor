@@ -133,16 +133,15 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
                  "considered unstable!");
 #endif
 
-            // Copy the jmp or call instruction.
-            // Unconditional jumps and calls consist of one byte.
-            if(*addr == 0xe8) {
-                *tramp++ = *addr++;
-            }
+            // TODO This can be stabilized by creating a 8-bit conditional
+            // jump with 32/64-bit jumps at each target. However, this is
+            // only required for 64-bit support and then only when this
+            // instruction occurs at all in the original function - which is
+            // currently not the case.
+
             // Conditional jumps consist of two bytes.
-            else {
-                *tramp++ = *addr++;
-                *tramp++ = *addr++;
-            }
+            *tramp++ = addr[0];
+            *tramp++ = addr[1];
 
             // When a jmp/call is performed, then the relative offset +
             // the instruction pointer + the size of the instruction is the
@@ -150,24 +149,24 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
             // As we have already written the first one or two bytes of the
             // instruction we only have the relative address left - four bytes
             // in total.
-            const uint8_t *target = addr + *(int32_t *) addr + 4;
-            addr += 4;
+            const uint8_t *target = addr + *(int32_t *)(addr + 2) + 6;
 
             // We have already copied the instruction opcode(s) itself so we
             // just have to calculate the relative address now.
             *(uint32_t *) tramp = target - tramp - 4;
             tramp += 4;
 
-            // Because an unconditional jump denotes the end of a basic block
-            // we will return failure if we have not yet processed enough room
-            // to store our hook code.
-            if(tramp[-5] == 0xe9 && len > 0) return -1;
+            addr += 6;
         }
         // Unconditional jump with 8bit relative offset.
         else if(*addr == 0xeb) {
             const uint8_t *target = addr + *(int8_t *)(addr + 1) + 2;
             tramp += asm_jump_addr(tramp, target);
             addr += 2;
+
+            // TODO Check the remaining length. Also keep in mind that any
+            // following nop's behind this short jump can be included in the
+            // remaining available space.
         }
         // Conditional jump with 8bit relative offset.
         else if(*addr >= 0x70 && *addr < 0x80) {
@@ -176,6 +175,8 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
             pipe("CRITICAL:Conditional jumps in 64-bit are "
                  "considered unstable!");
 #endif
+
+            // TODO The same as for the 32-bit conditional jumps.
 
             // Same rules apply as with the 32bit relative offsets, except
             // for the fact that both conditional and unconditional 8bit
@@ -188,7 +189,7 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
             // offset jump to obtain the 32bit relative offset jump
             // opcode.
             *tramp++ = 0x0f;
-            *tramp++ = *addr + 0x10;
+            *tramp++ = addr[0] + 0x10;
 
             // 8bit relative offset - we have to sign-extend it, by casting it
             // as signed char, in order to calculate the correct address.
