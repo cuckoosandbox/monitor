@@ -253,6 +253,11 @@ class DefitionProcessor(object):
             # "special" in the signature, as long as it is set.
             row['signature']['special'] = 'special' in row['signature']
 
+            # Check whether there is a return value present.
+            if 'return_value' not in row['signature']:
+                raise Exception('No return value present for %r.' %
+                                row['apiname'])
+
             # If no is_success handler has been defined then use one based on
             # the return value. (This is the default behavior.)
             if 'is_success' not in row['signature']:

@@ -127,6 +127,7 @@ CryptEncrypt
 Signature::
 
     * Library: advapi32
+    * Return value: BOOL
 
 Parameters::
 
@@ -169,6 +170,7 @@ CryptDecodeMessage
 Signature::
 
     * Library: crypt32
+    * Return value: BOOL
 
 Parameters::
 
