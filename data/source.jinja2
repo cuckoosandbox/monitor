@@ -52,7 +52,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {{hook.ensure[param]}} _{{param}};
     if({{param}} == NULL) {
         {{param}} = &_{{param}};
-        memset(&{{param}}, 0, sizeof({{hook.ensure[param]}}));
+        memset(&_{{param}}, 0, sizeof({{hook.ensure[param]}}));
     }
     {%- endfor %}
 
