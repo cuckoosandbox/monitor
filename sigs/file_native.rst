@@ -223,7 +223,7 @@ Pre::
 
 Logging::
 
-     b file_information IoStatusBlock->Information, FileInformation
+     b file_information Length, FileInformation
 
 
 NtOpenDirectoryObject
