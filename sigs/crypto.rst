@@ -2,7 +2,6 @@ Signature::
 
     * Calling convention: WINAPI
     * Category: crypto
-    * Return value: BOOL
 
 
 CryptProtectData
@@ -11,6 +10,7 @@ CryptProtectData
 Signature::
 
     * Library: crypt32
+    * Return value: BOOL
 
 Parameters::
 
@@ -37,6 +37,7 @@ CryptUnprotectData
 Signature::
 
     * Library: crypt32
+    * Return value: BOOL
 
 Parameters::
 
@@ -66,6 +67,7 @@ CryptProtectMemory
 Signature::
 
     * Library: crypt32
+    * Return value: BOOL
 
 Parameters::
 
@@ -84,6 +86,7 @@ CryptUnprotectMemory
 Signature::
 
     * Library: crypt32
+    * Return value: BOOL
 
 Parameters::
 
@@ -102,6 +105,7 @@ CryptDecrypt
 Signature::
 
     * Library: advapi32
+    * Return value: BOOL
 
 Parameters::
 
@@ -145,6 +149,7 @@ CryptHashData
 Signature::
 
     * Library: advapi32
+    * Return value: BOOL
 
 Parameters::
 
@@ -192,6 +197,7 @@ CryptDecryptMessage
 Signature::
 
     * Library: crypt32
+    * Return value: BOOL
 
 Parameters::
 
@@ -213,6 +219,7 @@ CryptEncryptMessage
 Signature::
 
     * Library: crypt32
+    * Return value: BOOL
 
 Parameters::
 
@@ -235,6 +242,7 @@ CryptHashMessage
 Signature::
 
     * Library: crypt32
+    * Return value: BOOL
 
 Parameters::
 
@@ -272,3 +280,22 @@ Post::
     if(mem != NULL) {
         free(mem);
     }
+
+
+CertCreateCertificateContext
+============================
+
+Signature::
+
+    * Library: crypt32
+    * Return value: PCCERT_CONTEXT
+
+Parameters::
+
+    ** DWORD dwCertEncodingType encoding
+    *  const BYTE *pbCertEncoded
+    *  DWORD cbCertEncoded
+
+Logging::
+
+    b certificate cbCertEncoded, pbCertEncoded
