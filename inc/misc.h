@@ -36,6 +36,7 @@ uint32_t path_from_object_attributes(const OBJECT_ATTRIBUTES *obj,
 int ensure_absolute_path(wchar_t *out, const wchar_t *in, int length);
 
 void hide_module_from_peb(HMODULE module_handle);
+void destroy_pe_header(HANDLE module_handle);
 
 void get_ip_port(const struct sockaddr *addr, const char **ip, int *port);
 

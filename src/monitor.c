@@ -48,6 +48,7 @@ void monitor_init(HMODULE module_handle)
     LoadLibrary("advapi32.dll");
 
     hide_module_from_peb(module_handle);
+    destroy_pe_header(module_handle);
 }
 
 void monitor_hook(const char *library)

@@ -157,6 +157,17 @@ void hide_module_from_peb(HMODULE module_handle)
     }
 }
 
+void destroy_pe_header(HANDLE module_handle)
+{
+    DWORD old_protect;
+
+    if(VirtualProtect(module_handle, 0x1000,
+            PAGE_EXECUTE_READWRITE, &old_protect) != FALSE) {
+        memset(module_handle, 0, 512);
+        VirtualProtect(module_handle, 0x1000, old_protect, &old_protect);
+    }
+}
+
 uint32_t path_from_handle(HANDLE handle,
     wchar_t *path, uint32_t path_buffer_len)
 {
