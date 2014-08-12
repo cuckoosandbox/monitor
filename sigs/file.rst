@@ -69,7 +69,7 @@ Parameters::
     ** LPWSTR lpNewFileName newfilepath
     *  LPPROGRESS_ROUTINE lpProgressRoutine
     *  LPVOID lpData
-    *  DWORD dwFlags
+    ** DWORD dwFlags flags
 
 Post::
 
@@ -123,7 +123,7 @@ Parameters::
 
     ** LPCTSTR lpExistingFileName oldfilepath
     ** LPCTSTR lpNewFileName newfilepath
-    *  BOOL bFailIfExists
+    ** BOOL bFailIfExists fail_if_exists
 
 
 CopyFileW
@@ -137,7 +137,7 @@ Parameters::
 
     ** LPWSTR lpExistingFileName oldfilepath
     ** LPWSTR lpNewFileName newfilepath
-    *  BOOL bFailIfExists
+    ** BOOL bFailIfExists fail_if_exists
 
 
 CopyFileExW
@@ -154,7 +154,7 @@ Parameters::
     *  LPPROGRESS_ROUTINE lpProgressRoutine
     *  LPVOID lpData
     *  LPBOOL pbCancel
-    *  DWORD dwCopyFlags
+    ** DWORD dwCopyFlags flags
 
 
 DeleteFileA
