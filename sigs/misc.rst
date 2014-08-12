@@ -135,7 +135,7 @@ GetUserNameA
 
 Signature::
 
-    * Library: user32
+    * Library: advapi32
     * Return value: BOOL
 
 Parameters::
@@ -157,7 +157,7 @@ GetUserNameW
 
 Signature::
 
-    * Library: user32
+    * Library: advapi32
     * Return value: BOOL
 
 Parameters::
@@ -172,6 +172,52 @@ Ensure::
 Logging::
 
     U user_name *lpnSize / sizeof(wchar_t), lpBuffer
+
+
+GetUserNameExA
+==============
+
+Signature::
+
+    * Library: secur32
+    * Return value: BOOL
+
+Parameters::
+
+    ** EXTENDED_NAME_FORMAT NameFormat name_format
+    *  LPCSTR lpNameBuffer
+    *  PULONG lpnSize
+
+Ensure::
+
+    * lpnSize
+
+Logging::
+
+    S name *lpnSize, lpNameBuffer
+
+
+GetUserNameExW
+==============
+
+Signature::
+
+    * Library: secur32
+    * Return value: BOOL
+
+Parameters::
+
+    ** EXTENDED_NAME_FORMAT NameFormat name_format
+    *  LPWSTR lpNameBuffer
+    *  PULONG lpnSize
+
+Ensure::
+
+    * lpnSize
+
+Logging::
+
+    U name *lpnSize, lpNameBuffer
 
 
 EnumWindows
