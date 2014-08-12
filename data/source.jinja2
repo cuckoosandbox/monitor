@@ -48,6 +48,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- if not loop.last %},{% endif -%}
 {%- endfor %}
 ) {
+    {%- for param in hook.ensure.keys(): %}
+    {{hook.ensure[param]}} _{{param}};
+    if({{param}} == NULL) {
+        {{param}} = &_{{param}};
+        memset(&{{param}}, 0, sizeof({{hook.ensure[param]}}));
+    }
+    {%- endfor %}
+
     {%- if hook.pre: %}
     {%- for line in hook.pre: %}
     {{line}}

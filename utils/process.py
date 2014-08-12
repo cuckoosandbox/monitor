@@ -37,6 +37,7 @@ class DefitionProcessor(object):
         base_sigs_path = os.path.join(data_dir, 'base_sigs.json')
         types_path = os.path.join(data_dir, 'types.conf')
         is_success_path = os.path.join(data_dir, 'is-success.conf')
+        dereference_path = os.path.join(data_dir, 'dereference.conf')
 
         self.hooks_c = os.path.join(out_dir, 'hooks.c')
         self.hooks_h = os.path.join(out_dir, 'hooks.h')
@@ -53,8 +54,12 @@ class DefitionProcessor(object):
             key, value = line.split('=', 1)
             self.is_success[key.strip()] = value.strip()
 
-        self.base_sigs = []
+        self.dereference = {}
+        for line in open(dereference_path, 'rb'):
+            key, value = line.split('=', 1)
+            self.dereference[key.strip()] = value.strip()
 
+        self.base_sigs = []
         for entry in json.load(open(base_sigs_path, 'rb')):
             entry['is_hook'] = False
             entry['signature']['special'] = False
@@ -264,9 +269,20 @@ class DefitionProcessor(object):
                                 row['apiname'])
 
             # Check the types of each parameter.
+            ensure = {}
             for arg in row.get('parameters', []):
                 if arg['log'] and arg['argtype'] not in self.types:
                     raise Exception('Unknown argtype %r.' % arg['argtype'])
+
+                # Check whether we have to "ensure" this parameter. That is,
+                # it's a pointer and we'd like to have its contents after the
+                # original function call even if it's originally specified as
+                # a null pointer.
+                if 'ensure' in row and arg['argname'] in row['ensure']:
+                    ensure[arg['argname']] = self.dereference[arg['argtype']]
+
+            # Dictionary with the dereferenced types for each parameter.
+            row['ensure'] = ensure
 
             yield row
 
