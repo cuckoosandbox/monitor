@@ -11,6 +11,7 @@ Signature::
 
     * Library: kernel32
     * Return value: BOOL
+    * Special: true
 
 Parameters::
 
@@ -20,7 +21,7 @@ Parameters::
     *  LPSECURITY_ATTRIBUTES lpProcessAttributes
     *  LPSECURITY_ATTRIBUTES lpThreadAttributes
     *  BOOL bInheritHandles
-    ** DWORD dwCreationFlags creation_flags
+    *  DWORD dwCreationFlags
     *  LPVOID lpEnvironment
     ** LPWSTR lpCurrentDirectory current_directory
     *  LPSTARTUPINFO lpStartupInfo
@@ -31,13 +32,36 @@ Ensure::
 
     lpProcessInformation
 
+Pre::
+
+    // Ensure the CREATE_SUSPENDED flag is set when calling
+    // the original function.
+    DWORD creation_flags = dwCreationFlags;
+    dwCreationFlags |= CREATE_SUSPENDED;
+
 Logging::
 
+    l creation_flags creation_flags
     i process_identifier lpProcessInformation->dwProcessId
     i thread_identifier lpProcessInformation->dwThreadId
     i process_handle lpProcessInformation->hProcess
     i thread_handle lpProcessInformation->hThread
 
+Post::
+
+    if(ret != FALSE) {
+        pipe("PROCESS:%d,%d",
+            lpProcessInformation->dwProcessId,
+            lpProcessInformation->dwThreadId);
+
+        // If the CREATE_SUSPENDED flag was not set then we have to resume
+        // the main thread ourselves.
+        if((creation_flags & CREATE_SUSPENDED) == 0) {
+            ResumeThread(lpProcessInformation->hThread);
+        }
+
+        sleep_skip_disable();
+    }
 
 ExitProcess
 ===========

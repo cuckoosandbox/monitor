@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "hooking.h"
 #include "log.h"
 #include "misc.h"
+#include "monitor.h"
 #include "pipe.h"
 #include "sleep.h"
 #include "unhook.h"
@@ -49,11 +50,18 @@ void monitor_init(HMODULE module_handle)
     hide_module_from_peb(module_handle);
 }
 
-void monitor_hook()
+void monitor_hook(const char *library)
 {
+    // TODO Make sure that special hooks are not handled regardless.
     hook_disable();
 
     for (const hook_t *h = g_hooks; h->funcname != NULL; h++) {
+        // If a specific library has been specified then we skip all other
+        // libraries. This feature is used in the special hook for LdrLoadDll.
+        if(library != NULL && stricmp(h->library, library) != 0) {
+            continue;
+        }
+
         if(hook(h->library, h->funcname, h->handler, h->orig) < 0) {
             pipe("CRITICAL:Hooking %z returned failure!", h->funcname);
         }
@@ -85,7 +93,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
     switch (dwReason) {
     case DLL_PROCESS_ATTACH:
         monitor_init(hModule);
-        monitor_hook();
+        monitor_hook(NULL);
         monitor_notify();
         break;
     }

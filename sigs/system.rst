@@ -56,6 +56,7 @@ Signature::
 
     * Library: ntdll
     * Return value: NTSTATUS
+    * Special: true
 
 Parameters::
 
@@ -66,11 +67,20 @@ Parameters::
 
 Pre::
 
-    COPY_UNICODE_STRING(library, ModuleFileName);
+    char library[MAX_PATH];
+
+    COPY_UNICODE_STRING(module_name, ModuleFileName);
+    library_from_unicode_string(ModuleFileName, library, sizeof(library));
 
 Logging::
 
-    O module_name &library
+    O module_name &module_name
+
+Post::
+
+    if(NT_SUCCESS(ret)) {
+        monitor_hook(library);
+    }
 
 
 LdrGetDllHandle

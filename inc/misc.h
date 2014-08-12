@@ -41,6 +41,9 @@ void get_ip_port(const struct sockaddr *addr, const char **ip, int *port);
 
 int is_shutting_down();
 
+void library_from_unicode_string(const UNICODE_STRING *us,
+    char *library, int32_t length);
+
 #define COPY_UNICODE_STRING(local_name, param_name) \
     UNICODE_STRING local_name; wchar_t local_name##_buf[MAX_PATH+128]; \
     local_name.Length = local_name.MaximumLength = 0; \
