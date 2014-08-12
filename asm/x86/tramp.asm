@@ -14,6 +14,7 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%ifndef tramp_special
 global _asm_tramp
 global _asm_tramp_size
 global _asm_tramp_hook_alloc_off
@@ -21,6 +22,15 @@ global _asm_tramp_hook_handler_off
 global _asm_tramp_orig_func_stub_off
 global _asm_tramp_retaddr_off
 global _asm_tramp_retaddr_add_off
+%else
+global _asm_tramp_special
+global _asm_tramp_special_size
+global _asm_tramp_special_hook_alloc_off
+global _asm_tramp_special_hook_handler_off
+global _asm_tramp_special_orig_func_stub_off
+global _asm_tramp_special_retaddr_off
+global _asm_tramp_special_retaddr_add_off
+%endif
 
 %define TLS_HOOK_INFO 0x44
 %define TLS_LASTERR 0x34
@@ -116,6 +126,7 @@ _tramp_getpc3:
 _tramp_end:
 
 
+%ifndef tramp_special
 _asm_tramp dd asm_tramp
 _asm_tramp_size dd _tramp_end - asm_tramp
 _asm_tramp_hook_alloc_off dd _tramp_hook_alloc - asm_tramp
@@ -123,3 +134,12 @@ _asm_tramp_hook_handler_off dd _tramp_hook_handler - asm_tramp
 _asm_tramp_orig_func_stub_off dd _tramp_orig_func_stub - asm_tramp
 _asm_tramp_retaddr_off dd _tramp_retaddr - asm_tramp
 _asm_tramp_retaddr_add_off dd _tramp_retaddr_add - asm_tramp
+%else
+_asm_tramp_special dd asm_tramp
+_asm_tramp_special_size dd _tramp_end - asm_tramp
+_asm_tramp_special_hook_alloc_off dd _tramp_hook_alloc - asm_tramp
+_asm_tramp_special_hook_handler_off dd _tramp_hook_handler - asm_tramp
+_asm_tramp_special_orig_func_stub_off dd _tramp_orig_func_stub - asm_tramp
+_asm_tramp_special_retaddr_off dd _tramp_retaddr - asm_tramp
+_asm_tramp_special_retaddr_add_off dd _tramp_retaddr_add - asm_tramp
+%endif

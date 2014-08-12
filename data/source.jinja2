@@ -73,6 +73,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endfor %}
     );
 
+    {% if hook.signature.special: %}
+    if(hook_info()->hook_count == 1) {
+    {% endif %}
     log_api({{ hook.index }},
         {{ hook.signature.is_success }},
         {%- if hook.signature.return_value != 'void' %}
@@ -101,6 +104,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         {{log.argvalue}}
     {%- endfor %}
     );
+    {% if hook.signature.special: %}
+    }
+    {% endif %}
 
     {%- if hook.post: %}
     {% for line in hook.post: %}
@@ -165,8 +171,8 @@ const char *g_explain_paramnames[][16] = {
 const hook_t g_hooks[] = {
 {%- for row in sigs: %}
     {%- if row.signature.category != '__notification__': %}
-    {"{{row.signature.library}}", "{{row.apiname}}", (FARPROC) New_{{row.apiname}}, (FARPROC *) &Old_{{row.apiname}}, NULL},
+    {"{{row.signature.library}}", "{{row.apiname}}", (FARPROC) New_{{row.apiname}}, (FARPROC *) &Old_{{row.apiname}}, {{row.signature.special.__int__()}}, NULL, NULL},
     {%- endif %}
 {%- endfor %}
-    {NULL, NULL, NULL, NULL, NULL},
+    {NULL, NULL, NULL, NULL, 0, NULL, NULL},
 };

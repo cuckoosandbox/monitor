@@ -16,6 +16,7 @@
 
 %include "misc.inc"
 
+%ifndef tramp_special
 global asm_tramp
 global asm_tramp_size
 global asm_tramp_hook_alloc_off
@@ -23,6 +24,15 @@ global asm_tramp_hook_handler_off
 global asm_tramp_orig_func_stub_off
 global asm_tramp_retaddr_off
 global asm_tramp_retaddr_add_off
+%else
+global asm_tramp_special
+global asm_tramp_special_size
+global asm_tramp_special_hook_alloc_off
+global asm_tramp_special_hook_handler_off
+global asm_tramp_special_orig_func_stub_off
+global asm_tramp_special_retaddr_off
+global asm_tramp_special_retaddr_add_off
+%endif
 
 %define TLS_HOOK_INFO 0x80
 %define TLS_TEB       0x30
@@ -124,6 +134,7 @@ _tramp_getpc3:
 _tramp_end:
 
 
+%ifndef tramp_special
 asm_tramp dq _asm_tramp
 asm_tramp_size dd _tramp_end - _asm_tramp
 asm_tramp_hook_alloc_off dd _tramp_hook_alloc - _asm_tramp
@@ -131,3 +142,12 @@ asm_tramp_hook_handler_off dd _tramp_hook_handler - _asm_tramp
 asm_tramp_orig_func_stub_off dd _tramp_orig_func_stub - _asm_tramp
 asm_tramp_retaddr_off dd _tramp_retaddr - _asm_tramp
 asm_tramp_retaddr_add_off dd _tramp_retaddr_add - _asm_tramp
+%else
+asm_tramp_special dq _asm_tramp
+asm_tramp_special_size dd _tramp_end - _asm_tramp
+asm_tramp_special_hook_alloc_off dd _tramp_hook_alloc - _asm_tramp
+asm_tramp_special_hook_handler_off dd _tramp_hook_handler - _asm_tramp
+asm_tramp_special_orig_func_stub_off dd _tramp_orig_func_stub - _asm_tramp
+asm_tramp_special_retaddr_off dd _tramp_retaddr - _asm_tramp
+asm_tramp_special_retaddr_add_off dd _tramp_retaddr_add - _asm_tramp
+%endif

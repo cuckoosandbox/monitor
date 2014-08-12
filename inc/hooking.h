@@ -44,6 +44,8 @@ typedef struct _hook_t {
     const char *funcname;
     FARPROC handler;
     FARPROC *orig;
+    int special;
+
     uint8_t *addr;
 
     hook_data_t *data;

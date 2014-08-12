@@ -133,6 +133,15 @@ Available keys:
 
     .. literalinclude:: ../data/is-success.conf
 
+* Special:
+
+    Mark this API signature as ``special``. Special API signatures are always
+    executed, also when the monitor is already *inside* another hook. E.g.,
+    when executing the ``system()`` function we still want to follow the
+    ``CreateProcessInternalW()`` function calls in order to catch the process
+    identifier(s) of the child process(es), allowing the monitor to inject
+    into said child process(es).
+
 .. _hook-block-parameters:
 
 Parameters Block

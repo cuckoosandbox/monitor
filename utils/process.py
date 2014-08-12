@@ -57,6 +57,7 @@ class DefitionProcessor(object):
 
         for entry in json.load(open(base_sigs_path, 'rb')):
             entry['is_hook'] = False
+            entry['signature']['special'] = False
             for param in entry['parameters']:
                 param['alias'] = param['argname']
                 param['log'] = True
@@ -240,6 +241,12 @@ class DefitionProcessor(object):
                 except Exception as e:
                     raise Exception('Error parsing node of api %r: %s' %
                                     (apiname, e.message))
+
+            # By default hooks are not "special". Special hooks are those
+            # hooks that are executed also when already inside another hook.
+            # Note that it doesn't really matter what value is specified for
+            # "special" in the signature, as long as it is set.
+            row['signature']['special'] = 'special' in row['signature']
 
             # If no is_success handler has been defined then use one based on
             # the return value. (This is the default behavior.)

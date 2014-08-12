@@ -24,6 +24,9 @@ ASM64 = $(wildcard asm/x64/*.asm)
 ASMOBJ32 = $(ASM32:asm/x86/%.asm=objects/x86/asm/%.o)
 ASMOBJ64 = $(ASM64:asm/x64/%.asm=objects/x64/asm/%.o)
 
+ASMOBJ32 += objects/x86/asm/tramp-special.o
+ASMOBJ64 += objects/x64/asm/tramp-special.o
+
 BSON = $(wildcard src/bson/*.c)
 BSONOBJ32 = $(BSON:%.c=objects/x86/%.o)
 BSONOBJ64 = $(BSON:%.c=objects/x64/%.o)
@@ -83,6 +86,12 @@ objects/x64/%.o: %.c $(HEADER) Makefile
 
 objects/x64/%.o: objects/x64/%.c $(HEADER) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS) -m64
+
+objects/x86/asm/tramp-special.o: asm/x86/tramp.asm Makefile
+	$(NASM) -f elf32 -i asm/x86/ -d tramp_special=1 -o $@ $<
+
+objects/x64/asm/tramp-special.o: asm/x64/tramp.asm Makefile
+	$(NASM) -f elf64 -i asm/x64/ -d tramp_special=1 -o $@ $<
 
 objects/x86/asm/%.o: asm/x86/%.asm Makefile
 	$(NASM) -f elf32 -i asm/x86/ -o $@ $<
