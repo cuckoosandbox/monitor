@@ -80,7 +80,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     log_api({{ hook.index }},
         {{ hook.signature.is_success }},
         {%- if hook.signature.return_value != 'void' %}
-        (int)(uintptr_t) ret,
+        (uintptr_t) ret,
         {%- else %}
         0,
         {%- endif %}

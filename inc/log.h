@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MONITOR_LOG_H
 #define MONITOR_LOG_H
 
+#include <stdint.h>
+
 void log_init(unsigned int ip, unsigned short port);
 void log_free();
 
@@ -26,7 +28,7 @@ void log_explain();
 
 void log_api_pre(const char *fmt, ...);
 
-void log_api(int index, int is_success, int return_value,
+void log_api(int index, int is_success, uintptr_t return_value,
     const char *fmt, ...);
 
 void log_anomaly(const char *subcategory, int success,

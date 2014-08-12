@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
 #include <winsock2.h>
@@ -223,7 +224,7 @@ void log_api_pre(const char *fmt, ...)
     va_end(args);
 }
 
-void log_api(int index, int is_success, int return_value,
+void log_api(int index, int is_success, uintptr_t return_value,
     const char *fmt, ...)
 {
     va_list args; char key = 0; char idx[4];
@@ -246,7 +247,7 @@ void log_api(int index, int is_success, int return_value,
     bson_append_int(&b, "t", GetTickCount() - g_starttick);
     bson_append_start_array(&b, "args");
     bson_append_int(&b, "0", is_success);
-    bson_append_int(&b, "1", return_value);
+    bson_append_long(&b, "1", return_value);
 
     int argnum = 2;
 
