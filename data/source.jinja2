@@ -124,28 +124,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {%- endfor %}
 
 const char *g_explain_apinames[] = {
-{%- for row in sigs: %}
-    "{{ row.apiname }}",
+{%- for hook in sigs: %}
+    "{{ hook.apiname }}",
 {%- endfor %}
     NULL,
 };
 
 const char *g_explain_categories[] = {
-{%- for row in sigs: %}
-    /* {{ '%-32s'|format(row.apiname) }} */ "{{ row.signature.category }}",
+{%- for hook in sigs: %}
+    /* {{ '%-32s'|format(hook.apiname) }} */ "{{ hook.signature.category }}",
 {%- endfor %}
 };
 
 const char *g_explain_paramtypes[] = {
-{%- for row in sigs: %}
-    /* {{ '%-32s'|format(row.apiname) }} */ "
-    {%- for param in row.prelog: -%}
+{%- for hook in sigs: %}
+    /* {{ '%-32s'|format(hook.apiname) }} */ "
+    {%- for param in hook.prelog: -%}
         {{ param.argtype }}
     {%- endfor -%}
-    {%- for param in row.parameters: -%}
+    {%- for param in hook.parameters: -%}
         {% if param.log %}{{ types[param.argtype] }}{% endif %}
     {%- endfor -%}
-    {%- for param in row.logging: -%}
+    {%- for param in hook.logging: -%}
         {{ param.argtype }}
     {%- endfor -%}
     ",
@@ -153,16 +153,16 @@ const char *g_explain_paramtypes[] = {
 };
 
 const char *g_explain_paramnames[][16] = {
-{%- for row in sigs: %}
-    /* {{ row.apiname }} */
+{%- for hook in sigs: %}
+    /* {{ hook.apiname }} */
     {
-    {%- for param in row.prelog: -%}
+    {%- for param in hook.prelog: -%}
         {% if True %}"{{ param.argname }}", {% endif %}
     {%- endfor -%}
-    {%- for param in row.parameters: -%}
+    {%- for param in hook.parameters: -%}
         {% if param.log %}"{{ param.alias }}", {% endif %}
     {%- endfor -%}
-    {%- for param in row.logging: -%}
+    {%- for param in hook.logging: -%}
         {% if True %}"{{ param.argname }}", {% endif %}
     {%- endfor -%}
     },
@@ -170,9 +170,9 @@ const char *g_explain_paramnames[][16] = {
 };
 
 const hook_t g_hooks[] = {
-{%- for row in sigs: %}
-    {%- if row.signature.category != '__notification__': %}
-    {"{{row.signature.library}}", "{{row.apiname}}", (FARPROC) New_{{row.apiname}}, (FARPROC *) &Old_{{row.apiname}}, {{row.signature.special.__int__()}}, NULL, NULL},
+{%- for hook in sigs: %}
+    {%- if hook.signature.category != '__notification__': %}
+    {"{{hook.signature.library}}", "{{hook.apiname}}", (FARPROC) New_{{hook.apiname}}, (FARPROC *) &Old_{{hook.apiname}}, {{hook.signature.special.__int__()}}, NULL, NULL},
     {%- endif %}
 {%- endfor %}
     {NULL, NULL, NULL, NULL, 0, NULL, NULL},
