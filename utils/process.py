@@ -34,7 +34,7 @@ class DefitionProcessor(object):
         fs_loader = jinja2.FileSystemLoader(data_dir)
         self.templ_env = jinja2.Environment(loader=fs_loader)
 
-        base_sigs_path = os.path.join(data_dir, 'base_sigs.json')
+        base_sigs_path = os.path.join(data_dir, 'base-sigs.json')
         types_path = os.path.join(data_dir, 'types.conf')
         is_success_path = os.path.join(data_dir, 'is-success.conf')
         dereference_path = os.path.join(data_dir, 'dereference.conf')
