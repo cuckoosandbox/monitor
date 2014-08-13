@@ -462,7 +462,7 @@ int hook2(hook_t *h)
 }
 
 int hook(const char *library, const char *funcname,
-    FARPROC handler, FARPROC *orig)
+    FARPROC handler, FARPROC *orig, int special)
 {
     HMODULE module_handle = GetModuleHandle(library);
     if(module_handle == NULL) return 0;
@@ -473,11 +473,13 @@ int hook(const char *library, const char *funcname,
         return -1;
     }
 
-    hook_t h;
-    h.library = library;
-    h.funcname = funcname;
-    h.handler = handler;
-    h.orig = orig;
-    h.addr = _hook_follow_jumps(funcname, (uint8_t *) addr);
+    hook_t h = {
+        .library  = library,
+        .funcname = funcname,
+        .handler  = handler,
+        .orig     = orig,
+        .special  = special,
+        .addr     = _hook_follow_jumps(funcname, (uint8_t *) addr),
+    };
     return hook2(&h);
 }

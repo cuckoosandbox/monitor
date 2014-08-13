@@ -58,7 +58,7 @@ void hook_disable();
 void hook_enable();
 
 int hook(const char *library, const char *funcname,
-    FARPROC handler, FARPROC *orig);
+    FARPROC handler, FARPROC *orig, int special);
 
 int hook2(hook_t *h);
 
