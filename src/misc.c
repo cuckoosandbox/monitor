@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <shlwapi.h>
 #include "misc.h"
 #include "ntapi.h"
+#include "pipe.h"
 
 static char g_shutdown_mutex[MAX_PATH];
 
@@ -62,6 +63,14 @@ static NTSTATUS (WINAPI *pNtQueryInformationFile)(
     FILE_INFORMATION_CLASS FileInformationClass
 );
 
+static NTSTATUS (WINAPI *pNtQueryKey)(
+    HANDLE KeyHandle,
+    KEY_INFORMATION_CLASS KeyInformationClass,
+    PVOID KeyInformation,
+    ULONG Length,
+    PULONG ResultLength
+);
+
 void misc_init(const char *shutdown_mutex)
 {
     HMODULE mod = GetModuleHandle("ntdll");
@@ -80,6 +89,9 @@ void misc_init(const char *shutdown_mutex)
 
     *(FARPROC *) &pNtQueryInformationFile =
         GetProcAddress(mod, "NtQueryInformationFile");
+
+    *(FARPROC *) &pNtQueryKey =
+        GetProcAddress(mod, "NtQueryKey");
 
     strncpy(g_shutdown_mutex, shutdown_mutex, sizeof(g_shutdown_mutex));
 }
@@ -166,6 +178,14 @@ void destroy_pe_header(HANDLE module_handle)
         memset(module_handle, 0, 512);
         VirtualProtect(module_handle, 0x1000, old_protect, &old_protect);
     }
+}
+
+void wcsncpyA(wchar_t *str, const char *value, uint32_t length)
+{
+    while (*value != 0 && length != 0) {
+        *str++ = *value++, length--;
+    }
+    *str = 0;
 }
 
 uint32_t path_from_handle(HANDLE handle,
@@ -260,6 +280,70 @@ int ensure_absolute_path(wchar_t *out, const wchar_t *in, int length)
         wcsncpy(out, in, length < MAX_PATH ? length : MAX_PATH);
         return length;
     }
+}
+
+uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
+{
+    ULONG ret; uint8_t buffer[sizeof(ULONG) + MAX_PATH_W * sizeof(wchar_t)];
+    KEY_NAME_INFORMATION *key_name_information =
+        (KEY_NAME_INFORMATION *) buffer;
+
+    const wchar_t *key = NULL;
+    switch ((uintptr_t) key_handle) {
+    case 0x80000000:
+        key = L"HKEY_CLASSES_ROOT";
+        break;
+
+    case 0x80000001:
+        key = L"HKEY_CURRENT_USER";
+        break;
+
+    case 0x80000002:
+        key = L"HKEY_LOCAL_MACHINE";
+        break;
+
+    case 0x80000003:
+        key = L"HKEY_USERS";
+        break;
+
+    case 0x80000004:
+        key = L"HKEY_PERFORMANCE_DATA";
+        break;
+
+    case 0x80000005:
+        key = L"HKEY_CURRENT_CONFIG";
+        break;
+
+    case 0x80000006:
+        key = L"HKEY_DYN_DATA";
+        break;
+    }
+
+    if(key != NULL) {
+        uint32_t length = lstrlenW(key);
+        memcpy(regkey, key, length * sizeof(wchar_t));
+        regkey[length] = 0;
+        return length;
+    }
+
+    if(NT_SUCCESS(pNtQueryKey(key_handle, KeyNameInformation,
+            key_name_information, sizeof(buffer), &ret))) {
+
+        if(key_name_information->NameLength > length) {
+            pipe("CRITICAL:Registry key too long?! regkey length: %d",
+                key_name_information->NameLength / sizeof(wchar_t));
+            return 0;
+        }
+
+        memcpy(regkey, key_name_information->Name,
+            key_name_information->NameLength);
+
+        uint32_t length = key_name_information->NameLength / sizeof(wchar_t);
+
+        regkey[length] = 0;
+        return length;
+    }
+    return 0;
 }
 
 void get_ip_port(const struct sockaddr *addr, const char **ip, int *port)

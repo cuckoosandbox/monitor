@@ -485,6 +485,11 @@ typedef enum _FILE_INFO_BY_HANDLE_CLASS {
     MaximumFileInfoByHandlesClass
 } FILE_INFO_BY_HANDLE_CLASS, *PFILE_INFO_BY_HANDLE_CLASS;
 
+typedef struct _KEY_NAME_INFORMATION {
+    ULONG NameLength;
+    WCHAR Name[1];
+} KEY_NAME_INFORMATION, *PKEY_NAME_INFORMATION;
+
 typedef int EXTENDED_NAME_FORMAT;
 
 static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
@@ -496,5 +501,6 @@ static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
 #define ThreadBasicInformation 0
 
 #define MAX_PATH_PLUS_TOLERANCE (MAX_PATH + 64)
+#define MAX_PATH_W 0x8000
 
 #endif

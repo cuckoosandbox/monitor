@@ -12,11 +12,22 @@ RegOpenKeyExA
 
 Parameters::
 
-    ** HKEY hKey base_key_handle
-    ** LPCTSTR lpSubKey sub_key
+    ** HKEY hKey base_handle
+    *  LPCTSTR lpSubKey
     *  DWORD ulOptions options
     ** REGSAM samDesired access
     ** PHKEY phkResult key_handle
+
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+    wcsncpyA(&regkey[length], lpSubKey, MAX_PATH_W - length);
+
+Logging::
+
+    u regkey regkey
 
 
 RegOpenKeyExW
@@ -24,11 +35,22 @@ RegOpenKeyExW
 
 Parameters::
 
-    ** HKEY hKey base_key_handle
-    ** LPWSTR lpSubKey sub_key
+    ** HKEY hKey base_handle
+    *  LPWSTR lpSubKey
     *  DWORD ulOptions
     ** REGSAM samDesired access
     ** PHKEY phkResult key_handle
+
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+    wcsncpy(&regkey[length], lpSubKey, MAX_PATH_W - length);
+
+Logging::
+
+    u regkey regkey
 
 
 RegCreateKeyExA
@@ -36,8 +58,8 @@ RegCreateKeyExA
 
 Parameters::
 
-    ** HKEY hKey base_key_handle
-    ** LPCTSTR lpSubKey sub_key
+    ** HKEY hKey base_handle
+    *  LPCTSTR lpSubKey
     *  DWORD Reserved
     ** LPTSTR lpClass class
     *  DWORD dwOptions
@@ -46,14 +68,25 @@ Parameters::
     ** PHKEY phkResult key_handle
     *  LPDWORD lpdwDisposition
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+    wcsncpyA(&regkey[length], lpSubKey, MAX_PATH_W - length);
+
+Logging::
+
+    u regkey regkey
+
 
 RegCreateKeyExW
 ===============
 
 Parameters::
 
-    ** HKEY hKey base_key_handle
-    ** LPWSTR lpSubKey sub_key
+    ** HKEY hKey base_handle
+    *  LPWSTR lpSubKey
     *  DWORD Reserved
     ** LPWSTR lpClass class
     *  DWORD dwOptions
@@ -61,6 +94,17 @@ Parameters::
     *  LPSECURITY_ATTRIBUTES lpSecurityAttributes
     ** PHKEY phkResult key_handle
     *  LPDWORD lpdwDisposition
+
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+    wcsncpy(&regkey[length], lpSubKey, MAX_PATH_W - length);
+
+Logging::
+
+    u regkey regkey
 
 
 RegDeleteKeyA

@@ -35,8 +35,12 @@ uint32_t path_from_object_attributes(const OBJECT_ATTRIBUTES *obj,
     wchar_t *path, uint32_t buffer_length);
 int ensure_absolute_path(wchar_t *out, const wchar_t *in, int length);
 
+void wcsncpyA(wchar_t *str, const char *value, uint32_t length);
+
 void hide_module_from_peb(HMODULE module_handle);
 void destroy_pe_header(HANDLE module_handle);
+
+uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length);
 
 void get_ip_port(const struct sockaddr *addr, const char **ip, int *port);
 
