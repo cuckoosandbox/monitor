@@ -26,6 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 static char g_shutdown_mutex[MAX_PATH];
 
+#define HKCU_PREFIX L"\\REGISTRY\\USER\\S-1-5-"
+#define HKLM_PREFIX L"\\REGISTRY\\MACHINE"
+
 static LONG (WINAPI *pNtQueryInformationProcess)(
     HANDLE ProcessHandle,
     ULONG ProcessInformationClass,
@@ -320,7 +323,7 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
     }
 
     if(key != NULL) {
-        uint32_t length = lstrlenW(key);
+        length = lstrlenW(key);
         memcpy(regkey, key, length * sizeof(wchar_t));
         regkey[length] = 0;
         return length;
@@ -333,6 +336,34 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
             pipe("CRITICAL:Registry key too long?! regkey length: %d",
                 key_name_information->NameLength / sizeof(wchar_t));
             return 0;
+        }
+
+        // HKEY_CURRENT_USER is expanded into this ugly
+        // \\REGISTRY\\USER\\S-1-5-<bunch of numbers> thing which is not
+        // relevant to the monitor and thus we normalize it.
+        if(wcsncmp(key_name_information->Name,
+                HKCU_PREFIX, lstrlenW(HKCU_PREFIX)) == 0) {
+            uint32_t offset = reg_get_key(HKEY_CURRENT_USER, regkey, length);
+            const wchar_t *subkey =
+                wcschr(regkey + lstrlenW(HKCU_PREFIX), '\\');
+
+            // Shouldn't be a null pointer but let's just make sure.
+            if(subkey != NULL) {
+                wcsncpy(&regkey[offset], subkey, length - offset);
+            }
+
+            return lstrlenW(regkey);
+        }
+
+        // HKEY_LOCAL_MACHINE might be expanded into \\REGISTRY\\MACHINE - we
+        // normalize this as well.
+        if(wcsncmp(key_name_information->Name,
+                HKLM_PREFIX, lstrlenW(HKLM_PREFIX)) == 0) {
+            uint32_t offset = reg_get_key(HKEY_LOCAL_MACHINE, regkey, length);
+            wcsncpy(&regkey[offset],
+                &key_name_information->Name[lstrlenW(HKLM_PREFIX)],
+                length - offset);
+            return lstrlenW(regkey);
         }
 
         memcpy(regkey, key_name_information->Name,
