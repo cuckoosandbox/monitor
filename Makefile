@@ -6,6 +6,10 @@ CFLAGS = -Wall -O0 -ggdb -Wextra -std=c99 -static \
 		 -Wno-missing-field-initializers -I inc/ -I objects/x86/code/
 LDFLAGS = -lws2_32 -lshlwapi
 
+ifdef DEBUG
+	CFLAGS += -DDEBUG=1
+endif
+
 SIGS = $(wildcard sigs/*.rst)
 JINJA2 = $(wildcard data/*.jinja2)
 

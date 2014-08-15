@@ -224,6 +224,35 @@ void log_api_pre(const char *fmt, ...)
     va_end(args);
 }
 
+#ifdef DEBUG
+
+static bson *_log_stacktrace()
+{
+    bson *ret = bson_alloc();
+    bson_init(ret);
+
+    uintptr_t stacktrace[32]; char num[4];
+
+    uint32_t count = RtlCaptureStackBackTrace(
+        0, sizeof(stacktrace) / sizeof(uintptr_t),
+        (void **) stacktrace, NULL);
+
+    for (uint32_t idx = 0; idx < count; idx++) {
+        sprintf(num, "%d", idx);
+
+#if __x86_64__
+        bson_append_long(ret, num, stacktrace[idx]);
+#else
+        bson_append_int(ret, num, stacktrace[idx]);
+#endif
+    }
+
+    bson_finish(ret);
+    return ret;
+}
+
+#endif
+
 void log_api(int index, int is_success, uintptr_t return_value,
     const char *fmt, ...)
 {
@@ -245,6 +274,11 @@ void log_api(int index, int is_success, uintptr_t return_value,
     bson_append_int(&b, "I", index);
     bson_append_int(&b, "T", GetCurrentThreadId());
     bson_append_int(&b, "t", GetTickCount() - g_starttick);
+
+#ifdef DEBUG
+    bson_append_bson(&b, "s", _log_stacktrace());
+#endif
+
     bson_append_start_array(&b, "args");
     bson_append_int(&b, "0", is_success);
     bson_append_long(&b, "1", return_value);
