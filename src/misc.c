@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <windows.h>
 #include <shlwapi.h>
+#include "log.h"
 #include "misc.h"
 #include "ntapi.h"
 #include "pipe.h"
@@ -74,6 +75,11 @@ static NTSTATUS (WINAPI *pNtQueryKey)(
     PULONG ResultLength
 );
 
+static PVOID (WINAPI *pRtlAddVectoredExceptionHandler)(
+    ULONG FirstHandler,
+    PVECTORED_EXCEPTION_HANDLER VectoredHandler
+);
+
 void misc_init(const char *shutdown_mutex)
 {
     HMODULE mod = GetModuleHandle("ntdll");
@@ -95,6 +101,9 @@ void misc_init(const char *shutdown_mutex)
 
     *(FARPROC *) &pNtQueryKey =
         GetProcAddress(mod, "NtQueryKey");
+
+    *(FARPROC *) &pRtlAddVectoredExceptionHandler =
+        GetProcAddress(mod, "RtlAddVectoredExceptionHandler");
 
     strncpy(g_shutdown_mutex, shutdown_mutex, sizeof(g_shutdown_mutex));
 }
@@ -448,4 +457,38 @@ void library_from_unicode_string(const UNICODE_STRING *us,
             }
         }
     }
+}
+
+static LONG CALLBACK _exception_handler(
+    EXCEPTION_POINTERS *exception_pointers)
+{
+    char buf[128]; CONTEXT *ctx = exception_pointers->ContextRecord;
+
+#if __x86_64__
+    sprintf(buf,
+        "Exception occurred. RIP: 0x%p, "
+        "Exception Address: 0x%p, "
+        "Exception Code: 0x%08x",
+        (void *) exception_pointers->ContextRecord->Rip,
+        (void *) exception_pointers->ExceptionRecord->ExceptionAddress,
+        (uint32_t) exception_pointers->ExceptionRecord->ExceptionCode
+    );
+#else
+    sprintf(buf,
+        "Exception occurred. EIP: 0x%p, "
+        "Exception Address: 0x%p, "
+        "Exception Code: 0x%08x",
+        (void *) exception_pointers->ContextRecord->Eip,
+        (void *) exception_pointers->ExceptionRecord->ExceptionAddress,
+        (uint32_t) exception_pointers->ExceptionRecord->ExceptionCode
+    );
+#endif
+
+    log_api(3, 1, 0, "sss", buf, "", "");
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
+void setup_exception_handler()
+{
+    pRtlAddVectoredExceptionHandler(TRUE, &_exception_handler);
 }

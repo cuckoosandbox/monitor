@@ -32,5 +32,16 @@
         "signature": {
             "category": "__notification__"
         }
+    },
+    {
+        "apiname": "__exception__",
+        "parameters": [
+            {"argtype": "LPCSTR", "argname": "message"},
+            {"argtype": "LPCSTR", "argname": "registers"}
+            {"argtype": "LPCSTR", "argname": "stacktrace"}
+        ],
+        "signature": {
+            "category": "__notification__"
+        }
     }
 ]
