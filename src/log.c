@@ -424,6 +424,15 @@ void log_api(int index, int is_success, uintptr_t return_value,
             LARGE_INTEGER *value = va_arg(args, LARGE_INTEGER *);
             log_int64(&b, idx, value != NULL ? value->QuadPart : 0);
         }
+        else if(key == 'z') {
+            bson *value = va_arg(args, bson *);
+            if(value == NULL) {
+                bson_append_null(&b, idx);
+            }
+            else {
+                bson_append_bson(&b, idx, value);
+            }
+        }
     }
 
     va_end(args);

@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <windows.h>
 #include <shlwapi.h>
+#include "bson/bson.h"
+#include "hooking.h"
 #include "log.h"
 #include "misc.h"
 #include "ntapi.h"
@@ -462,9 +464,29 @@ void library_from_unicode_string(const UNICODE_STRING *us,
 static LONG CALLBACK _exception_handler(
     EXCEPTION_POINTERS *exception_pointers)
 {
-    char buf[128]; CONTEXT *ctx = exception_pointers->ContextRecord;
+    char buf[128]; bson b; CONTEXT *ctx = exception_pointers->ContextRecord;
+
+    hook_disable();
+
+    bson_init(&b);
 
 #if __x86_64__
+    const char *regnames[] = {
+        "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
+        "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",
+    };
+
+    uintptr_t regvalues[] = {
+        ctx->Rax, ctx->Rcx, ctx->Rdx, ctx->Rbx,
+        ctx->Rsp, ctx->Rbp, ctx->Rsi, ctx->Rdi,
+        ctx->R8,  ctx->R9,  ctx->R10, ctx->R11,
+        ctx->R12, ctx->R13, ctx->R14, ctx->R15,
+    };
+
+    for (uint32_t idx = 0; idx < 16; idx++) {
+        bson_append_long(&b, regnames[idx], regvalues[idx]);
+    }
+
     sprintf(buf,
         "Exception occurred. RIP: 0x%p, "
         "Exception Address: 0x%p, "
@@ -474,6 +496,19 @@ static LONG CALLBACK _exception_handler(
         (uint32_t) exception_pointers->ExceptionRecord->ExceptionCode
     );
 #else
+    const char *regnames[] = {
+        "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi",
+    };
+
+    uintptr_t regvalues[] = {
+        ctx->Eax, ctx->Ecx, ctx->Edx, ctx->Ebx,
+        ctx->Esp, ctx->Ebp, ctx->Esi, ctx->Edi,
+    };
+
+    for (uint32_t idx = 0; idx < 8; idx++) {
+        bson_append_int(&b, regnames[idx], regvalues[idx]);
+    }
+
     sprintf(buf,
         "Exception occurred. EIP: 0x%p, "
         "Exception Address: 0x%p, "
@@ -484,7 +519,12 @@ static LONG CALLBACK _exception_handler(
     );
 #endif
 
-    log_api(3, 1, 0, "sss", buf, "", "");
+    bson_finish(&b);
+    log_api(3, 1, 0, "szs", buf, &b, "");
+    bson_destroy(&b);
+
+    hook_enable();
+
     return EXCEPTION_CONTINUE_SEARCH;
 }
 

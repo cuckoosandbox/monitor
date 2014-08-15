@@ -39,6 +39,7 @@ void monitor_init(HMODULE module_handle)
     pipe_init(cfg.pipe_name);
 
     log_init(cfg.host_ip, cfg.host_port);
+    setup_exception_handler();
 
     sleep_init(cfg.first_process, cfg.force_sleep_skip, cfg.startup_time);
 
