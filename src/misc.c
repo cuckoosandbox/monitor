@@ -488,10 +488,7 @@ static LONG CALLBACK _exception_handler(
     }
 
     sprintf(buf,
-        "Exception occurred. RIP: 0x%p, "
-        "Exception Address: 0x%p, "
-        "Exception Code: 0x%08x",
-        (void *) exception_pointers->ContextRecord->Rip,
+        "Exception occurred. Exception Address: 0x%p, Exception Code: 0x%08x",
         (void *) exception_pointers->ExceptionRecord->ExceptionAddress,
         (uint32_t) exception_pointers->ExceptionRecord->ExceptionCode
     );
@@ -510,10 +507,7 @@ static LONG CALLBACK _exception_handler(
     }
 
     sprintf(buf,
-        "Exception occurred. EIP: 0x%p, "
-        "Exception Address: 0x%p, "
-        "Exception Code: 0x%08x",
-        (void *) exception_pointers->ContextRecord->Eip,
+        "Exception occurred. Exception Address: 0x%p, Exception Code: 0x%08x",
         (void *) exception_pointers->ExceptionRecord->ExceptionAddress,
         (uint32_t) exception_pointers->ExceptionRecord->ExceptionCode
     );

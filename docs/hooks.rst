@@ -310,3 +310,4 @@ Following is a list of all currently supported format specifiers:
 * ``R``: registry stuff - to be updated
 * ``q``: 64-bit integer
 * ``Q``: pointer to 64-bit integer (e.g., pointer to ``LARGE_INTEGER``)
+* ``z``: bson object
