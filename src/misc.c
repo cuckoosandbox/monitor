@@ -471,7 +471,7 @@ static LONG CALLBACK _exception_handler(
     bson_init(&b);
 
 #if __x86_64__
-    const char *regnames[] = {
+    static const char *regnames[] = {
         "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
         "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",
     };
@@ -482,8 +482,19 @@ static LONG CALLBACK _exception_handler(
         ctx->R8,  ctx->R9,  ctx->R10, ctx->R11,
         ctx->R12, ctx->R13, ctx->R14, ctx->R15,
     };
+#else
+    static const char *regnames[] = {
+        "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi",
+    };
 
-    for (uint32_t idx = 0; idx < 16; idx++) {
+    uintptr_t regvalues[] = {
+        ctx->Eax, ctx->Ecx, ctx->Edx, ctx->Ebx,
+        ctx->Esp, ctx->Ebp, ctx->Esi, ctx->Edi,
+    };
+#endif
+
+    for (uint32_t idx = 0; idx < sizeof(regvalues) / sizeof(uintptr_t);
+            idx++) {
         bson_append_long(&b, regnames[idx], regvalues[idx]);
     }
 
@@ -492,26 +503,6 @@ static LONG CALLBACK _exception_handler(
         (void *) exception_pointers->ExceptionRecord->ExceptionAddress,
         (uint32_t) exception_pointers->ExceptionRecord->ExceptionCode
     );
-#else
-    const char *regnames[] = {
-        "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi",
-    };
-
-    uintptr_t regvalues[] = {
-        ctx->Eax, ctx->Ecx, ctx->Edx, ctx->Ebx,
-        ctx->Esp, ctx->Ebp, ctx->Esi, ctx->Edi,
-    };
-
-    for (uint32_t idx = 0; idx < 8; idx++) {
-        bson_append_int(&b, regnames[idx], regvalues[idx]);
-    }
-
-    sprintf(buf,
-        "Exception occurred. Exception Address: 0x%p, Exception Code: 0x%08x",
-        (void *) exception_pointers->ExceptionRecord->ExceptionAddress,
-        (uint32_t) exception_pointers->ExceptionRecord->ExceptionCode
-    );
-#endif
 
     bson_finish(&b);
     log_api(3, 1, 0, "szs", buf, &b, "");
