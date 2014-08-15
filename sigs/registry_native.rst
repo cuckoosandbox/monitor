@@ -21,13 +21,14 @@ Parameters::
 
 Pre::
 
-    UNICODE_STRING *unistr = unistr_from_objattr(ObjectAttributes);
-    COPY_UNICODE_STRING(sub_key, unistr);
     COPY_UNICODE_STRING(class, Class);
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key_objattr(ObjectAttributes, regkey, MAX_PATH_W);
 
 Logging::
 
-    O sub_key &sub_key
+    u regkey regkey
     O class &class
 
 
@@ -42,12 +43,12 @@ Parameters::
 
 Pre::
 
-    UNICODE_STRING *unistr = unistr_from_objattr(ObjectAttributes);
-    COPY_UNICODE_STRING(sub_key, unistr);
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key_objattr(ObjectAttributes, regkey, MAX_PATH_W);
 
 Logging::
 
-    O sub_key &sub_key
+    u regkey regkey
 
 
 NtOpenKeyEx
@@ -62,12 +63,12 @@ Parameters::
 
 Pre::
 
-    UNICODE_STRING *unistr = unistr_from_objattr(ObjectAttributes);
-    COPY_UNICODE_STRING(sub_key, unistr);
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key_objattr(ObjectAttributes, regkey, MAX_PATH_W);
 
 Logging::
 
-    O sub_key &sub_key
+    u regkey regkey
 
 
 NtRenameKey
@@ -82,9 +83,13 @@ Pre::
 
     COPY_UNICODE_STRING(new_name, NewName);
 
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+
 Logging::
 
     O new_name &new_name
+    u regkey regkey
 
 
 NtReplaceKey
@@ -93,7 +98,7 @@ NtReplaceKey
 Parameters::
 
     *  POBJECT_ATTRIBUTES NewHiveFileName
-    ** HANDLE KeyHandle
+    ** HANDLE KeyHandle key_handle
     *  POBJECT_ATTRIBUTES BackupHiveFileName
 
 Pre::
@@ -101,10 +106,14 @@ Pre::
     COPY_OBJECT_ATTRIBUTES(newfilepath, NewHiveFileName);
     COPY_OBJECT_ATTRIBUTES(backupfilepath, BackupHiveFileName);
 
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+
 Logging::
 
     x newfilepath &newfilepath
     x backupfilepath &backupfilepath
+    u regkey regkey
 
 
 NtEnumerateKey
@@ -119,9 +128,15 @@ Parameters::
     *  ULONG Length
     *  PULONG ResultLength
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+
 Logging::
 
     B buffer ResultLength, KeyInformation
+    u regkey regkey
 
 
 NtEnumerateValueKey
@@ -136,9 +151,19 @@ Parameters::
     *  ULONG Length
     *  PULONG ResultLength
 
+Ensure::
+
+    ResultLength
+
+Pre::
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+
 Logging::
 
     B buffer ResultLength, KeyValueInformation
+    u regkey regkey
 
 
 NtSetValueKey
@@ -155,12 +180,22 @@ Parameters::
 
 Pre::
 
-    COPY_UNICODE_STRING(value_name, ValueName);
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+
+    if(ValueName != NULL) {
+        length = MIN(
+            ValueName->Length / sizeof(wchar_t),
+            MAX_PATH_W - length);
+
+        regkey[length++] = '\\';
+        wcsncpy(&regkey[length], ValueName->Buffer, length);
+    }
 
 Logging::
 
     b buffer DataSize, Data
-    O value_name &value_name
+    u regkey regkey
 
 
 NtQueryValueKey
@@ -181,12 +216,22 @@ Ensure::
 
 Pre::
 
-    COPY_UNICODE_STRING(value_name, ValueName);
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+
+    if(ValueName != NULL) {
+        length = MIN(
+            ValueName->Length / sizeof(wchar_t),
+            MAX_PATH_W - length);
+
+        regkey[length++] = '\\';
+        wcsncpy(&regkey[length], ValueName->Buffer, length);
+    }
 
 Logging::
 
     B buffer ResultLength, KeyValueInformation
-    O value_name &value_name
+    u regkey regkey
 
 
 NtQueryMultipleValueKey
@@ -213,6 +258,15 @@ Parameters::
 
     ** HANDLE KeyHandle key_handle
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+
+Logging::
+
+    u regkey regkey
+
 
 NtDeleteValueKey
 ================
@@ -220,15 +274,25 @@ NtDeleteValueKey
 Parameters::
 
     ** HANDLE KeyHandle key_handle
-    * PUNICODE_STRING ValueName
+    *  PUNICODE_STRING ValueName
 
 Pre::
 
-    COPY_UNICODE_STRING(value_name, ValueName);
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+
+    if(ValueName != NULL) {
+        length = MIN(
+            ValueName->Length / sizeof(wchar_t),
+            MAX_PATH_W - length);
+
+        regkey[length++] = '\\';
+        wcsncpy(&regkey[length], ValueName->Buffer, length);
+    }
 
 Logging::
 
-    O value_name &value_name
+    u regkey regkey
 
 
 NtLoadKey
@@ -241,14 +305,15 @@ Parameters::
 
 Pre::
 
-    UNICODE_STRING *unistr = unistr_from_objattr(TargetKey);
-    COPY_UNICODE_STRING(target_key, unistr);
     COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key_objattr(TargetKey, regkey, MAX_PATH_W);
 
 Logging::
 
     x filepath &source_file
-    O target_key &target_key
+    u regkey regkey
 
 
 NtLoadKey2
@@ -262,14 +327,15 @@ Parameters::
 
 Pre::
 
-    UNICODE_STRING *unistr = unistr_from_objattr(TargetKey);
-    COPY_UNICODE_STRING(target_key, unistr);
     COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key_objattr(TargetKey, regkey, MAX_PATH_W);
 
 Logging::
 
     x filepath &source_file
-    O target_key &target_key
+    u regkey regkey
 
 
 NtLoadKeyEx
@@ -284,15 +350,15 @@ Parameters::
 
 Pre::
 
-    UNICODE_STRING *unistr = unistr_from_objattr(TargetKey);
-    COPY_UNICODE_STRING(target_key, unistr);
     COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key_objattr(TargetKey, regkey, MAX_PATH_W);
 
 Logging::
 
     x filepath &source_file
-    O target_key &target_key
-
+    u regkey regkey
 
 
 NtQueryKey
@@ -306,9 +372,15 @@ Parameters::
     *  ULONG Length
     *  PULONG ResultLength
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key_objattr(KeyHandle, regkey, MAX_PATH_W);
+
 Logging::
 
     B buffer ResultLength, KeyInformation
+    u regkey regkey
 
 
 NtSaveKey
@@ -319,6 +391,15 @@ Parameters::
     ** HANDLE KeyHandle key_handle
     ** HANDLE FileHandle file_handle
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key_objattr(KeyHandle, regkey, MAX_PATH_W);
+
+Logging::
+
+    u regkey regkey
+
 
 NtSaveKeyEx
 ===========
@@ -328,3 +409,12 @@ Parameters::
     ** HANDLE KeyHandle key_handle
     ** HANDLE FileHandle file_handle
     ** ULONG Format format
+
+Pre::
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key_objattr(KeyHandle, regkey, MAX_PATH_W);
+
+Logging::
+
+    u regkey regkey

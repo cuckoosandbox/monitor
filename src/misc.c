@@ -377,6 +377,26 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
     return 0;
 }
 
+uint32_t reg_get_key_objattr(const OBJECT_ATTRIBUTES *obj,
+    wchar_t *regkey, uint32_t length)
+{
+    if(obj != NULL) {
+        length = reg_get_key(obj->RootDirectory, regkey, MAX_PATH_W);
+
+        // TODO Also use (Default) when Length is zero?
+        if(obj->ObjectName != NULL && obj->ObjectName->Length != 0) {
+            length = MIN(
+                obj->ObjectName->Length / sizeof(wchar_t),
+                MAX_PATH_W - length);
+
+            wcsncpy(&regkey[length], obj->ObjectName->Buffer, length);
+            return lstrlenW(regkey);
+        }
+        return length;
+    }
+    return 0;
+}
+
 void get_ip_port(const struct sockaddr *addr, const char **ip, int *port)
 {
     if(addr == NULL) return;
