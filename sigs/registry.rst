@@ -113,7 +113,18 @@ RegDeleteKeyA
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPCTSTR lpSubKey sub_key
+    *  LPCTSTR lpSubKey
+
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+    wcsncpyA(&regkey[length], lpSubKey, MAX_PATH_W - length);
+
+Logging::
+
+    u regkey regkey
 
 
 RegDeleteKeyW
@@ -122,7 +133,18 @@ RegDeleteKeyW
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPWSTR lpSubKey sub_key
+    *  LPWSTR lpSubKey
+
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+    wcsncpy(&regkey[length], lpSubKey, MAX_PATH_W - length);
+
+Logging::
+
+    u regkey regkey
 
 
 RegEnumKeyW
@@ -132,12 +154,17 @@ Parameters::
 
     ** HKEY hKey key_handle
     ** DWORD dwIndex index
-    *  LPWSTR lpName
+    ** LPWSTR lpName key_name
     *  DWORD cchName
+
+Pre::
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key(hKey, regkey, MAX_PATH_W);
 
 Logging::
 
-    u key_name lpName
+    u regkey regkey
 
 
 RegEnumKeyExA
@@ -154,6 +181,15 @@ Parameters::
     *  LPDWORD lpcClass
     *  PFILETIME lpftLastWriteTime
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key(hKey, regkey, MAX_PATH_W);
+
+Logging::
+
+    u regkey regkey
+
 
 RegEnumKeyExW
 =============
@@ -169,6 +205,15 @@ Parameters::
     *  LPDWORD lpcClass
     *  PFILETIME lpftLastWriteTime
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W];
+    reg_get_key(hKey, regkey, MAX_PATH_W);
+
+Logging::
+
+    u regkey regkey
+
 
 RegEnumValueA
 =============
@@ -177,7 +222,7 @@ Parameters::
 
     ** HKEY hKey key_handle
     ** DWORD dwIndex index
-    ** LPTSTR lpValueName value_name
+    *  LPTSTR lpValueName
     *  LPDWORD lpcchValueName
     *  LPDWORD lpReserved
     ** LPDWORD lpType reg_type
@@ -188,8 +233,16 @@ Ensure::
 
     lpcbData
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+    wcsncpyA(&regkey[length], lpValueName, MAX_PATH_W - length);
+
 Logging::
 
+    u regkey regkey
     B buffer lpcbData, lpData
 
 
@@ -200,7 +253,7 @@ Parameters::
 
     ** HKEY hKey key_handle
     ** DWORD dwIndex index
-    ** LPWSTR lpValueName value_name
+    *  LPWSTR lpValueName
     *  LPDWORD lpcchValueName
     *  LPDWORD lpReserved
     ** LPDWORD lpType reg_type
@@ -211,8 +264,16 @@ Ensure::
 
     lpcbData
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+    wcsncpy(&regkey[length], lpValueName, MAX_PATH_W - length);
+
 Logging::
 
+    u regkey regkey
     B buffer lpcbData, lpData
 
 
@@ -222,14 +283,27 @@ RegSetValueExA
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPCTSTR lpValueName value_name
+    *  LPCTSTR lpValueName
     *  DWORD Reserved
     ** DWORD dwType reg_type
     *  const BYTE *lpData
     *  DWORD cbData
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+
+    if(lpValueName == NULL) {
+        lpValueName = "(Default)";
+    }
+
+    wcsncpyA(&regkey[length], lpValueName, MAX_PATH_W - length);
+
 Logging::
 
+    u regkey regkey
     b buffer cbData, lpData
 
 
@@ -239,14 +313,27 @@ RegSetValueExW
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPWSTR lpValueName value_name
+    *  LPWSTR lpValueName
     *  DWORD Reserved
     ** DWORD dwType reg_type
     *  const BYTE *lpData
     *  DWORD cbData
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+
+    if(lpValueName == NULL) {
+        lpValueName = L"(Default)";
+    }
+
+    wcsncpy(&regkey[length], lpValueName, MAX_PATH_W - length);
+
 Logging::
 
+    u regkey regkey
     b buffer cbData, lpData
 
 
@@ -256,7 +343,7 @@ RegQueryValueExA
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPCTSTR lpValueName value_name
+    *  LPCTSTR lpValueName
     *  LPDWORD lpReserved
     ** LPDWORD lpType reg_type
     *  LPBYTE lpData
@@ -266,8 +353,21 @@ Ensure::
 
     lpcbData
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+
+    if(lpValueName == NULL) {
+        lpValueName = "(Default)";
+    }
+
+    wcsncpyA(&regkey[length], lpValueName, MAX_PATH_W - length);
+
 Logging::
 
+    u regkey regkey
     B buffer lpcbData, lpData
 
 
@@ -277,7 +377,7 @@ RegQueryValueExW
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPWSTR lpValueName value_name
+    *  LPWSTR lpValueName
     *  LPDWORD lpReserved
     ** LPDWORD lpType reg_type
     *  LPBYTE lpData
@@ -287,8 +387,21 @@ Ensure::
 
     lpcbData
 
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+
+    if(lpValueName == NULL) {
+        lpValueName = L"(Default)";
+    }
+
+    wcsncpy(&regkey[length], lpValueName, MAX_PATH_W - length);
+
 Logging::
 
+    u regkey regkey
     B buffer lpcbData, lpData
 
 
@@ -298,7 +411,23 @@ RegDeleteValueA
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPCTSTR lpValueName value_name
+    *  LPCTSTR lpValueName
+
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+
+    if(lpValueName == NULL) {
+        lpValueName = "(Default)";
+    }
+
+    wcsncpyA(&regkey[length], lpValueName, MAX_PATH_W - length);
+
+Logging::
+
+    u regkey regkey
 
 
 RegDeleteValueW
@@ -307,7 +436,23 @@ RegDeleteValueW
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPWSTR lpValueName value_name
+    *  LPWSTR lpValueName
+
+Pre::
+
+    wchar_t regkey[MAX_PATH_W]; uint32_t length;
+    length = reg_get_key(hKey, regkey, MAX_PATH_W);
+    regkey[length++] = '\\', regkey[length] = 0;
+
+    if(lpValueName == NULL) {
+        lpValueName = L"(Default)";
+    }
+
+    wcsncpy(&regkey[length], lpValueName, MAX_PATH_W - length);
+
+Logging::
+
+    u regkey regkey
 
 
 RegQueryInfoKeyA
