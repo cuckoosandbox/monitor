@@ -15,8 +15,8 @@ Signature::
 Parameters::
 
     *  LPUNKNOWN pCaller
-    ** LPWSTR szURL
-    ** LPWSTR szFileName
+    ** LPWSTR szURL url
+    ** LPWSTR szFileName filepath
     *  DWORD dwReserved
     *  LPVOID lpfnCB
 
