@@ -19,17 +19,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdint.h>
 #include <windows.h>
+#include "pipe.h"
+
+#define PAGE_READABLE \
+    (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | \
+     PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | \
+     PAGE_EXECUTE_WRITECOPY)
+
+static int _page_is_readable(const uint8_t *addr)
+{
+    MEMORY_BASIC_INFORMATION mbi;
+    return VirtualQuery(addr, &mbi, sizeof(mbi)) == sizeof(mbi) &&
+            mbi.State & MEM_COMMIT && mbi.Protect & PAGE_READABLE;
+}
 
 static const uint8_t *_module_from_address(const uint8_t *addr)
 {
     MEMORY_BASIC_INFORMATION mbi;
+    uint8_t **ptr = (uint8_t **) &mbi.AllocationBase;
+
     if(VirtualQuery(addr, &mbi, sizeof(mbi)) == sizeof(mbi) &&
-            mbi.State != MEM_FREE) {
-        addr = (const uint8_t *)((uintptr_t) addr & ~0xfff);
-        while (*addr != 'M' || addr[1] != 'Z') {
-            addr -= 0x1000;
-        }
-        return addr;
+            _page_is_readable(mbi.AllocationBase) &&
+            **ptr == 'M' && (*ptr)[1] == 'Z') {
+        return mbi.AllocationBase;
     }
     return NULL;
 }
@@ -39,7 +51,10 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
     int len; *sym = 0;
 
     const uint8_t *mod = _module_from_address(addr);
-    if(mod == NULL) return -1;
+    if(mod == NULL) {
+        pipe("DEBUG:Unable to find module for address 0x%x.", addr);
+        return -1;
+    }
 
     IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) mod;
     IMAGE_NT_HEADERS *image_nt_headers =
@@ -49,6 +64,8 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
         image_nt_headers->OptionalHeader.DataDirectory;
     if(image_nt_headers->OptionalHeader.NumberOfRvaAndSizes <
             IMAGE_DIRECTORY_ENTRY_EXPORT + 1) {
+        pipe("DEBUG:Address 0x%x is embedded in a DLL without exports.",
+            addr);
         return -1;
     }
 
@@ -56,6 +73,8 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
         &data_directories[IMAGE_DIRECTORY_ENTRY_EXPORT];
     if(export_data_directory->VirtualAddress == 0 ||
             export_data_directory->Size == 0) {
+        pipe("DEBUG:Address 0x%x is embedded in a DLL without exports.",
+            addr);
         return -1;
     }
 

@@ -536,17 +536,20 @@ static LONG CALLBACK _exception_handler(
         return_addresses, sizeof(return_addresses) / sizeof(uint32_t));
 #endif
 
-    bson s; char sym[512];
+    bson s; char sym[512], argidx[12];
     bson_init(&s);
 
     for (uint32_t idx = 0; idx < count; idx++) {
         if(return_addresses[idx] == 0) break;
 
-        sprintf(buf, "%d", idx);
         symbol((const uint8_t *) return_addresses[idx], sym, sizeof(sym));
 
-        bson_append_start_array(&s, buf);
-        bson_append_long(&s, "0", return_addresses[idx]);
+        sprintf(argidx, "%d", idx);
+        bson_append_start_array(&s, argidx);
+
+        sprintf(argidx, "0x%p", (void *) return_addresses[idx]);
+        bson_append_string(&s, "0", argidx);
+
         bson_append_string(&s, "1", sym);
         bson_append_finish_array(&s);
     }
