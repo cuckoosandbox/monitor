@@ -461,6 +461,25 @@ void library_from_unicode_string(const UNICODE_STRING *us,
     }
 }
 
+#if __x86_64__
+#else
+
+int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length)
+{
+    uint32_t top = readtls(0x04);
+    uint32_t bottom = readtls(0x08);
+
+    int count = 0;
+    for (; ebp >= bottom && ebp < top && length != 0; count++, length--) {
+        *addrs++ = *(uint32_t *)(ebp + 4);
+        ebp = *(uint32_t *) ebp;
+    }
+
+    return count;
+}
+
+#endif
+
 static LONG CALLBACK _exception_handler(
     EXCEPTION_POINTERS *exception_pointers)
 {
@@ -498,15 +517,38 @@ static LONG CALLBACK _exception_handler(
         bson_append_long(&b, regnames[idx], regvalues[idx]);
     }
 
+    bson_finish(&b);
+
     sprintf(buf,
         "Exception occurred; address: 0x%p, code: 0x%08x.",
         (void *) exception_pointers->ExceptionRecord->ExceptionAddress,
         (uint32_t) exception_pointers->ExceptionRecord->ExceptionCode
     );
 
-    bson_finish(&b);
-    log_api(3, 1, 0, "szs", buf, &b, "");
+    uintptr_t return_addresses[32]; uint32_t count = 0;
+
+    memset(return_addresses, 0, sizeof(return_addresses));
+
+#if __x86_64__
+#else
+    count = stacktrace(exception_pointers->ContextRecord->Ebp,
+        return_addresses, sizeof(return_addresses) / sizeof(uint32_t));
+#endif
+
+    bson s;
+    bson_init(&s);
+
+    for (uint32_t idx = 0; idx < count; idx++) {
+        sprintf(buf, "%d", idx);
+        bson_append_long(&s, buf, return_addresses[idx]);
+    }
+
+    bson_finish(&s);
+
+    log_api(3, 1, 0, "szz", buf, &b, &s);
+
     bson_destroy(&b);
+    bson_destroy(&s);
 
     hook_enable();
 
