@@ -499,7 +499,7 @@ static LONG CALLBACK _exception_handler(
     }
 
     sprintf(buf,
-        "Exception occurred. Exception Address: 0x%p, Exception Code: 0x%08x",
+        "Exception occurred; address: 0x%p, code: 0x%08x.",
         (void *) exception_pointers->ExceptionRecord->ExceptionAddress,
         (uint32_t) exception_pointers->ExceptionRecord->ExceptionCode
     );
