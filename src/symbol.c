@@ -22,11 +22,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 static const uint8_t *_module_from_address(const uint8_t *addr)
 {
-    addr = (const uint8_t *)((uintptr_t) addr & ~0xfff);
-    while (*addr != 'M' || addr[1] != 'Z') {
-        addr -= 0x1000;
+    MEMORY_BASIC_INFORMATION mbi;
+    if(VirtualQuery(addr, &mbi, sizeof(mbi)) == sizeof(mbi) &&
+            mbi.State != MEM_FREE) {
+        addr = (const uint8_t *)((uintptr_t) addr & ~0xfff);
+        while (*addr != 'M' || addr[1] != 'Z') {
+            addr -= 0x1000;
+        }
+        return addr;
     }
-    return addr;
+    return NULL;
 }
 
 int symbol(const uint8_t *addr, char *sym, uint32_t length)

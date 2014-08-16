@@ -254,7 +254,7 @@ static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
             addr += si.dwAllocationGranularity) {
 
         if(VirtualQueryEx(GetCurrentProcess(), addr, &mbi,
-                sizeof(mbi)) == FALSE || mbi.State != MEM_FREE) {
+                sizeof(mbi)) != sizeof(mbi) || mbi.State != MEM_FREE) {
             continue;
         }
 

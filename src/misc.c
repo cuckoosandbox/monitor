@@ -540,6 +540,8 @@ static LONG CALLBACK _exception_handler(
     bson_init(&s);
 
     for (uint32_t idx = 0; idx < count; idx++) {
+        if(return_addresses[idx] == 0) break;
+
         sprintf(buf, "%d", idx);
         symbol((const uint8_t *) return_addresses[idx], sym, sizeof(sym));
 
