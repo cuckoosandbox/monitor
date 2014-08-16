@@ -276,7 +276,12 @@ void log_api(int index, int is_success, uintptr_t return_value,
     bson_append_int(&b, "t", GetTickCount() - g_starttick);
 
 #ifdef DEBUG
-    bson_append_bson(&b, "s", _log_stacktrace());
+    bson *trace = _log_stacktrace();
+    if(trace != NULL) {
+        bson_append_bson(&b, "s", trace);
+        bson_destroy(trace);
+        bson_dealloc(trace);
+    }
 #endif
 
     bson_append_start_array(&b, "args");
