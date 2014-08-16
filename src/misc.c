@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "misc.h"
 #include "ntapi.h"
 #include "pipe.h"
+#include "symbol.h"
 
 static char g_shutdown_mutex[MAX_PATH];
 
@@ -535,12 +536,17 @@ static LONG CALLBACK _exception_handler(
         return_addresses, sizeof(return_addresses) / sizeof(uint32_t));
 #endif
 
-    bson s;
+    bson s; char sym[512];
     bson_init(&s);
 
     for (uint32_t idx = 0; idx < count; idx++) {
         sprintf(buf, "%d", idx);
-        bson_append_long(&s, buf, return_addresses[idx]);
+        symbol((const uint8_t *) return_addresses[idx], sym, sizeof(sym));
+
+        bson_append_start_array(&s, buf);
+        bson_append_long(&s, "0", return_addresses[idx]);
+        bson_append_string(&s, "1", sym);
+        bson_append_finish_array(&s);
     }
 
     bson_finish(&s);
