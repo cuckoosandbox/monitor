@@ -13,6 +13,8 @@ endif
 SIGS = $(wildcard sigs/*.rst)
 JINJA2 = $(wildcard data/*.jinja2)
 
+# Dependencies for the auto-generated hook files.
+HOOKREQ = utils/process.py $(wildcard data/*.json) $(wildcard data/*.conf)
 HOOK32 = objects/x86/code/hooks.h objects/x86/code/hooks.c
 HOOK64 = objects/x64/code/hooks.h objects/x64/code/hooks.c
 HOOKOBJ32 = objects/x86/code/hooks.o
@@ -55,10 +57,10 @@ objects/:
 	mkdir -p objects/x86/code/ objects/x64/code/
 	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
 
-$(HOOK32): $(SIGS) $(JINJA2) utils/process.py data/types.conf
+$(HOOK32): $(SIGS) $(JINJA2) $(HOOKREQ)
 	python utils/process.py data/ objects/x86/code/ $(SIGS)
 
-$(HOOK64): $(SIGS) $(JINJA2) utils/process.py data/types.conf
+$(HOOK64): $(SIGS) $(JINJA2) $(HOOKREQ)
 	python utils/process.py data/ objects/x64/code/ $(SIGS)
 
 $(LIBBSON32): $(BSONOBJ32)
