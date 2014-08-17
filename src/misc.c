@@ -484,16 +484,20 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length)
 static LONG CALLBACK _exception_handler(
     EXCEPTION_POINTERS *exception_pointers)
 {
-    char buf[128]; bson b; CONTEXT *ctx = exception_pointers->ContextRecord;
+    char buf[128]; CONTEXT *ctx = exception_pointers->ContextRecord;
+    bson b, s, e;
 
     hook_disable();
 
     bson_init(&b);
+    bson_init(&s);
+    bson_init(&e);
 
 #if __x86_64__
     static const char *regnames[] = {
         "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
         "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",
+        NULL,
     };
 
     uintptr_t regvalues[] = {
@@ -505,6 +509,7 @@ static LONG CALLBACK _exception_handler(
 #else
     static const char *regnames[] = {
         "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi",
+        NULL,
     };
 
     uintptr_t regvalues[] = {
@@ -513,18 +518,9 @@ static LONG CALLBACK _exception_handler(
     };
 #endif
 
-    for (uint32_t idx = 0; idx < sizeof(regvalues) / sizeof(uintptr_t);
-            idx++) {
+    for (uint32_t idx = 0; regnames[idx] != NULL; idx++) {
         bson_append_long(&b, regnames[idx], regvalues[idx]);
     }
-
-    bson_finish(&b);
-
-    sprintf(buf,
-        "Exception occurred; address: 0x%p, code: 0x%08x.",
-        (void *) exception_pointers->ExceptionRecord->ExceptionAddress,
-        (uint32_t) exception_pointers->ExceptionRecord->ExceptionCode
-    );
 
     uintptr_t return_addresses[32]; uint32_t count = 0;
 
@@ -536,8 +532,20 @@ static LONG CALLBACK _exception_handler(
         return_addresses, sizeof(return_addresses) / sizeof(uint32_t));
 #endif
 
-    bson s; char sym[512], argidx[12];
-    bson_init(&s);
+    char sym[512], argidx[12];
+
+    const uint8_t *exception_address = (const uint8_t *)
+        exception_pointers->ExceptionRecord->ExceptionAddress;
+
+    sprintf(buf, "0x%p", exception_address);
+    bson_append_string(&e, "address", buf);
+
+    symbol(exception_address, sym, sizeof(sym));
+    bson_append_string(&e, "symbol", sym);
+
+    sprintf(buf, "0x%08x", (uint32_t)
+        exception_pointers->ExceptionRecord->ExceptionCode);
+    bson_append_string(&e, "exception_code", buf);
 
     // First check whether any of the return addresses are "spoofed", that is,
     // they belong to one of our hooks. If so, then we fetch the original
@@ -568,12 +576,15 @@ static LONG CALLBACK _exception_handler(
         bson_append_finish_array(&s);
     }
 
+    bson_finish(&e);
     bson_finish(&s);
+    bson_finish(&b);
 
-    log_api(3, 1, 0, "szz", buf, &b, &s);
+    log_api(3, 1, 0, "zzz", &e, &b, &s);
 
-    bson_destroy(&b);
+    bson_destroy(&e);
     bson_destroy(&s);
+    bson_destroy(&b);
 
     hook_enable();
 

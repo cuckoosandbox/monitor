@@ -36,7 +36,7 @@
     {
         "apiname": "__exception__",
         "parameters": [
-            {"argtype": "LPCSTR", "argname": "message"},
+            {"argtype": "LPCSTR", "argname": "exception"},
             {"argtype": "LPCSTR", "argname": "registers"},
             {"argtype": "LPCSTR", "argname": "stacktrace"}
         ],
