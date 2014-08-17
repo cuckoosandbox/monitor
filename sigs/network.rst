@@ -121,7 +121,7 @@ Parameters::
 Pre::
 
     int headers_length = dwHeadersLength;
-    if(headers_length == -1) {
+    if(lpszHeaders != NULL && headers_length == -1) {
         headers_length = strlen(lpszHeaders);
     }
 
@@ -150,7 +150,7 @@ Parameters::
 Pre::
 
     int headers_length = dwHeadersLength;
-    if(headers_length == -1) {
+    if(lpszHeaders != NULL && headers_length == -1) {
         headers_length = lstrlenW(lpszHeaders);
     }
 

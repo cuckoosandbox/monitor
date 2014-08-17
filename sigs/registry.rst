@@ -22,8 +22,10 @@ Pre::
 
     wchar_t regkey[MAX_PATH_W]; uint32_t length;
     length = reg_get_key(hKey, regkey, MAX_PATH_W);
-    regkey[length++] = '\\', regkey[length] = 0;
-    wcsncpyA(&regkey[length], lpSubKey, MAX_PATH_W - length);
+    if(lpSubKey != NULL) {
+        regkey[length++] = '\\', regkey[length] = 0;
+        wcsncpyA(&regkey[length], lpSubKey, MAX_PATH_W - length);
+    }
 
 Logging::
 
@@ -45,8 +47,10 @@ Pre::
 
     wchar_t regkey[MAX_PATH_W]; uint32_t length;
     length = reg_get_key(hKey, regkey, MAX_PATH_W);
-    regkey[length++] = '\\', regkey[length] = 0;
-    wcsncpy(&regkey[length], lpSubKey, MAX_PATH_W - length);
+    if(lpSubKey != NULL) {
+        regkey[length++] = '\\', regkey[length] = 0;
+        wcsncpy(&regkey[length], lpSubKey, MAX_PATH_W - length);
+    }
 
 Logging::
 
