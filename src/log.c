@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ntapi.h"
 #include "log.h"
 #include "pipe.h"
+#include "symbol.h"
 #include "utf8.h"
 
 // TLS index of the bson object.
@@ -231,20 +232,27 @@ static bson *_log_stacktrace()
     bson *ret = bson_alloc();
     bson_init(ret);
 
-    uintptr_t stacktrace[32]; char num[4];
+    uintptr_t stacktrace[32]; char buf[12], sym[512];
 
     uint32_t count = RtlCaptureStackBackTrace(
         0, sizeof(stacktrace) / sizeof(uintptr_t),
         (void **) stacktrace, NULL);
 
     for (uint32_t idx = 0; idx < count; idx++) {
-        sprintf(num, "%d", idx);
+        sprintf(buf, "%d", idx);
+        bson_append_start_array(ret, buf);
+
+        sprintf(buf, "0x%p", (const uint8_t *) stacktrace[idx]);
+        bson_append_string(ret, "0", buf);
 
 #if __x86_64__
-        bson_append_long(ret, num, stacktrace[idx]);
+        sym[0] = 0;
 #else
-        bson_append_int(ret, num, stacktrace[idx]);
+        symbol((const uint8_t *) stacktrace[idx], sym, sizeof(sym));
 #endif
+
+        bson_append_string(ret, "1", sym);
+        bson_append_finish_array(ret);
     }
 
     bson_finish(ret);
