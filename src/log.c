@@ -446,6 +446,10 @@ void log_api(int index, int is_success, uintptr_t return_value,
                 bson_append_bson(&b, idx, value);
             }
         }
+        else {
+            char buf[2] = {key, 0};
+            pipe("CRITICAL:Invalid format specifier: %z", buf);
+        }
     }
 
     va_end(args);
@@ -488,6 +492,13 @@ void log_init(unsigned int ip, unsigned short port)
 
     WSADATA wsa;
     WSAStartup(MAKEWORD(2, 2), &wsa);
+
+    // Might be the case when debugging manually, but should never happen
+    // during an actual analysis.
+    if(ip == 0 || port == 0) {
+        pipe("CRITICAL:No connection information found!");
+        return;
+    }
 
     g_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(g_sock == INVALID_SOCKET) {
