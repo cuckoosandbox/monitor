@@ -30,7 +30,7 @@ Pre::
 
     if(((uintptr_t) lpType & 0xffff) == (uintptr_t) lpType) {
         sprintf(value2, "#%d", (uint16_t) (uintptr_t) lpType);
-        name = value2;
+        type = value2;
     }
 
 Logging::
@@ -64,7 +64,7 @@ Pre::
 
     if(((uintptr_t) lpType & 0xffff) == (uintptr_t) lpType) {
         wsprintfW(value2, L"#%d", (uint16_t) (uintptr_t) lpType);
-        name = value2;
+        type = value2;
     }
 
 Logging::
@@ -99,7 +99,7 @@ Pre::
 
     if(((uintptr_t) lpType & 0xffff) == (uintptr_t) lpType) {
         sprintf(value2, "#%d", (uint16_t) (uintptr_t) lpType);
-        name = value2;
+        type = value2;
     }
 
 Logging::
@@ -134,7 +134,7 @@ Pre::
 
     if(((uintptr_t) lpType & 0xffff) == (uintptr_t) lpType) {
         wsprintfW(value2, L"#%d", (uint16_t) (uintptr_t) lpType);
-        name = value2;
+        type = value2;
     }
 
 Logging::
