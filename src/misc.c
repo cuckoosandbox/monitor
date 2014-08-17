@@ -540,7 +540,11 @@ static LONG CALLBACK _exception_handler(
     sprintf(buf, "0x%p", exception_address);
     bson_append_string(&e, "address", buf);
 
+#if __x86_64__
+    sym[0] = 0;
+#else
     symbol(exception_address, sym, sizeof(sym));
+#endif
     bson_append_string(&e, "symbol", sym);
 
     sprintf(buf, "0x%08x", (uint32_t)
@@ -564,7 +568,11 @@ static LONG CALLBACK _exception_handler(
     for (uint32_t idx = 0; idx < count; idx++) {
         if(return_addresses[idx] == 0) break;
 
+#if __x86_64__
+        sym[0] = 0;
+#else
         symbol((const uint8_t *) return_addresses[idx], sym, sizeof(sym));
+#endif
 
         sprintf(argidx, "%d", idx);
         bson_append_start_array(&s, argidx);
