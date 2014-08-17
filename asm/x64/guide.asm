@@ -21,6 +21,7 @@ global asm_guide_size
 global asm_guide_orig_stub_off
 global asm_guide_retaddr_add_off
 global asm_guide_retaddr_pop_off
+global asm_guide_next_off
 
 %define TLS_HOOK_INFO 0x80
 %define TLS_TEMPORARY 0x88
@@ -105,3 +106,4 @@ asm_guide_size dd _guide_end - _asm_guide
 asm_guide_orig_stub_off dd _guide_orig_stub - _asm_guide
 asm_guide_retaddr_add_off dd _guide_retaddr_add - _asm_guide
 asm_guide_retaddr_pop_off dd _guide_retaddr_pop - _asm_guide
+asm_guide_next_off dd _guide_next - _asm_guide
