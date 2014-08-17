@@ -3,12 +3,10 @@ CC64 = x86_64-w64-mingw32-gcc
 NASM = nasm
 AR = ar
 CFLAGS = -Wall -O0 -ggdb -Wextra -std=c99 -static \
-		 -Wno-missing-field-initializers -I inc/ -I objects/x86/code/
+		 -Wno-missing-field-initializers -I inc/ -I objects/x86/code/ \
+		 -DDEBUG=$(DEBUG)0
 LDFLAGS = -lws2_32 -lshlwapi
-
-ifdef DEBUG
-	CFLAGS += -DDEBUG=1
-endif
+MAKEFLAGS = -j8
 
 SIGS = $(wildcard sigs/*.rst)
 JINJA2 = $(wildcard data/*.jinja2)

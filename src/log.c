@@ -224,7 +224,7 @@ void log_api_pre(const char *fmt, ...)
     va_end(args);
 }
 
-#ifdef DEBUG
+#if DEBUG
 
 static bson *_log_stacktrace()
 {
@@ -275,7 +275,7 @@ void log_api(int index, int is_success, uintptr_t return_value,
     bson_append_int(&b, "T", GetCurrentThreadId());
     bson_append_int(&b, "t", GetTickCount() - g_starttick);
 
-#ifdef DEBUG
+#if DEBUG
     bson *trace = _log_stacktrace();
     if(trace != NULL) {
         bson_append_bson(&b, "s", trace);
