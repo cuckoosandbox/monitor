@@ -539,6 +539,20 @@ static LONG CALLBACK _exception_handler(
     bson s; char sym[512], argidx[12];
     bson_init(&s);
 
+    // First check whether any of the return addresses are "spoofed", that is,
+    // they belong to one of our hooks. If so, then we fetch the original
+    // return address from the return address list and use that to provide a
+    // symbol. As the list traverses as last in first out we start at the
+    // "end" of the return address list (the oldest return address in it
+    // really) and iterate upwards from there on.
+    for (uint32_t idx = count, listidx = 0; idx != 0; idx--) {
+        if(hook_is_spoofed_return_address(return_addresses[idx - 1]) != 0) {
+            pipe("DEBUG:Spoofed return address 0x%x -> 0x%x",
+                return_addresses[idx - 1], hook_retaddr_get(listidx));
+            return_addresses[idx - 1] = hook_retaddr_get(listidx++);
+        }
+    }
+
     for (uint32_t idx = 0; idx < count; idx++) {
         if(return_addresses[idx] == 0) break;
 

@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "capstone/include/capstone.h"
 #include "capstone/include/x86.h"
 #include "hooking.h"
+#include "hooks-info.h"
 #include "ntapi.h"
 #include "pipe.h"
 #include "slist.h"
@@ -37,6 +38,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #else
 #define TLS_HOOK_INFO 0x44
 #endif
+
+static uintptr_t g_retaddr_spoofed[MONITOR_HOOKCNT][2];
+static uint32_t g_retaddr_length = 0;
 
 hook_info_t *hook_alloc()
 {
@@ -65,6 +69,12 @@ uintptr_t __stdcall hook_retaddr_pop()
 {
     hook_info_t *h = hook_info();
     return slist_pop(&h->retaddr);
+}
+
+uintptr_t hook_retaddr_get(uint32_t index)
+{
+    hook_info_t *h = hook_info();
+    return slist_get(&h->retaddr, index);
 }
 
 void hook_disable()
@@ -445,6 +455,13 @@ int hook2(hook_t *h)
     memcpy(hd->clean, asm_clean, asm_clean_size);
     PATCH(hd->clean, asm_clean_retaddr_pop_off, hook_retaddr_pop);
 
+    // Register the spoofed return addresses so we can later retrieve
+    // this information when handling exceptions / obtaining stacktraces
+    // in general.
+    g_retaddr_spoofed[g_retaddr_length][0] = (uintptr_t) hd->clean;
+    g_retaddr_spoofed[g_retaddr_length++][1] =
+        (uintptr_t) hd->guide + asm_guide_next_off;
+
     uint8_t region_original[32];
     memcpy(region_original, h->addr, stub_used);
 
@@ -482,4 +499,15 @@ int hook(const char *library, const char *funcname,
         .addr     = _hook_follow_jumps(funcname, (uint8_t *) addr),
     };
     return hook2(&h);
+}
+
+int hook_is_spoofed_return_address(uintptr_t addr)
+{
+    for (uint32_t idx = 0; idx < g_retaddr_length; idx++) {
+        if(g_retaddr_spoofed[idx][0] == addr ||
+                g_retaddr_spoofed[idx][1] == addr) {
+            return 1;
+        }
+    }
+    return 0;
 }

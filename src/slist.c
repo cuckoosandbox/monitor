@@ -53,3 +53,8 @@ uintptr_t slist_pop(slist_t *s)
     if(s->index == 0) return 0;
     return s->value[--s->index];
 }
+
+uintptr_t slist_get(slist_t *s, uint32_t index)
+{
+    return index < s->index ? s->value[index] : 0;
+}

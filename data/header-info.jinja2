@@ -16,20 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MONITOR_SLIST_H
-#define MONITOR_SLIST_H
+#ifndef MONITOR_HOOKS_INFO_H
+#define MONITOR_HOOKS_INFO_H
 
-#include <stdint.h>
-
-typedef struct _slist_t {
-    uint32_t index;
-    uint32_t length;
-    uintptr_t *value;
-} slist_t;
-
-void slist_init(slist_t *s, uintptr_t length);
-void slist_push(slist_t *s, uintptr_t value);
-uintptr_t slist_pop(slist_t *s);
-uintptr_t slist_get(slist_t *s, uint32_t index);
+#define MONITOR_HOOKCNT {{ sigs|length }}
 
 #endif

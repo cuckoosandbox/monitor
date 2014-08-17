@@ -42,6 +42,7 @@ extern const uint32_t asm_guide_size;
 extern const uint32_t asm_guide_orig_stub_off;
 extern const uint32_t asm_guide_retaddr_add_off;
 extern const uint32_t asm_guide_retaddr_pop_off;
+extern const uint32_t asm_guide_next_off;
 
 extern const uint8_t *asm_clean;
 extern const uint32_t asm_clean_size;
