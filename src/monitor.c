@@ -30,7 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 void monitor_init(HMODULE module_handle)
 {
-
     config_t cfg;
     config_read(&cfg);
 
