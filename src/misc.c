@@ -356,8 +356,8 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
         if(wcsncmp(key_name_information->Name,
                 HKCU_PREFIX, lstrlenW(HKCU_PREFIX)) == 0) {
             uint32_t offset = reg_get_key(HKEY_CURRENT_USER, regkey, length);
-            const wchar_t *subkey =
-                wcschr(regkey + lstrlenW(HKCU_PREFIX), '\\');
+            const wchar_t *subkey = wcschr(
+                key_name_information->Name + lstrlenW(HKCU_PREFIX), '\\');
 
             // Shouldn't be a null pointer but let's just make sure.
             if(subkey != NULL) {
