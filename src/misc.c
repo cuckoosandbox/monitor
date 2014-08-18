@@ -297,12 +297,8 @@ int ensure_absolute_path(wchar_t *out, const wchar_t *in, int length)
     }
 }
 
-uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
+static uint32_t _reg_root_handle(HANDLE key_handle, wchar_t *regkey)
 {
-    ULONG ret; uint8_t buffer[sizeof(ULONG) + MAX_PATH_W * sizeof(wchar_t)];
-    KEY_NAME_INFORMATION *key_name_information =
-        (KEY_NAME_INFORMATION *) buffer;
-
     const wchar_t *key = NULL;
     switch ((uintptr_t) key_handle) {
     case 0x80000000:
@@ -335,11 +331,20 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
     }
 
     if(key != NULL) {
-        length = lstrlenW(key);
-        memcpy(regkey, key, length * sizeof(wchar_t));
-        regkey[length] = 0;
-        return length;
+        wcscpy(regkey, key);
+        return lstrlenW(key);
     }
+    return 0;
+}
+
+uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
+{
+    ULONG ret; uint8_t buffer[sizeof(ULONG) + MAX_PATH_W * sizeof(wchar_t)];
+    KEY_NAME_INFORMATION *key_name_information =
+        (KEY_NAME_INFORMATION *) buffer;
+
+    uint32_t offset = _reg_root_handle(key_handle, regkey);
+    if(offset != 0) return offset;
 
     if(NT_SUCCESS(pNtQueryKey(key_handle, KeyNameInformation,
             key_name_information, sizeof(buffer), &ret))) {
@@ -355,7 +360,7 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
         // relevant to the monitor and thus we normalize it.
         if(0 && wcsncmp(key_name_information->Name,
                 HKCU_PREFIX, lstrlenW(HKCU_PREFIX)) == 0) {
-            uint32_t offset = reg_get_key(HKEY_CURRENT_USER, regkey, length);
+            uint32_t offset = _reg_root_handle(HKEY_CURRENT_USER, regkey);
             const wchar_t *subkey = wcschr(
                 key_name_information->Name + lstrlenW(HKCU_PREFIX), '\\');
 
@@ -371,7 +376,7 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
         // normalize this as well.
         if(0 && wcsncmp(key_name_information->Name,
                 HKLM_PREFIX, lstrlenW(HKLM_PREFIX)) == 0) {
-            uint32_t offset = reg_get_key(HKEY_LOCAL_MACHINE, regkey, length);
+            uint32_t offset = _reg_root_handle(HKEY_LOCAL_MACHINE, regkey);
             wcsncpy(&regkey[offset],
                 &key_name_information->Name[lstrlenW(HKLM_PREFIX)],
                 length - offset);
@@ -393,7 +398,7 @@ uint32_t reg_get_key_objattr(const OBJECT_ATTRIBUTES *obj,
     wchar_t *regkey, uint32_t length)
 {
     if(obj != NULL) {
-        length = reg_get_key(obj->RootDirectory, regkey, MAX_PATH_W);
+        uint32_t offset = _reg_root_handle(obj->RootDirectory, regkey);
 
         // TODO Also use (Default) when Length is zero?
         if(obj->ObjectName != NULL && obj->ObjectName->Length != 0) {
