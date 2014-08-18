@@ -299,7 +299,7 @@ Pre::
     length = reg_get_key(hKey, regkey, MAX_PATH_W);
     regkey[length++] = '\\', regkey[length] = 0;
 
-    if(lpValueName == NULL) {
+    if(lpValueName == NULL || *lpValueName == 0) {
         lpValueName = "(Default)";
     }
 
@@ -329,7 +329,7 @@ Pre::
     length = reg_get_key(hKey, regkey, MAX_PATH_W);
     regkey[length++] = '\\', regkey[length] = 0;
 
-    if(lpValueName == NULL) {
+    if(lpValueName == NULL || *lpValueName == 0) {
         lpValueName = L"(Default)";
     }
 
@@ -363,7 +363,7 @@ Pre::
     length = reg_get_key(hKey, regkey, MAX_PATH_W);
     regkey[length++] = '\\', regkey[length] = 0;
 
-    if(lpValueName == NULL) {
+    if(lpValueName == NULL || *lpValueName == 0) {
         lpValueName = "(Default)";
     }
 
@@ -397,7 +397,7 @@ Pre::
     length = reg_get_key(hKey, regkey, MAX_PATH_W);
     regkey[length++] = '\\', regkey[length] = 0;
 
-    if(lpValueName == NULL) {
+    if(lpValueName == NULL || *lpValueName == 0) {
         lpValueName = L"(Default)";
     }
 
@@ -423,7 +423,7 @@ Pre::
     length = reg_get_key(hKey, regkey, MAX_PATH_W);
     regkey[length++] = '\\', regkey[length] = 0;
 
-    if(lpValueName == NULL) {
+    if(lpValueName == NULL || *lpValueName == 0) {
         lpValueName = "(Default)";
     }
 
@@ -448,7 +448,7 @@ Pre::
     length = reg_get_key(hKey, regkey, MAX_PATH_W);
     regkey[length++] = '\\', regkey[length] = 0;
 
-    if(lpValueName == NULL) {
+    if(lpValueName == NULL || *lpValueName == 0) {
         lpValueName = L"(Default)";
     }
 
