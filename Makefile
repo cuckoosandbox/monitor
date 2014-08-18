@@ -110,6 +110,6 @@ $(DLL64): $(ASMOBJ64) $(SRCOBJ64) $(HOOKOBJ64) $(LIBBSON64) $(LIBCAPSTONE64)
 	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS) -m64
 
 clean:
-	rm -rf objects/ $(DLL)
+	rm -rf objects/ $(DLL32) $(DLL64)
 	make -C test/ clean
 	make -C utils/ clean
