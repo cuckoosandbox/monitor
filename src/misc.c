@@ -483,8 +483,20 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length)
 
     int count = 0;
     for (; ebp >= bottom && ebp < top && length != 0; count++, length--) {
-        *addrs++ = *(uint32_t *)(ebp + 4);
+        addrs[count] = *(uint32_t *)(ebp + 4);
         ebp = *(uint32_t *) ebp;
+    }
+
+    // Check whether any of the return addresses are "spoofed", that is, they
+    // belong to one of our hooks. If so, then we fetch the original return
+    // address from the return address list and use that to provide a symbol.
+    // As the list traverses as last in first out we start at the "end" of the
+    // return address list (the oldest return address in it really) and
+    // iterate upwards from there on.
+    for (uint32_t idx = count, listidx = 0; idx != 0; idx--) {
+        if(hook_is_spoofed_return_address(addrs[idx - 1]) != 0) {
+            addrs[idx - 1] = hook_retaddr_get(listidx++);
+        }
     }
 
     return count;
@@ -561,20 +573,6 @@ static LONG CALLBACK _exception_handler(
     sprintf(buf, "0x%08x", (uint32_t)
         exception_pointers->ExceptionRecord->ExceptionCode);
     bson_append_string(&e, "exception_code", buf);
-
-    // First check whether any of the return addresses are "spoofed", that is,
-    // they belong to one of our hooks. If so, then we fetch the original
-    // return address from the return address list and use that to provide a
-    // symbol. As the list traverses as last in first out we start at the
-    // "end" of the return address list (the oldest return address in it
-    // really) and iterate upwards from there on.
-    for (uint32_t idx = count, listidx = 0; idx != 0; idx--) {
-        if(hook_is_spoofed_return_address(return_addresses[idx - 1]) != 0) {
-            pipe("DEBUG:Spoofed return address 0x%x -> 0x%x",
-                return_addresses[idx - 1], hook_retaddr_get(listidx));
-            return_addresses[idx - 1] = hook_retaddr_get(listidx++);
-        }
-    }
 
     for (uint32_t idx = 0; idx < count; idx++) {
         if(return_addresses[idx] == 0) break;

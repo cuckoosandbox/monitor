@@ -227,28 +227,42 @@ void log_api_pre(const char *fmt, ...)
 
 #if DEBUG
 
+#if __x86_64__
+#else
+
+static inline uintptr_t get_ebp()
+{
+    uintptr_t ret;
+    __asm__ volatile("movl %%ebp, %0" : "=r" (ret));
+    return ret;
+}
+
+#endif
+
 static bson *_log_stacktrace()
 {
     bson *ret = bson_alloc();
     bson_init(ret);
 
-    uintptr_t stacktrace[32]; char buf[12], sym[512];
+    uintptr_t addrs[32]; char buf[12], sym[512];
 
-    uint32_t count = RtlCaptureStackBackTrace(
-        0, sizeof(stacktrace) / sizeof(uintptr_t),
-        (void **) stacktrace, NULL);
+#if __x86_64__
+#else
+    uint32_t count = stacktrace(get_ebp(),
+        addrs, sizeof(addrs) / sizeof(uintptr_t));
+#endif
 
     for (uint32_t idx = 0; idx < count; idx++) {
         sprintf(buf, "%d", idx);
         bson_append_start_array(ret, buf);
 
-        sprintf(buf, "0x%p", (const uint8_t *) stacktrace[idx]);
+        sprintf(buf, "0x%p", (const uint8_t *) addrs[idx]);
         bson_append_string(ret, "0", buf);
 
 #if __x86_64__
         sym[0] = 0;
 #else
-        symbol((const uint8_t *) stacktrace[idx], sym, sizeof(sym));
+        symbol((const uint8_t *) addrs[idx], sym, sizeof(sym));
 #endif
 
         bson_append_string(ret, "1", sym);

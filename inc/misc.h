@@ -50,6 +50,8 @@ int is_shutting_down();
 void library_from_unicode_string(const UNICODE_STRING *us,
     char *library, int32_t length);
 
+int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length);
+
 void setup_exception_handler();
 
 #define COPY_UNICODE_STRING(local_name, param_name) \
