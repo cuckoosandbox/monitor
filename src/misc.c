@@ -339,7 +339,11 @@ static uint32_t _reg_root_handle(HANDLE key_handle, wchar_t *regkey)
 
 uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
 {
-    ULONG ret; uint8_t buffer[sizeof(ULONG) + MAX_PATH_W * sizeof(wchar_t)];
+    ULONG ret;
+
+    uint8_t buffer[sizeof(KEY_NAME_INFORMATION) +
+        MAX_PATH_W  * sizeof(wchar_t)];
+
     KEY_NAME_INFORMATION *key_name_information =
         (KEY_NAME_INFORMATION *) buffer;
 
@@ -355,10 +359,13 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
             return 0;
         }
 
+        length = key_name_information->NameLength / sizeof(wchar_t);
+        key_name_information->Name[length] = 0;
+
         // HKEY_CURRENT_USER is expanded into this ugly
         // \\REGISTRY\\USER\\S-1-5-<bunch of numbers> thing which is not
         // relevant to the monitor and thus we normalize it.
-        if(0 && wcsncmp(key_name_information->Name,
+        if(wcsncmp(key_name_information->Name,
                 HKCU_PREFIX, lstrlenW(HKCU_PREFIX)) == 0) {
             uint32_t offset = _reg_root_handle(HKEY_CURRENT_USER, regkey);
             const wchar_t *subkey = wcschr(
@@ -366,7 +373,7 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
 
             // Shouldn't be a null pointer but let's just make sure.
             if(subkey != NULL) {
-                wcsncpy(&regkey[offset], subkey, length - offset);
+                wcscpy(&regkey[offset], subkey);
             }
 
             return lstrlenW(regkey);
@@ -374,12 +381,11 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
 
         // HKEY_LOCAL_MACHINE might be expanded into \\REGISTRY\\MACHINE - we
         // normalize this as well.
-        if(0 && wcsncmp(key_name_information->Name,
+        if(wcsncmp(key_name_information->Name,
                 HKLM_PREFIX, lstrlenW(HKLM_PREFIX)) == 0) {
             uint32_t offset = _reg_root_handle(HKEY_LOCAL_MACHINE, regkey);
-            wcsncpy(&regkey[offset],
-                &key_name_information->Name[lstrlenW(HKLM_PREFIX)],
-                length - offset);
+            wcscpy(&regkey[offset],
+                &key_name_information->Name[lstrlenW(HKLM_PREFIX)]);
             return lstrlenW(regkey);
         }
 
