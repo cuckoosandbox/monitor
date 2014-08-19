@@ -248,7 +248,7 @@ static void _log_stacktrace(bson *b)
     count = stacktrace(get_ebp(), addrs, sizeof(addrs) / sizeof(uintptr_t));
 #endif
 
-    for (uint32_t idx = 2; idx < count; idx++) {
+    for (uint32_t idx = 3; idx < count; idx++) {
         sprintf(buf, "%d", idx);
         bson_append_start_array(b, buf);
 
