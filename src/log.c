@@ -239,25 +239,21 @@ static inline uintptr_t get_ebp()
 
 #endif
 
-static bson *_log_stacktrace()
+static void _log_stacktrace(bson *b)
 {
-    bson *ret = bson_alloc();
-    bson_init(ret);
-
-    uintptr_t addrs[32]; char buf[12], sym[512];
+    uintptr_t addrs[32]; uint32_t count = 0; char buf[12], sym[512];
 
 #if __x86_64__
 #else
-    uint32_t count = stacktrace(get_ebp(),
-        addrs, sizeof(addrs) / sizeof(uintptr_t));
+    count = stacktrace(get_ebp(), addrs, sizeof(addrs) / sizeof(uintptr_t));
 #endif
 
     for (uint32_t idx = 0; idx < count; idx++) {
         sprintf(buf, "%d", idx);
-        bson_append_start_array(ret, buf);
+        bson_append_start_array(b, buf);
 
         sprintf(buf, "0x%p", (const uint8_t *) addrs[idx]);
-        bson_append_string(ret, "0", buf);
+        bson_append_string(b, "0", buf);
 
 #if __x86_64__
         sym[0] = 0;
@@ -265,12 +261,9 @@ static bson *_log_stacktrace()
         symbol((const uint8_t *) addrs[idx], sym, sizeof(sym));
 #endif
 
-        bson_append_string(ret, "1", sym);
-        bson_append_finish_array(ret);
+        bson_append_string(b, "1", sym);
+        bson_append_finish_array(b);
     }
-
-    bson_finish(ret);
-    return ret;
 }
 
 #endif
@@ -298,12 +291,9 @@ void log_api(int index, int is_success, uintptr_t return_value,
     bson_append_int(&b, "t", GetTickCount() - g_starttick);
 
 #if DEBUG
-    bson *trace = _log_stacktrace();
-    if(trace != NULL) {
-        bson_append_bson(&b, "s", trace);
-        bson_destroy(trace);
-        bson_dealloc(trace);
-    }
+    bson_append_start_array(&b, "s");
+    _log_stacktrace(&b);
+    bson_append_finish_array(&b);
 #endif
 
     bson_append_start_array(&b, "args");
