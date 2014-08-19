@@ -95,8 +95,16 @@ Parameters::
 
     *  PWORD pwPath
     *  PVOID Unused
-    ** PUNICODE_STRING ModuleFileName module_name
+    *  PUNICODE_STRING ModuleFileName
     ** PHANDLE pHModule module_address
+
+Pre::
+
+    COPY_UNICODE_STRING(module_name, ModuleFileName);
+
+Logging::
+
+    O module_name &module_name
 
 
 LdrGetProcedureAddress

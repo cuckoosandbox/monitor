@@ -183,7 +183,7 @@ Pre::
     wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
     length = reg_get_key(KeyHandle, regkey);
 
-    if(ValueName != NULL) {
+    if(ValueName != NULL && ValueName->Buffer != NULL) {
         length = MIN(
             ValueName->Length / sizeof(wchar_t),
             MAX_PATH_W - length
@@ -220,7 +220,7 @@ Pre::
     wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
     length = reg_get_key(KeyHandle, regkey);
 
-    if(ValueName != NULL) {
+    if(ValueName != NULL && ValueName->Buffer != NULL) {
         length = MIN(
             ValueName->Length / sizeof(wchar_t),
             MAX_PATH_W - length
@@ -283,7 +283,7 @@ Pre::
     wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
     length = reg_get_key(KeyHandle, regkey);
 
-    if(ValueName != NULL) {
+    if(ValueName != NULL && ValueName->Buffer != NULL) {
         length = MIN(
             ValueName->Length / sizeof(wchar_t),
             MAX_PATH_W - length
