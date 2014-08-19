@@ -23,8 +23,8 @@ Pre::
 
     COPY_UNICODE_STRING(class, Class);
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key_objattr(ObjectAttributes, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_objattr(ObjectAttributes, regkey);
 
 Logging::
 
@@ -43,8 +43,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key_objattr(ObjectAttributes, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_objattr(ObjectAttributes, regkey);
 
 Logging::
 
@@ -63,8 +63,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key_objattr(ObjectAttributes, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_objattr(ObjectAttributes, regkey);
 
 Logging::
 
@@ -83,8 +83,8 @@ Pre::
 
     COPY_UNICODE_STRING(new_name, NewName);
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key(KeyHandle, regkey);
 
 Logging::
 
@@ -106,8 +106,8 @@ Pre::
     COPY_OBJECT_ATTRIBUTES(newfilepath, NewHiveFileName);
     COPY_OBJECT_ATTRIBUTES(backupfilepath, BackupHiveFileName);
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key(KeyHandle, regkey);
 
 Logging::
 
@@ -130,8 +130,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key(KeyHandle, regkey);
 
 Logging::
 
@@ -157,8 +157,8 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key(KeyHandle, regkey);
 
 Logging::
 
@@ -180,13 +180,14 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W]; uint32_t length;
-    length = reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
+    length = reg_get_key(KeyHandle, regkey);
 
     if(ValueName != NULL) {
         length = MIN(
             ValueName->Length / sizeof(wchar_t),
-            MAX_PATH_W - length);
+            MAX_PATH_W - length
+        );
 
         regkey[length++] = '\\';
         wcsncpy(&regkey[length], ValueName->Buffer, length);
@@ -216,13 +217,14 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W]; uint32_t length;
-    length = reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
+    length = reg_get_key(KeyHandle, regkey);
 
     if(ValueName != NULL) {
         length = MIN(
             ValueName->Length / sizeof(wchar_t),
-            MAX_PATH_W - length);
+            MAX_PATH_W - length
+        );
 
         regkey[length++] = '\\';
         wcsncpy(&regkey[length], ValueName->Buffer, length);
@@ -260,8 +262,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key(KeyHandle, regkey);
 
 Logging::
 
@@ -278,13 +280,14 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W]; uint32_t length;
-    length = reg_get_key(KeyHandle, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
+    length = reg_get_key(KeyHandle, regkey);
 
     if(ValueName != NULL) {
         length = MIN(
             ValueName->Length / sizeof(wchar_t),
-            MAX_PATH_W - length);
+            MAX_PATH_W - length
+        );
 
         regkey[length++] = '\\';
         wcsncpy(&regkey[length], ValueName->Buffer, length);
@@ -307,8 +310,8 @@ Pre::
 
     COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key_objattr(TargetKey, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_objattr(TargetKey, regkey);
 
 Logging::
 
@@ -329,8 +332,8 @@ Pre::
 
     COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key_objattr(TargetKey, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_objattr(TargetKey, regkey);
 
 Logging::
 
@@ -352,8 +355,8 @@ Pre::
 
     COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key_objattr(TargetKey, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_objattr(TargetKey, regkey);
 
 Logging::
 
@@ -374,8 +377,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key_objattr(KeyHandle, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_objattr(KeyHandle, regkey);
 
 Logging::
 
@@ -393,8 +396,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key_objattr(KeyHandle, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_objattr(KeyHandle, regkey);
 
 Logging::
 
@@ -412,8 +415,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W];
-    reg_get_key_objattr(KeyHandle, regkey, MAX_PATH_W);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_objattr(KeyHandle, regkey);
 
 Logging::
 

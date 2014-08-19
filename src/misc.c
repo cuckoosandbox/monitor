@@ -337,7 +337,7 @@ static uint32_t _reg_root_handle(HANDLE key_handle, wchar_t *regkey)
     return 0;
 }
 
-uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
+uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
 {
     ULONG ret;
 
@@ -353,13 +353,13 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
     if(NT_SUCCESS(pNtQueryKey(key_handle, KeyNameInformation,
             key_name_information, sizeof(buffer), &ret))) {
 
-        if(key_name_information->NameLength > length) {
+        if(key_name_information->NameLength > MAX_PATH_W * sizeof(wchar_t)) {
             pipe("CRITICAL:Registry key too long?! regkey length: %d",
                 key_name_information->NameLength / sizeof(wchar_t));
             return 0;
         }
 
-        length = key_name_information->NameLength / sizeof(wchar_t);
+        uint32_t length = key_name_information->NameLength / sizeof(wchar_t);
         key_name_information->Name[length] = 0;
 
         // HKEY_CURRENT_USER is expanded into this ugly
@@ -367,9 +367,11 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
         // relevant to the monitor and thus we normalize it.
         if(wcsncmp(key_name_information->Name,
                 HKCU_PREFIX, lstrlenW(HKCU_PREFIX)) == 0) {
-            uint32_t offset = _reg_root_handle(HKEY_CURRENT_USER, regkey);
+            offset = _reg_root_handle(HKEY_CURRENT_USER, regkey);
             const wchar_t *subkey = wcschr(
-                key_name_information->Name + lstrlenW(HKCU_PREFIX), '\\');
+                key_name_information->Name + lstrlenW(HKCU_PREFIX),
+                '\\'
+            );
 
             // Shouldn't be a null pointer but let's just make sure.
             if(subkey != NULL) {
@@ -383,39 +385,37 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length)
         // normalize this as well.
         if(wcsncmp(key_name_information->Name,
                 HKLM_PREFIX, lstrlenW(HKLM_PREFIX)) == 0) {
-            uint32_t offset = _reg_root_handle(HKEY_LOCAL_MACHINE, regkey);
+            offset = _reg_root_handle(HKEY_LOCAL_MACHINE, regkey);
             wcscpy(&regkey[offset],
                 &key_name_information->Name[lstrlenW(HKLM_PREFIX)]);
             return lstrlenW(regkey);
         }
 
-        memcpy(regkey, key_name_information->Name,
-            key_name_information->NameLength);
-
-        uint32_t length = key_name_information->NameLength / sizeof(wchar_t);
-
-        regkey[length] = 0;
+        wcscpy(regkey, key_name_information->Name);
         return length;
     }
     return 0;
 }
 
-uint32_t reg_get_key_objattr(const OBJECT_ATTRIBUTES *obj,
-    wchar_t *regkey, uint32_t length)
+uint32_t reg_get_key_objattr(const OBJECT_ATTRIBUTES *obj, wchar_t *regkey)
 {
     if(obj != NULL) {
         uint32_t offset = _reg_root_handle(obj->RootDirectory, regkey);
 
         // TODO Also use (Default) when Length is zero?
-        if(obj->ObjectName != NULL && obj->ObjectName->Length != 0) {
-            length = MIN(
+        if(obj->ObjectName != NULL && obj->ObjectName->Buffer != NULL &&
+                obj->ObjectName->Length != 0) {
+            uint32_t length = MIN(
                 obj->ObjectName->Length / sizeof(wchar_t),
-                MAX_PATH_W - length);
+                MAX_PATH_W - offset
+            );
 
-            wcsncpy(&regkey[length], obj->ObjectName->Buffer, length);
-            return lstrlenW(regkey);
+            memcpy(&regkey[offset], obj->ObjectName->Buffer,
+                length * sizeof(wchar_t));
+            regkey[offset + length] = 0;
+            return offset + length;
         }
-        return length;
+        return offset;
     }
     return 0;
 }

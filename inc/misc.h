@@ -40,9 +40,8 @@ void wcsncpyA(wchar_t *str, const char *value, uint32_t length);
 void hide_module_from_peb(HMODULE module_handle);
 void destroy_pe_header(HANDLE module_handle);
 
-uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey, uint32_t length);
-uint32_t reg_get_key_objattr(const OBJECT_ATTRIBUTES *obj,
-    wchar_t *regkey, uint32_t length);
+uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey);
+uint32_t reg_get_key_objattr(const OBJECT_ATTRIBUTES *obj, wchar_t *regkey);
 
 void get_ip_port(const struct sockaddr *addr, const char **ip, int *port);
 
