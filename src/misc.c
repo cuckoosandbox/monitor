@@ -485,6 +485,11 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length)
     for (; ebp >= bottom && ebp < top && length != 0; count++, length--) {
         addrs[count] = *(uint32_t *)(ebp + 4);
         ebp = *(uint32_t *) ebp;
+
+        // No need to track any further.
+        if(addrs[count] == 0) {
+            break;
+        }
     }
 
     // Check whether any of the return addresses are "spoofed", that is, they
