@@ -501,6 +501,6 @@ static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
 #define ThreadBasicInformation 0
 
 #define MAX_PATH_PLUS_TOLERANCE (MAX_PATH + 64)
-#define MAX_PATH_W 0x8000
+#define MAX_PATH_W 0x7fff
 
 #endif
