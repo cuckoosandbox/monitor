@@ -82,6 +82,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endfor %}
     );
 
+    {%- if hook.middle: %}
+    {%- for line in hook.middle: %}
+    {{line}}
+    {%- endfor %}
+    {% endif %}
+
     {% if hook.signature.special: %}
     if(hook_info()->hook_count == 1) {
     {% endif %}

@@ -149,12 +149,6 @@ class DefitionProcessor(object):
                             alias=alias, log=log))
         return ret
 
-    def _parse_pre(self, text):
-        return text.split('\n')
-
-    def _parse_prelog(self, text):
-        return self._parse_logging(text)
-
     def _parse_ensure(self, text):
         ret = []
         for line in text.split('\n'):
@@ -164,7 +158,13 @@ class DefitionProcessor(object):
             ret.append(line)
         return ret
 
-    def _parse_post(self, text):
+    def _parse_pre(self, text):
+        return text.split('\n')
+
+    def _parse_prelog(self, text):
+        return self._parse_logging(text)
+
+    def _parse_middle(self, text):
         return text.split('\n')
 
     def _parse_logging(self, text):
@@ -178,6 +178,9 @@ class DefitionProcessor(object):
                             argname=argname,
                             argvalue=argvalue))
         return ret
+
+    def _parse_post(self, text):
+        return text.split('\n')
 
     def _parse_paragraph(self, paragraph, literal_block):
         if not isinstance(paragraph, docutils.nodes.paragraph):

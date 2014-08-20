@@ -216,6 +216,15 @@ for the fact that at the moment only **one** ``buffer`` line is supported.
 (Mostly because there has been no need for other data types or multiple
 buffers yet.)
 
+.. _hook-block-middle:
+
+Middle Block
+------------
+
+The middle block executes arbitrary C code after the original function has
+been called but before the function call has been logged. Its syntax is equal
+to the :ref:`hook-block-pre`.
+
 .. _hook-block-logging:
 
 Logging Block
