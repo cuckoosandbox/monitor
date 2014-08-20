@@ -468,6 +468,7 @@ void log_new_process()
 {
     wchar_t module_path[MAX_PATH];
     GetModuleFileNameW(NULL, module_path, ARRAYSIZE(module_path));
+    GetLongPathNameW(module_path, module_path, ARRAYSIZE(module_path));
 
     g_starttick = GetTickCount();
 

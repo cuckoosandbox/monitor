@@ -14,8 +14,16 @@ Signature::
 
 Parameters::
 
-    ** LPWSTR lpPathName dirpath
+    *  LPWSTR lpPathName
     *  LPSECURITY_ATTRIBUTES lpSecurityAttributes
+
+Pre::
+
+    COPY_FILE_PATH_W(dirpath, lpPathName);
+
+Logging::
+
+    u dirpath dirpath
 
 
 CreateDirectoryExW
@@ -28,8 +36,16 @@ Signature::
 Parameters::
 
     *  LPWSTR lpTemplateDirectory
-    ** LPWSTR lpNewDirectory dirpath
+    *  LPWSTR lpNewDirectory
     *  LPSECURITY_ATTRIBUTES lpSecurityAttributes
+
+Pre::
+
+    COPY_FILE_PATH_W(dirpath, lpNewDirectory);
+
+Logging::
+
+    u dirpath dirpath
 
 
 RemoveDirectoryA
@@ -41,7 +57,15 @@ Signature::
 
 Parameters::
 
-    ** LPCTSTR lpPathName dirpath
+    *  LPCTSTR lpPathName
+
+Pre::
+
+    COPY_FILE_PATH_A(dirpath, lpPathName);
+
+Logging::
+
+    s dirpath dirpath
 
 
 RemoveDirectoryW
@@ -53,7 +77,15 @@ Signature::
 
 Parameters::
 
-    ** LPWSTR lpPathName dirpath
+    *  LPWSTR lpPathName
+
+Pre::
+
+    COPY_FILE_PATH_W(dirpath, lpPathName);
+
+Logging::
+
+    u dirpath dirpath
 
 
 MoveFileWithProgressW
@@ -65,11 +97,21 @@ Signature::
 
 Parameters::
 
-    ** LPWSTR lpExistingFileName oldfilepath
-    ** LPWSTR lpNewFileName newfilepath
+    *  LPWSTR lpExistingFileName
+    *  LPWSTR lpNewFileName
     *  LPPROGRESS_ROUTINE lpProgressRoutine
     *  LPVOID lpData
     ** DWORD dwFlags flags
+
+Pre::
+
+    COPY_FILE_PATH_W(oldfilepath, lpExistingFileName);
+    COPY_FILE_PATH_W(newfilepath, lpNewFileName);
+
+Logging::
+
+    u oldfilepath oldfilepath
+    u newfilepath newfilepath
 
 Post::
 
@@ -87,12 +129,20 @@ Signature::
 
 Parameters::
 
-    ** LPCTSTR lpFileName filepath
+    *  LPCTSTR lpFileName
     *  FINDEX_INFO_LEVELS fInfoLevelId
     *  LPVOID lpFindFileData
     *  FINDEX_SEARCH_OPS fSearchOp
     *  LPVOID lpSearchFilter
     *  DWORD dwAdditionalFlags
+
+Pre::
+
+    COPY_FILE_PATH_A(filepath, lpFileName);
+
+Logging::
+
+    s filepath filepath
 
 
 FindFirstFileExW
@@ -104,12 +154,20 @@ Signature::
 
 Parameters::
 
-    ** LPWSTR lpFileName filepath
+    *  LPWSTR lpFileName
     *  FINDEX_INFO_LEVELS fInfoLevelId
     *  LPVOID lpFindFileData
     *  FINDEX_SEARCH_OPS fSearchOp
     *  LPVOID lpSearchFilter
     *  DWORD dwAdditionalFlags
+
+Pre::
+
+    COPY_FILE_PATH_W(filepath, lpFileName);
+
+Logging::
+
+    u filepath filepath
 
 
 CopyFileA
@@ -121,9 +179,19 @@ Signature::
 
 Parameters::
 
-    ** LPCTSTR lpExistingFileName oldfilepath
-    ** LPCTSTR lpNewFileName newfilepath
+    *  LPCTSTR lpExistingFileName
+    *  LPCTSTR lpNewFileName
     ** BOOL bFailIfExists fail_if_exists
+
+Pre::
+
+    COPY_FILE_PATH_A(oldfilepath, lpExistingFileName);
+    COPY_FILE_PATH_A(newfilepath, lpNewFileName);
+
+Logging::
+
+    s oldfilepath oldfilepath
+    s newfilepath newfilepath
 
 
 CopyFileW
@@ -135,9 +203,19 @@ Signature::
 
 Parameters::
 
-    ** LPWSTR lpExistingFileName oldfilepath
-    ** LPWSTR lpNewFileName newfilepath
+    *  LPWSTR lpExistingFileName
+    *  LPWSTR lpNewFileName
     ** BOOL bFailIfExists fail_if_exists
+
+Pre::
+
+    COPY_FILE_PATH_W(oldfilepath, lpExistingFileName);
+    COPY_FILE_PATH_W(newfilepath, lpNewFileName);
+
+Logging::
+
+    u oldfilepath oldfilepath
+    u newfilepath newfilepath
 
 
 CopyFileExW
@@ -149,12 +227,22 @@ Signature::
 
 Parameters::
 
-    ** LPWSTR lpExistingFileName oldfilepath
-    ** LPWSTR lpNewFileName newfilepath
+    *  LPWSTR lpExistingFileName
+    *  LPWSTR lpNewFileName
     *  LPPROGRESS_ROUTINE lpProgressRoutine
     *  LPVOID lpData
     *  LPBOOL pbCancel
     ** DWORD dwCopyFlags flags
+
+Pre::
+
+    COPY_FILE_PATH_W(oldfilepath, lpExistingFileName);
+    COPY_FILE_PATH_W(newfilepath, lpNewFileName);
+
+Logging::
+
+    u oldfilepath oldfilepath
+    u newfilepath newfilepath
 
 
 DeleteFileA
@@ -166,22 +254,16 @@ Signature::
 
 Parameters::
 
-    ** LPCSTR lpFileName filepath
+    *  LPCSTR lpFileName
 
 Pre::
 
-    wchar_t path[MAX_PATH];
+    COPY_FILE_PATH_A(filepath, lpFileName);
+    pipe("FILE_DEL:%z", filepath);
 
-    // Turn the ascii string into a unicode string.
-    for (uint32_t idx = 0; lpFileName[idx] != 0 && idx < MAX_PATH; idx++) {
-        path[idx] = lpFileName[idx];
-    }
+Logging::
 
-    path[strlen(lpFileName)] = 0;
-
-    ensure_absolute_path(path, path, strlen(lpFileName));
-
-    pipe("FILE_DEL:%Z", path);
+    s filepath filepath
 
 
 DeleteFileW
@@ -193,15 +275,16 @@ Signature::
 
 Parameters::
 
-    ** LPWSTR lpFileName filepath
+    *  LPWSTR lpFileName
 
 Pre::
 
-    wchar_t path[MAX_PATH];
+    COPY_FILE_PATH_W(filepath, lpFileName);
+    pipe("FILE_DEL:%Z", filepath);
 
-    ensure_absolute_path(path, lpFileName, lstrlenW(lpFileName));
+Logging::
 
-    pipe("FILE_DEL:%Z", path);
+    u filepath filepath
 
 
 GetFileType

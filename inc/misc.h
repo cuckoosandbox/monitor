@@ -54,6 +54,16 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length);
 
 void setup_exception_handler();
 
+#define COPY_FILE_PATH_A(local_name, param_name) \
+    char local_name[MAX_PATH+1]; \
+    GetFullPathNameA(param_name, MAX_PATH+1, local_name, NULL); \
+    GetLongPathNameA(local_name, local_name, MAX_PATH+1);
+
+#define COPY_FILE_PATH_W(local_name, param_name) \
+    wchar_t local_name[MAX_PATH_W+1]; \
+    GetFullPathNameW(param_name, MAX_PATH_W+1, local_name, NULL); \
+    GetLongPathNameW(local_name, local_name, MAX_PATH_W+1);
+
 #define COPY_UNICODE_STRING(local_name, param_name) \
     UNICODE_STRING local_name; wchar_t local_name##_buf[MAX_PATH+128]; \
     local_name.Length = local_name.MaximumLength = 0; \
