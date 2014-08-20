@@ -64,8 +64,6 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
         image_nt_headers->OptionalHeader.DataDirectory;
     if(image_nt_headers->OptionalHeader.NumberOfRvaAndSizes <
             IMAGE_DIRECTORY_ENTRY_EXPORT + 1) {
-        pipe("DEBUG:Address 0x%x is embedded in a DLL without exports.",
-            addr);
         return -1;
     }
 
@@ -73,8 +71,6 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
         &data_directories[IMAGE_DIRECTORY_ENTRY_EXPORT];
     if(export_data_directory->VirtualAddress == 0 ||
             export_data_directory->Size == 0) {
-        pipe("DEBUG:Address 0x%x is embedded in a DLL without exports.",
-            addr);
         return -1;
     }
 
