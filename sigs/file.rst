@@ -172,10 +172,12 @@ Pre::
 
     wchar_t path[MAX_PATH];
 
-    // copy ascii to unicode string
-    for (int i = 0; lpFileName[i] != 0 && i < MAX_PATH; i++) {
-        path[i] = lpFileName[i];
+    // Turn the ascii string into a unicode string.
+    for (uint32_t idx = 0; lpFileName[idx] != 0 && idx < MAX_PATH; idx++) {
+        path[idx] = lpFileName[idx];
     }
+
+    path[strlen(lpFileName)] = 0;
 
     ensure_absolute_path(path, path, strlen(lpFileName));
 
