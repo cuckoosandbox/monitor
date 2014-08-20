@@ -103,16 +103,16 @@ Parameters::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(newfilepath, NewHiveFileName);
-    COPY_OBJECT_ATTRIBUTES(backupfilepath, BackupHiveFileName);
+    COPY_FILE_PATH_OA(newfilepath, NewHiveFileName);
+    COPY_FILE_PATH_OA(backupfilepath, BackupHiveFileName);
 
     wchar_t regkey[MAX_PATH_W+1];
     reg_get_key(KeyHandle, regkey);
 
 Logging::
 
-    x newfilepath &newfilepath
-    x backupfilepath &backupfilepath
+    u newfilepath newfilepath
+    u backupfilepath backupfilepath
     u regkey regkey
 
 
@@ -308,14 +308,14 @@ Parameters::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
+    COPY_FILE_PATH_OA(source_file, SourceFile);
 
     wchar_t regkey[MAX_PATH_W+1];
     reg_get_key_objattr(TargetKey, regkey);
 
 Logging::
 
-    x filepath &source_file
+    u filepath source_file
     u regkey regkey
 
 
@@ -330,14 +330,14 @@ Parameters::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
+    COPY_FILE_PATH_OA(source_file, SourceFile);
 
     wchar_t regkey[MAX_PATH_W+1];
     reg_get_key_objattr(TargetKey, regkey);
 
 Logging::
 
-    x filepath &source_file
+    u filepath source_file
     u regkey regkey
 
 
@@ -353,14 +353,14 @@ Parameters::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(source_file, SourceFile);
+    COPY_FILE_PATH_OA(source_file, SourceFile);
 
     wchar_t regkey[MAX_PATH_W+1];
     reg_get_key_objattr(TargetKey, regkey);
 
 Logging::
 
-    x filepath &source_file
+    u filepath source_file
     u regkey regkey
 
 

@@ -203,12 +203,11 @@ void wcsncpyA(wchar_t *str, const char *value, uint32_t length)
     *str = 0;
 }
 
-uint32_t path_from_handle(HANDLE handle,
-    wchar_t *path, uint32_t path_buffer_len)
+uint32_t path_from_handle(HANDLE handle, wchar_t *path)
 {
     IO_STATUS_BLOCK status; FILE_FS_VOLUME_INFORMATION volume_information;
 
-    unsigned char buf[FILE_NAME_INFORMATION_REQUIRED_SIZE];
+    uint8_t buf[FILE_NAME_INFORMATION_REQUIRED_SIZE];
     FILE_NAME_INFORMATION *name_information = (FILE_NAME_INFORMATION *) buf;
 
     // Get the volume serial number of the directory handle.
@@ -225,7 +224,7 @@ uint32_t path_from_handle(HANDLE handle,
     wcscpy(path, L"?:\\");
     for (path[0] = 'A'; path[0] <= 'Z'; path[0]++) {
         if(GetVolumeInformationW(path, NULL, 0, &serial_number, NULL,
-                NULL, NULL, 0) == 0 ||
+                NULL, NULL, 0) == FALSE ||
                 serial_number != volume_information.VolumeSerialNumber) {
             continue;
         }
@@ -239,17 +238,27 @@ uint32_t path_from_handle(HANDLE handle,
 
         uint32_t length = name_information->FileNameLength / sizeof(wchar_t);
 
-        // NtQueryInformationFile omits the "C:" part in a filename.
-        wcsncpy(path + 2, name_information->FileName, path_buffer_len - 2);
-
-        return length + 2 < path_buffer_len ?
-            length + 2 : path_buffer_len - 1;
+        // NtQueryInformationFile returns the filepath. Either relative
+        // (without backslash) or full path (with backslash.)
+        memcpy(path + 2, name_information->FileName,
+            name_information->FileNameLength);
+        return length + 2;
     }
     return 0;
 }
 
-uint32_t path_from_object_attributes(const OBJECT_ATTRIBUTES *obj,
-    wchar_t *path, uint32_t buffer_length)
+static uint32_t _path_handle_long_paths(wchar_t *path)
+{
+    // Replace the leading "\\??\\" by "\\\\?\\".
+    if(wcsncmp(path, L"\\??\\", 4) == 0) {
+        memcpy(path, L"\\\\?\\", 4 * sizeof(wchar_t));
+    }
+
+    return lstrlenW(path);
+}
+
+uint32_t path_from_object_attributes(
+    const OBJECT_ATTRIBUTES *obj, wchar_t *path)
 {
     if(obj == NULL || obj->ObjectName == NULL ||
             obj->ObjectName->Buffer == NULL) {
@@ -259,42 +268,16 @@ uint32_t path_from_object_attributes(const OBJECT_ATTRIBUTES *obj,
     uint32_t obj_length = obj->ObjectName->Length / sizeof(wchar_t);
 
     if(obj->RootDirectory == NULL) {
-        wcsncpy(path, obj->ObjectName->Buffer, buffer_length);
-        return obj_length > buffer_length ? buffer_length : obj_length;
+        memcpy(path, obj->ObjectName->Buffer, obj->ObjectName->Length);
+        path[obj_length] = 0;
+        return _path_handle_long_paths(path);
     }
 
-    uint32_t length =
-        path_from_handle(obj->RootDirectory, path, buffer_length);
-
-    path[length++] = L'\\';
-    wcsncpy(&path[length], obj->ObjectName->Buffer, buffer_length - length);
-
-    length += obj_length;
-    return length > buffer_length ? buffer_length : length;
-}
-
-int ensure_absolute_path(wchar_t *out, const wchar_t *in, int length)
-{
-    if(!wcsncmp(in, L"\\??\\", 4)) {
-        length -= 4, in += 4;
-        wcsncpy(out, in, length < MAX_PATH ? length : MAX_PATH);
-        return length;
-    }
-    else if(in[1] != ':' || (in[2] != '\\' && in[2] != '/')) {
-        wchar_t cur_dir[MAX_PATH], fname[MAX_PATH];
-        GetCurrentDirectoryW(ARRAYSIZE(cur_dir), cur_dir);
-
-        // Ensure the filename is zero-terminated.
-        wcsncpy(fname, in, length < MAX_PATH ? length : MAX_PATH);
-        fname[length] = 0;
-
-        PathCombineW(out, cur_dir, fname);
-        return lstrlenW(out);
-    }
-    else {
-        wcsncpy(out, in, length < MAX_PATH ? length : MAX_PATH);
-        return length;
-    }
+    uint32_t offset = path_from_handle(obj->RootDirectory, path);
+    path[offset++] = '\\';
+    memcpy(&path[offset], obj->ObjectName->Buffer, obj->ObjectName->Length);
+    path[offset + obj_length] = 0;
+    return _path_handle_long_paths(path);
 }
 
 static uint32_t _reg_root_handle(HANDLE key_handle, wchar_t *regkey)

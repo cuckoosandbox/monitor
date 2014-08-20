@@ -23,18 +23,18 @@ Parameters::
     *  PVOID EaBuffer
     *  ULONG EaLength
 
-Pre::
+Middle::
 
-    COPY_OBJECT_ATTRIBUTES(filepath, ObjectAttributes);
+    COPY_FILE_PATH_OA(filepath, ObjectAttributes);
 
 Logging::
 
-    x filepath &filepath
+    u filepath filepath
 
 Post::
 
     if(NT_SUCCESS(ret) && (DesiredAccess & DUMP_FILE_MASK) != 0) {
-        dropped_add(*FileHandle, &filepath);
+        dropped_add(*FileHandle, ObjectAttributes, filepath);
     }
 
 
@@ -47,12 +47,12 @@ Parameters::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(filepath, ObjectAttributes);
-    pipe("FILE_DEL:%O", &filepath);
+    COPY_FILE_PATH_OA(filepath, ObjectAttributes);
+    pipe("FILE_DEL:%Z", filepath);
 
 Logging::
 
-    x filepath &filepath
+    u filepath filepath
 
 
 NtOpenFile
@@ -67,18 +67,18 @@ Parameters::
     ** ULONG ShareAccess share_access
     ** ULONG OpenOptions open_options
 
-Pre::
+Middle::
 
-    COPY_OBJECT_ATTRIBUTES(filepath, ObjectAttributes);
+    COPY_FILE_PATH_OA(filepath, ObjectAttributes);
 
 Logging::
 
-    x filepath &filepath
+    u filepath filepath
 
 Post::
 
     if(NT_SUCCESS(ret) && (DesiredAccess & DUMP_FILE_MASK) != 0) {
-        dropped_add(*FileHandle, &filepath);
+        dropped_add(*FileHandle, ObjectAttributes, filepath);
     }
 
 
@@ -215,10 +215,9 @@ Pre::
     if(FileInformation != NULL && Length == sizeof(BOOLEAN) &&
             FileInformationClass == FileDispositionInformation &&
             *(BOOLEAN *) FileInformation != FALSE) {
-
-        wchar_t path[MAX_PATH];
-        path_from_handle(FileHandle, path, MAX_PATH);
-        pipe("FILE_DEL:%Z", path);
+        wchar_t filepath[MAX_PATH_W+1];
+        path_from_handle(FileHandle, filepath);
+        pipe("FILE_DEL:%Z", filepath);
     }
 
 Logging::
@@ -237,11 +236,11 @@ Parameters::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(dirpath, ObjectAttributes);
+    COPY_FILE_PATH_OA(dirpath, ObjectAttributes);
 
 Logging::
 
-    x dirpath &dirpath
+    u dirpath dirpath
 
 
 NtCreateDirectoryObject
@@ -255,8 +254,8 @@ Parameters::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(dirpath, ObjectAttributes);
+    COPY_FILE_PATH_OA(dirpath, ObjectAttributes);
 
 Logging::
 
-    x dirpath &dirpath
+    u dirpath dirpath

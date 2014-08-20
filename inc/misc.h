@@ -29,10 +29,9 @@ uintptr_t pid_from_thread_handle(HANDLE thread_handle);
 uintptr_t parent_process_id();
 
 BOOL is_directory_objattr(const OBJECT_ATTRIBUTES *obj);
-uint32_t path_from_handle(HANDLE handle,
-    wchar_t *path, uint32_t path_buffer_len);
-uint32_t path_from_object_attributes(const OBJECT_ATTRIBUTES *obj,
-    wchar_t *path, uint32_t buffer_length);
+uint32_t path_from_handle(HANDLE handle, wchar_t *path);
+uint32_t path_from_object_attributes(
+    const OBJECT_ATTRIBUTES *obj, wchar_t *path);
 int ensure_absolute_path(wchar_t *out, const wchar_t *in, int length);
 
 void wcsncpyA(wchar_t *str, const char *value, uint32_t length);
@@ -64,6 +63,22 @@ void setup_exception_handler();
     GetFullPathNameW(param_name, MAX_PATH_W+1, local_name, NULL); \
     GetLongPathNameW(local_name, local_name, MAX_PATH_W+1);
 
+#define COPY_FILE_PATH_US(local_name, param_name) \
+    wchar_t local_name[MAX_PATH_W+1]; \
+    if(param_name != NULL && param_name->Buffer != NULL) { \
+        memcpy(local_name, param_name->Buffer, param_name->Length); \
+        local_name[param_name->Length / sizeof(wchar_t)] = 0; \
+        GetFullPathNameW(local_name, MAX_PATH_W+1, local_name, NULL); \
+        GetLongPathNameW(local_name, local_name, MAX_PATH_W+1); \
+    }
+
+#define COPY_FILE_PATH_OA(local_name, param_name) \
+    wchar_t local_name[MAX_PATH_W+1], local_name##_tmp[MAX_PATH_W+1]; \
+    if(path_from_object_attributes(param_name, local_name##_tmp) != 0) { \
+        GetFullPathNameW(local_name##_tmp, MAX_PATH_W+1, local_name, NULL); \
+        GetLongPathNameW(local_name, local_name, MAX_PATH_W+1); \
+    }
+
 #define COPY_UNICODE_STRING(local_name, param_name) \
     UNICODE_STRING local_name; wchar_t local_name##_buf[MAX_PATH+128]; \
     local_name.Length = local_name.MaximumLength = 0; \
@@ -87,6 +102,6 @@ void setup_exception_handler();
     }
 
 #define FILE_NAME_INFORMATION_REQUIRED_SIZE \
-    sizeof(FILE_NAME_INFORMATION) + sizeof(wchar_t) * MAX_PATH
+    sizeof(FILE_NAME_INFORMATION) + sizeof(wchar_t) * MAX_PATH_W
 
 #endif

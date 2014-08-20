@@ -22,11 +22,11 @@ Parameters::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(filepath, ObjectAttributes);
+    COPY_FILE_PATH_OA(filepath, ObjectAttributes);
 
 Logging::
 
-    x filepath &filepath
+    u filepath filepath
 
 Post::
 
@@ -53,11 +53,11 @@ Parameters::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(filepath, ObjectAttributes);
+    COPY_FILE_PATH_OA(filepath, ObjectAttributes);
 
 Logging::
 
-    x filepath &filepath
+    u filepath filepath
 
 Post::
 
@@ -110,7 +110,7 @@ RtlCreateUserProcess
 
 Parameters::
 
-    ** PUNICODE_STRING ImagePath filepath
+    *  PUNICODE_STRING ImagePath
     ** ULONG ObjectAttributes flags
     *  PRTL_USER_PROCESS_PARAMETERS ProcessParameters
     *  PSECURITY_DESCRIPTOR ProcessSecurityDescriptor
@@ -120,6 +120,14 @@ Parameters::
     *  HANDLE DebugPort
     *  HANDLE ExceptionPort
     *  PRTL_USER_PROCESS_INFORMATION ProcessInformation
+
+Pre::
+
+    COPY_FILE_PATH_US(filepath, ImagePath);
+
+Logging::
+
+    u filepath filepath
 
 Post::
 
@@ -141,19 +149,13 @@ Parameters::
     *  POBJECT_ATTRIBUTES ObjectAttributes
     *  PCLIENT_ID ClientId
 
-Pre::
+Ensure::
 
-    COPY_OBJECT_ATTRIBUTES(object_attributes, ObjectAttributes);
-
-    uintptr_t pid = 0;
-    if(ClientId != NULL) {
-        pid = (uintptr_t) ClientId->UniqueProcess;
-    }
+    ClientId
 
 Logging::
 
-    i process_identifier pid
-    x object_attributes &object_attributes
+    l process_identifier (uintptr_t) ClientId->UniqueProcess
 
 
 NtTerminateProcess

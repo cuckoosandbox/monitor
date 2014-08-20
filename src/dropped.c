@@ -32,7 +32,7 @@ static CRITICAL_SECTION g_mutex;
 typedef struct _dropped_entry_t {
     uint32_t written;
     uint32_t length;
-    wchar_t path[MAX_PATH_PLUS_TOLERANCE];
+    wchar_t path[MAX_PATH_W+1];
 } dropped_entry_t;
 
 static void _dropped_submit(const wchar_t *path)
@@ -67,15 +67,16 @@ void dropped_init()
     InitializeCriticalSection(&g_mutex);
 }
 
-void dropped_add(HANDLE file_handle, const OBJECT_ATTRIBUTES *obj)
+void dropped_add(HANDLE file_handle, const OBJECT_ATTRIBUTES *obj,
+    const wchar_t *filepath)
 {
     dropped_entry_t e;
 
-    if(is_directory_objattr(obj) == 0 && is_ignored_file_objattr(obj) == 0) {
-        e.length = path_from_object_attributes(
-            obj, e.path, MAX_PATH_PLUS_TOLERANCE);
+    memset(&e, 0, sizeof(e));
 
-        e.length = ensure_absolute_path(e.path, e.path, e.length);
+    if(is_directory_objattr(obj) == 0 &&
+            is_ignored_file_unicode(filepath, lstrlenW(filepath)) == 0) {
+        wcscpy(e.path, filepath);
 
         EnterCriticalSection(&g_mutex);
         ht_insert(&g_files, (uintptr_t) file_handle, &e);

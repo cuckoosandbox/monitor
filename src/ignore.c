@@ -36,10 +36,3 @@ BOOL is_ignored_file_unicode(const wchar_t *fname, int length)
     // IGNORE_START(L"\\Device\\");
     return FALSE;
 }
-
-BOOL is_ignored_file_objattr(const OBJECT_ATTRIBUTES *obj)
-{
-    return is_ignored_file_unicode(obj->ObjectName->Buffer,
-        obj->ObjectName->Length / sizeof(wchar_t));
-}
-
