@@ -1,5 +1,5 @@
-CC32 = i686-w64-mingw32-gcc
-CC64 = x86_64-w64-mingw32-gcc
+CC32 = i686-w64-mingw32-gcc -m32
+CC64 = x86_64-w64-mingw32-gcc -m64
 NASM = nasm
 AR = ar
 CFLAGS = -Wall -O0 -ggdb -Wextra -std=c99 -static \
@@ -52,8 +52,8 @@ endif
 
 all: dirs $(LIBCAPSTONE32) $(LIBCAPSTONE64) \
 		$(HOOK32) $(HOOK64) $(DLL32) $(DLL64)
-	make -C test/
-	make -C utils/
+	+make -C test/
+	+make -C utils/
 
 dirs: | objects/
 
@@ -87,16 +87,16 @@ $(LIBCAPSTONE64):
 	BUILDDIR=../../objects/x64/capstone/ ./make.sh cross-win64
 
 objects/x86/%.o: %.c $(HEADER) Makefile
-	$(CC32) -c -o $@ $< $(CFLAGS) -m32
+	$(CC32) -c -o $@ $< $(CFLAGS)
 
 objects/x86/%.o: objects/x86/%.c $(HEADER) Makefile
-	$(CC32) -c -o $@ $< $(CFLAGS) -m32
+	$(CC32) -c -o $@ $< $(CFLAGS)
 
 objects/x64/%.o: %.c $(HEADER) Makefile
-	$(CC64) -c -o $@ $< $(CFLAGS) -m64
+	$(CC64) -c -o $@ $< $(CFLAGS)
 
 objects/x64/%.o: objects/x64/%.c $(HEADER) Makefile
-	$(CC64) -c -o $@ $< $(CFLAGS) -m64
+	$(CC64) -c -o $@ $< $(CFLAGS)
 
 objects/x86/asm/tramp-special.o: asm/x86/tramp.asm Makefile
 	$(NASM) -f elf32 -i asm/x86/ -d tramp_special=1 -o $@ $<
@@ -111,12 +111,12 @@ objects/x64/asm/%.o: asm/x64/%.asm Makefile
 	$(NASM) -f elf64 -i asm/x64/ -o $@ $<
 
 $(DLL32): $(ASMOBJ32) $(SRCOBJ32) $(HOOKOBJ32) $(LIBBSON32) $(LIBCAPSTONE32)
-	$(CC32) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS) -m32
+	$(CC32) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 $(DLL64): $(ASMOBJ64) $(SRCOBJ64) $(HOOKOBJ64) $(LIBBSON64) $(LIBCAPSTONE64)
-	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS) -m64
+	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 clean:
 	rm -rf objects/ $(DLL32) $(DLL64)
-	make -C test/ clean
-	make -C utils/ clean
+	+make -C test/ clean
+	+make -C utils/ clean
