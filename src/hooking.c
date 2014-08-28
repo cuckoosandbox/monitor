@@ -112,16 +112,23 @@ int lde(const void *addr)
     return size;
 }
 
-int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
+int hook_create_stub(hook_stub_t *stub, uint8_t *tramp,
+    const uint8_t *addr, uint32_t len)
 {
-    const uint8_t *base_addr = addr;
+    stub->hook_offset = stub->stack_displacement = stub->stub_used = 0;
 
-    while (len > 0) {
+    uint8_t *stack_displacement_offsets[4];
+
+    while (stub->stub_used < len) {
         int length = lde(addr);
         if(length == 0) return -1;
 
-        // How many bytes left?
-        len -= length;
+        stub->stub_used += length;
+
+        // The first available instruction after the initial five bytes.
+        if(stub->stub_used >= 5 && stub->hook_offset == 0) {
+            stub->hook_offset = stub->stub_used;
+        }
 
         // Unconditional jump with 32-bit relative offset.
         if(*addr == 0xe9) {
@@ -213,9 +220,49 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
         }
         // Return instruction indicates the end of basic block as well so we
         // have to check if we already have enough space for our hook..
-        else if((*addr == 0xc3 || *addr == 0xc2) && len > 0) {
+        else if((*addr == 0xc3 || *addr == 0xc2) && stub->stub_used < len) {
             return -1;
         }
+#if !__x86_64__
+        // Instructions that push data on to the stack.
+        else if(*addr == 0x6a || *addr == 0x68 ||
+                (*addr >= 0x50 && *addr < 0x58) ||
+                (*addr == 0xff && (addr[1] & 0x38) == 0x30)) {
+
+            // We handle this stack displacement only while we're still in
+            // the part which is before our jump. Instructions that are
+            // overwritten by our jump don't matter.
+            if(stub->hook_offset == 0) {
+                // mov eax, dword [fs:tls_hook_info]
+                *tramp++ = 0x64;
+                *tramp++ = 0xa1;
+                *tramp++ = TLS_HOOK_INFO;
+                *tramp++ = 0x00;
+                *tramp++ = 0x00;
+                *tramp++ = 0x00;
+
+                // push dword [eax+stack_offset]
+                *tramp++ = 0xff;
+                *tramp++ = 0x70;
+                *tramp++ = 0x00;
+
+                uint32_t stack_index =
+                    stub->stack_displacement / sizeof(uintptr_t);
+                stack_displacement_offsets[stack_index] = tramp - 1;
+
+                stub->stack_displacement += sizeof(uintptr_t);
+                addr += length;
+            }
+            else {
+                // This push instruction is not handled in a special way
+                // so we copy it over as-is.
+                while (length-- != 0) {
+                    *tramp++ = *addr++;
+                }
+            }
+
+        }
+#endif
         // This is a regular instruction - copy it right away.
         else {
             while (length-- != 0) {
@@ -224,9 +271,16 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
         }
     }
 
+    for (uint32_t idx = 0; idx < stub->stack_displacement / sizeof(uintptr_t);
+            idx++) {
+        *stack_displacement_offsets[idx] =
+            offsetof(hook_info_t, stack) + stub->stack_displacement -
+            idx * sizeof(uintptr_t) - sizeof(uintptr_t);
+    }
+
     // Jump to the original function at the point where our stub ends.
     tramp += asm_jump_addr(tramp, addr);
-    return addr - base_addr;
+    return 0;
 }
 
 #if __x86_64__
@@ -286,11 +340,11 @@ static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
     return NULL;
 }
 
-int hook_create_jump(uint8_t *addr, uint8_t *target, int stub_used)
+int hook_create_jump(hook_stub_t *stub, uint8_t *addr, uint8_t *target)
 {
     unsigned long old_protect;
 
-    if(VirtualProtect(addr, stub_used, PAGE_EXECUTE_READWRITE,
+    if(VirtualProtect(addr, stub->stub_used, PAGE_EXECUTE_READWRITE,
             &old_protect) == FALSE) {
         return -1;
     }
@@ -300,7 +354,7 @@ int hook_create_jump(uint8_t *addr, uint8_t *target, int stub_used)
     uint8_t *closeby = _hook_alloc_closeby(addr, ASM_JUMP_ADDR_SIZE);
 
     // Nop all used bytes out with int3's.
-    memset(addr, 0xcc, stub_used);
+    memset(addr, 0xcc, stub->stub_used);
 
     // Jump from the hooked address to our intermediate jump. The intermediate
     // jump address is within the 32-bit range a 32-bit jump can handle.
@@ -310,28 +364,29 @@ int hook_create_jump(uint8_t *addr, uint8_t *target, int stub_used)
     // 64-bit jump.
     asm_jump_addr(closeby, target);
 
-    VirtualProtect(addr, stub_used, old_protect, &old_protect);
+    VirtualProtect(addr, stub->stub_used, old_protect, &old_protect);
     return 0;
 }
 
 #else
 
-int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
+int hook_create_jump(hook_stub_t *stub, uint8_t *addr, const uint8_t *target)
 {
     unsigned long old_protect;
 
-    if(VirtualProtect(addr, stub_used, PAGE_EXECUTE_READWRITE,
+    if(VirtualProtect(addr, stub->stub_used, PAGE_EXECUTE_READWRITE,
             &old_protect) == FALSE) {
         return -1;
     }
 
     // Pad all used bytes out with int3's.
-    memset(addr, 0xcc, stub_used);
+    memset(addr + stub->hook_offset, 0xcc,
+        stub->stub_used - stub->hook_offset);
 
     // Jump from the hooked address to the target address.
-    asm_jump_32bit(addr, target);
+    asm_jump_32bit(addr + stub->hook_offset, target);
 
-    VirtualProtect(addr, stub_used, old_protect, &old_protect);
+    VirtualProtect(addr, stub->stub_used, old_protect, &old_protect);
     return 0;
 }
 
@@ -415,9 +470,10 @@ int hook2(hook_t *h)
 
     *h->orig = (FARPROC) hd->guide;
 
+    hook_stub_t stub;
+
     // Create the original function stub.
-    int stub_used = hook_create_stub(hd->func_stub, h->addr, 5);
-    if(stub_used < 0) {
+    if(hook_create_stub(&stub, hd->func_stub, h->addr, 10) < 0) {
         pipe("CRITICAL:Error creating function stub for %z!%z.",
             h->library, h->funcname);
         return -1;
@@ -431,6 +487,10 @@ int hook2(hook_t *h)
         PATCH(hd->trampoline, asm_tramp_orig_func_stub_off, hd->func_stub);
         PATCH(hd->trampoline, asm_tramp_retaddr_off, hd->clean);
         PATCH(hd->trampoline, asm_tramp_retaddr_add_off, hook_retaddr_add);
+#if !__x86_64__
+        PATCH(hd->trampoline, asm_tramp_stack_displacement_off,
+            sizeof(hook_info()->stack) - stub.stack_displacement);
+#endif
     }
     else {
         memcpy(hd->trampoline,
@@ -445,6 +505,11 @@ int hook2(hook_t *h)
             asm_tramp_special_retaddr_off, hd->clean);
         PATCH(hd->trampoline,
             asm_tramp_special_retaddr_add_off, hook_retaddr_add);
+#if !__x86_64__
+        PATCH(hd->trampoline,
+            asm_tramp_special_stack_displacement_off,
+            sizeof(hook_info()->stack) - stub.stack_displacement);
+#endif
     }
 
     memcpy(hd->guide, asm_guide, asm_guide_size);
@@ -463,17 +528,17 @@ int hook2(hook_t *h)
         (uintptr_t) hd->guide + asm_guide_next_off;
 
     uint8_t region_original[32];
-    memcpy(region_original, h->addr, stub_used);
+    memcpy(region_original, h->addr, stub.stub_used);
 
     // Patch the original function.
-    if(hook_create_jump(h->addr, hd->trampoline, stub_used) < 0) {
+    if(hook_create_jump(&stub, h->addr, hd->trampoline) < 0) {
         pipe("CRITICIAL:Error creating function jump for %z!%z.",
             h->library, h->funcname);
         return -1;
     }
 
     unhook_detect_add_region(h->funcname, h->addr, region_original,
-        h->addr, stub_used);
+        h->addr, stub.stub_used);
 
     return 0;
 }

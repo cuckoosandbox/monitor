@@ -22,6 +22,7 @@ global _asm_tramp_hook_handler_off
 global _asm_tramp_orig_func_stub_off
 global _asm_tramp_retaddr_off
 global _asm_tramp_retaddr_add_off
+global _asm_tramp_stack_displacement_off
 %else
 global _asm_tramp_special
 global _asm_tramp_special_size
@@ -30,13 +31,16 @@ global _asm_tramp_special_hook_handler_off
 global _asm_tramp_special_orig_func_stub_off
 global _asm_tramp_special_retaddr_off
 global _asm_tramp_special_retaddr_add_off
+global _asm_tramp_special_stack_displacement_off
 %endif
 
 %define TLS_HOOK_INFO 0x44
+%define TLS_TEMPORARY 0x48
 %define TLS_LASTERR 0x34
 
 %define HOOKCNT_OFF 0
 %define LASTERR_OFF 4
+%define STCKVAL_OFF 8
 
 asm_tramp:
 
@@ -59,6 +63,9 @@ _tramp_retaddr:
 _tramp_retaddr_add:
     dd 0xcccccccc
 
+_tramp_stack_displacement_off:
+    dd 0xcccccccc
+
 _tramp_addresses:
 
     test eax, eax
@@ -73,6 +80,20 @@ _tramp_getpc:
     pushad
     call dword [eax+_tramp_hook_alloc-_tramp_getpc]
     popad
+
+    mov dword [fs:TLS_TEMPORARY], eax
+    mov eax, dword [fs:TLS_HOOK_INFO]
+
+    ; do a backup of the stack contents before they're overwritten
+    pop dword [eax+STCKVAL_OFF]
+    pop dword [eax+STCKVAL_OFF+4]
+    pop dword [eax+STCKVAL_OFF+8]
+    pop dword [eax+STCKVAL_OFF+12]
+
+    mov eax, dword [fs:TLS_TEMPORARY]
+
+    ; adjust for any pushes to the stack that may have already happened
+    sub esp, dword [eax+_tramp_stack_displacement_off-_tramp_getpc]
 
     mov eax, dword [fs:TLS_HOOK_INFO]
 
@@ -134,6 +155,8 @@ _asm_tramp_hook_handler_off dd _tramp_hook_handler - asm_tramp
 _asm_tramp_orig_func_stub_off dd _tramp_orig_func_stub - asm_tramp
 _asm_tramp_retaddr_off dd _tramp_retaddr - asm_tramp
 _asm_tramp_retaddr_add_off dd _tramp_retaddr_add - asm_tramp
+_asm_tramp_stack_displacement_off dd \
+    _tramp_stack_displacement_off - asm_tramp
 %else
 _asm_tramp_special dd asm_tramp
 _asm_tramp_special_size dd _tramp_end - asm_tramp
@@ -142,4 +165,6 @@ _asm_tramp_special_hook_handler_off dd _tramp_hook_handler - asm_tramp
 _asm_tramp_special_orig_func_stub_off dd _tramp_orig_func_stub - asm_tramp
 _asm_tramp_special_retaddr_off dd _tramp_retaddr - asm_tramp
 _asm_tramp_special_retaddr_add_off dd _tramp_retaddr_add - asm_tramp
+_asm_tramp_special_stack_displacement_off dd \
+    _tramp_stack_displacement_off - asm_tramp
 %endif

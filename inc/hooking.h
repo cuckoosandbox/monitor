@@ -27,6 +27,8 @@ typedef struct _hook_info_t {
     uint32_t hook_count;
     uint32_t last_error;
 
+    uintptr_t stack[4];
+
     slist_t retaddr;
 } hook_info_t;
 
@@ -38,6 +40,12 @@ typedef struct _hook_data_t {
 
     uint8_t *_mem;
 } hook_data_t;
+
+typedef struct _hook_stub_t {
+    uint32_t stub_used;
+    uint32_t hook_offset;
+    uint32_t stack_displacement;
+} hook_stub_t;
 
 typedef struct _hook_t {
     const char *library;
