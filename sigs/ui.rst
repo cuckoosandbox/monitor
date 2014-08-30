@@ -94,6 +94,19 @@ Logging::
     s class_name class_name
 
 
+MessageBoxTimeoutA
+==================
+
+Parameters::
+
+    ** HWND hWnd window_handle
+    ** LPCTSTR lpText text
+    ** LPCTSTR lpCaption caption
+    ** UINT uType flags
+    ** WORD wLanguageId language_identifier
+    *  INT Unknown
+
+
 MessageBoxTimeoutW
 ==================
 
