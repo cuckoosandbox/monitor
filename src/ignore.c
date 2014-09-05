@@ -21,10 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ntapi.h"
 
 #define IGNORE_MATCH(s) \
-    if(!wcsnicmp(fname, s, length)) return TRUE
+    if(wcsnicmp(fname, s, length) == 0) return TRUE
 
 #define IGNORE_START(s) \
-    if(!wcsnicmp(fname, s, sizeof(s)/sizeof(wchar_t)-1)) return TRUE
+    if(wcsnicmp(fname, s, sizeof(s)/sizeof(wchar_t)-1) == 0) return TRUE
 
 BOOL is_ignored_file_unicode(const wchar_t *fname, int length)
 {

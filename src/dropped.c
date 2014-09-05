@@ -38,7 +38,7 @@ typedef struct _dropped_entry_t {
 static void _dropped_submit(const wchar_t *path)
 {
     // If the path is prepended with \??\, then we strip that.
-    if(!wcsncmp(path, L"\\??\\", 4)) {
+    if(wcsncmp(path, L"\\??\\", 4) == 0) {
         pipe("FILE_NEW:%Z", path + 4);
     }
 
@@ -51,7 +51,7 @@ static void _dropped_submit(const wchar_t *path)
     }
 
     // \Device\HarddiskVolume1 is an alias for C:\.
-    else if(!wcsnicmp(path, HDDVOL1, lstrlenW(HDDVOL1))) {
+    else if(wcsnicmp(path, HDDVOL1, lstrlenW(HDDVOL1)) == 0) {
         pipe("FILE_NEW:C:%Z", path + lstrlenW(HDDVOL1));
     }
 

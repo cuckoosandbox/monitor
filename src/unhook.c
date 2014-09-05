@@ -88,8 +88,8 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
             region_t *r = &g_regions[g_region_index];
 
             // Check whether this memory region still equals what we made it.
-            if(!memcmp(r->region_address, r->region_modified,
-                    r->region_length)) {
+            if(memcmp(r->region_address, r->region_modified,
+                    r->region_length) == 0) {
                 continue;
             }
 
@@ -98,8 +98,8 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
 
             // If the memory region matches the original contents, then it
             // has been restored to its original state.
-            if(!memcmp(r->region_address, r->region_original,
-                    r->region_length)) {
+            if(memcmp(r->region_address, r->region_original,
+                    r->region_length) == 0) {
                 msg = "Function was unhooked/restored!";
             }
 

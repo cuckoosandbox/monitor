@@ -370,7 +370,7 @@ static uint8_t *_hook_follow_jumps(const char *funcname, uint8_t *addr)
         }
 
         // mov edi, edi ; push ebp ; mov ebp, esp ; pop ebp ; jmp short imm8
-        if(!memcmp(addr, "\x8b\xff\x55\x8b\xec\x5d\xeb", 7)) {
+        if(memcmp(addr, "\x8b\xff\x55\x8b\xec\x5d\xeb", 7) == 0) {
             unhook_detect_add_region(funcname, addr, addr, addr, 8);
             addr = addr + 8 + *(signed char *)(addr + 7);
             continue;

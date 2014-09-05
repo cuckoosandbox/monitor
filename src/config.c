@@ -47,25 +47,25 @@ void config_read(config_t *cfg)
 
             const char *key = buf, *value = p + 1;
 
-            if(!strcmp(key, "pipe")) {
+            if(strcmp(key, "pipe") == 0) {
                 strcpy(cfg->pipe_name, value);
             }
-            else if(!strcmp(key, "shutdown-mutex")) {
+            else if(strcmp(key, "shutdown-mutex") == 0) {
                 strcpy(cfg->shutdown_mutex, value);
             }
-            else if(!strcmp(key, "first-process")) {
+            else if(strcmp(key, "first-process") == 0) {
                 cfg->first_process = value[0] == '1';
             }
-            else if(!strcmp(key, "startup-time")) {
+            else if(strcmp(key, "startup-time") == 0) {
                 cfg->startup_time = atoi(value);
             }
-            else if(!strcmp(key, "host-ip")) {
+            else if(strcmp(key, "host-ip") == 0) {
                 cfg->host_ip = inet_addr(value);
             }
-            else if(!strcmp(key, "host-port")) {
+            else if(strcmp(key, "host-port") == 0) {
                 cfg->host_port = atoi(value);
             }
-            else if(!strcmp(key, "force-sleepskip")) {
+            else if(strcmp(key, "force-sleepskip") == 0) {
                 cfg->force_sleep_skip = value[0] == '1';
             }
         }
