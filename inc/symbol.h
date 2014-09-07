@@ -20,7 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MONITOR_SYMBOL_H
 
 #include <stdint.h>
+#include <windows.h>
 
+void symbol_init(HMODULE module_handle);
 int symbol(const uint8_t *addr, char *sym, uint32_t length);
 
 #endif

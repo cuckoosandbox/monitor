@@ -26,6 +26,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
      PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | \
      PAGE_EXECUTE_WRITECOPY)
 
+static const uint8_t *g_monitor_base_address;
+static uint32_t *g_monitor_function_addresses;
+static uint32_t *g_monitor_names_addresses;
+static uint16_t *g_monitor_ordinals;
+static uint32_t g_monitor_number_of_names;
+
 static int _page_is_readable(const uint8_t *addr)
 {
     MEMORY_BASIC_INFORMATION mbi;
@@ -54,6 +60,16 @@ static int _eat_pointers_for_module(const uint8_t *mod,
     IMAGE_NT_HEADERS *image_nt_headers =
         (IMAGE_NT_HEADERS *)(mod + image_dos_header->e_lfanew);
 
+    // Check whether this module is the Monitor DLL. As the monitor destroys
+    // its own PE header we cache the related pointers. Fetch them now.
+    if(mod == g_monitor_base_address) {
+        *function_addresses = g_monitor_function_addresses;
+        *names_addresses = g_monitor_names_addresses;
+        *ordinals = g_monitor_ordinals;
+        *number_of_names = g_monitor_number_of_names;
+        return 0;
+    }
+
     IMAGE_DATA_DIRECTORY *data_directories =
         image_nt_headers->OptionalHeader.DataDirectory;
     if(image_nt_headers->OptionalHeader.NumberOfRvaAndSizes <
@@ -77,6 +93,15 @@ static int _eat_pointers_for_module(const uint8_t *mod,
     *names_addresses = (uint32_t *)(mod + export_directory->AddressOfNames);
     *ordinals = (uint16_t *)(mod + export_directory->AddressOfNameOrdinals);
     return 0;
+}
+
+void symbol_init(HMODULE module_handle)
+{
+    g_monitor_base_address = (const uint8_t *) module_handle;
+
+    _eat_pointers_for_module(g_monitor_base_address,
+        &g_monitor_function_addresses, &g_monitor_names_addresses,
+        &g_monitor_ordinals, &g_monitor_number_of_names);
 }
 
 int symbol(const uint8_t *addr, char *sym, uint32_t length)
