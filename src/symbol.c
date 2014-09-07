@@ -46,16 +46,10 @@ static const uint8_t *_module_from_address(const uint8_t *addr)
     return NULL;
 }
 
-int symbol(const uint8_t *addr, char *sym, uint32_t length)
+static int _eat_pointers_for_module(const uint8_t *mod,
+    uint32_t **function_addresses, uint32_t **names_addresses,
+    uint16_t **ordinals, uint32_t *number_of_names)
 {
-    int len; *sym = 0;
-
-    const uint8_t *mod = _module_from_address(addr);
-    if(mod == NULL) {
-        pipe("DEBUG:Unable to find module for address 0x%x.", addr);
-        return -1;
-    }
-
     IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) mod;
     IMAGE_NT_HEADERS *image_nt_headers =
         (IMAGE_NT_HEADERS *)(mod + image_dos_header->e_lfanew);
@@ -77,18 +71,35 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
     IMAGE_EXPORT_DIRECTORY *export_directory = (IMAGE_EXPORT_DIRECTORY *)(
         mod + export_data_directory->VirtualAddress);
 
-    uint32_t *function_addresses = (uint32_t *)(
+    *number_of_names = export_directory->NumberOfNames;
+    *function_addresses = (uint32_t *)(
         mod + export_directory->AddressOfFunctions);
+    *names_addresses = (uint32_t *)(mod + export_directory->AddressOfNames);
+    *ordinals = (uint16_t *)(mod + export_directory->AddressOfNameOrdinals);
+    return 0;
+}
 
-    uint32_t *names_addresses = (uint32_t *)(
-        mod + export_directory->AddressOfNames);
+int symbol(const uint8_t *addr, char *sym, uint32_t length)
+{
+    int len; *sym = 0;
 
-    uint16_t *ordinals = (uint16_t *)(
-        mod + export_directory->AddressOfNameOrdinals);
+    const uint8_t *mod = _module_from_address(addr);
+    if(mod == NULL) {
+        pipe("DEBUG:Unable to find module for address 0x%x.", addr);
+        return -1;
+    }
+
+    uint32_t *function_addresses, *names_addresses, number_of_names;
+    uint16_t *ordinals;
+
+    if(_eat_pointers_for_module(mod, &function_addresses, &names_addresses,
+            &ordinals, &number_of_names) < 0) {
+        return -1;
+    }
 
     int32_t lower = -1, higher = -1;
 
-    for (uint32_t idx = 0; idx < export_directory->NumberOfNames; idx++) {
+    for (uint32_t idx = 0; idx < number_of_names; idx++) {
         const uint8_t *fnaddr = mod + function_addresses[ordinals[idx]];
 
         if(addr > fnaddr && (lower == -1 ||
