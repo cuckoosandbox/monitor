@@ -227,8 +227,7 @@ void log_api_pre(const char *fmt, ...)
 
 #if DEBUG
 
-#if __x86_64__
-#else
+#if !__x86_64__
 
 static inline uintptr_t get_ebp()
 {
@@ -243,8 +242,7 @@ static void _log_stacktrace(bson *b)
 {
     uintptr_t addrs[32]; uint32_t count = 0; char buf[12], sym[512];
 
-#if __x86_64__
-#else
+#if !__x86_64__
     count = stacktrace(get_ebp(), addrs, sizeof(addrs) / sizeof(uintptr_t));
 #endif
 

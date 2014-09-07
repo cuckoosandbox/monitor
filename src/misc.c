@@ -456,8 +456,7 @@ void library_from_unicode_string(const UNICODE_STRING *us,
     }
 }
 
-#if __x86_64__
-#else
+#if !__x86_64__
 
 int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length)
 {
@@ -537,8 +536,7 @@ static LONG CALLBACK _exception_handler(
 
     memset(return_addresses, 0, sizeof(return_addresses));
 
-#if __x86_64__
-#else
+#if !__x86_64__
     count = stacktrace(exception_pointers->ContextRecord->Ebp,
         return_addresses, sizeof(return_addresses) / sizeof(uint32_t));
 #endif
