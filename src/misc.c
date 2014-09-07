@@ -207,13 +207,14 @@ uint32_t path_from_handle(HANDLE handle, wchar_t *path)
 {
     IO_STATUS_BLOCK status; FILE_FS_VOLUME_INFORMATION volume_information;
 
-    uint8_t buf[FILE_NAME_INFORMATION_REQUIRED_SIZE];
-    FILE_NAME_INFORMATION *name_information = (FILE_NAME_INFORMATION *) buf;
+    FILE_NAME_INFORMATION *name_information = (FILE_NAME_INFORMATION *)
+        calloc(1, FILE_NAME_INFORMATION_REQUIRED_SIZE);
 
     // Get the volume serial number of the directory handle.
     if(NT_SUCCESS(pNtQueryVolumeInformationFile(handle, &status,
             &volume_information, sizeof(volume_information),
             FileFsVolumeInformation)) == 0) {
+        *path = 0;
         return 0;
     }
 
@@ -242,19 +243,28 @@ uint32_t path_from_handle(HANDLE handle, wchar_t *path)
         // (without backslash) or full path (with backslash.)
         memcpy(path + 2, name_information->FileName,
             name_information->FileNameLength);
+
+        path[2 + length] = 0;
+
+        free(name_information);
         return length + 2;
     }
+    free(name_information);
     return 0;
 }
 
 static uint32_t _path_handle_long_paths(wchar_t *path)
 {
-    // Replace the leading "\\??\\" by "\\\\?\\".
+    uint32_t length = lstrlenW(path);
+
+    // Remove the leading "\\??\\".
     if(wcsncmp(path, L"\\??\\", 4) == 0) {
-        memcpy(path, L"\\\\?\\", 4 * sizeof(wchar_t));
+        length -= 4;
+        memmove(path, path + 4, length * sizeof(wchar_t));
+        path[length] = 0;
     }
 
-    return lstrlenW(path);
+    return length;
 }
 
 uint32_t path_from_object_attributes(
