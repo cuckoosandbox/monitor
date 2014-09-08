@@ -87,29 +87,50 @@ void hook_enable()
     hook_info()->hook_count--;
 }
 
+static int g_capstone_init = 0; static csh g_capstone;
+
+static void _capstone_init()
+{
+    if(g_capstone_init == 0) {
+#if __x86_64__
+        cs_open(CS_ARCH_X86, CS_MODE_64, &g_capstone);
+#else
+        cs_open(CS_ARCH_X86, CS_MODE_32, &g_capstone);
+#endif
+        g_capstone_init = 1;
+    }
+}
+
 int lde(const void *addr)
 {
-    static int capstone_init = 0; static csh capstone;
-
-    if(capstone_init == 0) {
-#if __x86_64__
-        cs_open(CS_ARCH_X86, CS_MODE_64, &capstone);
-#else
-        cs_open(CS_ARCH_X86, CS_MODE_32, &capstone);
-#endif
-        capstone_init = 1;
-    }
+    _capstone_init();
 
     cs_insn *insn;
 
     size_t count =
-        cs_disasm_ex(capstone, addr, 16, (uintptr_t) addr, 1, &insn);
+        cs_disasm_ex(g_capstone, addr, 16, (uintptr_t) addr, 1, &insn);
     if(count == 0) return 0;
 
     int size = insn->size;
 
     cs_free(insn, count);
     return size;
+}
+
+int disasm(const void *addr, char *str)
+{
+    _capstone_init();
+
+    cs_insn *insn;
+
+    size_t count =
+        cs_disasm_ex(g_capstone, addr, 16, (uintptr_t) addr, 1, &insn);
+    if(count == 0) return -1;
+
+    sprintf(str, "%s %s", insn->mnemonic, insn->op_str);
+
+    cs_free(insn, count);
+    return 0;
 }
 
 int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)

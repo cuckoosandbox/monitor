@@ -66,6 +66,10 @@ int hook2(hook_t *h);
 
 int hook_is_spoofed_return_address(uintptr_t addr);
 
+#define DISASM_BUFSIZ 128
+
+int disasm(const void *addr, char *str);
+
 extern const hook_t g_hooks[];
 
 #endif
