@@ -4,56 +4,6 @@ Signature::
     * Category: misc
 
 
-WriteConsoleA
-=============
-
-Signature::
-
-    * Library: kernel32
-    * Return value: BOOL
-
-Parameters::
-
-    ** HANDLE hConsoleOutput console_handle
-    *  const VOID *lpBuffer
-    *  DWORD nNumberOfCharsToWrite
-    *  LPDWORD lpNumberOfCharsWritten
-    *  LPVOID lpReseverd
-
-Ensure::
-
-    * lpNumberOfCharsWritten
-
-Logging::
-
-    S buffer *lpNumberOfCharsWritten, lpBuffer
-
-
-WriteConsoleW
-=============
-
-Signature::
-
-    * Library: kernel32
-    * Return value: BOOL
-
-Parameters::
-
-    ** HANDLE hConsoleOutput console_handle
-    *  const VOID *lpBuffer
-    *  DWORD nNumberOfCharsToWrite
-    *  LPDWORD lpNumberOfCharsWritten
-    *  LPVOID lpReseverd
-
-Ensure::
-
-    * lpNumberOfCharsWritten
-
-Logging::
-
-    U buffer *lpNumberOfCharsWritten, lpBuffer
-
-
 GetSystemMetrics
 ================
 
