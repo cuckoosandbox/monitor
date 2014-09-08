@@ -116,7 +116,7 @@ uintptr_t pid_from_process_handle(HANDLE process_handle)
     PROCESS_BASIC_INFORMATION pbi; ULONG size;
 
     if(NT_SUCCESS(pNtQueryInformationProcess(process_handle,
-            ProcessBasicInformation, &pbi, sizeof(pbi), &size)) &&
+            ProcessBasicInformation, &pbi, sizeof(pbi), &size)) != FALSE &&
             size == sizeof(pbi)) {
         return pbi.UniqueProcessId;
     }
@@ -128,7 +128,7 @@ uintptr_t pid_from_thread_handle(HANDLE thread_handle)
     THREAD_BASIC_INFORMATION tbi; ULONG size;
 
     if(NT_SUCCESS(pNtQueryInformationThread(thread_handle,
-            ThreadBasicInformation, &tbi, sizeof(tbi), &size)) &&
+            ThreadBasicInformation, &tbi, sizeof(tbi), &size)) != FALSE &&
             size == sizeof(tbi)) {
         return (uintptr_t) tbi.ClientId.UniqueProcess;
     }
@@ -144,7 +144,7 @@ BOOL is_directory_objattr(const OBJECT_ATTRIBUTES *obj)
 {
     FILE_BASIC_INFORMATION info;
 
-    if(NT_SUCCESS(pNtQueryAttributesFile(obj, &info))) {
+    if(NT_SUCCESS(pNtQueryAttributesFile(obj, &info)) != FALSE) {
         return info.FileAttributes & FILE_ATTRIBUTE_DIRECTORY ? TRUE : FALSE;
     }
 
@@ -210,7 +210,7 @@ uint32_t path_from_handle(HANDLE handle, wchar_t *path)
     // Get the volume serial number of the directory handle.
     if(NT_SUCCESS(pNtQueryVolumeInformationFile(handle, &status,
             &volume_information, sizeof(volume_information),
-            FileFsVolumeInformation)) == 0) {
+            FileFsVolumeInformation)) == FALSE) {
         *path = 0;
         return 0;
     }
@@ -234,7 +234,7 @@ uint32_t path_from_handle(HANDLE handle, wchar_t *path)
         // Obtain the relative path for this filename on the given harddisk.
         if(NT_SUCCESS(pNtQueryInformationFile(handle, &status,
                 name_information, FILE_NAME_INFORMATION_REQUIRED_SIZE,
-                FileNameInformation)) == 0) {
+                FileNameInformation)) == FALSE) {
             continue;
         }
 
@@ -346,7 +346,7 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
     if(key_name_information == NULL) return 0;
 
     if(NT_SUCCESS(pNtQueryKey(key_handle, KeyNameInformation,
-            key_name_information, buffer_length, &ret))) {
+            key_name_information, buffer_length, &ret)) != FALSE) {
 
         if(key_name_information->NameLength > MAX_PATH_W * sizeof(wchar_t)) {
             pipe("CRITICAL:Registry key too long?! regkey length: %d",
