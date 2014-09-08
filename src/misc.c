@@ -361,7 +361,7 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
         // HKEY_CURRENT_USER is expanded into this ugly
         // \\REGISTRY\\USER\\S-1-5-<bunch of numbers> thing which is not
         // relevant to the monitor and thus we normalize it.
-        if(wcsncmp(key_name_information->Name,
+        if(wcsnicmp(key_name_information->Name,
                 HKCU_PREFIX, lstrlenW(HKCU_PREFIX)) == 0) {
             offset = _reg_root_handle(HKEY_CURRENT_USER, regkey);
             const wchar_t *subkey = wcschr(
@@ -380,7 +380,7 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
 
         // HKEY_LOCAL_MACHINE might be expanded into \\REGISTRY\\MACHINE - we
         // normalize this as well.
-        if(wcsncmp(key_name_information->Name,
+        if(wcsnicmp(key_name_information->Name,
                 HKLM_PREFIX, lstrlenW(HKLM_PREFIX)) == 0) {
             offset = _reg_root_handle(HKEY_LOCAL_MACHINE, regkey);
             wcscpy(&regkey[offset],
