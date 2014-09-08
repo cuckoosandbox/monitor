@@ -3,8 +3,7 @@ CC64 = x86_64-w64-mingw32-gcc
 NASM = nasm
 AR = ar
 CFLAGS = -Wall -O0 -ggdb -Wextra -std=c99 -static \
-		 -Wno-missing-field-initializers -I inc/ -I objects/x86/code/ \
-		 -DDEBUG=$(DEBUG)0
+		 -Wno-missing-field-initializers -I inc/ -I objects/x86/code/
 LDFLAGS = -lws2_32 -lshlwapi
 MAKEFLAGS = -j8
 
@@ -43,6 +42,14 @@ LIBCAPSTONE64 = objects/x64/capstone/capstone.lib
 DLL32 = monitor-x86.dll
 DLL64 = monitor-x64.dll
 
+ifdef DEBUG
+	CFLAGS += -DDEBUG=1
+	CSCONF = data/capstone-config-debug.mk
+else
+	CFLAGS += -DDEBUG=0
+	CSCONF = data/capstone-config-release.mk
+endif
+
 all: dirs $(LIBCAPSTONE32) $(LIBCAPSTONE64) \
 		$(HOOK32) $(HOOK64) $(DLL32) $(DLL64)
 	make -C test/
@@ -69,13 +76,13 @@ $(LIBBSON64): $(BSONOBJ64)
 
 $(LIBCAPSTONE32):
 	git submodule update --init && \
-	cp data/capstone-config.mk src/capstone/config.mk && \
+	cp $(CSCONF) src/capstone/config.mk && \
 	cd src/capstone/ && \
 	BUILDDIR=../../objects/x86/capstone/ ./make.sh cross-win32
 
 $(LIBCAPSTONE64):
 	git submodule update --init && \
-	cp data/capstone-config.mk src/capstone/config.mk && \
+	cp $(CSCONF) src/capstone/config.mk && \
 	cd src/capstone/ && \
 	BUILDDIR=../../objects/x64/capstone/ ./make.sh cross-win64
 
