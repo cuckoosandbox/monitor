@@ -217,6 +217,7 @@ uint32_t path_from_handle(HANDLE handle, wchar_t *path)
 
     FILE_NAME_INFORMATION *name_information = (FILE_NAME_INFORMATION *)
         calloc(1, FILE_NAME_INFORMATION_REQUIRED_SIZE);
+    if(name_information == NULL) return 0;
 
     unsigned long serial_number;
 
@@ -334,21 +335,23 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
 {
     ULONG ret;
 
-    uint8_t buffer[sizeof(KEY_NAME_INFORMATION) +
-        MAX_PATH_W  * sizeof(wchar_t)];
-
-    KEY_NAME_INFORMATION *key_name_information =
-        (KEY_NAME_INFORMATION *) buffer;
+    uint32_t buffer_length =
+        sizeof(KEY_NAME_INFORMATION) + MAX_PATH_W * sizeof(wchar_t);
 
     uint32_t offset = _reg_root_handle(key_handle, regkey);
     if(offset != 0) return offset;
 
+    KEY_NAME_INFORMATION *key_name_information =
+        (KEY_NAME_INFORMATION *) calloc(1, buffer_length);
+    if(key_name_information == NULL) return 0;
+
     if(NT_SUCCESS(pNtQueryKey(key_handle, KeyNameInformation,
-            key_name_information, sizeof(buffer), &ret))) {
+            key_name_information, buffer_length, &ret))) {
 
         if(key_name_information->NameLength > MAX_PATH_W * sizeof(wchar_t)) {
             pipe("CRITICAL:Registry key too long?! regkey length: %d",
                 key_name_information->NameLength / sizeof(wchar_t));
+            free(key_name_information);
             return 0;
         }
 
@@ -371,6 +374,7 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
                 wcscpy(&regkey[offset], subkey);
             }
 
+            free(key_name_information);
             return lstrlenW(regkey);
         }
 
@@ -381,10 +385,12 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
             offset = _reg_root_handle(HKEY_LOCAL_MACHINE, regkey);
             wcscpy(&regkey[offset],
                 &key_name_information->Name[lstrlenW(HKLM_PREFIX)]);
+            free(key_name_information);
             return lstrlenW(regkey);
         }
 
         wcscpy(regkey, key_name_information->Name);
+        free(key_name_information);
         return length;
     }
     return 0;
