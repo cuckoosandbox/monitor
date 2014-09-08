@@ -207,9 +207,6 @@ uint32_t path_from_handle(HANDLE handle, wchar_t *path)
 {
     IO_STATUS_BLOCK status; FILE_FS_VOLUME_INFORMATION volume_information;
 
-    FILE_NAME_INFORMATION *name_information = (FILE_NAME_INFORMATION *)
-        calloc(1, FILE_NAME_INFORMATION_REQUIRED_SIZE);
-
     // Get the volume serial number of the directory handle.
     if(NT_SUCCESS(pNtQueryVolumeInformationFile(handle, &status,
             &volume_information, sizeof(volume_information),
@@ -217,6 +214,9 @@ uint32_t path_from_handle(HANDLE handle, wchar_t *path)
         *path = 0;
         return 0;
     }
+
+    FILE_NAME_INFORMATION *name_information = (FILE_NAME_INFORMATION *)
+        calloc(1, FILE_NAME_INFORMATION_REQUIRED_SIZE);
 
     unsigned long serial_number;
 
