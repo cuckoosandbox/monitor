@@ -36,8 +36,8 @@ typedef struct _region_t {
     uint32_t        region_reported;
 } region_t;
 
-static HANDLE g_unhook_thread_handle, g_watcher_thread_handle;
-static uint32_t g_region_index;
+static HANDLE g_unhook_thread_handle, g_watcher_thread_handle, g_main_thread;
+static uint32_t g_region_index, g_unhook_exited;
 static region_t g_regions[UNHOOK_MAXCOUNT];
 
 void unhook_detect_add_region(const char *funcname, const uint8_t *addr,
@@ -71,7 +71,8 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
 
     hook_disable();
 
-    while (1) {
+    while (g_main_thread == NULL ||
+            WaitForSingleObject(g_main_thread, 10) == WAIT_TIMEOUT) {
         if(WaitForSingleObject(g_watcher_thread_handle,
                 500) != WAIT_TIMEOUT) {
             if(watcher_first != 0) {
@@ -112,6 +113,7 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
         }
     }
 
+    g_unhook_exited = 1;
     return 0;
 }
 
@@ -123,15 +125,23 @@ static DWORD WINAPI _unhook_watch_thread(LPVOID param)
 
     while (WaitForSingleObject(g_unhook_thread_handle, 1000) == WAIT_TIMEOUT);
 
-    if(is_shutting_down() == 0) {
+    if(g_unhook_exited == 0 && is_shutting_down() == 0) {
         log_anomaly("unhook", 1, NULL,
             "Unhook detection thread has been corrupted!");
     }
     return 0;
 }
 
-int unhook_init_detection()
+int unhook_init_detection(int first_process)
 {
+    g_unhook_exited = 0;
+
+    if(first_process != 0) {
+        DuplicateHandle(GetCurrentProcess(), GetCurrentThread(),
+            GetCurrentProcess(), &g_main_thread, 0,
+            FALSE, DUPLICATE_SAME_ACCESS);
+    }
+
     g_unhook_thread_handle =
         CreateThread(NULL, 0, &_unhook_detect_thread, NULL, 0, NULL);
 
