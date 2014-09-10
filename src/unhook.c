@@ -136,6 +136,8 @@ int unhook_init_detection(int first_process)
 {
     g_unhook_exited = 0;
 
+    // TODO Note that this only works with the QueueUserAPC injection method
+    // as CreateRemoteThread creates a new thread.
     if(first_process != 0) {
         DuplicateHandle(GetCurrentProcess(), GetCurrentThread(),
             GetCurrentProcess(), &g_main_thread, 0,
