@@ -288,6 +288,12 @@ class DefitionProcessor(object):
                 # original function call even if it's originally specified as
                 # a null pointer.
                 if 'ensure' in row and arg['argname'] in row['ensure']:
+                    if arg['argtype'] not in self.dereference:
+                        raise Exception(
+                            'No dereference definition available for '
+                            'argument type %r. Please add it to '
+                            'conf/dereference.conf' % arg['argtype'])
+
                     ensure[arg['argname']] = self.dereference[arg['argtype']]
 
             # Dictionary with the dereferenced types for each parameter.
