@@ -88,6 +88,10 @@ Parameters::
 
     *  SHELLEXECUTEINFOW *pExecInfo
 
+Ensure::
+
+    pExecInfo
+
 Logging::
 
     u filepath pExecInfo->lpFile
