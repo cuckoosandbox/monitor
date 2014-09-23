@@ -20,12 +20,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    if(lpSubKey != NULL) {
-        regkey[length++] = '\\';
-        wcsncpyA(&regkey[length], lpSubKey, MAX_PATH_W - length);
-    }
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_asciiz(hKey, lpSubKey, regkey);
 
 Logging::
 
@@ -45,12 +41,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    if(lpSubKey != NULL) {
-        regkey[length++] = '\\';
-        wcsncpy(&regkey[length], lpSubKey, MAX_PATH_W - length);
-    }
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_uniz(hKey, lpSubKey, regkey);
 
 Logging::
 
@@ -74,10 +66,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-    wcsncpyA(&regkey[length], lpSubKey, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_asciiz(hKey, lpSubKey, regkey);
 
 Logging::
 
@@ -101,10 +91,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-    wcsncpy(&regkey[length], lpSubKey, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_uniz(hKey, lpSubKey, regkey);
 
 Logging::
 
@@ -121,10 +109,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-    wcsncpyA(&regkey[length], lpSubKey, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_asciiz(hKey, lpSubKey, regkey);
 
 Logging::
 
@@ -141,10 +127,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-    wcsncpy(&regkey[length], lpSubKey, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_uniz(hKey, lpSubKey, regkey);
 
 Logging::
 
@@ -239,10 +223,8 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-    wcsncpyA(&regkey[length], lpValueName, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_asciiz(hKey, lpValueName, regkey);
 
 Logging::
 
@@ -270,10 +252,8 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-    wcsncpy(&regkey[length], lpValueName, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_uniz(hKey, lpValueName, regkey);
 
 Logging::
 
@@ -295,15 +275,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-
-    if(lpValueName == NULL || *lpValueName == 0) {
-        lpValueName = "(Default)";
-    }
-
-    wcsncpyA(&regkey[length], lpValueName, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_asciiz(hKey, lpValueName, regkey);
 
 Logging::
 
@@ -325,15 +298,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-
-    if(lpValueName == NULL || *lpValueName == 0) {
-        lpValueName = L"(Default)";
-    }
-
-    wcsncpy(&regkey[length], lpValueName, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_uniz(hKey, lpValueName, regkey);
 
 Logging::
 
@@ -359,15 +325,8 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-
-    if(lpValueName == NULL || *lpValueName == 0) {
-        lpValueName = "(Default)";
-    }
-
-    wcsncpyA(&regkey[length], lpValueName, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_asciiz(hKey, lpValueName, regkey);
 
 Logging::
 
@@ -393,15 +352,8 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-
-    if(lpValueName == NULL || *lpValueName == 0) {
-        lpValueName = L"(Default)";
-    }
-
-    wcsncpy(&regkey[length], lpValueName, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_uniz(hKey, lpValueName, regkey);
 
 Logging::
 
@@ -419,15 +371,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-
-    if(lpValueName == NULL || *lpValueName == 0) {
-        lpValueName = "(Default)";
-    }
-
-    wcsncpyA(&regkey[length], lpValueName, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_asciiz(hKey, lpValueName, regkey);
 
 Logging::
 
@@ -444,15 +389,8 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1]; uint32_t length;
-    length = reg_get_key(hKey, regkey);
-    regkey[length++] = '\\';
-
-    if(lpValueName == NULL || *lpValueName == 0) {
-        lpValueName = L"(Default)";
-    }
-
-    wcsncpy(&regkey[length], lpValueName, MAX_PATH_W - length);
+    wchar_t regkey[MAX_PATH_W+1];
+    reg_get_key_uniz(hKey, lpValueName, regkey);
 
 Logging::
 

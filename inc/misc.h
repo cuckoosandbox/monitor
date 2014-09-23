@@ -40,6 +40,16 @@ void hide_module_from_peb(HMODULE module_handle);
 void destroy_pe_header(HANDLE module_handle);
 
 uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey);
+uint32_t reg_get_key_ascii(HANDLE key_handle,
+    const char *subkey, uint32_t length, wchar_t *regkey);
+uint32_t reg_get_key_asciiz(HANDLE key_handle,
+    const char *subkey, wchar_t *regkey);
+uint32_t reg_get_key_uni(HANDLE key_handle,
+    const wchar_t *subkey, uint32_t length, wchar_t *regkey);
+uint32_t reg_get_key_uniz(HANDLE key_handle,
+    const wchar_t *subkey, wchar_t *regkey);
+uint32_t reg_get_key_unistr(HANDLE key_handle,
+    const UNICODE_STRING *unistr, wchar_t *regkey);
 uint32_t reg_get_key_objattr(const OBJECT_ATTRIBUTES *obj, wchar_t *regkey);
 
 void get_ip_port(const struct sockaddr *addr, const char **ip, int *port);

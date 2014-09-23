@@ -325,8 +325,10 @@ static uint32_t _reg_root_handle(HANDLE key_handle, wchar_t *regkey)
     }
 
     if(key != NULL) {
-        wcscpy(regkey, key);
-        return lstrlenW(key);
+        uint32_t length = lstrlenW(key);
+        memmove(regkey, key, length * sizeof(wchar_t));
+        regkey[length] = 0;
+        return length;
     }
     return 0;
 }
@@ -369,13 +371,18 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
                 '\\'
             );
 
+            // Subtract the part of the key from the length that
+            // we're skipping.
+            length -= subkey - key_name_information->Name;
+
             // Shouldn't be a null pointer but let's just make sure.
-            if(subkey != NULL) {
-                wcscpy(&regkey[offset], subkey);
+            if(subkey != NULL && length != 0) {
+                memmove(&regkey[offset], subkey, length * sizeof(wchar_t));
+                regkey[offset + length] = 0;
             }
 
             free(key_name_information);
-            return lstrlenW(regkey);
+            return offset + length;
         }
 
         // HKEY_LOCAL_MACHINE might be expanded into \\REGISTRY\\MACHINE - we
@@ -383,38 +390,104 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
         if(wcsnicmp(key_name_information->Name,
                 HKLM_PREFIX, lstrlenW(HKLM_PREFIX)) == 0) {
             offset = _reg_root_handle(HKEY_LOCAL_MACHINE, regkey);
-            wcscpy(&regkey[offset],
-                &key_name_information->Name[lstrlenW(HKLM_PREFIX)]);
+            const wchar_t *ptr =
+                &key_name_information->Name[lstrlenW(HKLM_PREFIX)];
+
+            // Subtract the part of the key from the length that
+            // we're skipping.
+            length -= lstrlenW(HKLM_PREFIX);
+
+            memmove(&regkey[offset], ptr, length * sizeof(wchar_t));
+            regkey[offset + length] = 0;
+
             free(key_name_information);
             return lstrlenW(regkey);
         }
 
-        wcscpy(regkey, key_name_information->Name);
+        memmove(regkey, key_name_information->Name, length * sizeof(wchar_t));
+        regkey[length] = 0;
+
         free(key_name_information);
         return length;
     }
     return 0;
 }
 
+uint32_t reg_get_key_ascii(HANDLE key_handle,
+    const char *subkey, uint32_t length, wchar_t *regkey)
+{
+    uint32_t offset = reg_get_key(key_handle, regkey);
+
+    if(subkey == NULL || length == 0) {
+        subkey = "(Default)";
+        length = strlen(subkey);
+    }
+
+    length = MIN(length, MAX_PATH_W - offset);
+
+    regkey[offset++] = '\\';
+    wcsncpyA(regkey, subkey, length);
+    regkey[offset + length] = 0;
+    return offset + length;
+}
+
+uint32_t reg_get_key_asciiz(HANDLE key_handle,
+    const char *subkey, wchar_t *regkey)
+{
+    return reg_get_key_ascii(key_handle, subkey,
+        subkey != NULL ? strlen(subkey) : 0, regkey);
+}
+
+uint32_t reg_get_key_uni(HANDLE key_handle,
+    const wchar_t *subkey, uint32_t length, wchar_t *regkey)
+{
+    uint32_t offset = reg_get_key(key_handle, regkey);
+
+    if(subkey == NULL || length == 0) {
+        subkey = L"(Default)";
+        length = lstrlenW(subkey);
+    }
+
+    length = MIN(length, MAX_PATH_W - offset);
+
+    regkey[offset++] = '\\';
+    memmove(&regkey[offset], subkey, length * sizeof(wchar_t));
+    regkey[offset + length] = 0;
+    return offset + length;
+}
+
+uint32_t reg_get_key_uniz(HANDLE key_handle,
+    const wchar_t *subkey, wchar_t *regkey)
+{
+    return reg_get_key_uni(key_handle, subkey,
+        subkey != NULL ? lstrlenW(subkey) : 0, regkey);
+}
+
+uint32_t reg_get_key_unistr(HANDLE key_handle,
+    const UNICODE_STRING *unistr, wchar_t *regkey)
+{
+    const wchar_t *ptr = NULL; uint32_t length = 0;
+
+    if(unistr != NULL && unistr->Buffer != NULL && unistr->Length != 0) {
+        ptr = unistr->Buffer;
+        length = unistr->Length / sizeof(wchar_t);
+    }
+
+    return reg_get_key_uni(key_handle, ptr, length, regkey);
+}
+
 uint32_t reg_get_key_objattr(const OBJECT_ATTRIBUTES *obj, wchar_t *regkey)
 {
     if(obj != NULL) {
-        uint32_t offset = _reg_root_handle(obj->RootDirectory, regkey);
+        const wchar_t *ptr = NULL; uint32_t length = 0;
 
-        // TODO Also use (Default) when Length is zero?
         if(obj->ObjectName != NULL && obj->ObjectName->Buffer != NULL &&
                 obj->ObjectName->Length != 0) {
-            uint32_t length = MIN(
-                obj->ObjectName->Length / sizeof(wchar_t),
-                MAX_PATH_W - offset
-            );
-
-            memcpy(&regkey[offset], obj->ObjectName->Buffer,
-                length * sizeof(wchar_t));
-            regkey[offset + length] = 0;
-            return offset + length;
+            ptr = obj->ObjectName->Buffer;
+            length = obj->ObjectName->Length / sizeof(wchar_t);
         }
-        return offset;
+
+        return reg_get_key_uni(obj->RootDirectory, ptr, length, regkey);
     }
     return 0;
 }
