@@ -203,6 +203,46 @@ void wcsncpyA(wchar_t *str, const char *value, uint32_t length)
     *str = 0;
 }
 
+int copy_unicode_string(const UNICODE_STRING *in,
+    UNICODE_STRING *out, wchar_t *buffer, uint32_t length)
+{
+    memset(out, 0, sizeof(UNICODE_STRING));
+
+    if(in != NULL && in->Buffer != NULL && in->Length < length) {
+        out->Buffer = buffer;
+        out->Length = in->Length;
+        out->MaximumLength = length;
+
+        memcpy(out->Buffer, in->Buffer, in->Length);
+        return 0;
+    }
+    return -1;
+}
+
+int copy_object_attributes(const OBJECT_ATTRIBUTES *in,
+    OBJECT_ATTRIBUTES *out, UNICODE_STRING *unistr,
+    wchar_t *buffer, uint32_t length)
+{
+    memset(out, 0, sizeof(OBJECT_ATTRIBUTES));
+
+    if(in != NULL && in->Length == sizeof(OBJECT_ATTRIBUTES)) {
+        out->Length = in->Length;
+        out->RootDirectory = in->RootDirectory;
+        out->Attributes = in->Attributes;
+        out->SecurityDescriptor = in->SecurityDescriptor;
+        out->SecurityQualityOfService = in->SecurityQualityOfService;
+        out->ObjectName = NULL;
+
+        if(in->ObjectName != NULL) {
+            out->ObjectName = unistr;
+            return copy_unicode_string(in->ObjectName,
+                unistr, buffer, length);
+        }
+        return 0;
+    }
+    return -1;
+}
+
 uint32_t path_from_handle(HANDLE handle, wchar_t *path)
 {
     IO_STATUS_BLOCK status; FILE_FS_VOLUME_INFORMATION volume_information;

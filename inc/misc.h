@@ -39,6 +39,13 @@ void wcsncpyA(wchar_t *str, const char *value, uint32_t length);
 void hide_module_from_peb(HMODULE module_handle);
 void destroy_pe_header(HANDLE module_handle);
 
+int copy_unicode_string(const UNICODE_STRING *in,
+    UNICODE_STRING *out, wchar_t *buffer, uint32_t length);
+
+int copy_object_attributes(const OBJECT_ATTRIBUTES *in,
+    OBJECT_ATTRIBUTES *out, UNICODE_STRING *unistr,
+    wchar_t *buffer, uint32_t length);
+
 uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey);
 uint32_t reg_get_key_ascii(HANDLE key_handle,
     const char *subkey, uint32_t length, wchar_t *regkey);
@@ -90,26 +97,15 @@ void setup_exception_handler();
     }
 
 #define COPY_UNICODE_STRING(local_name, param_name) \
-    UNICODE_STRING local_name; wchar_t local_name##_buf[MAX_PATH+128]; \
-    local_name.Length = local_name.MaximumLength = 0; \
-    local_name.Buffer = local_name##_buf; \
-    memset(local_name##_buf, 0, sizeof(local_name##_buf)); \
-    if(param_name != NULL && \
-            param_name->MaximumLength < sizeof(local_name##_buf)) { \
-        local_name.Length = param_name->Length; \
-        local_name.MaximumLength = param_name->MaximumLength; \
-        memcpy(local_name.Buffer, param_name->Buffer, \
-            local_name.MaximumLength); \
-    }
+    UNICODE_STRING local_name; wchar_t local_name##_buffer[MAX_PATH_W+1]; \
+    copy_unicode_string(param_name, &local_name, \
+        local_name##_buffer, sizeof(local_name##_buffer));
 
 #define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
-    OBJECT_ATTRIBUTES local_name; \
-    memset(&local_name, 0, sizeof(local_name)); \
-    COPY_UNICODE_STRING(local_name##_str, unistr_from_objattr(param_name)); \
-    if(param_name != NULL) { \
-        memcpy(&local_name, param_name, sizeof(local_name)); \
-        local_name.ObjectName = &local_name##_str; \
-    }
+    OBJECT_ATTRIBUTES local_name; UNICODE_STRING local_name##_unistr; \
+    wchar_t local_name##_buffer[MAX_PATH_W+1]; \
+    copy_object_attributes(param_name, &local_name, &local_name##_unistr, \
+        local_name##_buffer, sizeof(local_name##_buffer));
 
 #define FILE_NAME_INFORMATION_REQUIRED_SIZE \
     sizeof(FILE_NAME_INFORMATION) + sizeof(wchar_t) * MAX_PATH_W
