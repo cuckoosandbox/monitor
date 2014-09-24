@@ -479,15 +479,8 @@ uint32_t reg_get_key_unistr(HANDLE key_handle,
 uint32_t reg_get_key_objattr(const OBJECT_ATTRIBUTES *obj, wchar_t *regkey)
 {
     if(obj != NULL) {
-        const wchar_t *ptr = NULL; uint32_t length = 0;
-
-        if(obj->ObjectName != NULL && obj->ObjectName->Buffer != NULL &&
-                obj->ObjectName->Length != 0) {
-            ptr = obj->ObjectName->Buffer;
-            length = obj->ObjectName->Length / sizeof(wchar_t);
-        }
-
-        return reg_get_key_uni(obj->RootDirectory, ptr, length, regkey);
+        return reg_get_key_unistr(obj->RootDirectory,
+            obj->ObjectName, regkey);
     }
     return 0;
 }
