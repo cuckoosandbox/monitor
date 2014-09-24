@@ -276,18 +276,27 @@ uint32_t path_from_object_attributes(
         return 0;
     }
 
-    uint32_t obj_length = obj->ObjectName->Length / sizeof(wchar_t);
-
     if(obj->RootDirectory == NULL) {
-        memcpy(path, obj->ObjectName->Buffer, obj->ObjectName->Length);
-        path[obj_length] = 0;
+        uint32_t length = MIN(
+            obj->ObjectName->Length / sizeof(wchar_t),
+            MAX_PATH_W
+        );
+
+        memcpy(path, obj->ObjectName->Buffer, length * sizeof(wchar_t));
+        path[length] = 0;
         return _path_handle_long_paths(path);
     }
 
     uint32_t offset = path_from_handle(obj->RootDirectory, path);
     path[offset++] = '\\';
-    memcpy(&path[offset], obj->ObjectName->Buffer, obj->ObjectName->Length);
-    path[offset + obj_length] = 0;
+
+    uint32_t length = MIN(
+        obj->ObjectName->Length / sizeof(wchar_t),
+        MAX_PATH_W - offset
+    );
+
+    memcpy(&path[offset], obj->ObjectName->Buffer, length * sizeof(wchar_t));
+    path[offset + length] = 0;
     return _path_handle_long_paths(path);
 }
 
