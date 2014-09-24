@@ -308,6 +308,19 @@ static uint32_t _path_handle_long_paths(wchar_t *path)
     return length;
 }
 
+uint32_t path_from_unicode_string(const UNICODE_STRING *unistr,
+    wchar_t *path, uint32_t length)
+{
+    if(unistr != NULL && unistr->Buffer != NULL && unistr->Length != 0) {
+        length = MIN(unistr->Length / sizeof(wchar_t), length);
+
+        memcpy(path, unistr->Buffer, length * sizeof(wchar_t));
+        path[length] = 0;
+        return _path_handle_long_paths(path);
+    }
+    return 0;
+}
+
 uint32_t path_from_object_attributes(
     const OBJECT_ATTRIBUTES *obj, wchar_t *path)
 {
@@ -317,27 +330,14 @@ uint32_t path_from_object_attributes(
     }
 
     if(obj->RootDirectory == NULL) {
-        uint32_t length = MIN(
-            obj->ObjectName->Length / sizeof(wchar_t),
-            MAX_PATH_W
-        );
-
-        memcpy(path, obj->ObjectName->Buffer, length * sizeof(wchar_t));
-        path[length] = 0;
-        return _path_handle_long_paths(path);
+        return path_from_unicode_string(obj->ObjectName, path, MAX_PATH_W);
     }
 
     uint32_t offset = path_from_handle(obj->RootDirectory, path);
     path[offset++] = '\\';
 
-    uint32_t length = MIN(
-        obj->ObjectName->Length / sizeof(wchar_t),
-        MAX_PATH_W - offset
-    );
-
-    memcpy(&path[offset], obj->ObjectName->Buffer, length * sizeof(wchar_t));
-    path[offset + length] = 0;
-    return _path_handle_long_paths(path);
+    return path_from_unicode_string(obj->ObjectName,
+        &path[offset], MAX_PATH_W - offset);
 }
 
 static uint32_t _reg_root_handle(HANDLE key_handle, wchar_t *regkey)

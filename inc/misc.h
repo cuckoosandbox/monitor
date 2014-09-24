@@ -29,10 +29,12 @@ uintptr_t pid_from_thread_handle(HANDLE thread_handle);
 uintptr_t parent_process_id();
 
 BOOL is_directory_objattr(const OBJECT_ATTRIBUTES *obj);
+
 uint32_t path_from_handle(HANDLE handle, wchar_t *path);
+uint32_t path_from_unicode_string(const UNICODE_STRING *unistr,
+    wchar_t *path, uint32_t length);
 uint32_t path_from_object_attributes(
     const OBJECT_ATTRIBUTES *obj, wchar_t *path);
-int ensure_absolute_path(wchar_t *out, const wchar_t *in, int length);
 
 void wcsncpyA(wchar_t *str, const char *value, uint32_t length);
 
