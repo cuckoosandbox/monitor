@@ -208,7 +208,7 @@ int copy_unicode_string(const UNICODE_STRING *in,
 {
     memset(out, 0, sizeof(UNICODE_STRING));
 
-    if(in != NULL && in->Buffer != NULL && in->Length < length) {
+    if(in != NULL && in->Buffer != NULL) {
         out->Buffer = buffer;
         out->Length = in->Length;
         out->MaximumLength = length;
