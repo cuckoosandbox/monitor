@@ -36,6 +36,12 @@ uint32_t path_from_unicode_string(const UNICODE_STRING *unistr,
 uint32_t path_from_object_attributes(
     const OBJECT_ATTRIBUTES *obj, wchar_t *path);
 
+uint32_t path_get_full_pathA(const char *in, wchar_t *out);
+uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out);
+uint32_t path_get_full_path_unistr(const UNICODE_STRING *in, wchar_t *out);
+uint32_t path_get_full_path_objattr(
+    const OBJECT_ATTRIBUTES *in, wchar_t *out);
+
 void wcsncpyA(wchar_t *str, const char *value, uint32_t length);
 
 void hide_module_from_peb(HMODULE module_handle);
@@ -73,30 +79,20 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length);
 void setup_exception_handler();
 
 #define COPY_FILE_PATH_A(local_name, param_name) \
-    char local_name[MAX_PATH+1]; \
-    GetFullPathNameA(param_name, MAX_PATH+1, local_name, NULL); \
-    GetLongPathNameA(local_name, local_name, MAX_PATH+1);
+    wchar_t local_name[MAX_PATH_W+1]; \
+    path_get_full_pathA(param_name, local_name);
 
 #define COPY_FILE_PATH_W(local_name, param_name) \
     wchar_t local_name[MAX_PATH_W+1]; \
-    GetFullPathNameW(param_name, MAX_PATH_W+1, local_name, NULL); \
-    GetLongPathNameW(local_name, local_name, MAX_PATH_W+1);
+    path_get_full_pathW(param_name, local_name);
 
 #define COPY_FILE_PATH_US(local_name, param_name) \
     wchar_t local_name[MAX_PATH_W+1]; \
-    if(param_name != NULL && param_name->Buffer != NULL) { \
-        memcpy(local_name, param_name->Buffer, param_name->Length); \
-        local_name[param_name->Length / sizeof(wchar_t)] = 0; \
-        GetFullPathNameW(local_name, MAX_PATH_W+1, local_name, NULL); \
-        GetLongPathNameW(local_name, local_name, MAX_PATH_W+1); \
-    }
+    path_get_full_path_unistr(param_name, local_name);
 
 #define COPY_FILE_PATH_OA(local_name, param_name) \
-    wchar_t local_name[MAX_PATH_W+1], local_name##_tmp[MAX_PATH_W+1]; \
-    if(path_from_object_attributes(param_name, local_name##_tmp) != 0) { \
-        GetFullPathNameW(local_name##_tmp, MAX_PATH_W+1, local_name, NULL); \
-        GetLongPathNameW(local_name, local_name, MAX_PATH_W+1); \
-    }
+    wchar_t local_name[MAX_PATH_W+1]; \
+    path_get_full_path_objattr(param_name, local_name);
 
 #define COPY_UNICODE_STRING(local_name, param_name) \
     UNICODE_STRING local_name; wchar_t local_name##_buffer[MAX_PATH_W+1]; \
