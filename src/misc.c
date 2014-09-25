@@ -385,11 +385,9 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
     }
     // If the path starts with "\\SystemRoot\\" then we manually replace it
     // with "C:\\Windows".
-    else if(wcsnicmp(in, L"\\SystemRoot\\",
-            lstrlenW(L"\\SystemRoot\\")) == 0) {
+    else if(wcsnicmp(in, L"\\SystemRoot\\", 12) == 0) {
         wcscpy(input, L"\\\\?\\C:\\Windows\\");
-        wcsncat(input, in + lstrlenW(L"\\SystemRoot\\"),
-            MAX_PATH_W+1 - lstrlenW(L"\\\\?\\C:\\Windows\\"));
+        wcsncat(input, in + 12, MAX_PATH_W+1 - lstrlenW(input));
     }
     // If the path doesn't start with C: or similar then it's not an absolute
     // path and we shouldn't prepend "\\\\?\\".
