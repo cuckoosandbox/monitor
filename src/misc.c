@@ -29,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "symbol.h"
 
 static char g_shutdown_mutex[MAX_PATH];
+static uint32_t g_tls_unicode_buffers;
+static uint32_t g_tls_unicode_buffer_index;
 
 #define HKCU_PREFIX L"\\REGISTRY\\USER\\S-1-5-"
 #define HKLM_PREFIX L"\\REGISTRY\\MACHINE"
@@ -109,6 +111,28 @@ void misc_init(const char *shutdown_mutex)
         GetProcAddress(mod, "RtlAddVectoredExceptionHandler");
 
     strncpy(g_shutdown_mutex, shutdown_mutex, sizeof(g_shutdown_mutex));
+
+    g_tls_unicode_buffers = TlsAlloc();
+    g_tls_unicode_buffer_index = TlsAlloc();
+}
+
+static wchar_t *_unicode_buffer()
+{
+    uintptr_t index = (uintptr_t) TlsGetValue(g_tls_unicode_buffer_index);
+    wchar_t **buffers = (wchar_t **) TlsGetValue(g_tls_unicode_buffers);
+
+    // If the buffers have not been allocated already then do so now.
+    if(buffers == NULL) {
+        buffers = malloc(sizeof(wchar_t *) * 8);
+        for (uint32_t idx = 0; idx < 8; idx++) {
+            buffers[idx] = (wchar_t *)
+                malloc(sizeof(wchar_t) * (MAX_PATH_W + 1));
+        }
+        TlsSetValue(g_tls_unicode_buffers, buffers);
+    }
+
+    TlsSetValue(g_tls_unicode_buffer_index, (void *)(index + 1));
+    return buffers[index % 8];
 }
 
 uintptr_t pid_from_process_handle(HANDLE process_handle)
@@ -351,8 +375,8 @@ uint32_t path_get_full_pathA(const char *in, wchar_t *out)
 
 uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
 {
-    wchar_t input[MAX_PATH_W+1], partial[MAX_PATH_W+1];
-    wchar_t partial2[MAX_PATH_W+1], *last_ptr = NULL, *partial_ptr;
+    wchar_t *input = _unicode_buffer(), *partial = _unicode_buffer();
+    wchar_t *partial2 = _unicode_buffer(), *last_ptr = NULL, *partial_ptr;
 
     // First normalize the input file path.
     if(wcsncmp(in, L"\\??\\", 4) == 0 || wcsncmp(in, L"\\\\?\\", 4) == 0) {
@@ -437,7 +461,7 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
 
 uint32_t path_get_full_path_unistr(const UNICODE_STRING *in, wchar_t *out)
 {
-    wchar_t input[MAX_PATH_W+1];
+    wchar_t *input = _unicode_buffer();
 
     if(in != NULL && in->Buffer != NULL) {
         memcpy(input, in->Buffer, in->Length);
@@ -451,7 +475,7 @@ uint32_t path_get_full_path_unistr(const UNICODE_STRING *in, wchar_t *out)
 
 uint32_t path_get_full_path_objattr(const OBJECT_ATTRIBUTES *in, wchar_t *out)
 {
-    wchar_t input[MAX_PATH_W+1];
+    wchar_t *input = _unicode_buffer();
 
     if(path_from_object_attributes(in, input) != 0) {
         return path_get_full_pathW(input, out);
