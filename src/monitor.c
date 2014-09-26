@@ -28,6 +28,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sleep.h"
 #include "unhook.h"
 
+/** Init the monitor
+*
+* Inits the basic features and hides the module. Also destroys the PE HEADER if not DEBUG-compiled
+**/
 void monitor_init(HMODULE module_handle)
 {
     config_t cfg;
@@ -53,6 +57,10 @@ void monitor_init(HMODULE module_handle)
 #endif
 }
 
+/** Iterate through APIs to hook and hook them
+*
+* library: Library to hook. Can be NULL for hooking everything
+**/
 void monitor_hook(const char *library)
 {
     // TODO Make sure that special hooks are not handled regardless.
@@ -74,6 +82,8 @@ void monitor_hook(const char *library)
     hook_enable();
 }
 
+/** Send an event to Cuckoo, notifying it that the monitor is ready
+**/
 void monitor_notify()
 {
     hook_disable();
@@ -90,6 +100,8 @@ void monitor_notify()
     hook_enable();
 }
 
+/** Initialises the monitor and hooks
+**/
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
 {
     (void) hModule; (void) lpReserved;
