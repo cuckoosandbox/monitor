@@ -21,6 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ntapi.h"
 #include "config.h"
 
+/** Read the configuration file into the structure
+* If no configuration file is present, structure will be zeroed
+*
+*cfg: config structure that will be filled
+**/
 void config_read(config_t *cfg)
 {
     char buf[512], config_fname[MAX_PATH];
