@@ -44,6 +44,11 @@ static SOCKET g_sock = INVALID_SOCKET;
 static unsigned int g_starttick;
 static uint8_t g_api_init[MONITOR_HOOKCNT];
 
+/** Send log buffer
+*
+* buf: buffer to send
+* length: length of this buffer
+**/
 static void log_raw(const char *buf, size_t length)
 {
     if(g_sock == INVALID_SOCKET) return;
@@ -63,16 +68,37 @@ static void log_raw(const char *buf, size_t length)
     LeaveCriticalSection(&g_mutex);
 }
 
+/** Add int32 to bson
+*
+* bson: bson to append to
+* idx: key of the data
+* value: value to append
+**/
 static void log_int32(bson *b, const char *idx, int value)
 {
     bson_append_int(b, idx, value);
 }
 
+/** Add long64 to bson
+*
+* bson: bson to append to
+* idx: key of the data
+* value: value to append
+**/
 static void log_int64(bson *b, const char *idx, int64_t value)
 {
     bson_append_long(b, idx, value);
 }
 
+/** Add string to bson
+*
+* String will be added as utf8
+*
+* bson: bson to append to
+* idx: key of the data
+* str: string to add
+* length: Length of this string
+**/
 static void log_string(bson *b, const char *idx, const char *str, int length)
 {
     if(str == NULL) {
@@ -92,6 +118,15 @@ static void log_string(bson *b, const char *idx, const char *str, int length)
     free(utf8s);
 }
 
+/** Add wstring to bson
+*
+* String will be added as utf8
+*
+* bson: bson to append to
+* idx: key of the data
+* str: string to add
+* length: Length of this string
+**/
 static void log_wstring(bson *b, const char *idx,
     const wchar_t *str, int length)
 {
@@ -111,6 +146,15 @@ static void log_wstring(bson *b, const char *idx,
     free(utf8s);
 }
 
+/** Log an array to bson
+*
+* Data will be logged as string
+*
+* bson: bson to append to
+* idx: key of the data
+* str: string to add
+* length: Length of this string
+**/
 static void log_argv(bson *b, const char *idx, int argc, const char **argv)
 {
     bson_append_start_array(b, idx);
@@ -123,6 +167,15 @@ static void log_argv(bson *b, const char *idx, int argc, const char **argv)
     bson_append_finish_array(b);
 }
 
+/** Log an array to bson
+*
+* Data will be logged as wstring
+*
+* bson: bson to append to
+* idx: key of the data
+* str: string to add
+* length: Length of this string
+**/
 static void log_wargv(bson *b, const char *idx,
     int argc, const wchar_t **argv)
 {
@@ -137,6 +190,14 @@ static void log_wargv(bson *b, const char *idx,
     bson_append_finish_array(b);
 }
 
+/** Log a buffer
+*
+*
+* bson: bson to append to
+* idx: key of the data
+* buf: buffer to log
+* length: Length of this buffer
+**/
 static void log_buffer(bson *b, const char *idx,
     const uint8_t *buf, size_t length)
 {
@@ -150,6 +211,12 @@ static void log_buffer(bson *b, const char *idx,
         (const char *) buf, trunclength);
 }
 
+/** Send description for a specific log entry
+*
+* Will send a combination of name, category, api parameters, ... (depending on log message)
+*
+* index: ID of the log message to be described
+**/
 void log_explain(int index)
 {
     bson b; char argidx[4];
@@ -190,6 +257,10 @@ void log_explain(int index)
     bson_destroy(&b);
 }
 
+/** Logging used to log a buffer before it gets sent to the original API
+*
+* fmt: The format. Only "b" is currently allowed (followed by size and buffer as arguments)
+**/
 void log_api_pre(const char *fmt, ...)
 {
     // For now we only require support for a single buffer object.
@@ -229,6 +300,8 @@ void log_api_pre(const char *fmt, ...)
 
 #if !__x86_64__
 
+/** Get stack addr
+**/
 static inline uintptr_t get_ebp()
 {
     uintptr_t ret;
@@ -238,6 +311,10 @@ static inline uintptr_t get_ebp()
 
 #endif
 
+/** Logs a stack trace
+*
+* bson: bson to log to
+**/
 static void _log_stacktrace(bson *b)
 {
     uintptr_t addrs[32]; uint32_t count = 0; char buf[12], sym[512];
@@ -266,6 +343,15 @@ static void _log_stacktrace(bson *b)
 
 #endif
 
+/** Logs an API call (or similar)
+*
+* Compiled with DEBUG options it will add a stacktrace as well
+*
+* index: index of the api
+* int_success: boolean if successful
+* return_value: Return value of the API
+* fmt: Format and parameters
+**/
 void log_api(int index, int is_success, uintptr_t return_value,
     const char *fmt, ...)
 {
@@ -462,6 +548,10 @@ void log_api(int index, int is_success, uintptr_t return_value,
     bson_destroy(&b);
 }
 
+/** Log new process
+*
+* Sends timestamp, pid, parent pid, module path
+**/
 void log_new_process()
 {
     wchar_t module_path[MAX_PATH];
@@ -477,6 +567,10 @@ void log_new_process()
         GetCurrentProcessId(), parent_process_id(), module_path);
 }
 
+/** Log new thread
+*
+* Sends process identifier
+**/
 void log_new_thread()
 {
     log_api(1, 1, 0, "l", GetCurrentProcessId());
@@ -489,6 +583,13 @@ void log_anomaly(const char *subcategory, int success,
         GetCurrentThreadId(), subcategory, funcname, msg);
 }
 
+/** Initialize logging
+*
+* And connect it to the port
+*
+* ip: IP to connect to
+* port: port to connect to
+**/
 void log_init(unsigned int ip, unsigned short port)
 {
     InitializeCriticalSection(&g_mutex);
@@ -529,6 +630,10 @@ void log_init(unsigned int ip, unsigned short port)
     log_new_thread();
 }
 
+/** Finish logging
+*
+* closes port
+**/
 void log_free()
 {
     DeleteCriticalSection(&g_mutex);
