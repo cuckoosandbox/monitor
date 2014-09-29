@@ -34,6 +34,7 @@ static uint32_t g_tls_unicode_buffer_index;
 
 #define HKCU_PREFIX L"\\REGISTRY\\USER\\S-1-5-"
 #define HKLM_PREFIX L"\\REGISTRY\\MACHINE"
+#define EXCEPTION_MAXCOUNT 1024
 
 static LONG (WINAPI *pNtQueryInformationProcess)(
     HANDLE ProcessHandle,
@@ -769,9 +770,15 @@ static LONG CALLBACK _exception_handler(
     EXCEPTION_POINTERS *exception_pointers)
 {
     char buf[128]; CONTEXT *ctx = exception_pointers->ContextRecord;
-    bson b, s, e;
+    bson b, s, e; static int exception_count;
 
     hook_disable();
+
+    if(exception_count++ == EXCEPTION_MAXCOUNT) {
+        sprintf(buf, "Encountered %d exceptions, quitting.", exception_count);
+        log_anomaly("exception", 1, NULL, buf);
+        ExitProcess(1);
+    }
 
     bson_init(&b);
     bson_init(&s);
