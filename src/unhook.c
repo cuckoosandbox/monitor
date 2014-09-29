@@ -26,13 +26,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define UNHOOK_MAXCOUNT 2048
 #define UNHOOK_BUFSIZE 256
 
+// structure to monitor hooks for unhooking by malware
 typedef struct _region_t {
-    uint32_t        region_length;
-    const uint8_t  *region_address;
-    uint8_t         region_original[UNHOOK_BUFSIZE];
-    uint8_t         region_modified[UNHOOK_BUFSIZE];
+    uint32_t        region_length;                   // length of the region
+    const uint8_t  *region_address;                  // address of the region
+    uint8_t         region_original[UNHOOK_BUFSIZE]; // original pattern of the region
+    uint8_t         region_modified[UNHOOK_BUFSIZE]; // modified pattern of the region
 
-    char            funcname[64];
+    char            funcname[64];                    // name of the function to monitor
     uint32_t        region_reported;
 } region_t;
 
@@ -40,6 +41,14 @@ static HANDLE g_unhook_thread_handle, g_watcher_thread_handle, g_main_thread;
 static uint32_t g_region_index, g_unhook_exited;
 static region_t g_regions[UNHOOK_MAXCOUNT];
 
+/** Add region to unhook detection
+*
+* funcname: name of the function (can be NULL)
+* addr: address of the region
+* original: original byte pattern
+* modified: modified (hooked) byte pattern
+* length: length of the region to monitor
+**/
 void unhook_detect_add_region(const char *funcname, const uint8_t *addr,
     const uint8_t *original, const uint8_t *modified, uint32_t length)
 {
@@ -63,6 +72,12 @@ void unhook_detect_add_region(const char *funcname, const uint8_t *addr,
     g_region_index++;
 }
 
+
+/** Checks if hooks are removed
+*
+* logs an anomaly if hooks have been removed
+* also monitors the watcher thread
+**/
 static DWORD WINAPI _unhook_detect_thread(LPVOID param)
 {
     (void) param;
@@ -117,6 +132,9 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
     return 0;
 }
 
+/** Monitors the unhook detection thread
+*
+**/
 static DWORD WINAPI _unhook_watch_thread(LPVOID param)
 {
     (void) param;
@@ -132,6 +150,9 @@ static DWORD WINAPI _unhook_watch_thread(LPVOID param)
     return 0;
 }
 
+/** Initializes the unhook monitor
+*
+**/
 int unhook_init_detection(int first_process)
 {
     g_unhook_exited = 0;

@@ -26,6 +26,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
      PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | \
      PAGE_EXECUTE_WRITECOPY)
 
+
+/** Checks if a page is readable
+*
+* returns: true if page is readable
+**/
 static int _page_is_readable(const uint8_t *addr)
 {
     MEMORY_BASIC_INFORMATION mbi;
@@ -33,6 +38,12 @@ static int _page_is_readable(const uint8_t *addr)
             mbi.State & MEM_COMMIT && mbi.Protect & PAGE_READABLE;
 }
 
+
+/** Checks if an address points to a module
+*
+* addr: addr to check
+* returns: NULL on error, AllocationBase if it is a module
+**/
 static const uint8_t *_module_from_address(const uint8_t *addr)
 {
     MEMORY_BASIC_INFORMATION mbi;
@@ -46,6 +57,16 @@ static const uint8_t *_module_from_address(const uint8_t *addr)
     return NULL;
 }
 
+
+/** read Export Address Table data from module
+*
+* mod: module address to request EAT for
+* function_addresses: ordered function addresses
+* names_addresses: ordered name addresses
+* ordinals: ordinals, ordered
+* number_of_names: number of names
+* returns: -1 on error 0 on success
+**/
 static int _eat_pointers_for_module(const uint8_t *mod,
     uint32_t **function_addresses, uint32_t **names_addresses,
     uint16_t **ordinals, uint32_t *number_of_names)
@@ -79,6 +100,18 @@ static int _eat_pointers_for_module(const uint8_t *mod,
     return 0;
 }
 
+
+/** Find the function names an address is in between
+*
+* Output format:
+* lower_function_name-offset_to_that/upper_function_name-offset_to_that
+* lower function: Function before the point of incident
+* upper function: Function after that
+*
+* addr: Address to look up
+* sym: symbol buffer
+* length: length of this buffer
+**/
 int symbol(const uint8_t *addr, char *sym, uint32_t length)
 {
     int len; *sym = 0;

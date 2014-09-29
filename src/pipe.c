@@ -54,6 +54,30 @@ static int _pipe_unicode(char **out, const wchar_t *s, int len)
     return ret;
 }
 
+/** Prepare Format args into the out buffer.
+*
+* Typical pipe-commands:
+* DEBUG:
+* CRITICAL:
+* FILE_NEW:<path>
+* FILE_MOVE:<from_path><to_path>
+* FILE_DEL:<path>
+* PROCESS:<pid>
+* PROCESS:<pid>,<tid>
+*
+* pipe formats:
+* z: ascii
+* Z: unicode
+* s: length, ascii
+* S: length, unicode
+* o: unicode string
+* O: OBJET_ATTRIBUTES, name will be printed
+* d: int, printed as dec
+* x: int, printed as hex
+*
+* out: out buffer to write to
+* fmt: format, args
+**/
 static int _pipe_sprintf(char *out, const char *fmt, va_list args)
 {
     int ret = 0;
@@ -117,11 +141,18 @@ static int _pipe_sprintf(char *out, const char *fmt, va_list args)
     return ret;
 }
 
+/** Init a pipe
+*
+* pipe_name: Name of the pipe
+**/
 void pipe_init(const char *pipe_name)
 {
     strncpy(g_pipe_name, pipe_name, sizeof(g_pipe_name));
 }
 
+/** Format string and send to pipe
+*
+**/
 int pipe(const char *fmt, ...)
 {
     va_list args;

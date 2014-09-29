@@ -301,11 +301,11 @@ Logging Format Specifier
 Following is a list of all currently supported format specifiers:
 
 * ``s``: zero-terminated ascii string
-* ``S``: ascii string with length
+* ``S``: ascii string with length (args: int length and char* string)
 * ``u``: zero-terminated unicode string
-* ``U``: unicode string with length in characters
+* ``U``: unicode string with length in characters (args: int length and wchar_t* string)
 * ``b``: buffer pointer with length
-* ``B``: buffer pointer with pointer to length
+* ``B``: buffer pointer with pointer to length (args: size_t* length and buffer)
 * ``i``: 32-bit integer
 * ``l``: 32-bit or 64-bit long
 * ``p``: pointer address
@@ -313,10 +313,10 @@ Following is a list of all currently supported format specifiers:
 * ``o``: pointer to ``ANSI_STRING``
 * ``O``: pointer to ``UNICODE_STRING``
 * ``x``: pointer to ``OBJECT_ATTRIBUTES``
-* ``a``: array of zero-terminated ascii strings
-* ``A``: array of zero-terminated unicode strings
-* ``r``: registry stuff - to be updated
-* ``R``: registry stuff - to be updated
+* ``a``: array of zero-terminated ascii strings (args: int length and char** array)
+* ``A``: array of zero-terminated unicode strings (args: int length and wchar_t** array)
+* ``r``: registry stuff - to be updated (args: ulong type, ulong size, char* data)
+* ``R``: registry stuff - to be updated (args: ulong type, ulong size, char* data)
 * ``q``: 64-bit integer
 * ``Q``: pointer to 64-bit integer (e.g., pointer to ``LARGE_INTEGER``)
 * ``z``: bson object

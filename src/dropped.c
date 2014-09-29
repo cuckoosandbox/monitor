@@ -35,6 +35,10 @@ typedef struct _dropped_entry_t {
     wchar_t path[MAX_PATH_W+1];
 } dropped_entry_t;
 
+/** Submit a path to pipe
+*
+* path: path to submit
+**/
 static void _dropped_submit(const wchar_t *path)
 {
     // If the path is prepended with \??\, then we strip that.
@@ -61,12 +65,21 @@ static void _dropped_submit(const wchar_t *path)
     }
 }
 
+/** Init dropped files handling
+*
+**/
 void dropped_init()
 {
     ht_init(&g_files, sizeof(dropped_entry_t *));
     InitializeCriticalSection(&g_mutex);
 }
 
+/** Add a file to the list of dropped files
+*
+* file_handle: File handle to add
+* obj: file object
+* filepath: Path of the file
+**/
 void dropped_add(HANDLE file_handle, const OBJECT_ATTRIBUTES *obj,
     const wchar_t *filepath)
 {
@@ -86,6 +99,10 @@ void dropped_add(HANDLE file_handle, const OBJECT_ATTRIBUTES *obj,
     }
 }
 
+/** Send a file to pipe and remove it from ht
+*
+* file_handle: Handle to identify the file
+**/
 void dropped_wrote(HANDLE file_handle)
 {
     EnterCriticalSection(&g_mutex);
@@ -101,6 +118,10 @@ void dropped_wrote(HANDLE file_handle)
     LeaveCriticalSection(&g_mutex);
 }
 
+/** Remove file from hashtable
+*
+* file_handle: File to remove
+**/
 void dropped_close(HANDLE file_handle)
 {
     EnterCriticalSection(&g_mutex);

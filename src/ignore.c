@@ -26,6 +26,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define IGNORE_START(s) \
     if(wcsnicmp(fname, s, sizeof(s)/sizeof(wchar_t)-1) == 0) return TRUE
 
+/** Check if file should be ignored
+*
+* fname: File name
+* length: Length of part to compare
+* returns: True if it should be ignored
+**/
 BOOL is_ignored_file_unicode(const wchar_t *fname, int length)
 {
     IGNORE_MATCH(L"\\??\\PIPE\\lsarpc");
