@@ -20,7 +20,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpSubKey, regkey);
 
 Logging::
@@ -41,7 +41,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpSubKey, regkey);
 
 Logging::
@@ -66,7 +66,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpSubKey, regkey);
 
 Logging::
@@ -91,7 +91,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpSubKey, regkey);
 
 Logging::
@@ -109,7 +109,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpSubKey, regkey);
 
 Logging::
@@ -127,7 +127,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpSubKey, regkey);
 
 Logging::
@@ -147,7 +147,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key(hKey, regkey);
 
 Logging::
@@ -171,7 +171,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key(hKey, regkey);
 
 Logging::
@@ -195,7 +195,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key(hKey, regkey);
 
 Logging::
@@ -223,7 +223,7 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpValueName, regkey);
 
 Logging::
@@ -252,7 +252,7 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpValueName, regkey);
 
 Logging::
@@ -275,7 +275,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpValueName, regkey);
 
 Logging::
@@ -298,7 +298,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpValueName, regkey);
 
 Logging::
@@ -325,7 +325,7 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpValueName, regkey);
 
 Logging::
@@ -352,7 +352,7 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpValueName, regkey);
 
 Logging::
@@ -371,7 +371,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpValueName, regkey);
 
 Logging::
@@ -389,7 +389,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpValueName, regkey);
 
 Logging::

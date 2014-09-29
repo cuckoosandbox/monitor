@@ -215,7 +215,7 @@ Pre::
     if(FileInformation != NULL && Length == sizeof(BOOLEAN) &&
             FileInformationClass == FileDispositionInformation &&
             *(BOOLEAN *) FileInformation != FALSE) {
-        wchar_t filepath[MAX_PATH_W+1];
+        wchar_t *filepath = get_unicode_buffer();
         path_from_handle(FileHandle, filepath);
         pipe("FILE_DEL:%Z", filepath);
     }

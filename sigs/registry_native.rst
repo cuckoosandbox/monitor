@@ -23,7 +23,7 @@ Pre::
 
     COPY_UNICODE_STRING(class, Class);
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(ObjectAttributes, regkey);
 
 Logging::
@@ -43,7 +43,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(ObjectAttributes, regkey);
 
 Logging::
@@ -63,7 +63,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(ObjectAttributes, regkey);
 
 Logging::
@@ -83,7 +83,7 @@ Pre::
 
     COPY_UNICODE_STRING(new_name, NewName);
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
 
 Logging::
@@ -106,7 +106,7 @@ Pre::
     COPY_FILE_PATH_OA(newfilepath, NewHiveFileName);
     COPY_FILE_PATH_OA(backupfilepath, BackupHiveFileName);
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
 
 Logging::
@@ -130,7 +130,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
 
 Logging::
@@ -157,7 +157,7 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
 
 Logging::
@@ -180,7 +180,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_unistr(KeyHandle, ValueName, regkey);
 
 Logging::
@@ -207,7 +207,7 @@ Ensure::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_unistr(KeyHandle, ValueName, regkey);
 
 Logging::
@@ -242,7 +242,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
 
 Logging::
@@ -260,7 +260,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_unistr(KeyHandle, ValueName, regkey);
 
 Logging::
@@ -280,7 +280,7 @@ Pre::
 
     COPY_FILE_PATH_OA(source_file, SourceFile);
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(TargetKey, regkey);
 
 Logging::
@@ -302,7 +302,7 @@ Pre::
 
     COPY_FILE_PATH_OA(source_file, SourceFile);
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(TargetKey, regkey);
 
 Logging::
@@ -325,7 +325,7 @@ Pre::
 
     COPY_FILE_PATH_OA(source_file, SourceFile);
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(TargetKey, regkey);
 
 Logging::
@@ -347,7 +347,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(KeyHandle, regkey);
 
 Logging::
@@ -366,7 +366,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(KeyHandle, regkey);
 
 Logging::
@@ -385,7 +385,7 @@ Parameters::
 
 Pre::
 
-    wchar_t regkey[MAX_PATH_W+1];
+    wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(KeyHandle, regkey);
 
 Logging::
