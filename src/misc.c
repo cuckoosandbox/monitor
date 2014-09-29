@@ -379,7 +379,7 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
         wcsncat(input, in + 12, MAX_PATH_W+1 - lstrlenW(input));
     }
     // "\\Device\\HarddiskVolume1\\" is an alias for "C:\\".
-    else if(wcsnicmp(path, L"\\Device\\HarddiskVolume1\\", 24) == 0) {
+    else if(wcsnicmp(in, L"\\Device\\HarddiskVolume1\\", 24) == 0) {
         wcscpy(input, L"\\\\?\\C:\\");
         wcsncat(input, in + 24, MAX_PATH_W+1 - lstrlenW(input));
     }
@@ -428,9 +428,8 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
 
         if(last_ptr != NULL) {
             *last_ptr = '\\';
+            *ptr = 0;
         }
-
-        last_ptr = ptr, *ptr = 0;
 
         if(GetLongPathNameW(partial, partial2, MAX_PATH_W+1) != 0) {
             // Copy the first part except for the "\\\\?\\" part.
@@ -441,13 +440,18 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
                 wcscpy(out, partial2);
             }
 
-            // Directory separator.
-            wcscat(out, L"\\");
+            // Only append the remainder if this is not the full path.
+            if(last_ptr != NULL) {
+                // Directory separator.
+                wcscat(out, L"\\");
 
-            // Everything that's behind the long path that we found.
-            wcscat(out, ptr + 1);
+                // Everything that's behind the long path that we found.
+                wcscat(out, ptr + 1);
+            }
             return lstrlenW(out);
         }
+
+        last_ptr = ptr;
     }
 }
 
