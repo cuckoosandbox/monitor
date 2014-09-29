@@ -1,0 +1,15 @@
+- Bugfix: limit to a maximum of 1024 exceptions avoiding huge logs.
+- Tweak: use a ringbuffer for unicode filepaths rather than allocating many
+  dozens or even hundreds of kilobytes on the stack.
+- Bugfix: long file path resolving (after many attempts).
+- Bugfix: registry key path resolving (after many attempts).
+- Bugfix: execution never finishing due to unhook detection threads.
+- Dump instruction at exception address in debug mode.
+- Exception handler; log exceptions with stacktraces.
+- Introduce debug mode; attach a stacktrace to every logged API.
+- Resolve registry key paths on-the-fly.
+- "Ensure" blocks; avoid null pointer arguments in called APIs.
+- Documentation.
+- Special hooks; hook handlers for a specific API that are always invoked.
+- Start on 64-bit support.
+- Base monitor including hooking, logging, unhook detection.
