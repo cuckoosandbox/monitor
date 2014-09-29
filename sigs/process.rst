@@ -16,7 +16,7 @@ Signature::
 Parameters::
 
     *  LPVOID lpUnknown1
-    ** LPWSTR lpApplicationName filepath
+    *  LPWSTR lpApplicationName
     ** LPWSTR lpCommandLine command_line
     *  LPSECURITY_ATTRIBUTES lpProcessAttributes
     *  LPSECURITY_ATTRIBUTES lpThreadAttributes
@@ -39,8 +39,12 @@ Pre::
     DWORD creation_flags = dwCreationFlags;
     dwCreationFlags |= CREATE_SUSPENDED;
 
+    wchar_t *filepath = get_unicode_buffer();
+    COPY_FILE_PATH_W(filepath, lpApplicationName);
+
 Logging::
 
+    u filepath filepath
     l creation_flags creation_flags
     i process_identifier lpProcessInformation->dwProcessId
     i thread_identifier lpProcessInformation->dwThreadId
@@ -92,9 +96,14 @@ Ensure::
 
     pExecInfo
 
+Pre::
+
+    wchar_t *filepath = get_unicode_buffer();
+    COPY_FILE_PATH_W(filepath, pExecInfo->lpFile);
+
 Logging::
 
-    u filepath pExecInfo->lpFile
+    u filepath filepath
     u parameters pExecInfo->lpParameters
     l show_type pExecInfo->nShow
 
