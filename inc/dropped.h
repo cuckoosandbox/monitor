@@ -28,8 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
      FILE_APPEND_DATA | STANDARD_RIGHTS_WRITE | STANDARD_RIGHTS_ALL)
 
 void dropped_init();
-void dropped_add(HANDLE file_handle, const OBJECT_ATTRIBUTES *obj,
-    const wchar_t *filepath);
+void dropped_add(HANDLE file_handle, const wchar_t *filepath);
 void dropped_wrote(HANDLE file_handle);
 void dropped_close(HANDLE file_handle);
 

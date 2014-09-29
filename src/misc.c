@@ -165,17 +165,6 @@ uintptr_t parent_process_id()
     return pid_from_process_handle(GetCurrentProcess());
 }
 
-BOOL is_directory_objattr(const OBJECT_ATTRIBUTES *obj)
-{
-    FILE_BASIC_INFORMATION info;
-
-    if(NT_SUCCESS(pNtQueryAttributesFile(obj, &info)) != FALSE) {
-        return info.FileAttributes & FILE_ATTRIBUTE_DIRECTORY ? TRUE : FALSE;
-    }
-
-    return FALSE;
-}
-
 // Hide our module from PEB.
 // http://www.openrce.org/blog/view/844/How_to_hide_dll
 

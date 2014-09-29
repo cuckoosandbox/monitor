@@ -34,7 +34,7 @@ Logging::
 Post::
 
     if(NT_SUCCESS(ret) && (DesiredAccess & DUMP_FILE_MASK) != 0) {
-        dropped_add(*FileHandle, ObjectAttributes, filepath);
+        dropped_add(*FileHandle, filepath);
     }
 
 
@@ -78,7 +78,7 @@ Logging::
 Post::
 
     if(NT_SUCCESS(ret) && (DesiredAccess & DUMP_FILE_MASK) != 0) {
-        dropped_add(*FileHandle, ObjectAttributes, filepath);
+        dropped_add(*FileHandle, filepath);
     }
 
 

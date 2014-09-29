@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <windows.h>
+#include <shlwapi.h>
 #include "hashtable.h"
 #include "ignore.h"
 #include "misc.h"
@@ -67,12 +68,11 @@ void dropped_init()
     InitializeCriticalSection(&g_mutex);
 }
 
-void dropped_add(HANDLE file_handle, const OBJECT_ATTRIBUTES *obj,
-    const wchar_t *filepath)
+void dropped_add(HANDLE file_handle, const wchar_t *filepath)
 {
     dropped_entry_t *e;
 
-    if(is_directory_objattr(obj) == 0 &&
+    if(PathIsDirectoryW(filepath) == FALSE &&
             is_ignored_file_unicode(filepath, lstrlenW(filepath)) == 0) {
 
         e = (dropped_entry_t *) calloc(1, sizeof(dropped_entry_t));

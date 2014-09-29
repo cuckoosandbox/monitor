@@ -30,8 +30,6 @@ uintptr_t pid_from_process_handle(HANDLE process_handle);
 uintptr_t pid_from_thread_handle(HANDLE thread_handle);
 uintptr_t parent_process_id();
 
-BOOL is_directory_objattr(const OBJECT_ATTRIBUTES *obj);
-
 uint32_t path_from_handle(HANDLE handle, wchar_t *path);
 uint32_t path_from_unicode_string(const UNICODE_STRING *unistr,
     wchar_t *path, uint32_t length);
