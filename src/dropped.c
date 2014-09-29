@@ -63,24 +63,26 @@ static void _dropped_submit(const wchar_t *path)
 
 void dropped_init()
 {
-    ht_init(&g_files, sizeof(dropped_entry_t));
+    ht_init(&g_files, sizeof(dropped_entry_t *));
     InitializeCriticalSection(&g_mutex);
 }
 
 void dropped_add(HANDLE file_handle, const OBJECT_ATTRIBUTES *obj,
     const wchar_t *filepath)
 {
-    dropped_entry_t e;
-
-    memset(&e, 0, sizeof(e));
+    dropped_entry_t *e;
 
     if(is_directory_objattr(obj) == 0 &&
             is_ignored_file_unicode(filepath, lstrlenW(filepath)) == 0) {
-        wcscpy(e.path, filepath);
 
-        EnterCriticalSection(&g_mutex);
-        ht_insert(&g_files, (uintptr_t) file_handle, &e);
-        LeaveCriticalSection(&g_mutex);
+        e = (dropped_entry_t *) calloc(1, sizeof(dropped_entry_t));
+        if(e != NULL) {
+            wcscpy(e->path, filepath);
+
+            EnterCriticalSection(&g_mutex);
+            ht_insert(&g_files, (uintptr_t) file_handle, e);
+            LeaveCriticalSection(&g_mutex);
+        }
     }
 }
 
@@ -88,9 +90,10 @@ void dropped_wrote(HANDLE file_handle)
 {
     EnterCriticalSection(&g_mutex);
 
-    dropped_entry_t *e = (dropped_entry_t *)
+    dropped_entry_t **e_ = (dropped_entry_t **)
         ht_lookup(&g_files, (uintptr_t) file_handle, NULL);
-    if(e != NULL) {
+    if(e_ != NULL && *e_ != NULL) {
+        dropped_entry_t *e = *e_;
         _dropped_submit(e->path);
         ht_remove(&g_files, (uintptr_t) file_handle);
     }
