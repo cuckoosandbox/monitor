@@ -173,7 +173,7 @@ Parameters::
     *  PIO_STATUS_BLOCK IoStatusBlock
     *  PVOID FileInformation
     *  ULONG Length
-    *  FILE_INFORMATION_CLASS FileInformationClass
+    ** FILE_INFORMATION_CLASS FileInformationClass information_class
     *  BOOLEAN ReturnSingleEntry
     *  PUNICODE_STRING FileName
     *  BOOLEAN RestartScan
