@@ -65,7 +65,7 @@ Pre::
 
 Logging::
 
-    s dirpath dirpath
+    u dirpath dirpath
 
 
 RemoveDirectoryW
@@ -142,7 +142,7 @@ Pre::
 
 Logging::
 
-    s filepath filepath
+    u filepath filepath
 
 
 FindFirstFileExW
@@ -190,8 +190,8 @@ Pre::
 
 Logging::
 
-    s oldfilepath oldfilepath
-    s newfilepath newfilepath
+    u oldfilepath oldfilepath
+    u newfilepath newfilepath
 
 
 CopyFileW
@@ -259,11 +259,11 @@ Parameters::
 Pre::
 
     COPY_FILE_PATH_A(filepath, lpFileName);
-    pipe("FILE_DEL:%z", filepath);
+    pipe("FILE_DEL:%Z", filepath);
 
 Logging::
 
-    s filepath filepath
+    u filepath filepath
 
 
 DeleteFileW
