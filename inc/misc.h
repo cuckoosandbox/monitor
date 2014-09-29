@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 void misc_init();
 
+wchar_t *get_unicode_buffer();
+
 uintptr_t pid_from_process_handle(HANDLE process_handle);
 uintptr_t pid_from_thread_handle(HANDLE thread_handle);
 uintptr_t parent_process_id();
@@ -79,29 +81,30 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length);
 void setup_exception_handler();
 
 #define COPY_FILE_PATH_A(local_name, param_name) \
-    wchar_t local_name[MAX_PATH_W+1]; \
+    wchar_t *local_name = get_unicode_buffer(); \
     path_get_full_pathA(param_name, local_name);
 
 #define COPY_FILE_PATH_W(local_name, param_name) \
-    wchar_t local_name[MAX_PATH_W+1]; \
+    wchar_t *local_name = get_unicode_buffer(); \
     path_get_full_pathW(param_name, local_name);
 
 #define COPY_FILE_PATH_US(local_name, param_name) \
-    wchar_t local_name[MAX_PATH_W+1]; \
+    wchar_t *local_name = get_unicode_buffer(); \
     path_get_full_path_unistr(param_name, local_name);
 
 #define COPY_FILE_PATH_OA(local_name, param_name) \
-    wchar_t local_name[MAX_PATH_W+1]; \
+    wchar_t *local_name = get_unicode_buffer(); \
     path_get_full_path_objattr(param_name, local_name);
 
 #define COPY_UNICODE_STRING(local_name, param_name) \
-    UNICODE_STRING local_name; wchar_t local_name##_buffer[MAX_PATH_W+1]; \
+    UNICODE_STRING local_name; \
+    wchar_t *local_name##_buffer = get_unicode_buffer(); \
     copy_unicode_string(param_name, &local_name, \
         local_name##_buffer, sizeof(local_name##_buffer));
 
 #define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
     OBJECT_ATTRIBUTES local_name; UNICODE_STRING local_name##_unistr; \
-    wchar_t local_name##_buffer[MAX_PATH_W+1]; \
+    wchar_t *local_name##_buffer = get_unicode_buffer(); \
     copy_object_attributes(param_name, &local_name, &local_name##_unistr, \
         local_name##_buffer, sizeof(local_name##_buffer));
 

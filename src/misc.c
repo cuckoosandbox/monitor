@@ -116,7 +116,7 @@ void misc_init(const char *shutdown_mutex)
     g_tls_unicode_buffer_index = TlsAlloc();
 }
 
-static wchar_t *_unicode_buffer()
+wchar_t *get_unicode_buffer()
 {
     uintptr_t index = (uintptr_t) TlsGetValue(g_tls_unicode_buffer_index);
     wchar_t **buffers = (wchar_t **) TlsGetValue(g_tls_unicode_buffers);
@@ -375,8 +375,8 @@ uint32_t path_get_full_pathA(const char *in, wchar_t *out)
 
 uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
 {
-    wchar_t *input = _unicode_buffer(), *partial = _unicode_buffer();
-    wchar_t *partial2 = _unicode_buffer(), *last_ptr = NULL, *partial_ptr;
+    wchar_t *input = get_unicode_buffer(), *partial = get_unicode_buffer();
+    wchar_t *partial2 = get_unicode_buffer(), *last_ptr = NULL, *partial_ptr;
 
     // First normalize the input file path.
     if(wcsncmp(in, L"\\??\\", 4) == 0 || wcsncmp(in, L"\\\\?\\", 4) == 0) {
@@ -459,7 +459,7 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
 
 uint32_t path_get_full_path_unistr(const UNICODE_STRING *in, wchar_t *out)
 {
-    wchar_t *input = _unicode_buffer();
+    wchar_t *input = get_unicode_buffer();
 
     if(in != NULL && in->Buffer != NULL) {
         memcpy(input, in->Buffer, in->Length);
@@ -473,7 +473,7 @@ uint32_t path_get_full_path_unistr(const UNICODE_STRING *in, wchar_t *out)
 
 uint32_t path_get_full_path_objattr(const OBJECT_ATTRIBUTES *in, wchar_t *out)
 {
-    wchar_t *input = _unicode_buffer();
+    wchar_t *input = get_unicode_buffer();
 
     if(path_from_object_attributes(in, input) != 0) {
         return path_get_full_pathW(input, out);
