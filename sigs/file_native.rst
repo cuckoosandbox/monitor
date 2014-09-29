@@ -175,12 +175,20 @@ Parameters::
     *  ULONG Length
     *  FILE_INFORMATION_CLASS FileInformationClass
     *  BOOLEAN ReturnSingleEntry
-    ** PUNICODE_STRING FileName dirpath
+    *  PUNICODE_STRING FileName
     *  BOOLEAN RestartScan
+
+Pre::
+
+    COPY_UNICODE_STRING(filename, FileName);
+
+    OBJECT_ATTRIBUTES objattr;
+    InitializeObjectAttributes(&objattr, &filename, 0, FileHandle, NULL);
 
 Logging::
 
     b file_information IoStatusBlock->Information, FileInformation
+    x dirpath &objattr
 
 
 NtQueryInformationFile

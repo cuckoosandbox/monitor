@@ -497,6 +497,15 @@ static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
     return obj != NULL ? obj->ObjectName : NULL;
 }
 
+#define InitializeObjectAttributes(p, n, a, r, s) { \
+    (p)->Length = sizeof(OBJECT_ATTRIBUTES); \
+    (p)->RootDirectory = r;                  \
+    (p)->Attributes = a;                     \
+    (p)->ObjectName = n;                     \
+    (p)->SecurityDescriptor = s;             \
+    (p)->SecurityQualityOfService = NULL;    \
+}
+
 #define ProcessBasicInformation 0
 #define ThreadBasicInformation 0
 
