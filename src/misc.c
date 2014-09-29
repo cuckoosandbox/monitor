@@ -86,6 +86,18 @@ static PVOID (WINAPI *pRtlAddVectoredExceptionHandler)(
     PVECTORED_EXCEPTION_HANDLER VectoredHandler
 );
 
+static wchar_t g_aliases[64][2][MAX_PATH];
+static uint32_t g_alias_index;
+
+#define ADD_ALIAS(before, after) \
+    if(g_alias_index == 64) { \
+        pipe("CRITICAL:Too many aliases!"); \
+        exit(1); \
+    } \
+    wcscpy(g_aliases[g_alias_index][0], before); \
+    wcscpy(g_aliases[g_alias_index][1], after); \
+    g_alias_index++;
+
 void misc_init(const char *shutdown_mutex)
 {
     HMODULE mod = GetModuleHandle("ntdll");
@@ -115,6 +127,23 @@ void misc_init(const char *shutdown_mutex)
 
     g_tls_unicode_buffers = TlsAlloc();
     g_tls_unicode_buffer_index = TlsAlloc();
+
+    ADD_ALIAS(L"\\SystemRoot\\", L"C:\\Windows\\");
+
+    wchar_t device_name[4], target_path[MAX_PATH];
+
+    for (wchar_t ch = 'A'; ch <= 'Z'; ch++) {
+        device_name[0] = ch, device_name[1] = ':', device_name[2] = 0;
+        if(QueryDosDeviceW(device_name, target_path, MAX_PATH) != 0) {
+            // Ensure both paths are backslash-terminated to avoid issues
+            // between "\\Device\\HarddiskVolume1" and
+            // "\\Device\\HarddiskVolume10".
+            wcscat(device_name, L"\\");
+            wcscat(target_path, L"\\");
+
+            ADD_ALIAS(target_path, device_name);
+        }
+    }
 }
 
 wchar_t *get_unicode_buffer()
@@ -368,20 +397,20 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
     wchar_t *input = get_unicode_buffer(), *partial = get_unicode_buffer();
     wchar_t *partial2 = get_unicode_buffer(), *last_ptr = NULL, *partial_ptr;
 
+    // Check whether any of the known aliases are being used.
+    for (uint32_t idx = 0; idx < g_alias_index; idx++) {
+        uint32_t length = lstrlenW(g_aliases[idx][0]);
+        if(wcsnicmp(in, g_aliases[idx][0], length) == 0) {
+            wcscpy(input, g_aliases[idx][1]);
+            wcsncat(input, &in[length], MAX_PATH_W+1 - lstrlenW(input));
+            break;
+        }
+    }
+
     // First normalize the input file path.
     if(wcsncmp(in, L"\\??\\", 4) == 0 || wcsncmp(in, L"\\\\?\\", 4) == 0) {
         wcscpy(input, L"\\\\?\\");
         wcsncat(input, in + 4, MAX_PATH_W+1 - 4);
-    }
-    // "\\SystemRoot\\" is an alias for "C:\\Windows\\".
-    else if(wcsnicmp(in, L"\\SystemRoot\\", 12) == 0) {
-        wcscpy(input, L"\\\\?\\C:\\Windows\\");
-        wcsncat(input, in + 12, MAX_PATH_W+1 - lstrlenW(input));
-    }
-    // "\\Device\\HarddiskVolume1\\" is an alias for "C:\\".
-    else if(wcsnicmp(in, L"\\Device\\HarddiskVolume1\\", 24) == 0) {
-        wcscpy(input, L"\\\\?\\C:\\");
-        wcsncat(input, in + 24, MAX_PATH_W+1 - lstrlenW(input));
     }
     // If the path doesn't start with C: or similar then it's not an absolute
     // path and we shouldn't prepend "\\\\?\\".
