@@ -373,11 +373,15 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
         wcscpy(input, L"\\\\?\\");
         wcsncat(input, in + 4, MAX_PATH_W+1 - 4);
     }
-    // If the path starts with "\\SystemRoot\\" then we manually replace it
-    // with "C:\\Windows".
+    // "\\SystemRoot\\" is an alias for "C:\\Windows\\".
     else if(wcsnicmp(in, L"\\SystemRoot\\", 12) == 0) {
         wcscpy(input, L"\\\\?\\C:\\Windows\\");
         wcsncat(input, in + 12, MAX_PATH_W+1 - lstrlenW(input));
+    }
+    // "\\Device\\HarddiskVolume1\\" is an alias for "C:\\".
+    else if(wcsnicmp(path, L"\\Device\\HarddiskVolume1\\", 24) == 0) {
+        wcscpy(input, L"\\\\?\\C:\\");
+        wcsncat(input, in + 24, MAX_PATH_W+1 - lstrlenW(input));
     }
     // If the path doesn't start with C: or similar then it's not an absolute
     // path and we shouldn't prepend "\\\\?\\".
