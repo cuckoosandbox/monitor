@@ -147,6 +147,8 @@ void misc_init(const char *shutdown_mutex)
     }
 }
 
+#define UNICODE_BUFFER_COUNT 16
+
 wchar_t *get_unicode_buffer()
 {
     uintptr_t index = (uintptr_t) TlsGetValue(g_tls_unicode_buffer_index);
@@ -154,8 +156,8 @@ wchar_t *get_unicode_buffer()
 
     // If the buffers have not been allocated already then do so now.
     if(buffers == NULL) {
-        buffers = malloc(sizeof(wchar_t *) * 8);
-        for (uint32_t idx = 0; idx < 8; idx++) {
+        buffers = malloc(sizeof(wchar_t *) * UNICODE_BUFFER_COUNT);
+        for (uint32_t idx = 0; idx < UNICODE_BUFFER_COUNT; idx++) {
             buffers[idx] = (wchar_t *)
                 malloc(sizeof(wchar_t) * (MAX_PATH_W + 1));
         }
@@ -163,7 +165,7 @@ wchar_t *get_unicode_buffer()
     }
 
     TlsSetValue(g_tls_unicode_buffer_index, (void *)(index + 1));
-    return buffers[index % 8];
+    return buffers[index % UNICODE_BUFFER_COUNT];
 }
 
 uintptr_t pid_from_process_handle(HANDLE process_handle)
