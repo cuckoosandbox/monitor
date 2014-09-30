@@ -386,6 +386,11 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
     wchar_t *input = get_unicode_buffer(), *partial = get_unicode_buffer();
     wchar_t *partial2 = get_unicode_buffer(), *last_ptr = NULL, *partial_ptr;
 
+    if (in == NULL) {
+        wcscpy(out,L"");
+        return 0;
+    }
+
     // Check whether any of the known aliases are being used.
     for (uint32_t idx = 0; idx < g_alias_index; idx++) {
         uint32_t length = lstrlenW(g_aliases[idx][0]);
