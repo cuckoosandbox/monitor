@@ -224,7 +224,7 @@ Pre::
             FileInformationClass == FileDispositionInformation &&
             *(BOOLEAN *) FileInformation != FALSE) {
         wchar_t *filepath = get_unicode_buffer();
-        path_from_handle(FileHandle, filepath);
+        path_get_full_path_handle(FileHandle, filepath);
         pipe("FILE_DEL:%Z", filepath);
     }
 

@@ -367,11 +367,14 @@ Parameters::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
+    wchar_t *filepath = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
+    path_get_full_path_handle(FileHandle, filepath);
 
 Logging::
 
     u regkey regkey
+    u filepath filepath
 
 
 NtSaveKeyEx
@@ -386,8 +389,11 @@ Parameters::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
+    wchar_t *filepath = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
+    path_get_full_path_handle(FileHandle, filepath);
 
 Logging::
 
     u regkey regkey
+    u filepath filepath

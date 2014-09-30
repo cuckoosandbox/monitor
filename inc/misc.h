@@ -38,6 +38,7 @@ uint32_t path_from_object_attributes(
 
 uint32_t path_get_full_pathA(const char *in, wchar_t *out);
 uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out);
+uint32_t path_get_full_path_handle(HANDLE file_handle, wchar_t *out);
 uint32_t path_get_full_path_unistr(const UNICODE_STRING *in, wchar_t *out);
 uint32_t path_get_full_path_objattr(
     const OBJECT_ATTRIBUTES *in, wchar_t *out);

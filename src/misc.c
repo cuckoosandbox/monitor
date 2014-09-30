@@ -477,6 +477,18 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
     }
 }
 
+uint32_t path_get_full_path_handle(HANDLE file_handle, wchar_t *out)
+{
+    wchar_t *input = get_unicode_buffer();
+
+    if(path_from_handle(file_handle, input) != 0) {
+        return path_get_full_pathW(input, out);
+    }
+
+    out[0] = 0;
+    return 0;
+}
+
 uint32_t path_get_full_path_unistr(const UNICODE_STRING *in, wchar_t *out)
 {
     wchar_t *input = get_unicode_buffer();
