@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <shlwapi.h>
 #include "bson/bson.h"
 #include "hooking.h"
+#include "ignore.h"
 #include "log.h"
 #include "misc.h"
 #include "ntapi.h"
@@ -337,20 +338,6 @@ uint32_t path_from_handle(HANDLE handle, wchar_t *path)
     return 0;
 }
 
-static uint32_t _path_handle_long_paths(wchar_t *path)
-{
-    uint32_t length = lstrlenW(path);
-
-    // Remove the leading "\\??\\".
-    if(wcsncmp(path, L"\\??\\", 4) == 0) {
-        length -= 4;
-        memmove(path, path + 4, length * sizeof(wchar_t));
-        path[length] = 0;
-    }
-
-    return length;
-}
-
 uint32_t path_from_unicode_string(const UNICODE_STRING *unistr,
     wchar_t *path, uint32_t length)
 {
@@ -359,7 +346,7 @@ uint32_t path_from_unicode_string(const UNICODE_STRING *unistr,
 
         memcpy(path, unistr->Buffer, length * sizeof(wchar_t));
         path[length] = 0;
-        return _path_handle_long_paths(path);
+        return length;
     }
     return 0;
 }
@@ -387,7 +374,7 @@ uint32_t path_get_full_pathA(const char *in, wchar_t *out)
 {
     wchar_t input[MAX_PATH+1];
 
-    wcsncpyA(input, in, MAX_PATH+1);
+    wcsncpyA(input, in, MAX_PATH);
 
     return path_get_full_pathW(input, out);
 }
@@ -420,6 +407,12 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
     else {
         wcscpy(input, L"\\\\?\\");
         wcsncat(input, in, MAX_PATH_W+1 - 4);
+    }
+
+    // We don't further modify ignored filepaths.
+    if(is_ignored_file_unicode(input, lstrlenW(input)) != FALSE) {
+        wcscpy(out, input);
+        return lstrlenW(out);
     }
 
     // Try to obtain the full path. If this fails, then we don't do any
