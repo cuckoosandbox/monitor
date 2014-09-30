@@ -348,7 +348,7 @@ Parameters::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    reg_get_key_objattr(KeyHandle, regkey);
+    reg_get_key(KeyHandle, regkey);
 
 Logging::
 
@@ -367,7 +367,7 @@ Parameters::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    reg_get_key_objattr(KeyHandle, regkey);
+    reg_get_key(KeyHandle, regkey);
 
 Logging::
 
@@ -386,7 +386,7 @@ Parameters::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    reg_get_key_objattr(KeyHandle, regkey);
+    reg_get_key(KeyHandle, regkey);
 
 Logging::
 
