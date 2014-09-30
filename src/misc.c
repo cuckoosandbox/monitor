@@ -376,6 +376,11 @@ uint32_t path_get_full_pathA(const char *in, wchar_t *out)
 {
     wchar_t input[MAX_PATH+1];
 
+    if(in == NULL) {
+        out[0] = 0;
+        return 0;
+    }
+
     wcsncpyA(input, in, MAX_PATH);
 
     return path_get_full_pathW(input, out);
@@ -386,8 +391,8 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
     wchar_t *input = get_unicode_buffer(), *partial = get_unicode_buffer();
     wchar_t *partial2 = get_unicode_buffer(), *last_ptr = NULL, *partial_ptr;
 
-    if (in == NULL) {
-        wcscpy(out,L"");
+    if(in == NULL) {
+        out[0] = 0;
         return 0;
     }
 

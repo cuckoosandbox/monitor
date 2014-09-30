@@ -105,8 +105,11 @@ Parameters::
 
 Pre::
 
+    wchar_t *newfilepath = get_unicode_buffer();
     COPY_FILE_PATH_W(oldfilepath, lpExistingFileName);
-    COPY_FILE_PATH_W(newfilepath, lpNewFileName);
+    if(lpNewFileName != NULL) {
+        path_get_full_pathW(lpNewFileName, newfilepath);
+    }
 
 Logging::
 
@@ -116,7 +119,12 @@ Logging::
 Post::
 
     if(ret != FALSE) {
-        pipe("FILE_MOVE:%Z::%Z", lpExistingFileName, lpNewFileName);
+        if(lpNewFileName == NULL) {
+            pipe("FILE_DEL:%Z", oldfilepath);
+        }
+        else {
+            pipe("FILE_MOVE:%Z::%Z", oldfilepath, newfilepath);
+        }
     }
 
 
