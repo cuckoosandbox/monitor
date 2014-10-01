@@ -445,7 +445,7 @@ int hook2(hook_t *h)
         return -1;
     }
 
-    h->addr = _hook_follow_jumps(h->funcname, (uint8_t *) addr),
+    h->addr = _hook_follow_jumps(h->funcname, (uint8_t *) addr);
 
     hook_data_t *hd = h->data =
         (hook_data_t *) calloc(1, sizeof(hook_data_t));
