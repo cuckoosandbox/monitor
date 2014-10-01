@@ -47,6 +47,7 @@ typedef struct _hook_t {
     int special;
 
     uint8_t *addr;
+    uint32_t is_hooked;
 
     hook_data_t *data;
 } hook_t;
@@ -70,6 +71,6 @@ int hook_is_spoofed_return_address(uintptr_t addr);
 
 int disasm(const void *addr, char *str);
 
-extern const hook_t g_hooks[];
+extern hook_t g_hooks[];
 
 #endif

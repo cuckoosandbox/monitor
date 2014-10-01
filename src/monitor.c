@@ -58,15 +58,14 @@ void monitor_hook(const char *library)
     // TODO Make sure that special hooks are not handled regardless.
     hook_disable();
 
-    for (const hook_t *h = g_hooks; h->funcname != NULL; h++) {
+    for (hook_t *h = g_hooks; h->funcname != NULL; h++) {
         // If a specific library has been specified then we skip all other
         // libraries. This feature is used in the special hook for LdrLoadDll.
         if(library != NULL && stricmp(h->library, library) != 0) {
             continue;
         }
 
-        if(hook(h->library, h->funcname, h->handler, h->orig,
-                h->special) < 0) {
+        if(hook2(h) < 0) {
             pipe("CRITICAL:Hooking %z returned failure!", h->funcname);
         }
     }

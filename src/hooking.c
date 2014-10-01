@@ -433,6 +433,20 @@ static uint8_t *_hook_follow_jumps(const char *funcname, uint8_t *addr)
 
 int hook2(hook_t *h)
 {
+    if(h->is_hooked != 0) return 0;
+
+    HMODULE module_handle = GetModuleHandle(h->library);
+    if(module_handle == NULL) return 0;
+
+    FARPROC addr = GetProcAddress(module_handle, h->funcname);
+    if(addr == NULL) {
+        pipe("CRITICAL:Error resolving function %z!%z.",
+            h->library, h->funcname);
+        return -1;
+    }
+
+    h->addr = _hook_follow_jumps(h->funcname, (uint8_t *) addr),
+
     hook_data_t *hd = h->data =
         (hook_data_t *) calloc(1, sizeof(hook_data_t));
 
@@ -513,7 +527,7 @@ int hook2(hook_t *h)
 
     // Patch the original function.
     if(hook_create_jump(h->addr, hd->trampoline, stub_used) < 0) {
-        pipe("CRITICIAL:Error creating function jump for %z!%z.",
+        pipe("CRITICAL:Error creating function jump for %z!%z.",
             h->library, h->funcname);
         return -1;
     }
@@ -521,28 +535,19 @@ int hook2(hook_t *h)
     unhook_detect_add_region(h->funcname, h->addr, region_original,
         h->addr, stub_used);
 
+    h->is_hooked = 1;
     return 0;
 }
 
 int hook(const char *library, const char *funcname,
     FARPROC handler, FARPROC *orig, int special)
 {
-    HMODULE module_handle = GetModuleHandle(library);
-    if(module_handle == NULL) return 0;
-
-    FARPROC addr = GetProcAddress(module_handle, funcname);
-    if(addr == NULL) {
-        pipe("CRITICAL:Error resolving function %z!%z.", library, funcname);
-        return -1;
-    }
-
     hook_t h = {
         .library  = library,
         .funcname = funcname,
         .handler  = handler,
         .orig     = orig,
         .special  = special,
-        .addr     = _hook_follow_jumps(funcname, (uint8_t *) addr),
     };
     return hook2(&h);
 }

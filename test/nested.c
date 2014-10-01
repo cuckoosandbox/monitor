@@ -64,12 +64,12 @@ int main()
 
     hook_t hk_a = {
         NULL, "a", (FARPROC) &new_a, (FARPROC *) &old_a, 0,
-        (uint8_t *) &a, NULL
+        (uint8_t *) &a, 0, NULL
     };
 
     hook_t hk_b = {
         NULL, "b", (FARPROC) &new_b, (FARPROC *) &old_b, 0,
-        (uint8_t *) &b, NULL
+        (uint8_t *) &b, 0, NULL
     };
 
     m_hook2(&hk_a);

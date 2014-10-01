@@ -183,11 +183,11 @@ const char *g_explain_paramnames[][16] = {
 {%- endfor %}
 };
 
-const hook_t g_hooks[] = {
+hook_t g_hooks[] = {
 {%- for hook in sigs: %}
     {%- if hook.is_hook: %}
-    {"{{hook.signature.library}}", "{{hook.apiname}}", (FARPROC) New_{{hook.apiname}}, (FARPROC *) &Old_{{hook.apiname}}, {{hook.signature.special.__int__()}}, NULL, NULL},
+    {"{{hook.signature.library}}", "{{hook.apiname}}", (FARPROC) New_{{hook.apiname}}, (FARPROC *) &Old_{{hook.apiname}}, {{hook.signature.special.__int__()}}, NULL, 0, NULL},
     {%- endif %}
 {%- endfor %}
-    {NULL, NULL, NULL, NULL, 0, NULL, NULL},
+    {NULL, NULL, NULL, NULL, 0, NULL, 0, NULL},
 };
