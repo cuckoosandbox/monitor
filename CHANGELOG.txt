@@ -1,3 +1,5 @@
+- Bugfix: Only hook functions once (thanks Thorsten Sick).
+- Bugfix: Stabilize null pointer filepaths.
 - Tweak: Update and improve integration of ignored filepaths.
 - Bugfix: Correctly replace \Device\HarddiskVolumeX aliases (thanks Accuvant).
 - Bugfix: Don't enter infinite recursion when entering a new thread (thanks
