@@ -14,7 +14,7 @@ Signature::
 
 Parameters::
 
-    ** PHANDLE MutantHandle
+    ** PHANDLE MutantHandle mutant_handle
     *  ACCESS_MASK DesiredAccess
-    ** POBJECT_ATTRIBUTES ObjectAttributes MutexName
-    ** BOOLEAN InitialOwner
+    ** POBJECT_ATTRIBUTES ObjectAttributes mutant_name
+    ** BOOLEAN InitialOwner initial_owner
