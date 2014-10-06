@@ -3,6 +3,7 @@ Signature::
     * Calling convention: WINAPI
     * Category: synchronisation
 
+
 NtCreateMutant
 ==============
 
