@@ -64,6 +64,7 @@ class DefitionProcessor(object):
         for entry in json.load(open(base_sigs_path, 'rb')):
             entry['is_hook'] = False
             entry['signature']['special'] = False
+            entry['signature']['terminates'] = False
             for param in entry['parameters']:
                 param['alias'] = param['argname']
                 param['log'] = True
@@ -256,6 +257,10 @@ class DefitionProcessor(object):
             # Note that it doesn't really matter what value is specified for
             # "special" in the signature, as long as it is set.
             row['signature']['special'] = 'special' in row['signature']
+
+            # If an API terminates (ExitProcess..) logging after the API call will not happen
+            # Terminating APIs need logging before the API call
+            row['signature']['terminates'] = 'terminates' in row['signature']
 
             # Check whether there is a return value present.
             if 'return_value' not in row['signature']:

@@ -73,6 +73,7 @@ Signature::
 
     * Library: kernel32
     * Return value: void
+    * Terminates: true
 
 Parameters::
 

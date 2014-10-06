@@ -62,6 +62,7 @@ ExitThread
 Signature::
 
     * Return value: void
+    * Terminates: true
 
 Parameters::
 

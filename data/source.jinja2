@@ -72,22 +72,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endif %}
 
     {%- if hook.signature.return_value != 'void' %}
-    {{hook.signature.return_value}} ret = Old_{{hook.apiname}}(
-    {%- else %}
-    Old_{{hook.apiname}}(
-    {%- endif %}
-    {%- for param in hook.parameters: %}
-        {{param.argname}}
-        {%- if not loop.last %},{% endif -%}
-    {%- endfor %}
-    );
-
-    {%- if hook.middle: %}
-    {%- for line in hook.middle: %}
-    {{line}}
-    {%- endfor %}
+    {{hook.signature.return_value}} ret;
     {% endif %}
 
+    {% if hook.signature.terminates: %}
     {% if hook.signature.special: %}
     if(hook_info()->hook_count == 1) {
     {% endif %}
@@ -121,6 +109,61 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     );
     {% if hook.signature.special: %}
     }
+    {% endif %}
+    {% endif %}
+
+    {%- if hook.signature.return_value != 'void' %}
+    ret = Old_{{hook.apiname}}(
+    {%- else %}
+    Old_{{hook.apiname}}(
+    {%- endif %}
+    {%- for param in hook.parameters: %}
+        {{param.argname}}
+        {%- if not loop.last %},{% endif -%}
+    {%- endfor %}
+    );
+
+    {%- if hook.middle: %}
+    {%- for line in hook.middle: %}
+    {{line}}
+    {%- endfor %}
+    {% endif %}
+
+    {% if not hook.signature.terminates %}
+    {% if hook.signature.special: %}
+    if(hook_info()->hook_count == 1) {
+    {% endif %}
+    log_api({{ hook.index }},
+        {{ hook.signature.is_success }},
+        {%- if hook.signature.return_value != 'void' %}
+        (uintptr_t) ret,
+        {%- else %}
+        0,
+        {%- endif %}
+        "
+    {%- for param in hook.parameters: -%}
+        {%- if param.log == True: -%}
+            {{types[param.argtype]}}
+        {%- endif -%}
+    {%- endfor -%}
+    {%- for log in hook.logging: -%}
+        {{log.argtype}}
+    {%- endfor -%}
+    "
+    {%- for param in hook.parameters: -%}
+        {% if param.log == True: -%}
+        ,
+        {{param.argname}}
+        {%- endif %}
+    {%- endfor %}
+    {%- for log in hook.logging: -%}
+        ,
+        {{log.argvalue}}
+    {%- endfor %}
+    );
+    {% if hook.signature.special: %}
+    }
+    {% endif %}
     {% endif %}
 
     {%- if hook.post: %}
