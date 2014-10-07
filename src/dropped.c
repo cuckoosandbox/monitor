@@ -25,8 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ntapi.h"
 #include "pipe.h"
 
-#define HDDVOL1 L"\\Device\\HarddiskVolume1"
-
 static ht_t g_files;
 static CRITICAL_SECTION g_mutex;
 
@@ -44,12 +42,11 @@ void dropped_init()
 
 void dropped_add(HANDLE file_handle, const wchar_t *filepath)
 {
-    dropped_entry_t *e;
-
     if(PathIsDirectoryW(filepath) == FALSE &&
             is_ignored_file_unicode(filepath, lstrlenW(filepath)) == 0) {
 
-        e = (dropped_entry_t *) calloc(1, sizeof(dropped_entry_t));
+        dropped_entry_t *e =
+            (dropped_entry_t *) calloc(1, sizeof(dropped_entry_t));
         if(e != NULL) {
             wcscpy(e->path, filepath);
 
@@ -77,8 +74,6 @@ void dropped_wrote(HANDLE file_handle)
 void dropped_close(HANDLE file_handle)
 {
     EnterCriticalSection(&g_mutex);
-
     ht_remove(&g_files, (uintptr_t) file_handle);
-
     LeaveCriticalSection(&g_mutex);
 }

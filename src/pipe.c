@@ -133,7 +133,7 @@ int pipe(const char *fmt, ...)
         va_end(args);
 
         if(CallNamedPipe(g_pipe_name, buf, len, buf, len,
-                (unsigned long *) &len, PIPE_MAX_TIMEOUT) == 0) {
+                (unsigned long *) &len, PIPE_MAX_TIMEOUT) == FALSE) {
             return 0;
         }
     }
@@ -151,7 +151,7 @@ int pipe2(void *out, int *outlen, const char *fmt, ...)
         va_end(args);
 
         if(CallNamedPipe(g_pipe_name, buf, len, out, *outlen,
-                (unsigned long *) outlen, PIPE_MAX_TIMEOUT) == 0) {
+                (unsigned long *) outlen, PIPE_MAX_TIMEOUT) == FALSE) {
             return 0;
         }
     }

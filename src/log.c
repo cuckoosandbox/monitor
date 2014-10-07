@@ -489,7 +489,7 @@ void log_anomaly(const char *subcategory, int success,
         GetCurrentThreadId(), subcategory, funcname, msg);
 }
 
-void log_init(unsigned int ip, unsigned short port)
+void log_init(uint32_t ip, uint16_t port)
 {
     InitializeCriticalSection(&g_mutex);
 

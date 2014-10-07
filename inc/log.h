@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 
-void log_init(unsigned int ip, unsigned short port);
+void log_init(uint32_t ip, uint16_t port);
 void log_free();
 
 void log_explain();
