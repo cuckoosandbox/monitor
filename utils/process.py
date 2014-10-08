@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import argparse
 import copy
 import docutils.nodes
 import docutils.utils
@@ -337,9 +338,11 @@ class DefitionProcessor(object):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print 'Usage: python %s <datadir> <outdir> <sigs.rst..>' % sys.argv[0]
-        exit(1)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('data_directory', type=str, help='Path to data directory.')
+    parser.add_argument('outfile', type=str, help='Output file.')
+    parser.add_argument('signatures', type=str, nargs='+', action='append', help='Signature files.')
+    args = parser.parse_args()
 
-    dp = DefitionProcessor(sys.argv[1], sys.argv[2], sys.argv[3:])
+    dp = DefitionProcessor(args.data_directory, args.outfile, *args.signatures)
     dp.process()
