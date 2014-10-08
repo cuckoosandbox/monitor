@@ -637,14 +637,15 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
             regkey[offset + length] = 0;
 
             free(key_name_information);
-            return lstrlenW(regkey);
+            return offset + length;
         }
 
-        memmove(regkey, key_name_information->Name, length * sizeof(wchar_t));
-        regkey[length] = 0;
+        memmove(&regkey[offset], key_name_information->Name,
+            length * sizeof(wchar_t));
+        regkey[offset + length] = 0;
 
         free(key_name_information);
-        return length;
+        return offset + length;
     }
     return 0;
 }
@@ -662,7 +663,7 @@ uint32_t reg_get_key_ascii(HANDLE key_handle,
     length = MIN(length, MAX_PATH_W - offset);
 
     regkey[offset++] = '\\';
-    wcsncpyA(regkey, subkey, length);
+    wcsncpyA(&regkey[offset], subkey, length);
     regkey[offset + length] = 0;
     return offset + length;
 }
