@@ -62,7 +62,7 @@ Parameters::
     ** REGSAM samDesired access
     *  LPSECURITY_ATTRIBUTES lpSecurityAttributes
     ** PHKEY phkResult key_handle
-    *  LPDWORD lpdwDisposition
+    ** LPDWORD lpdwDisposition disposition
 
 Pre::
 
@@ -87,7 +87,7 @@ Parameters::
     ** REGSAM samDesired access
     *  LPSECURITY_ATTRIBUTES lpSecurityAttributes
     ** PHKEY phkResult key_handle
-    *  LPDWORD lpdwDisposition
+    ** LPDWORD lpdwDisposition disposition
 
 Pre::
 
@@ -415,6 +415,15 @@ Parameters::
     *  LPDWORD lpcbSecurityDescriptor
     *  PFILETIME lpftLastWriteTime
 
+Ensure::
+
+    * lpcSubKeys
+    * lpcMaxSubKeyLen
+    * lpcMaxClassLen
+    * lpcValues
+    * lpcMaxValueNameLen
+    * lpcMaxValueLen
+
 
 RegQueryInfoKeyW
 ================
@@ -433,6 +442,15 @@ Parameters::
     ** LPDWORD lpcMaxValueLen value_max_length
     *  LPDWORD lpcbSecurityDescriptor
     *  PFILETIME lpftLastWriteTime
+
+Ensure::
+
+    * lpcSubKeys
+    * lpcMaxSubKeyLen
+    * lpcMaxClassLen
+    * lpcValues
+    * lpcMaxValueNameLen
+    * lpcMaxValueLen
 
 
 RegCloseKey

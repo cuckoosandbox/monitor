@@ -17,7 +17,7 @@ Parameters::
     ** ULONG TitleIndex index
     *  PUNICODE_STRING Class
     ** ULONG CreateOptions options
-    *  PULONG Disposition
+    ** PULONG Disposition disposition
 
 Pre::
 
