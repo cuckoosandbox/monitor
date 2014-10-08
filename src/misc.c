@@ -607,12 +607,12 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
                 '\\'
             );
 
-            // Subtract the part of the key from the length that
-            // we're skipping.
-            length -= subkey - key_name_information->Name;
-
             // Shouldn't be a null pointer but let's just make sure.
             if(subkey != NULL && length != 0) {
+                // Subtract the part of the key from the length that
+                // we're skipping.
+                length -= subkey - key_name_information->Name;
+
                 memmove(&regkey[offset], subkey, length * sizeof(wchar_t));
                 regkey[offset + length] = 0;
             }
