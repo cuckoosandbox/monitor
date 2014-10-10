@@ -158,3 +158,25 @@ Post::
         pipe("PROCESS:%d", pid_from_process_handle(ProcessHandle));
         sleep_skip_disable();
     }
+
+
+NtQueueApcThread
+================
+
+Parameters::
+
+    ** HANDLE ThreadHandle thread_handle
+    *  PIO_APC_ROUTINE ApcRoutine
+    ** PVOID ApcRoutineContext function_address
+    ** PIO_STATUS_BLOCK ApcStatusBlock parameter
+    *  ULONG ApcReserved
+
+Pre::
+
+    pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
+
+Post::
+
+    if(NT_SUCCESS(ret)) {
+        sleep_skip_disable();
+    }
