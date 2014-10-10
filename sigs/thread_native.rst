@@ -112,12 +112,7 @@ Parameters::
 Post::
 
     pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
-
-Post::
-
-    if(NT_SUCCESS(ret)) {
-        sleep_skip_disable();
-    }
+    sleep_skip_disable();
 
 
 NtSuspendThread
@@ -145,7 +140,7 @@ Ensure::
 
     SuspendCount
 
-Post::
+Pre::
 
     pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
 
