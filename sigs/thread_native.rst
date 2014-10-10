@@ -54,6 +54,16 @@ Parameters::
     *  LONG SizeOfStackReserve
     *  PVOID lpBytesBuffer
 
+Pre::
+
+    pipe("PROCESS:%d", pid_from_process_handle(ProcessHandle));
+
+Post::
+
+    if(NT_SUCCESS(ret)) {
+        sleep_skip_disable();
+    }
+
 
 NtOpenThread
 ============
@@ -76,7 +86,10 @@ Logging::
 
 Post::
 
-    pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
+    if(NT_SUCCESS(ret)) {
+        pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
+        sleep_skip_disable();
+    }
 
 
 NtGetContextThread
@@ -99,6 +112,12 @@ Parameters::
 Post::
 
     pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
+
+Post::
+
+    if(NT_SUCCESS(ret)) {
+        sleep_skip_disable();
+    }
 
 
 NtSuspendThread
@@ -126,6 +145,16 @@ Ensure::
 
     SuspendCount
 
+Post::
+
+    pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
+
+Post::
+
+    if(NT_SUCCESS(ret)) {
+        sleep_skip_disable();
+    }
+
 
 NtTerminateThread
 =================
@@ -152,10 +181,13 @@ Parameters::
     ** PHANDLE ThreadHandle thread_handle
     *  PCLIENT_ID ClientId
 
+Pre::
+
+    pipe("PROCESS:%d", pid_from_process_handle(ProcessHandle));
+
 Post::
 
     if(NT_SUCCESS(ret)) {
-        pipe("PROCESS:%d", pid_from_process_handle(ProcessHandle));
         sleep_skip_disable();
     }
 
