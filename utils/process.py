@@ -25,7 +25,6 @@ import docutils.parsers.rst
 import jinja2
 import json
 import os.path
-import sys
 
 
 class DefitionProcessor(object):
@@ -333,7 +332,8 @@ class DefitionProcessor(object):
             sig['index'] = idx
 
         print>>h, self.template('header').render(sigs=sigs)
-        print>>hi, self.template('header-info').render(sigs=sigs)
+        print>>hi, self.template('header-info').render(
+            sigs=sigs, first_hook=len(self.base_sigs))
         print>>s, self.template('source').render(sigs=sigs, types=self.types)
 
 

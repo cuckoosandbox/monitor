@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "bson/bson.h"
 #include "hooking.h"
 #include "hooks.h"
+#include "hooks-info.h"
 #include "misc.h"
 #include "ntapi.h"
 #include "log.h"
@@ -35,6 +36,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // TLS index of the bson object.
 static int g_tls_idx;
+
+// TLS index to see whether a thread is new or not.
+static int g_thread_init_idx;
 
 // Maximum length of a buffer so we try to avoid polluting logs with garbage.
 #define BUFFER_LOG_MAX 4096
@@ -281,6 +285,12 @@ void log_api(int index, int is_success, uintptr_t return_value,
 
     LeaveCriticalSection(&g_mutex);
 
+    void *value = TlsGetValue(g_thread_init_idx);
+    if(value == NULL && index >= MONITOR_FIRSTHOOKIDX) {
+        log_new_thread();
+        TlsSetValue(g_thread_init_idx, "init!");
+    }
+
     bson b;
 
     bson_init(&b);
@@ -523,6 +533,7 @@ void log_init(uint32_t ip, uint16_t port)
     }
 
     g_tls_idx = TlsAlloc();
+    g_thread_init_idx = TlsAlloc();
 
     log_raw("BSON\n", 5);
     log_new_process();
