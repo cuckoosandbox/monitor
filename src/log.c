@@ -537,7 +537,6 @@ void log_init(uint32_t ip, uint16_t port)
 
     log_raw("BSON\n", 5);
     log_new_process();
-    log_new_thread();
 }
 
 void log_free()
