@@ -97,11 +97,11 @@ static int _eat_pointers_for_module(const uint8_t *mod,
 
 void symbol_init(HMODULE module_handle)
 {
-    g_monitor_base_address = (const uint8_t *) module_handle;
-
-    _eat_pointers_for_module(g_monitor_base_address,
+    _eat_pointers_for_module((uint8_t *) module_handle,
         &g_monitor_function_addresses, &g_monitor_names_addresses,
         &g_monitor_ordinals, &g_monitor_number_of_names);
+
+    g_monitor_base_address = (const uint8_t *) module_handle;
 }
 
 int symbol(const uint8_t *addr, char *sym, uint32_t length)
