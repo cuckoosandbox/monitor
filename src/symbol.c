@@ -44,9 +44,15 @@ static const uint8_t *_module_from_address(const uint8_t *addr)
     MEMORY_BASIC_INFORMATION mbi;
     uint8_t **ptr = (uint8_t **) &mbi.AllocationBase;
 
-    if(VirtualQuery(addr, &mbi, sizeof(mbi)) == sizeof(mbi) &&
-            _page_is_readable(mbi.AllocationBase) &&
-            **ptr == 'M' && (*ptr)[1] == 'Z') {
+    if(VirtualQuery(addr, &mbi, sizeof(mbi)) != sizeof(mbi) ||
+            _page_is_readable(mbi.AllocationBase) == 0) {
+        return NULL;
+    }
+
+    // We're looking for either an MZ header or the image base address
+    // of our monitor.
+    if((**ptr == 'M' && (*ptr)[1] == 'Z') ||
+            mbi.AllocationBase == g_monitor_base_address) {
         return mbi.AllocationBase;
     }
     return NULL;
