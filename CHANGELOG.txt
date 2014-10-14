@@ -1,3 +1,6 @@
+- Tweak: Resolve monitors' symbols while destroying its PE header.
+- Bugfix: Announce new threads to Cuckoo.
+- Bugfix: Registry key resolving null-ptr issue, un-crashing Python.
 - Bugfix: Only hook functions once (thanks Thorsten Sick).
 - Bugfix: Stabilize null pointer filepaths.
 - Tweak: Update and improve integration of ignored filepaths.
