@@ -142,6 +142,12 @@ Available keys:
     identifier(s) of the child process(es), allowing the monitor to inject
     into said child process(es).
 
+* Terminates:
+
+    Mark this API signature as an API that terminates. Logging after the API
+    call would not happen. APIs doing that are ExitProcess and ExitThread.
+    Functions with this marker will be logged before the API call.
+
 .. _hook-block-parameters:
 
 Parameters Block
