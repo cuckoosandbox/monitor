@@ -285,10 +285,13 @@ void log_api(int index, int is_success, uintptr_t return_value,
 
     LeaveCriticalSection(&g_mutex);
 
-    void *value = TlsGetValue(g_thread_init_idx);
-    if(value == NULL && index >= MONITOR_FIRSTHOOKIDX) {
-        log_new_thread();
-        TlsSetValue(g_thread_init_idx, "init!");
+    if (index != 1)
+    {
+        void *value = TlsGetValue(g_thread_init_idx);
+        if(value == NULL && index >= MONITOR_FIRSTHOOKIDX) {
+            log_new_thread();
+            TlsSetValue(g_thread_init_idx, "init!");
+        }
     }
 
     bson b;
