@@ -194,7 +194,14 @@ uintptr_t pid_from_thread_handle(HANDLE thread_handle)
 
 uintptr_t parent_process_id()
 {
-    return pid_from_process_handle(GetCurrentProcess());
+    PROCESS_BASIC_INFORMATION pbi; ULONG size;
+
+    if(NT_SUCCESS(pNtQueryInformationProcess(GetCurrentProcess(),
+            ProcessBasicInformation, &pbi, sizeof(pbi), &size)) != FALSE &&
+            size == sizeof(pbi)) {
+        return pbi.InheritedFromUniqueProcessId;
+    }
+    return 0;
 }
 
 // Hide our module from PEB.

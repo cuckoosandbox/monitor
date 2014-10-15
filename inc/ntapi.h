@@ -139,7 +139,7 @@ typedef struct _PROCESS_BASIC_INFORMATION {
     void *PebBaseAddress;
     PVOID Reserved2[2];
     ULONG_PTR UniqueProcessId;
-    PVOID Reserved3;
+    PVOID InheritedFromUniqueProcessId;
 } PROCESS_BASIC_INFORMATION;
 
 typedef struct _CLIENT_ID {
