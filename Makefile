@@ -86,16 +86,16 @@ $(LIBCAPSTONE64):
 	cd src/capstone/ && \
 	BUILDDIR=../../objects/x64/capstone/ ./make.sh cross-win64
 
-objects/x86/%.o: %.c $(HEADER) Makefile
+objects/x86/%.o: %.c $(HEADER) $(HOOK32) Makefile
 	$(CC32) -c -o $@ $< $(CFLAGS)
 
-objects/x86/%.o: objects/x86/%.c $(HEADER) Makefile
+objects/x86/%.o: objects/x86/%.c $(HEADER) $(HOOK32) Makefile
 	$(CC32) -c -o $@ $< $(CFLAGS)
 
-objects/x64/%.o: %.c $(HEADER) Makefile
+objects/x64/%.o: %.c $(HEADER) $(HOOK64) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS)
 
-objects/x64/%.o: objects/x64/%.c $(HEADER) Makefile
+objects/x64/%.o: objects/x64/%.c $(HEADER) $(HOOK64) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS)
 
 objects/x86/asm/tramp-special.o: asm/x86/tramp.asm Makefile
