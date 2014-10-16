@@ -178,3 +178,37 @@ Post::
     if(NT_SUCCESS(ret)) {
         dropped_close(Handle);
     }
+
+
+GetSystemInfo
+=============
+
+Signature::
+
+    * Library: kernel32
+    * Return value: void
+
+Parameters::
+
+    *  LPSYSTEM_INFO lpSystemInfo
+
+Logging::
+
+    i processor_count lpSystemInfo->dwNumberOfProcessors
+
+
+GetNativeSystemInfo
+===================
+
+Signature::
+
+    * Library: kernel32
+    * Return value: void
+
+Parameters::
+
+    *  LPSYSTEM_INFO lpSystemInfo
+
+Logging::
+
+    i processor_count lpSystemInfo->dwNumberOfProcessors
