@@ -29,7 +29,7 @@ Signature::
 
 Parameters::
 
-    ** const char *name
+    ** const char *name hostname
 
 
 socket
