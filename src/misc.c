@@ -199,7 +199,7 @@ uintptr_t parent_process_id()
     if(NT_SUCCESS(pNtQueryInformationProcess(GetCurrentProcess(),
             ProcessBasicInformation, &pbi, sizeof(pbi), &size)) != FALSE &&
             size == sizeof(pbi)) {
-        return pbi.InheritedFromUniqueProcessId;
+        return (uintptr_t) pbi.InheritedFromUniqueProcessId;
     }
     return 0;
 }
