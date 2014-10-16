@@ -103,8 +103,11 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_OA(newfilepath, NewHiveFileName);
-    COPY_FILE_PATH_OA(backupfilepath, BackupHiveFileName);
+    wchar_t *newfilepath = get_unicode_buffer();
+    path_get_full_path_objattr(NewHiveFileName, newfilepath);
+
+    wchar_t *backupfilepath = get_unicode_buffer();
+    path_get_full_path_objattr(BackupHiveFileName, backupfilepath);
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
@@ -278,7 +281,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_OA(source_file, SourceFile);
+    wchar_t *source_file = get_unicode_buffer();
+    path_get_full_path_objattr(SourceFile, source_file);
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(TargetKey, regkey);
@@ -300,7 +304,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_OA(source_file, SourceFile);
+    wchar_t *source_file = get_unicode_buffer();
+    path_get_full_path_objattr(SourceFile, source_file);
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(TargetKey, regkey);
@@ -323,7 +328,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_OA(source_file, SourceFile);
+    wchar_t *source_file = get_unicode_buffer();
+    path_get_full_path_objattr(SourceFile, source_file);
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(TargetKey, regkey);

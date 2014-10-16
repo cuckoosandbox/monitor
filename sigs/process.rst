@@ -39,7 +39,8 @@ Pre::
     DWORD creation_flags = dwCreationFlags;
     dwCreationFlags |= CREATE_SUSPENDED;
 
-    COPY_FILE_PATH_W(filepath, lpApplicationName);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathW(lpApplicationName, filepath);
 
 Logging::
 
@@ -97,7 +98,8 @@ Ensure::
 
 Pre::
 
-    COPY_FILE_PATH_W(filepath, pExecInfo->lpFile);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathW(pExecInfo->lpFile, filepath);
 
 Logging::
 

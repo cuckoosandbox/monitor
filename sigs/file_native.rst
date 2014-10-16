@@ -25,7 +25,8 @@ Parameters::
 
 Middle::
 
-    COPY_FILE_PATH_OA(filepath, ObjectAttributes);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, filepath);
 
 Logging::
 
@@ -47,7 +48,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_OA(filepath, ObjectAttributes);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, filepath);
     pipe("FILE_DEL:%Z", filepath);
 
 Logging::
@@ -69,7 +71,8 @@ Parameters::
 
 Middle::
 
-    COPY_FILE_PATH_OA(filepath, ObjectAttributes);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, filepath);
 
 Logging::
 
@@ -244,7 +247,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_OA(dirpath, ObjectAttributes);
+    wchar_t *dirpath = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, dirpath);
 
 Logging::
 
@@ -262,7 +266,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_OA(dirpath, ObjectAttributes);
+    wchar_t *dirpath = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, dirpath);
 
 Logging::
 

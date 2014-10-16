@@ -79,22 +79,6 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length);
 
 void setup_exception_handler();
 
-#define COPY_FILE_PATH_A(local_name, param_name) \
-    wchar_t *local_name = get_unicode_buffer(); \
-    path_get_full_pathA(param_name, local_name);
-
-#define COPY_FILE_PATH_W(local_name, param_name) \
-    wchar_t *local_name = get_unicode_buffer(); \
-    path_get_full_pathW(param_name, local_name);
-
-#define COPY_FILE_PATH_US(local_name, param_name) \
-    wchar_t *local_name = get_unicode_buffer(); \
-    path_get_full_path_unistr(param_name, local_name);
-
-#define COPY_FILE_PATH_OA(local_name, param_name) \
-    wchar_t *local_name = get_unicode_buffer(); \
-    path_get_full_path_objattr(param_name, local_name);
-
 #define COPY_UNICODE_STRING(local_name, param_name) \
     UNICODE_STRING local_name; \
     wchar_t *local_name##_buffer = get_unicode_buffer(); \

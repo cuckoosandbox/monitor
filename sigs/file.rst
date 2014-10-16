@@ -19,7 +19,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_W(dirpath, lpPathName);
+    wchar_t *dirpath = get_unicode_buffer();
+    path_get_full_pathW(lpPathName, dirpath);
 
 Logging::
 
@@ -41,7 +42,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_W(dirpath, lpNewDirectory);
+    wchar_t *dirpath = get_unicode_buffer();
+    path_get_full_pathW(lpNewDirectory, dirpath);
 
 Logging::
 
@@ -61,7 +63,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_A(dirpath, lpPathName);
+    wchar_t *dirpath = get_unicode_buffer();
+    path_get_full_pathA(lpPathName, dirpath);
 
 Logging::
 
@@ -81,7 +84,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_W(dirpath, lpPathName);
+    wchar_t *dirpath = get_unicode_buffer();
+    path_get_full_pathW(lpPathName, dirpath);
 
 Logging::
 
@@ -105,8 +109,10 @@ Parameters::
 
 Pre::
 
+    wchar_t *oldfilepath = get_unicode_buffer();
+    path_get_full_pathW(lpExistingFileName, oldfilepath);
+
     wchar_t *newfilepath = get_unicode_buffer();
-    COPY_FILE_PATH_W(oldfilepath, lpExistingFileName);
     if(lpNewFileName != NULL) {
         path_get_full_pathW(lpNewFileName, newfilepath);
     }
@@ -146,7 +152,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_A(filepath, lpFileName);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathA(lpFileName, filepath);
 
 Logging::
 
@@ -171,7 +178,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_W(filepath, lpFileName);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathW(lpFileName, filepath);
 
 Logging::
 
@@ -193,8 +201,11 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_A(oldfilepath, lpExistingFileName);
-    COPY_FILE_PATH_A(newfilepath, lpNewFileName);
+    wchar_t *oldfilepath = get_unicode_buffer();
+    path_get_full_pathA(lpExistingFileName, oldfilepath);
+
+    wchar_t *newfilepath = get_unicode_buffer();
+    path_get_full_pathA(lpNewFileName, newfilepath);
 
 Logging::
 
@@ -217,8 +228,11 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_W(oldfilepath, lpExistingFileName);
-    COPY_FILE_PATH_W(newfilepath, lpNewFileName);
+    wchar_t *oldfilepath = get_unicode_buffer();
+    path_get_full_pathW(lpExistingFileName, oldfilepath);
+
+    wchar_t *newfilepath = get_unicode_buffer();
+    path_get_full_pathW(lpNewFileName, newfilepath);
 
 Logging::
 
@@ -244,8 +258,11 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_W(oldfilepath, lpExistingFileName);
-    COPY_FILE_PATH_W(newfilepath, lpNewFileName);
+    wchar_t *oldfilepath = get_unicode_buffer();
+    path_get_full_pathW(lpExistingFileName, oldfilepath);
+
+    wchar_t *newfilepath = get_unicode_buffer();
+    path_get_full_pathW(lpNewFileName, newfilepath);
 
 Logging::
 
@@ -266,7 +283,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_A(filepath, lpFileName);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathA(lpFileName, filepath);
     pipe("FILE_DEL:%Z", filepath);
 
 Logging::
@@ -287,7 +305,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_W(filepath, lpFileName);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathW(lpFileName, filepath);
     pipe("FILE_DEL:%Z", filepath);
 
 Logging::

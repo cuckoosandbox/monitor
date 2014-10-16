@@ -22,7 +22,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_OA(filepath, ObjectAttributes);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, filepath);
 
 Logging::
 
@@ -53,7 +54,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_OA(filepath, ObjectAttributes);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, filepath);
 
 Logging::
 
@@ -123,7 +125,8 @@ Parameters::
 
 Pre::
 
-    COPY_FILE_PATH_US(filepath, ImagePath);
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_path_unistr(ImagePath, filepath);
 
 Logging::
 
