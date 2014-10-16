@@ -147,27 +147,26 @@ void misc_init(const char *shutdown_mutex)
     }
 }
 
-#define UNICODE_BUFFER_COUNT 16
+#define UNICODE_BUFFER_COUNT 32
 
 wchar_t *get_unicode_buffer()
 {
     uintptr_t index = (uintptr_t) TlsGetValue(g_tls_unicode_buffer_index);
-    wchar_t **buffers = (wchar_t **) TlsGetValue(g_tls_unicode_buffers);
+    wchar_t *buffers = (wchar_t *) TlsGetValue(g_tls_unicode_buffers);
 
     // If the buffers have not been allocated already then do so now.
     if(buffers == NULL) {
-        buffers = malloc(sizeof(wchar_t *) * UNICODE_BUFFER_COUNT);
-        for (uint32_t idx = 0; idx < UNICODE_BUFFER_COUNT; idx++) {
-            buffers[idx] = (wchar_t *)
-                malloc(sizeof(wchar_t) * (MAX_PATH_W + 1));
-        }
+        // It's only 2MB per thread! What could possibly go wrong?
+        buffers = VirtualAlloc(NULL,
+            UNICODE_BUFFER_COUNT * (MAX_PATH_W+1) * sizeof(wchar_t),
+            MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
         TlsSetValue(g_tls_unicode_buffers, buffers);
     }
 
     TlsSetValue(g_tls_unicode_buffer_index, (void *)(index + 1));
 
     // Zero-terminate the string just in case.
-    wchar_t *ret = buffers[index % UNICODE_BUFFER_COUNT];
+    wchar_t *ret = &buffers[(index % UNICODE_BUFFER_COUNT) * (MAX_PATH_W+1)];
     return *ret = 0, ret;
 }
 
