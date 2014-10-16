@@ -365,3 +365,34 @@ Parameters::
     ** FILE_INFO_BY_HANDLE_CLASS FileInformationClass information_class
     *  LPVOID lpFIleInformation
     *  DWORD dwBufferSize
+
+
+DeviceIoControl
+===============
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hDevice device_handle
+    ** DWORD dwIoControlCode control_code
+    *  LPVOID lpInBuffer
+    *  DWORD nInBufferSize
+    *  LPVOID lpOutBuffer
+    *  DWORD nOutBufferSize
+    *  LPDWORD lpBytesReturned
+    *  LPOVERLAPPED lpOverlapped
+
+Ensure::
+
+    * lpBytesReturned
+
+Prelog::
+
+    b input_buffer nInBufferSize, lpInBuffer
+
+Logging::
+
+    B output_buffer lpBytesReturned, lpOutBuffer
