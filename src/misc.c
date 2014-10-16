@@ -165,7 +165,10 @@ wchar_t *get_unicode_buffer()
     }
 
     TlsSetValue(g_tls_unicode_buffer_index, (void *)(index + 1));
-    return buffers[index % UNICODE_BUFFER_COUNT];
+
+    // Zero-terminate the string just in case.
+    wchar_t *ret = buffers[index % UNICODE_BUFFER_COUNT];
+    return *ret = 0, ret;
 }
 
 uintptr_t pid_from_process_handle(HANDLE process_handle)
