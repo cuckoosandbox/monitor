@@ -26,7 +26,7 @@ void log_free();
 
 void log_explain();
 
-void log_api_pre(const char *fmt, ...);
+void log_api_pre(uint32_t length, const void *buffer);
 
 void log_api(int index, int is_success, uintptr_t return_value,
     const char *fmt, ...);

@@ -34,7 +34,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "symbol.h"
 #include "utf8.h"
 
-// TLS index of the bson object.
+typedef struct _memblock_t {
+    uint32_t length;
+    void    *buffer;
+} memblock_t;
+
+// TLS index of the prelog buffer object.
 static int g_tls_idx;
 
 // TLS index to see whether a thread is new or not.
@@ -194,39 +199,15 @@ void log_explain(int index)
     bson_destroy(&b);
 }
 
-void log_api_pre(const char *fmt, ...)
+void log_api_pre(uint32_t length, const void *buffer)
 {
-    // For now we only require support for a single buffer object.
-    if(strcmp(fmt, "b") != 0) {
-        pipe("CRITICAL:Unsupported log-api-pre format string found: %z!",
-            fmt);
-        return;
+    void *dup = memdup(buffer, length);
+    memblock_t *mb = (memblock_t *) malloc(sizeof(memblock_t));
+    if(mb != NULL) {
+        mb->buffer = dup;
+        mb->length = length;
+        TlsSetValue(g_tls_idx, mb);
     }
-
-    va_list args;
-    va_start(args, fmt);
-
-    bson *b = bson_alloc();
-    if(b == NULL) return;
-
-    bson_init(b);
-
-    char idx[4];
-
-    // Allow easy addition of other format specifiers later on.
-    for (uint32_t argnum = 2; *fmt != 0; argnum++, fmt++) {
-        snprintf(idx, 4, "%d", argnum);
-
-        if(*fmt == 'b') {
-            size_t len = va_arg(args, size_t);
-            const uint8_t *s = va_arg(args, const uint8_t *);
-            log_buffer(b, idx, s, len);
-        }
-    }
-
-    TlsSetValue(g_tls_idx, b);
-
-    va_end(args);
 }
 
 #if DEBUG
@@ -310,22 +291,13 @@ void log_api(int index, int is_success, uintptr_t return_value,
 
     int argnum = 2;
 
-    bson *pre = (bson *) TlsGetValue(g_tls_idx);
-    if(pre != NULL) {
-        bson_iterator *it = bson_iterator_alloc();
-        if(it != NULL) {
-            bson_iterator_init(it, pre);
+    memblock_t *mb = (memblock_t *) TlsGetValue(g_tls_idx);
+    if(mb != NULL) {
+        snprintf(idx, 4, "%u", argnum++);
 
-            while (bson_iterator_next(it) != BSON_EOO) {
-                bson_append_element(&b, NULL, it);
-                argnum++;
-            }
-
-            bson_iterator_dealloc(it);
-        }
-
-        bson_destroy(pre);
-        bson_dealloc(pre);
+        log_buffer(&b, idx, mb->buffer, mb->length);
+        free(mb->buffer);
+        free(mb);
 
         TlsSetValue(g_tls_idx, NULL);
     }

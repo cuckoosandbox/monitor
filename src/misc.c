@@ -939,3 +939,15 @@ void setup_exception_handler()
 {
     pRtlAddVectoredExceptionHandler(TRUE, &_exception_handler);
 }
+
+void *memdup(const void *addr, uint32_t length)
+{
+    if(addr != NULL && length != 0) {
+        void *ret = malloc(length);
+        if(ret != NULL) {
+            memcpy(ret, addr, length);
+            return ret;
+        }
+    }
+    return NULL;
+}

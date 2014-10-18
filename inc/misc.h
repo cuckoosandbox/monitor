@@ -78,6 +78,7 @@ void library_from_unicode_string(const UNICODE_STRING *us,
 int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length);
 
 void setup_exception_handler();
+void *memdup(const void *addr, uint32_t length);
 
 #define COPY_UNICODE_STRING(local_name, param_name) \
     UNICODE_STRING local_name; \

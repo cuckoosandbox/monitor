@@ -147,21 +147,13 @@ Parameters::
     *  PVOID OutputBuffer
     *  ULONG OutputBufferLength
 
-Pre::
+Prelog::
 
-    void *mem_copy = malloc(InputBufferLength);
-    if(mem_copy != NULL) {
-        memcpy(mem_copy, InputBuffer, InputBufferLength);
-    }
+    b input_buffer InputBufferLength, InputBuffer
 
 Logging::
 
-    b input_buffer InputBufferLength, mem_copy
     b output_buffer IoStatusBlock->Information, OutputBuffer
-
-Post::
-
-    free(mem_copy);
 
 
 NtQueryDirectoryFile

@@ -63,13 +63,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {% endif %}
 
     {%- if hook.prelog: %}
-    log_api_pre("{{ hook.prelog|join(attribute='argtype') }}"
-    {%- for log in hook.prelog: -%}
-        ,
-        {{log.argvalue}}
-    {%- endfor %}
-    );
-    {%- endif %}
+    log_api_pre({{hook.prelog|join(',', attribute='argvalue')}});
+    {% endif %}
 
     {%- if hook.signature.return_value != 'void' %}
     {{hook.signature.return_value}} ret = Old_{{hook.apiname}}(
