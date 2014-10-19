@@ -31,51 +31,51 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {%- for hook in sigs if hook.is_hook: %}
 
 
-{{hook.signature.return_value}} ({{hook.signature.calling_convention}} *Old_{{hook.apiname}})(
+{{ hook.signature.return_value }} ({{ hook.signature.calling_convention }} *Old_{{ hook.apiname }})(
 {%- for param in hook.parameters: %}
-    {{param.argtype}}
+    {{ param.argtype }}
     {%- if not param.argtype.endswith('*') %} {% endif -%}
-    {{param.argname}}
+    {{ param.argname }}
     {%- if not loop.last %},{% endif -%}
 {%- endfor %}
 );
 
-{{hook.signature.return_value}} {{hook.signature.calling_convention}} New_{{hook.apiname}}(
+{{ hook.signature.return_value }} {{ hook.signature.calling_convention }} New_{{ hook.apiname }}(
 {%- for param in hook.parameters: %}
-    {{param.argtype}}
+    {{ param.argtype }}
     {%- if not param.argtype.endswith('*') %} {% endif -%}
-    {{param.argname}}
+    {{ param.argname }}
     {%- if not loop.last %},{% endif -%}
 {%- endfor %}
 ) {
     {%- for param in hook.ensure.keys(): %}
-    {{hook.ensure[param]}} _{{param}};
-    if({{param}} == NULL) {
-        {{param}} = &_{{param}};
-        memset(&_{{param}}, 0, sizeof({{hook.ensure[param]}}));
+    {{ hook.ensure[param] }} _{{ param }};
+    if({{ param }} == NULL) {
+        {{ param }} = &_{{ param }};
+        memset(&_{{ param }}, 0, sizeof({{ hook.ensure[param] }}));
     }
     {%- endfor %}
 
     {%- if hook.pre: %}
     {%- for line in hook.pre: %}
-    {{line}}
+    {{ line }}
     {%- endfor %}
     {% endif %}
 
     {%- if hook.prelog: %}
-    log_api_pre({{hook.prelog|join(',', attribute='argvalue')}});
+    log_api_pre({{ hook.prelog|join(',', attribute='argvalue') }});
     {% endif %}
 
     {%- if hook.signature.return_value != 'void' %}
-    {{hook.signature.return_value}} ret = Old_{{hook.apiname}}(
+    {{ hook.signature.return_value }} ret = Old_{{ hook.apiname }}(
     {%- else %}
-    Old_{{hook.apiname}}(
+    Old_{{ hook.apiname }}(
     {%- endif %}
     {%- for param in hook.parameters: %}
         {% if param.argname in hook.replace -%}
-            {{hook.replace[param.argname]}}
+            {{ hook.replace[param.argname] }}
         {%- else -%}
-            {{param.argname}}
+            {{ param.argname }}
         {%- endif %}
         {%- if not loop.last %},{% endif -%}
     {%- endfor %}
@@ -83,7 +83,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     {%- if hook.middle: %}
     {%- for line in hook.middle: %}
-    {{line}}
+    {{ line }}
     {%- endfor %}
     {% endif %}
 
@@ -100,22 +100,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         "
     {%- for param in hook.parameters: -%}
         {%- if param.log == True: -%}
-            {{types[param.argtype]}}
+            {{ types[param.argtype] }}
         {%- endif -%}
     {%- endfor -%}
     {%- for log in hook.logging: -%}
-        {{log.argtype}}
+        {{ log.argtype }}
     {%- endfor -%}
     "
     {%- for param in hook.parameters: -%}
         {% if param.log == True: -%}
         ,
-        {{param.argname}}
+        {{ param.argname }}
         {%- endif %}
     {%- endfor %}
     {%- for log in hook.logging: -%}
         ,
-        {{log.argvalue}}
+        {{ log.argvalue }}
     {%- endfor %}
     );
     {% if hook.signature.special: %}
@@ -124,7 +124,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     {%- if hook.post: %}
     {% for line in hook.post: %}
-    {{line}}
+    {{ line }}
     {%- endfor %}
     {% endif %}
     {% if hook.signature.return_value != 'void' %}
@@ -185,7 +185,7 @@ const char *g_explain_paramnames[][16] = {
 hook_t g_hooks[] = {
 {%- for hook in sigs: %}
     {%- if hook.is_hook: %}
-    {"{{hook.signature.library}}", "{{hook.apiname}}", (FARPROC) New_{{hook.apiname}}, (FARPROC *) &Old_{{hook.apiname}}, {{hook.signature.special.__int__()}}, NULL, 0, NULL},
+    {"{{ hook.signature.library }}", "{{ hook.apiname }}", (FARPROC) New_{{ hook.apiname }}, (FARPROC *) &Old_{{ hook.apiname }}, {{ hook.signature.special.__int__() }}, NULL, 0, NULL},
     {%- endif %}
 {%- endfor %}
     {NULL, NULL, NULL, NULL, 0, NULL, 0, NULL},
