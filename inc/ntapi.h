@@ -471,17 +471,17 @@ typedef enum _FILE_INFO_BY_HANDLE_CLASS {
     FileStreamInfo                  = 7,
     FileCompressionInfo             = 8,
     FileAttributeTagInfo            = 9,
-    FileIdBothDirectoryInfo         = 10, // 0xA
-    FileIdBothDirectoryRestartInfo  = 11, // 0xB
-    FileIoPriorityHintInfo          = 12, // 0xC
-    FileRemoteProtocolInfo          = 13, // 0xD
-    FileFullDirectoryInfo           = 14, // 0xE
-    FileFullDirectoryRestartInfo    = 15, // 0xF
-    FileStorageInfo                 = 16, // 0x10
-    FileAlignmentInfo               = 17, // 0x11
-    FileIdInfo                      = 18, // 0x12
-    FileIdExtdDirectoryInfo         = 19, // 0x13
-    FileIdExtdDirectoryRestartInfo  = 20, // 0x14
+    FileIdBothDirectoryInfo         = 10,
+    FileIdBothDirectoryRestartInfo  = 11,
+    FileIoPriorityHintInfo          = 12,
+    FileRemoteProtocolInfo          = 13,
+    FileFullDirectoryInfo           = 14,
+    FileFullDirectoryRestartInfo    = 15,
+    FileStorageInfo                 = 16,
+    FileAlignmentInfo               = 17,
+    FileIdInfo                      = 18,
+    FileIdExtdDirectoryInfo         = 19,
+    FileIdExtdDirectoryRestartInfo  = 20,
     MaximumFileInfoByHandlesClass
 } FILE_INFO_BY_HANDLE_CLASS, *PFILE_INFO_BY_HANDLE_CLASS;
 
@@ -509,7 +509,6 @@ static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
 #define ProcessBasicInformation 0
 #define ThreadBasicInformation 0
 
-#define MAX_PATH_PLUS_TOLERANCE (MAX_PATH + 64)
 #define MAX_PATH_W 0x7fff
 
 #endif
