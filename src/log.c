@@ -225,27 +225,27 @@ static inline uintptr_t get_ebp()
 
 static void _log_stacktrace(bson *b)
 {
-    uintptr_t addrs[32]; uint32_t count = 0; char buf[12], sym[512];
+    uintptr_t addrs[32]; uint32_t count = 0; char number[20], sym[512];
 
 #if !__x86_64__
     count = stacktrace(get_ebp(), addrs, sizeof(addrs) / sizeof(uintptr_t));
 #endif
 
     for (uint32_t idx = 3; idx < count; idx++) {
-        sprintf(buf, "%d", idx);
-        bson_append_start_array(b, buf);
-
-        sprintf(buf, "0x%p", (const uint8_t *) addrs[idx]);
-        bson_append_string(b, "0", buf);
+        sprintf(number, "%d", idx);
 
 #if __x86_64__
         sym[0] = 0;
 #else
-        symbol((const uint8_t *) addrs[idx], sym, sizeof(sym));
+        symbol((const uint8_t *) addrs[idx], sym, sizeof(sym)-32);
 #endif
+        if(sym[0] != 0) {
+            strcat(sym, " @ ");
+        }
 
-        bson_append_string(b, "1", sym);
-        bson_append_finish_array(b);
+        sprintf(sym + strlen(sym), "0x%p", (const uint8_t *) addrs[idx]);
+
+        bson_append_string(b, number, sym);
     }
 }
 
