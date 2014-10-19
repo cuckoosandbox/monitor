@@ -904,17 +904,17 @@ static LONG CALLBACK _exception_handler(
     for (uint32_t idx = 0; idx < count; idx++) {
         if(return_addresses[idx] == 0) break;
 
-#if __x86_64__
-        sym[0] = 0;
-#else
-        symbol((const uint8_t *) return_addresses[idx], sym, sizeof(sym));
-#endif
-
         sprintf(argidx, "%d", idx);
         bson_append_start_array(&s, argidx);
 
         sprintf(argidx, "0x%p", (void *) return_addresses[idx]);
         bson_append_string(&s, "0", argidx);
+
+#if __x86_64__
+        sym[0] = 0;
+#else
+        symbol((const uint8_t *) return_addresses[idx], sym, sizeof(sym));
+#endif
 
         bson_append_string(&s, "1", sym);
         bson_append_finish_array(&s);
