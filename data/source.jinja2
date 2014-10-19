@@ -72,7 +72,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     Old_{{hook.apiname}}(
     {%- endif %}
     {%- for param in hook.parameters: %}
-        {{param.argname}}
+        {% if param.argname in hook.replace -%}
+            {{hook.replace[param.argname]}}
+        {%- else -%}
+            {{param.argname}}
+        {%- endif %}
         {%- if not loop.last %},{% endif -%}
     {%- endfor %}
     );

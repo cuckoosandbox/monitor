@@ -182,6 +182,13 @@ class DefitionProcessor(object):
     def _parse_post(self, text):
         return text.split('\n')
 
+    def _parse_replace(self, text):
+        ret = {}
+        for line in text.split('\n'):
+            key, value = line.split(None, 1)
+            ret[key.strip()] = value.strip()
+        return ret
+
     def _parse_paragraph(self, paragraph, literal_block):
         if not isinstance(paragraph, docutils.nodes.paragraph):
             raise Exception('Node must be a paragraph.')
