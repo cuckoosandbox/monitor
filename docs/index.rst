@@ -23,6 +23,7 @@ Contents:
    compilation
    components
    hooks
+   debug
 
 
 Indices and tables
