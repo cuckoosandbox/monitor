@@ -95,9 +95,7 @@ void monitor_hook(const char *library)
             continue;
         }
 
-        if(hook2(h) < 0) {
-            pipe("CRITICAL:Hooking %z returned failure!", h->funcname);
-        }
+        hook2(h);
     }
 
     hook_enable();
