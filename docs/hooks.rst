@@ -114,6 +114,13 @@ Available keys:
 
     The DLL name of the library, e.g., kernel32 or ntdll.
 
+* Minimum:
+
+    The minimum OS version for this signature. Some functions are not
+    available under Windows XP and thus should not be hooked under, e.g.,
+    Windows XP as it'll spit out error messages about not being able to find
+    the function.
+
 * Return value:
 
     The return value of this function. To determine whether a function call

@@ -28,6 +28,11 @@ import os.path
 
 
 class DefitionProcessor(object):
+    OSVERSIONS = {
+        'Windows XP': 'WINDOWS_XP',
+        'Windows 7': 'WINDOWS_7',
+    }
+
     def __init__(self, data_dir, out_dir, sig_files):
         self.data_dir = data_dir
 
@@ -283,6 +288,15 @@ class DefitionProcessor(object):
             if row['signature'].get('calling_convention') != 'WINAPI':
                 raise Exception('Calling convention of %r must be WINAPI.' %
                                 row['apiname'])
+
+            # Check the minimum supported Windows OS version. By default we
+            # assume that all signatures are supported by Windows XP and
+            # upwards.
+            minimum = row['signature'].get('minimum', 'Windows XP')
+            if minimum not in self.OSVERSIONS:
+                raise Exception('Invalid OS Version: %r', minimum)
+
+            row['signature']['minimum'] = self.OSVERSIONS.get(minimum)
 
             # Check the types of each parameter.
             ensure = {}

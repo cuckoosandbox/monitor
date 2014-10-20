@@ -376,6 +376,7 @@ GetFileInformationByHandleEx
 
 Signature::
 
+    * Minimum: Windows 7
     * Return value: BOOL
 
 Parameters::

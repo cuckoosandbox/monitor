@@ -1,3 +1,4 @@
+- Tweak: Minimum OS version to ignore unresolved symbols when hooking.
 - Feature: Added Replace section for signatures.
 - Tweak: Resolve monitors' symbols while destroying its PE header.
 - Bugfix: Announce new threads to Cuckoo.

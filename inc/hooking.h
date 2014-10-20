@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <windows.h>
+#include "monitor.h"
 #include "slist.h"
 
 typedef struct _hook_info_t {
@@ -45,6 +46,7 @@ typedef struct _hook_t {
     FARPROC handler;
     FARPROC *orig;
     int special;
+    os_version_t minimum_os;
 
     uint8_t *addr;
     uint32_t is_hooked;

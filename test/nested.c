@@ -63,12 +63,12 @@ int main()
     printf("-> %x %x %x\n", get_edi(), get_edi(), get_edi());
 
     hook_t hk_a = {
-        NULL, "a", (FARPROC) &new_a, (FARPROC *) &old_a, 0,
+        NULL, "a", (FARPROC) &new_a, (FARPROC *) &old_a, 0, 0,
         (uint8_t *) &a, 0, NULL
     };
 
     hook_t hk_b = {
-        NULL, "b", (FARPROC) &new_b, (FARPROC *) &old_b, 0,
+        NULL, "b", (FARPROC) &new_b, (FARPROC *) &old_b, 0, 0,
         (uint8_t *) &b, 0, NULL
     };
 

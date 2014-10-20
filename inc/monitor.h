@@ -21,6 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <windows.h>
 
+typedef enum _os_version_t {
+    WINDOWS_XP = 6,
+    WINDOWS_7 = 7,
+    WINDOWS_8 = 8,
+} os_version_t;
+
 void monitor_init(HMODULE module_handle);
 void monitor_hook(const char *library);
 void monitor_notify();

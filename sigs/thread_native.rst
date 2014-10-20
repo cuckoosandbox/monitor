@@ -40,6 +40,10 @@ Post::
 NtCreateThreadEx
 ================
 
+Signature::
+
+    * Minimum: Windows 7
+
 Parameters::
 
     ** PHANDLE hThread thread_handle
