@@ -37,7 +37,7 @@ static uint32_t g_tls_unicode_buffer_index;
 #define HKLM_PREFIX L"\\REGISTRY\\MACHINE"
 #define EXCEPTION_MAXCOUNT 1024
 
-static LONG (WINAPI *pNtQueryInformationProcess)(
+static NTSTATUS (WINAPI *pNtQueryInformationProcess)(
     HANDLE ProcessHandle,
     ULONG ProcessInformationClass,
     PVOID ProcessInformation,
@@ -45,7 +45,7 @@ static LONG (WINAPI *pNtQueryInformationProcess)(
     PULONG ReturnLength
 );
 
-static LONG (WINAPI *pNtQueryInformationThread)(
+static NTSTATUS (WINAPI *pNtQueryInformationThread)(
     HANDLE ThreadHandle,
     ULONG ThreadInformationClass,
     PVOID ThreadInformation,
