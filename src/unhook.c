@@ -86,7 +86,7 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
         }
 
         for (uint32_t idx = 0; idx < g_region_index; idx++) {
-            region_t *r = &g_regions[g_region_index];
+            region_t *r = &g_regions[idx];
 
             // Check whether this memory region still equals what we made it.
             if(memcmp(r->region_address, r->region_modified,
