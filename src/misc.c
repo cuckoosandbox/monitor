@@ -951,3 +951,10 @@ void *memdup(const void *addr, uint32_t length)
     }
     return NULL;
 }
+
+int page_is_readable(const uint8_t *addr)
+{
+    MEMORY_BASIC_INFORMATION mbi;
+    return VirtualQuery(addr, &mbi, sizeof(mbi)) == sizeof(mbi) &&
+            mbi.State & MEM_COMMIT && mbi.Protect & PAGE_READABLE;
+}

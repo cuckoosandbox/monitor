@@ -79,6 +79,7 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length);
 
 void setup_exception_handler();
 void *memdup(const void *addr, uint32_t length);
+int page_is_readable(const uint8_t *addr);
 
 #define COPY_UNICODE_STRING(local_name, param_name) \
     UNICODE_STRING local_name; \
@@ -94,5 +95,10 @@ void *memdup(const void *addr, uint32_t length);
 
 #define FILE_NAME_INFORMATION_REQUIRED_SIZE \
     sizeof(FILE_NAME_INFORMATION) + sizeof(wchar_t) * MAX_PATH_W
+
+#define PAGE_READABLE \
+    (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | \
+     PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | \
+     PAGE_EXECUTE_WRITECOPY)
 
 #endif

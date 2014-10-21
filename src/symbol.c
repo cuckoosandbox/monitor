@@ -19,12 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdint.h>
 #include <windows.h>
+#include "misc.h"
 #include "pipe.h"
-
-#define PAGE_READABLE \
-    (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | \
-     PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | \
-     PAGE_EXECUTE_WRITECOPY)
 
 static const uint8_t *g_monitor_base_address;
 static uint32_t *g_monitor_function_addresses;
@@ -32,19 +28,12 @@ static uint32_t *g_monitor_names_addresses;
 static uint16_t *g_monitor_ordinals;
 static uint32_t g_monitor_number_of_names;
 
-static int _page_is_readable(const uint8_t *addr)
-{
-    MEMORY_BASIC_INFORMATION mbi;
-    return VirtualQuery(addr, &mbi, sizeof(mbi)) == sizeof(mbi) &&
-            mbi.State & MEM_COMMIT && mbi.Protect & PAGE_READABLE;
-}
-
 static const uint8_t *_module_from_address(const uint8_t *addr)
 {
     MEMORY_BASIC_INFORMATION mbi;
 
     if(VirtualQuery(addr, &mbi, sizeof(mbi)) != sizeof(mbi) ||
-            _page_is_readable(mbi.AllocationBase) == 0) {
+            page_is_readable(mbi.AllocationBase) == 0) {
         return NULL;
     }
 
