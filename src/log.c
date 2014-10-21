@@ -227,6 +227,8 @@ static void _log_stacktrace(bson *b)
 {
     uintptr_t addrs[32]; uint32_t count = 0; char number[20], sym[512];
 
+    bson_append_start_array(b, "s");
+
 #if !__x86_64__
     count = stacktrace(get_ebp(), addrs, sizeof(addrs) / sizeof(uintptr_t));
 #endif
@@ -247,6 +249,8 @@ static void _log_stacktrace(bson *b)
 
         bson_append_string(b, number, sym);
     }
+
+    bson_append_finish_array(b);
 }
 
 #endif
@@ -280,9 +284,7 @@ void log_api(int index, int is_success, uintptr_t return_value,
     bson_append_int(&b, "t", GetTickCount() - g_starttick);
 
 #if DEBUG
-    bson_append_start_array(&b, "s");
     _log_stacktrace(&b);
-    bson_append_finish_array(&b);
 #endif
 
     bson_append_start_array(&b, "args");
