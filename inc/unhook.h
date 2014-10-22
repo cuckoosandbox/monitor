@@ -23,7 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 void unhook_detect_add_region(const char *funcname, const uint8_t *addr,
     const uint8_t *orig, const uint8_t *our, uint32_t length);
+void unhook_detect_remove_dead_regions();
 
 int unhook_init_detection(int first_process);
+void unhook_detect_disable();
+void unhook_detect_enable();
 
 #endif

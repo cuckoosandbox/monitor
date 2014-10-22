@@ -1,3 +1,5 @@
+- Tweak: Remove dead unhook detection regions when unloading a DLL.
+- Bugfix: Unhook detection was not working due to a copy 'n paste fail.
 - Tweak: Minimum OS version to ignore unresolved symbols when hooking.
 - Feature: Added Replace section for signatures.
 - Tweak: Resolve monitors' symbols while destroying its PE header.

@@ -37,7 +37,7 @@ typedef struct _region_t {
 } region_t;
 
 static HANDLE g_unhook_thread_handle, g_watcher_thread_handle, g_main_thread;
-static uint32_t g_region_index, g_unhook_exited;
+static uint32_t g_region_index, g_unhook_exited, g_unhook_enabled;
 static region_t g_regions[UNHOOK_MAXCOUNT];
 
 void unhook_detect_add_region(const char *funcname, const uint8_t *addr,
@@ -63,6 +63,24 @@ void unhook_detect_add_region(const char *funcname, const uint8_t *addr,
     g_region_index++;
 }
 
+void unhook_detect_remove_dead_regions()
+{
+    uint32_t outidx = 0;
+
+    for (uint32_t idx = 0; idx < g_region_index; idx++) {
+        region_t *r = &g_regions[idx];
+
+        // Remove the region by ignoring it.
+        if(page_is_readable(r->region_address) == 0) {
+            continue;
+        }
+
+        memcpy(&g_regions[outidx++], r, sizeof(region_t));
+    }
+
+    g_region_index = outidx;
+}
+
 static DWORD WINAPI _unhook_detect_thread(LPVOID param)
 {
     (void) param;
@@ -84,6 +102,8 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
             }
             Sleep(100);
         }
+
+        if(g_unhook_enabled == 0) continue;
 
         for (uint32_t idx = 0; idx < g_region_index; idx++) {
             region_t *r = &g_regions[idx];
@@ -135,6 +155,7 @@ static DWORD WINAPI _unhook_watch_thread(LPVOID param)
 int unhook_init_detection(int first_process)
 {
     g_unhook_exited = 0;
+    g_unhook_enabled = 1;
 
     // TODO Note that this only works with the QueueUserAPC injection method
     // as CreateRemoteThread creates a new thread. In the case of
@@ -160,4 +181,14 @@ int unhook_init_detection(int first_process)
 
     pipe("CRITICAL:Error initializing unhook detection threads!");
     return -1;
+}
+
+void unhook_detect_disable()
+{
+    g_unhook_enabled = 0;
+}
+
+void unhook_detect_enable()
+{
+    g_unhook_enabled = 1;
 }

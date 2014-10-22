@@ -83,6 +83,40 @@ Post::
     }
 
 
+LdrUnloadDll
+============
+
+Signature::
+
+    * Library: ntdll
+    * Return value: NTSTATUS
+    * Special: true
+
+Parameters::
+
+    ** HANDLE ModuleHandle module_address
+
+Pre::
+
+    MEMORY_BASIC_INFORMATION mbi;
+
+    memset(&mbi, 0, sizeof(mbi));
+    VirtualQuery(ModuleHandle, &mbi, sizeof(mbi));
+
+    unhook_detect_disable();
+
+Middle::
+
+    // If the module address is not readable anymore then the module got
+    // unhooked and thus we have to notify the unhook detection monitoring.
+    if(NT_SUCCESS(ret) != FALSE &&
+            page_is_readable(mbi.AllocationBase) == 0) {
+        unhook_detect_remove_dead_regions();
+    }
+
+    unhook_detect_enable();
+
+
 LdrGetDllHandle
 ===============
 
