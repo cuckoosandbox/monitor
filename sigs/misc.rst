@@ -51,7 +51,7 @@ Parameters::
 
 Ensure::
 
-    * lpnSize
+    lpnSize
 
 Logging::
 
@@ -73,7 +73,7 @@ Parameters::
 
 Ensure::
 
-    * lpnSize
+    lpnSize
 
 Logging::
 
@@ -95,7 +95,7 @@ Parameters::
 
 Ensure::
 
-    * lpnSize
+    lpnSize
 
 Logging::
 
@@ -117,7 +117,7 @@ Parameters::
 
 Ensure::
 
-    * lpnSize
+    lpnSize
 
 Logging::
 
@@ -140,7 +140,7 @@ Parameters::
 
 Ensure::
 
-    * lpnSize
+    lpnSize
 
 Logging::
 
@@ -163,7 +163,7 @@ Parameters::
 
 Ensure::
 
-    * lpnSize
+    lpnSize
 
 Logging::
 

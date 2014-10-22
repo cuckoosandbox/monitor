@@ -407,7 +407,7 @@ Parameters::
 
 Ensure::
 
-    * lpBytesReturned
+    lpBytesReturned
 
 Prelog::
 

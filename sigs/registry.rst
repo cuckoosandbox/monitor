@@ -417,12 +417,12 @@ Parameters::
 
 Ensure::
 
-    * lpcSubKeys
-    * lpcMaxSubKeyLen
-    * lpcMaxClassLen
-    * lpcValues
-    * lpcMaxValueNameLen
-    * lpcMaxValueLen
+    lpcSubKeys
+    lpcMaxSubKeyLen
+    lpcMaxClassLen
+    lpcValues
+    lpcMaxValueNameLen
+    lpcMaxValueLen
 
 
 RegQueryInfoKeyW
@@ -445,12 +445,12 @@ Parameters::
 
 Ensure::
 
-    * lpcSubKeys
-    * lpcMaxSubKeyLen
-    * lpcMaxClassLen
-    * lpcValues
-    * lpcMaxValueNameLen
-    * lpcMaxValueLen
+    lpcSubKeys
+    lpcMaxSubKeyLen
+    lpcMaxClassLen
+    lpcValues
+    lpcMaxValueNameLen
+    lpcMaxValueLen
 
 
 RegCloseKey

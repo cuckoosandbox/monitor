@@ -158,7 +158,7 @@ class DefitionProcessor(object):
         ret = []
         for line in text.split('\n'):
             if line.startswith('*'):
-                line = line[1:].strip()
+                raise Exception('Do not use asterisks in ensure blocks.')
 
             ret.append(line)
         return ret

@@ -179,14 +179,13 @@ parameter as optional. However, in order to make sure we know exactly how many
 bytes have been read we'd like to have this value at all times. This is where
 the ensure block makes sure the ``lpNumberOfBytesRead`` is not NULL.
 
-Its syntax is a line for each parameter's VariableName starting with an
-asterisks:
+Its syntax is a line for each parameter's VariableName:
 
 .. code-block:: rst
 
     Ensure::
 
-        * lpNumberOfBytesRead
+        lpNumberOfBytesRead
 
 .. _hook-block-pre:
 

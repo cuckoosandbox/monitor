@@ -24,7 +24,7 @@ Parameters::
 
 Ensure::
 
-    * pDataIn
+    pDataIn
 
 Prelog::
 
@@ -51,8 +51,8 @@ Parameters::
 
 Ensure::
 
-    * pDataOut
-    * pOptionalEntropy
+    pDataOut
+    pOptionalEntropy
 
 Logging::
 
