@@ -106,6 +106,14 @@ Parameters::
     ** PLARGE_INTEGER ByteOffset offset
     *  PULONG Key
 
+Ensure::
+
+    IoStatusBlock
+
+Pre::
+
+    memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
+
 Logging::
 
     * b buffer IoStatusBlock->Information, Buffer
@@ -153,6 +161,14 @@ Parameters::
     *  PVOID OutputBuffer
     *  ULONG OutputBufferLength
 
+Ensure::
+
+    IoStatusBlock
+
+Pre::
+
+    memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
+
 Prelog::
 
     b input_buffer InputBufferLength, InputBuffer
@@ -179,12 +195,17 @@ Parameters::
     *  PUNICODE_STRING FileName
     *  BOOLEAN RestartScan
 
+Ensure::
+
+    IoStatusBlock
+
 Pre::
 
     COPY_UNICODE_STRING(filename, FileName);
 
     OBJECT_ATTRIBUTES objattr;
     InitializeObjectAttributes(&objattr, &filename, 0, FileHandle, NULL);
+    memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
 
 Logging::
 
@@ -202,6 +223,14 @@ Parameters::
     *  PVOID FileInformation
     *  ULONG Length
     ** FILE_INFORMATION_CLASS FileInformationClass information_class
+
+Ensure::
+
+    IoStatusBlock
+
+Pre::
+
+    memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
 
 Logging::
 
