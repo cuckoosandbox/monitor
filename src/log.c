@@ -432,6 +432,12 @@ void log_api(int index, int is_success, uintptr_t return_value,
                 bson_append_bson(&b, idx, value);
             }
         }
+        else if(key == 'c') {
+            wchar_t buf[64];
+            REFCLSID rclsid = va_arg(args, REFCLSID);
+            clsid_to_string(rclsid, buf);
+            log_wstring(&b, idx, buf, -1);
+        }
         else {
             char buf[2] = {key, 0};
             pipe("CRITICAL:Invalid format specifier: %z", buf);

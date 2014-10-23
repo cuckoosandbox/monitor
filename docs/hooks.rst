@@ -335,3 +335,4 @@ Following is a list of all currently supported format specifiers:
 * ``q``: 64-bit integer
 * ``Q``: pointer to 64-bit integer (e.g., pointer to ``LARGE_INTEGER``)
 * ``z``: bson object
+* ``c``: REFCLSID object

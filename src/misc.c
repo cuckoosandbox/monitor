@@ -958,3 +958,13 @@ int page_is_readable(const uint8_t *addr)
     return VirtualQuery(addr, &mbi, sizeof(mbi)) == sizeof(mbi) &&
             mbi.State & MEM_COMMIT && mbi.Protect & PAGE_READABLE;
 }
+
+void clsid_to_string(REFCLSID rclsid, wchar_t *buf)
+{
+    OLESTRING *ptr; *buf = 0;
+
+    if(StringFromCLSID(rclsid, &ptr) == S_OK) {
+        wcscpy(buf, ptr);
+        CoTaskMemFree(ptr);
+    }
+}
