@@ -301,3 +301,58 @@ Parameters::
 Logging::
 
     b certificate cbCertEncoded, pbCertEncoded
+
+
+CryptExportKey
+==============
+
+Signature::
+
+    * Library: advapi32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HCRYPTKEY hKey crypto_handle
+    ** HCRYPTKEY hExpKey crypto_export_handle
+    ** DWORD dwBlobType blob_type
+    ** DWORD dwFlags flags
+    *  BYTE *pbData
+    *  DWORD *pdwDataLen
+
+Logging::
+
+    B buffer pdwDataLen, pbData
+
+
+CryptGenKey
+===========
+
+Signature::
+
+    * Library: advapi32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HCRYPTPROV hProv provider_handle
+    ** ALG_ID Algid algorithm_identifier
+    ** DWORD dwFlags flags
+    ** HCRYPTKEY *phKey crypto_handle
+
+
+CryptCreateHash
+===============
+
+Signature::
+
+    * Library: advapi32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HCRYPTPROV hProv provider_handle
+    ** ALG_ID Algid algorithm_identifier
+    ** HCRYPTKEY hKey crypto_handle
+    ** DWORD dwFlags flags
+    ** HCRYPTHASH *phHash hash_handle
