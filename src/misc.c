@@ -961,7 +961,7 @@ int page_is_readable(const uint8_t *addr)
 
 void clsid_to_string(REFCLSID rclsid, wchar_t *buf)
 {
-    OLESTRING *ptr; *buf = 0;
+    LPOLESTR ptr; *buf = 0;
 
     if(StringFromCLSID(rclsid, &ptr) == S_OK) {
         wcscpy(buf, ptr);
