@@ -32,20 +32,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {%- for hook in sigs if hook.is_hook: %}
 
 
-extern {{hook.signature.return_value}} ({{hook.signature.calling_convention}} *Old_{{hook.apiname}})(
+extern {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }} *Old_{{ hook.apiname }})(
 {%- for param in hook.parameters: %}
-    {{param.argtype}}
+    {{ param.argtype }}
     {%- if not param.argtype.endswith('*') %} {% endif -%}
-    {{param.argname}}
+    {{ param.argname }}
     {%- if not loop.last %},{% endif -%}
 {%- endfor %}
 );
 
-{{hook.signature.return_value}} {{hook.signature.calling_convention}} New_{{hook.apiname}}(
+{{ hook.signature.return_value }} {{ hook.signature.calling_convention }} New_{{ hook.apiname }}(
 {%- for param in hook.parameters: %}
-    {{param.argtype}}
+    {{ param.argtype }}
     {%- if not param.argtype.endswith('*') %} {% endif -%}
-    {{param.argname}}
+    {{ param.argname }}
     {%- if not loop.last %},{% endif -%}
 {%- endfor %}
 );
