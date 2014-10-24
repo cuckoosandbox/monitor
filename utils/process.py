@@ -46,7 +46,7 @@ class DefitionProcessor(object):
 
         self.hooks_c = os.path.join(out_dir, 'hooks.c')
         self.hooks_h = os.path.join(out_dir, 'hooks.h')
-        self.hooks_info_h = os.path.join(out_dir, 'hooks-info.h')
+        self.monitor_info_h = os.path.join(out_dir, 'monitor-info.h')
 
         self.sig_files = sig_files
 
@@ -324,7 +324,7 @@ class DefitionProcessor(object):
 
     def process(self):
         h = open(self.hooks_h, 'wb')
-        hi = open(self.hooks_info_h, 'wb')
+        mi = open(self.monitor_info_h, 'wb')
         s = open(self.hooks_c, 'wb')
 
         # Fetch all available signatures.
@@ -353,7 +353,7 @@ class DefitionProcessor(object):
             sig['index'] = idx
 
         print>>h, self.template('header').render(sigs=sigs)
-        print>>hi, self.template('header-info').render(
+        print>>mi, self.template('monitor-info').render(
             sigs=sigs, first_hook=len(self.base_sigs))
         print>>s, self.template('source').render(sigs=sigs, types=self.types)
 
