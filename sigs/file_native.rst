@@ -34,7 +34,7 @@ Logging::
 
 Post::
 
-    if(NT_SUCCESS(ret) && (DesiredAccess & DUMP_FILE_MASK) != 0) {
+    if(NT_SUCCESS(ret) != FALSE && (DesiredAccess & DUMP_FILE_MASK) != 0) {
         dropped_add(*FileHandle, filepath);
     }
 
@@ -86,7 +86,7 @@ Logging::
 
 Post::
 
-    if(NT_SUCCESS(ret) && (DesiredAccess & DUMP_FILE_MASK) != 0) {
+    if(NT_SUCCESS(ret) != FALSE && (DesiredAccess & DUMP_FILE_MASK) != 0) {
         dropped_add(*FileHandle, filepath);
     }
 
@@ -140,7 +140,7 @@ Logging::
 
 Post::
 
-    if(NT_SUCCESS(ret)) {
+    if(NT_SUCCESS(ret) != FALSE) {
         dropped_wrote(FileHandle);
     }
 

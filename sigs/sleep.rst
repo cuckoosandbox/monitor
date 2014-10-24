@@ -98,6 +98,6 @@ Parameters::
 
 Post::
 
-    if(NT_SUCCESS(ret)) {
+    if(NT_SUCCESS(ret) != FALSE) {
         SystemTime->QuadPart += sleep_skipped();
     }

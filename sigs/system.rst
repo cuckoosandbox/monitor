@@ -78,7 +78,7 @@ Logging::
 
 Post::
 
-    if(NT_SUCCESS(ret)) {
+    if(NT_SUCCESS(ret) != FALSE) {
         monitor_hook(library);
     }
 
@@ -209,7 +209,7 @@ Parameters::
 
 Post::
 
-    if(NT_SUCCESS(ret)) {
+    if(NT_SUCCESS(ret) != FALSE) {
         dropped_close(Handle);
     }
 
