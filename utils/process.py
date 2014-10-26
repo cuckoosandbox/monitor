@@ -294,7 +294,7 @@ class DefitionProcessor(object):
             # upwards.
             minimum = row['signature'].get('minimum', 'Windows XP')
             if minimum not in self.OSVERSIONS:
-                raise Exception('Invalid OS Version: %r', minimum)
+                raise Exception('Invalid OS Version: %r' % minimum)
 
             row['signature']['minimum'] = self.OSVERSIONS.get(minimum)
 
@@ -348,14 +348,15 @@ class DefitionProcessor(object):
         for library in sorted(siglibs.keys()):
             sigs.extend(sorted(siglibs[library], key=lambda x: x['apiname']))
 
-        # Assign hook indices accordingly.
+        # Assign hook indices accordingly (in a sorted manner).
         for idx, sig in enumerate(sigs):
             sig['index'] = idx
 
         print>>h, self.template('header').render(sigs=sigs)
-        print>>mi, self.template('monitor-info').render(
-            sigs=sigs, first_hook=len(self.base_sigs))
         print>>s, self.template('source').render(sigs=sigs, types=self.types)
+
+        print>>mi, self.template('monitor-info').render(
+            sigs=sigs, first_hook=len(self.base_sigs), flags=flags)
 
 
 if __name__ == '__main__':
