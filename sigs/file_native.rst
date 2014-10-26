@@ -23,6 +23,13 @@ Parameters::
     *  PVOID EaBuffer
     *  ULONG EaLength
 
+Flags::
+
+    desired_access
+    file_attributes
+    share_access
+    create_disposition
+
 Middle::
 
     wchar_t *filepath = get_unicode_buffer();
@@ -74,6 +81,10 @@ Parameters::
     *  PIO_STATUS_BLOCK IoStatusBlock
     ** ULONG ShareAccess share_access
     ** ULONG OpenOptions open_options
+
+Flags::
+
+    desired_access
 
 Middle::
 

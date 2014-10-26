@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MONITOR_MISC_H
 
 #include <windows.h>
+#include "flags.h"
 #include "ntapi.h"
 
 void misc_init();
@@ -81,6 +82,8 @@ void setup_exception_handler();
 void *memdup(const void *addr, uint32_t length);
 int page_is_readable(const uint8_t *addr);
 void clsid_to_string(REFCLSID rclsid, wchar_t *buf);
+
+wchar_t *flag_to_string(flag_t which, uint32_t flag);
 
 #define COPY_UNICODE_STRING(local_name, param_name) \
     UNICODE_STRING local_name; \

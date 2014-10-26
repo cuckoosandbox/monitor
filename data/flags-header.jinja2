@@ -1,0 +1,44 @@
+/*
+Cuckoo Sandbox - Automated Malware Analysis.
+Copyright (C) 2010-2014 Cuckoo Foundation.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef MONITOR_FLAGS_H
+#define MONITOR_FLAGS_H
+
+#include <stdint.h>
+#include <windows.h>
+
+#define FLAG_NONE  0
+#define FLAG_ENUM  1
+#define FLAG_VALUE 2
+
+typedef struct _flag_repr_t {
+    uint32_t type;
+    uint32_t value;
+    const char *repr;
+} flag_repr_t;
+
+typedef enum _flag_t {
+{%- for name in flags: %}
+    FLAG_{{ name }},
+{%- endfor %}
+    FLAGCNT,
+} flag_t;
+
+const flag_repr_t g_flags[FLAGCNT];
+
+#endif

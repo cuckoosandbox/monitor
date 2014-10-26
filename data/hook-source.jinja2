@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include "hooks.h"
 #include "dropped.h"
+#include "flags.h"
 #include "hooking.h"
 #include "monitor.h"
 #include "ntapi.h"
@@ -107,7 +108,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- for log in hook.logging: -%}
         {{ log.argtype }}
     {%- endfor -%}
-    "
+    {%- for flag in hook.flags: -%}
+        u
+    {%- endfor -%}
+        "
     {%- for param in hook.parameters: -%}
         {% if param.log == True: -%}
         ,
@@ -117,6 +121,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- for log in hook.logging: -%}
         ,
         {{ log.argvalue }}
+    {%- endfor %}
+    {%- for flag in hook.flags: -%}
+        ,
+        flag_to_string(FLAG_{{ flag.flagname }}, {{ flag.arg }})
     {%- endfor %}
     );
     {% if hook.signature.special: %}
@@ -162,6 +170,9 @@ const char *g_explain_paramtypes[] = {
     {%- for param in hook.logging: -%}
         {{ param.argtype }}
     {%- endfor -%}
+    {%- for flag in hook.flags: -%}
+        u
+    {%- endfor -%}
     ",
 {%- endfor %}
 };
@@ -178,6 +189,9 @@ const char *g_explain_paramnames[][16] = {
     {%- endfor -%}
     {%- for param in hook.logging: -%}
         {% if True %}"{{ param.argname }}", {% endif %}
+    {%- endfor -%}
+    {%- for flag in hook.flags: -%}
+        {% if True %}"{{ flag.name }}_s", {% endif %}
     {%- endfor -%}
     },
 {%- endfor %}

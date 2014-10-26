@@ -58,8 +58,9 @@ class SignatureProcessor(object):
         'Windows 7': 'WINDOWS_7',
     }
 
-    def __init__(self, data_dir, out_dir, sig_dirpath):
+    def __init__(self, data_dir, out_dir, sig_dirpath, flags):
         self.data_dir = data_dir
+        self.flags = flags
 
         base_sigs_path = os.path.join(data_dir, 'base-sigs.json')
         types_path = os.path.join(data_dir, 'types.conf')
@@ -159,6 +160,12 @@ class SignatureProcessor(object):
             ret.append(dict(argtype=' '.join(argtype).strip(),
                             argname=argname.strip(),
                             alias=alias, log=log))
+        return ret
+
+    def _parse_flags(self, text):
+        ret = []
+        for flag in text.split():
+            ret.append(dict(name=flag))
         return ret
 
     def _parse_ensure(self, text):
@@ -328,6 +335,27 @@ class SignatureProcessor(object):
 
                     ensure[arg['argname']] = self.dereference[arg['argtype']]
 
+            # Check whether every flag alias exists.
+            for idx, flag in enumerate(row.get('flags', [])):
+                for arg in row.get('parameters', []):
+                    if flag['name'] == arg['alias']:
+                        flag['arg'] = arg['argname']
+                        flag['argtype'] = arg['argtype']
+                        break
+                else:
+                    raise Exception('Alias %r not found in %r!' % (
+                                    flag, row['apiname']))
+
+                flagname = '%s_%s' % (row['apiname'], flag['arg'])
+                if flagname not in self.flags:
+                    if flag['argtype'] not in self.flags:
+                        raise Exception('Flag %r of %r is unknown!' % (
+                                        flag['name'], row['apiname']))
+
+                    flag['flagname'] = flag['argtype']
+                else:
+                    flag['flagname'] = flagname
+
             # Dictionary with the dereferenced types for each parameter.
             row['ensure'] = ensure
             yield row
@@ -370,13 +398,113 @@ class SignatureProcessor(object):
                   sigs=sigs, first_hook=len(self.base_sigs))
 
 
+class FlagsProcessor(object):
+    def __init__(self, data_dir, output_directory, flags_dirpath):
+        self.data_dir = data_dir
+        self.flags_dirpath = flags_dirpath
+
+        self.flags_c = os.path.join(output_directory, 'flags.c')
+        self.flags_h = os.path.join(output_directory, 'flags.h')
+
+    def _parse_enum(self, text):
+        return text.split()
+
+    def _parse_value(self, text):
+        return text.split()
+
+    def _parse_inherits(self, text):
+        return text.split()
+
+    def _parse_paragraph(self, paragraph, literal_block):
+        if not isinstance(paragraph, docutils.nodes.paragraph):
+            raise Exception('Node must be a paragraph.')
+
+        if not isinstance(literal_block, docutils.nodes.literal_block):
+            raise Exception('Child node must be a literal block.')
+
+        key = paragraph.astext().replace(':', '').lower()
+        if not hasattr(self, '_parse_' + key):
+            raise Exception('No parser known for the %r section.' % key)
+
+        return key, getattr(self, '_parse_' + key)(literal_block.astext())
+
+    def normalize(self, doc):
+        # Empty flags file?
+        if not doc.document.children:
+            return
+
+        for entry in doc.document.ids.values():
+            if not isinstance(entry.children[0], docutils.nodes.title):
+                raise Exception('Node must be a title.')
+
+            flagname = entry.children[0].astext()
+            children = entry.children
+
+            row = dict(name=flagname)
+
+            for x in xrange(1, len(children), 2):
+                try:
+                    key, value = self._parse_paragraph(children[x],
+                                                       children[x+1])
+                    row[key] = value
+
+                except Exception as e:
+                    raise Exception('Error parsing node of flag %r: %s' %
+                                    (flagname, e.message))
+
+            yield row
+
+    def process(self):
+        dp = DefinitionProcessor(self.data_dir)
+
+        # Fetch all available flags.
+        flags = {}
+        for flag_file in os.listdir(self.flags_dirpath):
+            if not flag_file.endswith('.rst'):
+                continue
+
+            flag_path = os.path.join(self.flags_dirpath, flag_file)
+            for flag in self.normalize(dp.read_document(flag_path)):
+                flags[flag['name']] = flag
+
+                if 'enum' in flag and 'value' in flag:
+                    raise Exception('Do not specify both value and enum '
+                                    'for one flag.')
+
+                if 'enum' in flag:
+                    flag['rows'] = flag['enum']
+                    flag['type'] = 'FLAG_ENUM'
+                elif 'value' in flag:
+                    flag['rows'] = flag['value']
+                    flag['type'] = 'FLAG_VALUE'
+                else:
+                    raise Exception('Either a value or an enum entry should '
+                                    'be present for a flag.')
+
+        # Handle inheritance.
+        for flag in flags.values():
+            rows = []
+            for inherit in flag.get('inherits', []):
+                rows += flags[inherit]['rows']
+
+            flag['rows'] = rows + flag['rows']
+
+        dp.render('flags-source', self.flags_c, flags=flags)
+        dp.render('flags-header', self.flags_h, flags=flags)
+        return flags.keys()
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('data_directory', type=str, help='Path to data directory.')
     parser.add_argument('output_directory', type=str, help='Output directory.')
     parser.add_argument('signatures_directory', type=str, help='Signature directory.')
+    parser.add_argument('flags_directory', type=str, help='Flags directory.')
     args = parser.parse_args()
 
+    fp = FlagsProcessor(args.data_directory, args.output_directory,
+                        args.flags_directory)
+    flags = fp.process()
+
     dp = SignatureProcessor(args.data_directory, args.output_directory,
-                            args.signatures_directory)
+                            args.signatures_directory, flags)
     dp.process()
