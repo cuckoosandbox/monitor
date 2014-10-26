@@ -65,10 +65,10 @@ objects/:
 	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
 
 $(HOOK32): $(SIGS) $(JINJA2) $(HOOKREQ)
-	python utils/process.py data/ objects/x86/code/ $(SIGS)
+	python utils/process.py data/ objects/x86/code/ sigs/
 
 $(HOOK64): $(SIGS) $(JINJA2) $(HOOKREQ)
-	python utils/process.py data/ objects/x64/code/ $(SIGS)
+	python utils/process.py data/ objects/x64/code/ sigs/
 
 $(LIBBSON32): $(BSONOBJ32)
 	$(AR) cr $@ $^

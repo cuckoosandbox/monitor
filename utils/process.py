@@ -58,7 +58,7 @@ class SignatureProcessor(object):
         'Windows 7': 'WINDOWS_7',
     }
 
-    def __init__(self, data_dir, out_dir, sig_files):
+    def __init__(self, data_dir, out_dir, sig_dirpath):
         self.data_dir = data_dir
 
         base_sigs_path = os.path.join(data_dir, 'base-sigs.json')
@@ -70,7 +70,7 @@ class SignatureProcessor(object):
         self.hooks_h = os.path.join(out_dir, 'hooks.h')
         self.hook_info_h = os.path.join(out_dir, 'hook-info.h')
 
-        self.sig_files = sig_files
+        self.sig_dirpath = sig_dirpath
 
         self.types = {}
         for line in open(types_path, 'rb'):
@@ -232,6 +232,10 @@ class SignatureProcessor(object):
     def normalize(self, doc):
         global_values, start = {}, 0
 
+        # Empty signatures file?
+        if not doc.document.children:
+            return
+
         while isinstance(doc.document.children[start],
                          docutils.nodes.paragraph):
             try:
@@ -333,8 +337,12 @@ class SignatureProcessor(object):
 
         # Fetch all available signatures.
         sigs = []
-        for sig_file in self.sig_files:
-            for sig in self.normalize(dp.read_document(sig_file)):
+        for sig_file in os.listdir(self.sig_dirpath):
+            if not sig_file.endswith('.rst'):
+                continue
+
+            sig_path = os.path.join(self.sig_dirpath, sig_file)
+            for sig in self.normalize(dp.read_document(sig_path)):
                 sig['is_hook'] = True
                 sigs.append(sig)
 
@@ -365,10 +373,10 @@ class SignatureProcessor(object):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('data_directory', type=str, help='Path to data directory.')
-    parser.add_argument('outfile', type=str, help='Output file.')
-    parser.add_argument('signatures', type=str, nargs='+', action='append', help='Signature files.')
+    parser.add_argument('output_directory', type=str, help='Output directory.')
+    parser.add_argument('signatures_directory', type=str, help='Signature directory.')
     args = parser.parse_args()
 
-    dp = SignatureProcessor(args.data_directory, args.outfile,
-                            *args.signatures)
+    dp = SignatureProcessor(args.data_directory, args.output_directory,
+                            args.signatures_directory)
     dp.process()
