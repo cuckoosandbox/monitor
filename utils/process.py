@@ -27,7 +27,32 @@ import json
 import os.path
 
 
-class DefitionProcessor(object):
+class DefinitionProcessor(object):
+    def __init__(self, data_dir):
+        fs_loader = jinja2.FileSystemLoader(data_dir)
+        self.templ_env = jinja2.Environment(loader=fs_loader)
+
+    def parser_settings(self):
+        components = docutils.parsers.rst.Parser,
+        settings = docutils.frontend.OptionParser(components=components)
+        return settings.get_default_values()
+
+    def read_document(self, sig):
+        doc = docutils.utils.new_document(os.path.basename(sig),
+                                          self.parser_settings())
+        parser = docutils.parsers.rst.Parser()
+        parser.parse(open(sig, 'rb').read(), doc)
+        return parser
+
+    def template(self, name):
+        return self.templ_env.get_template('%s.jinja2' % name)
+
+    def render(self, template, path, **kwargs):
+        with open(path, 'wb') as f:
+            f.write(self.template(template).render(**kwargs))
+
+
+class SignatureProcessor(object):
     OSVERSIONS = {
         'Windows XP': 'WINDOWS_XP',
         'Windows 7': 'WINDOWS_7',
@@ -35,9 +60,6 @@ class DefitionProcessor(object):
 
     def __init__(self, data_dir, out_dir, sig_files):
         self.data_dir = data_dir
-
-        fs_loader = jinja2.FileSystemLoader(data_dir)
-        self.templ_env = jinja2.Environment(loader=fs_loader)
 
         base_sigs_path = os.path.join(data_dir, 'base-sigs.json')
         types_path = os.path.join(data_dir, 'types.conf')
@@ -74,21 +96,6 @@ class DefitionProcessor(object):
                 param['log'] = True
 
             self.base_sigs.append(entry)
-
-    def parser_settings(self):
-        components = docutils.parsers.rst.Parser,
-        settings = docutils.frontend.OptionParser(components=components)
-        return settings.get_default_values()
-
-    def read_document(self, sig):
-        doc = docutils.utils.new_document(os.path.basename(sig),
-                                          self.parser_settings())
-        parser = docutils.parsers.rst.Parser()
-        parser.parse(open(sig, 'rb').read(), doc)
-        return parser
-
-    def template(self, name):
-        return self.templ_env.get_template('%s.jinja2' % name)
 
     def _parse_signature(self, text):
         ret = {}
@@ -319,18 +326,15 @@ class DefitionProcessor(object):
 
             # Dictionary with the dereferenced types for each parameter.
             row['ensure'] = ensure
-
             yield row
 
     def process(self):
-        h = open(self.hooks_h, 'wb')
-        mi = open(self.monitor_info_h, 'wb')
-        s = open(self.hooks_c, 'wb')
+        dp = DefinitionProcessor(self.data_dir)
 
         # Fetch all available signatures.
         sigs = []
         for sig_file in self.sig_files:
-            for sig in self.normalize(self.read_document(sig_file)):
+            for sig in self.normalize(dp.read_document(sig_file)):
                 sig['is_hook'] = True
                 sigs.append(sig)
 
@@ -352,11 +356,10 @@ class DefitionProcessor(object):
         for idx, sig in enumerate(sigs):
             sig['index'] = idx
 
-        print>>h, self.template('header').render(sigs=sigs)
-        print>>s, self.template('source').render(sigs=sigs, types=self.types)
-
-        print>>mi, self.template('monitor-info').render(
-            sigs=sigs, first_hook=len(self.base_sigs), flags=flags)
+        dp.render('header', self.hooks_h, sigs=sigs)
+        dp.render('source', self.hooks_c, sigs=sigs, types=self.types)
+        dp.render('monitor-info', self.monitor_info_h,
+                  sigs=sigs, first_hook=len(self.base_sigs), flags=flags)
 
 
 if __name__ == '__main__':
@@ -366,5 +369,6 @@ if __name__ == '__main__':
     parser.add_argument('signatures', type=str, nargs='+', action='append', help='Signature files.')
     args = parser.parse_args()
 
-    dp = DefitionProcessor(args.data_directory, args.outfile, *args.signatures)
+    dp = SignatureProcessor(args.data_directory, args.outfile,
+                            *args.signatures)
     dp.process()
