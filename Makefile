@@ -3,7 +3,7 @@ CC64 = x86_64-w64-mingw32-gcc -m64
 NASM = nasm
 AR = ar
 CFLAGS = -Wall -O0 -ggdb -Wextra -std=c99 -static \
-		 -Wno-missing-field-initializers -I inc/ -I objects/x86/code/
+		 -Wno-missing-field-initializers -I inc/ -I objects/code/
 LDFLAGS = -lws2_32 -lshlwapi -lole32
 MAKEFLAGS = -j8
 
@@ -13,9 +13,8 @@ JINJA2 = $(wildcard data/*.jinja2)
 # Dependencies for the auto-generated hook files.
 HOOKREQ = utils/process.py $(wildcard data/*.json) $(wildcard data/*.conf)
 
-# The source files also imply the header files that belong to them.
-HOOK32 = objects/x86/code/hooks.c
-HOOK64 = objects/x64/code/hooks.c
+# The source file also imply the header files that belong to them.
+HOOKSRC = objects/code/hooks.c
 HOOKOBJ32 = objects/x86/code/hooks.o
 HOOKOBJ64 = objects/x64/code/hooks.o
 
@@ -53,22 +52,20 @@ else
 endif
 
 all: dirs $(LIBCAPSTONE32) $(LIBCAPSTONE64) \
-		$(HOOK32) $(HOOK64) $(DLL32) $(DLL64)
+		$(HOOKSRC) $(DLL32) $(DLL64)
 	+make -C test/
 	+make -C utils/
 
 dirs: | objects/
 
 objects/:
+	mkdir -p objects/code/
 	mkdir -p objects/x86/asm/ objects/x64/asm/
 	mkdir -p objects/x86/code/ objects/x64/code/
 	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
 
-$(HOOK32): $(SIGS) $(JINJA2) $(HOOKREQ)
-	python utils/process.py data/ objects/x86/code/ sigs/
-
-$(HOOK64): $(SIGS) $(JINJA2) $(HOOKREQ)
-	python utils/process.py data/ objects/x64/code/ sigs/
+$(HOOKSRC): $(SIGS) $(JINJA2) $(HOOKREQ)
+	python utils/process.py data/ objects/code/ sigs/ flags/
 
 $(LIBBSON32): $(BSONOBJ32)
 	$(AR) cr $@ $^
@@ -85,16 +82,22 @@ $(LIBCAPSTONE32) $(LIBCAPSTONE64):
 	BUILDDIR=../../objects/x64/capstone/ ./make.sh cross-win64 && \
 	cp ../../objects/x64/capstone/capstone.lib capstone-x64.lib
 
-objects/x86/%.o: %.c $(HEADER) $(HOOK32) Makefile
+objects/x86/%.o: %.c $(HEADER) $(HOOKSRC) Makefile
 	$(CC32) -c -o $@ $< $(CFLAGS)
 
-objects/x86/%.o: objects/x86/%.c $(HEADER) $(HOOK32) Makefile
+objects/x86/%.o: objects/x86/%.c $(HEADER) $(HOOKSRC) Makefile
 	$(CC32) -c -o $@ $< $(CFLAGS)
 
-objects/x64/%.o: %.c $(HEADER) $(HOOK64) Makefile
+objects/x64/%.o: %.c $(HEADER) $(HOOKSRC) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS)
 
-objects/x64/%.o: objects/x64/%.c $(HEADER) $(HOOK64) Makefile
+objects/x64/%.o: objects/x64/%.c $(HEADER) $(HOOKSRC) Makefile
+	$(CC64) -c -o $@ $< $(CFLAGS)
+
+$(HOOKOBJ32): $(HOOKSRC) $(HEADER) Makefile
+	$(CC32) -c -o $@ $< $(CFLAGS)
+
+$(HOOKOBJ64): $(HOOKSRC) $(HEADER) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS)
 
 objects/x86/asm/tramp-special.o: asm/x86/tramp.asm Makefile
