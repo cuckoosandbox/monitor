@@ -356,9 +356,9 @@ class SignatureProcessor(object):
         for idx, sig in enumerate(sigs):
             sig['index'] = idx
 
-        dp.render('header', self.hooks_h, sigs=sigs)
-        dp.render('source', self.hooks_c, sigs=sigs, types=self.types)
-        dp.render('hook-info', self.hook_info_h,
+        dp.render('hook-header', self.hooks_h, sigs=sigs)
+        dp.render('hook-source', self.hooks_c, sigs=sigs, types=self.types)
+        dp.render('hook-info-header', self.hook_info_h,
                   sigs=sigs, first_hook=len(self.base_sigs))
 
 
