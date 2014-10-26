@@ -68,7 +68,7 @@ class SignatureProcessor(object):
 
         self.hooks_c = os.path.join(out_dir, 'hooks.c')
         self.hooks_h = os.path.join(out_dir, 'hooks.h')
-        self.monitor_info_h = os.path.join(out_dir, 'monitor-info.h')
+        self.hook_info_h = os.path.join(out_dir, 'hook-info.h')
 
         self.sig_files = sig_files
 
@@ -358,8 +358,8 @@ class SignatureProcessor(object):
 
         dp.render('header', self.hooks_h, sigs=sigs)
         dp.render('source', self.hooks_c, sigs=sigs, types=self.types)
-        dp.render('monitor-info', self.monitor_info_h,
-                  sigs=sigs, first_hook=len(self.base_sigs), flags=flags)
+        dp.render('hook-info', self.hook_info_h,
+                  sigs=sigs, first_hook=len(self.base_sigs))
 
 
 if __name__ == '__main__':

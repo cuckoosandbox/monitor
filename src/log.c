@@ -25,9 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <winsock.h>
 #include "bson/bson.h"
 #include "hooking.h"
-#include "hooks.h"
+#include "hook-info.h"
 #include "misc.h"
-#include "monitor-info.h"
 #include "ntapi.h"
 #include "log.h"
 #include "pipe.h"
