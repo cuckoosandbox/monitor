@@ -13,10 +13,15 @@ JINJA2 = $(wildcard data/*.jinja2)
 # Dependencies for the auto-generated hook files.
 HOOKREQ = utils/process.py $(wildcard data/*.json) $(wildcard data/*.conf)
 
-# The source file also imply the header files that belong to them.
+# HOOKSRC only contains one element as the related auto-generated files are
+# automatically created as well (if not emitting them it'll re-generate *all*
+# the to-be-auto-generated files multiple times).
 HOOKSRC = objects/code/hooks.c
 HOOKOBJ32 = objects/x86/code/hooks.o
 HOOKOBJ64 = objects/x64/code/hooks.o
+FLAGSRC = objects/code/flags.c
+FLAGOBJ32 = objects/x86/code/flags.o
+FLAGOBJ64 = objects/x64/code/flags.o
 
 SRC = $(wildcard src/*.c)
 SRCOBJ32 = $(SRC:%.c=objects/x86/%.o)
@@ -64,7 +69,8 @@ objects/:
 	mkdir -p objects/x86/code/ objects/x64/code/
 	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
 
-$(HOOKSRC): $(SIGS) $(JINJA2) $(HOOKREQ)
+# If there's a way to do this while only calling Python once, let me know!
+$(HOOKSRC) $(FLAGSRC): $(SIGS) $(JINJA2) $(HOOKREQ)
 	python utils/process.py data/ objects/code/ sigs/ flags/
 
 $(LIBBSON32): $(BSONOBJ32)
@@ -100,6 +106,12 @@ $(HOOKOBJ32): $(HOOKSRC) $(HEADER) Makefile
 $(HOOKOBJ64): $(HOOKSRC) $(HEADER) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS)
 
+$(FLAGOBJ32): $(FLAGSRC) $(HEADER) Makefile
+	$(CC32) -c -o $@ $< $(CFLAGS)
+
+$(FLAGOBJ64): $(FLAGSRC) $(HEADER) Makefile
+	$(CC64) -c -o $@ $< $(CFLAGS)
+
 objects/x86/asm/tramp-special.o: asm/x86/tramp.asm Makefile
 	$(NASM) -f elf32 -i asm/x86/ -d tramp_special=1 -o $@ $<
 
@@ -112,10 +124,12 @@ objects/x86/asm/%.o: asm/x86/%.asm Makefile
 objects/x64/asm/%.o: asm/x64/%.asm Makefile
 	$(NASM) -f elf64 -i asm/x64/ -o $@ $<
 
-$(DLL32): $(ASMOBJ32) $(SRCOBJ32) $(HOOKOBJ32) $(LIBBSON32) $(LIBCAPSTONE32)
+$(DLL32): $(ASMOBJ32) $(SRCOBJ32) $(HOOKOBJ32) $(FLAGOBJ32) \
+		$(LIBBSON32) $(LIBCAPSTONE32)
 	$(CC32) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
-$(DLL64): $(ASMOBJ64) $(SRCOBJ64) $(HOOKOBJ64) $(LIBBSON64) $(LIBCAPSTONE64)
+$(DLL64): $(ASMOBJ64) $(SRCOBJ64) $(HOOKOBJ64) $(FLAGOBJ64) \
+		$(LIBBSON64) $(LIBCAPSTONE64)
 	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 clean:
