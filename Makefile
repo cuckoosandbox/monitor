@@ -75,8 +75,8 @@ $(LIBBSON64): $(BSONOBJ64)
 	$(AR) cr $@ $^
 
 $(LIBCAPSTONE32) $(LIBCAPSTONE64):
-	git submodule update --init && \
-	cp $(CSCONF) src/capstone/config.mk && \
+	git submodule update --init
+	cp $(CSCONF) src/capstone/config.mk
 	cd src/capstone/ && \
 	BUILDDIR=../../objects/x86/capstone/ ./make.sh cross-win32 && \
 	cp ../../objects/x86/capstone/capstone.lib capstone-x86.lib && \
