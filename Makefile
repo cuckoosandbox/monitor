@@ -12,8 +12,10 @@ JINJA2 = $(wildcard data/*.jinja2)
 
 # Dependencies for the auto-generated hook files.
 HOOKREQ = utils/process.py $(wildcard data/*.json) $(wildcard data/*.conf)
-HOOK32 = objects/x86/code/hooks.h objects/x86/code/hooks.c
-HOOK64 = objects/x64/code/hooks.h objects/x64/code/hooks.c
+
+# The source files also imply the header files that belong to them.
+HOOK32 = objects/x86/code/hooks.c
+HOOK64 = objects/x64/code/hooks.c
 HOOKOBJ32 = objects/x86/code/hooks.o
 HOOKOBJ64 = objects/x64/code/hooks.o
 
