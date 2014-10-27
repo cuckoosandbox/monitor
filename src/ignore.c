@@ -21,12 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ntapi.h"
 
 #define IGNORE_MATCH(s) \
-    if(wcsnicmp(fname, s, length) == 0) return TRUE
+    if(wcsicmp(fname, s) == 0) return 1
 
 #define IGNORE_START(s) \
-    if(wcsnicmp(fname, s, sizeof(s)/sizeof(wchar_t)-1) == 0) return TRUE
+    if(wcsnicmp(fname, s, sizeof(s)/sizeof(wchar_t)-1) == 0) return 1
 
-BOOL is_ignored_file_unicode(const wchar_t *fname, int length)
+int is_ignored_filepath(const wchar_t *fname)
 {
     IGNORE_MATCH(L"\\\\?\\MountPointManager");
 
@@ -35,5 +35,5 @@ BOOL is_ignored_file_unicode(const wchar_t *fname, int length)
     IGNORE_START(L"\\\\?\\STORAGE#");
     IGNORE_START(L"\\\\?\\root#");
     IGNORE_START(L"\\Device\\");
-    return FALSE;
+    return 0;
 }

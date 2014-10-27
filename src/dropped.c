@@ -43,7 +43,7 @@ void dropped_init()
 void dropped_add(HANDLE file_handle, const wchar_t *filepath)
 {
     if(PathIsDirectoryW(filepath) == FALSE &&
-            is_ignored_file_unicode(filepath, lstrlenW(filepath)) == 0) {
+            is_ignored_filepath(filepath) == 0) {
 
         dropped_entry_t *e =
             (dropped_entry_t *) calloc(1, sizeof(dropped_entry_t));

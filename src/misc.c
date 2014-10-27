@@ -431,7 +431,7 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
     }
 
     // We don't further modify ignored filepaths.
-    if(is_ignored_file_unicode(input, lstrlenW(input)) != FALSE) {
+    if(is_ignored_filepath(input) != 0) {
         wcscpy(out, input);
         return lstrlenW(out);
     }

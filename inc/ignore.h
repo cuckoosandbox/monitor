@@ -22,6 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "ntapi.h"
 
-BOOL is_ignored_file_unicode(const wchar_t *fname, int length);
+int is_ignored_filepath(const wchar_t *fname);
 
 #endif
