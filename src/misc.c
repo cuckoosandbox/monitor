@@ -731,6 +731,63 @@ uint32_t reg_get_key_objattr(const OBJECT_ATTRIBUTES *obj, wchar_t *regkey)
     return 0;
 }
 
+void reg_get_info_from_keyvalue(const void *buf, uint32_t length,
+    KEY_VALUE_INFORMATION_CLASS information_class, wchar_t **reg_name,
+    uint32_t *reg_type, uint32_t *data_length, uint8_t **data)
+{
+    // TODO Length checking.
+    (void) length;
+
+    if(buf == NULL) {
+        return;
+    }
+
+    switch (information_class) {
+    case KeyValueBasicInformation: {
+        KEY_VALUE_BASIC_INFORMATION *basic =
+            (KEY_VALUE_BASIC_INFORMATION *) buf;
+
+        *reg_name = get_unicode_buffer();
+        uint32_t length = MIN(
+            basic->NameLength, MAX_PATH_W * sizeof(wchar_t));
+        memcpy(*reg_name, basic->Name, length);
+        (*reg_name)[length] = 0;
+
+        *reg_type = basic->Type;
+        break;
+    }
+
+    case KeyValueFullInformation: case KeyValueFullInformationAlign64: {
+        KEY_VALUE_FULL_INFORMATION *full =
+            (KEY_VALUE_FULL_INFORMATION *) buf;
+
+        *reg_name = get_unicode_buffer();
+        uint32_t length = MIN(
+            full->NameLength, MAX_PATH_W * sizeof(wchar_t));
+        memcpy(*reg_name, full->Name, length);
+        (*reg_name)[length] = 0;
+
+        *reg_type = full->Type;
+        *data_length = full->DataLength;
+        *data = (uint8_t *) full + full->DataOffset;
+        break;
+    }
+
+    case KeyValuePartialInformation: case KeyValuePartialInformationAlign64: {
+        KEY_VALUE_PARTIAL_INFORMATION *partial =
+            (KEY_VALUE_PARTIAL_INFORMATION *) buf;
+
+        *reg_type = partial->Type;
+        *data_length = partial->DataLength;
+        *data = partial->Data;
+        break;
+    }
+
+    case MaxKeyValueInfoClass:
+        break;
+    }
+}
+
 void get_ip_port(const struct sockaddr *addr, const char **ip, int *port)
 {
     if(addr == NULL) return;

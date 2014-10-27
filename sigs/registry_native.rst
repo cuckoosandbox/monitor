@@ -167,10 +167,23 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
 
+Middle::
+
+    wchar_t *key_name = NULL; uint8_t *data = NULL;
+    uint32_t reg_type = REG_NONE, data_length = 0;
+
+    if(NT_SUCCESS(ret) != FALSE) {
+        reg_get_info_from_keyvalue(KeyValueInformation, *ResultLength,
+            KeyValueInformationClass, &key_name, &reg_type,
+            &data_length, &data
+        );
+    }
+
 Logging::
 
-    B buffer ResultLength, KeyValueInformation
     u regkey regkey
+    u key_name key_name
+    R value &reg_type, &data_length, data
 
 
 NtSetValueKey
@@ -192,7 +205,7 @@ Pre::
 
 Logging::
 
-    b buffer DataSize, Data
+    R value &Type, &DataSize, Data
     u regkey regkey
 
 
@@ -217,10 +230,23 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_unistr(KeyHandle, ValueName, regkey);
 
+Middle::
+
+    wchar_t *key_name = NULL; uint8_t *data = NULL;
+    uint32_t reg_type = REG_NONE, data_length = 0;
+
+    if(NT_SUCCESS(ret) != FALSE) {
+        reg_get_info_from_keyvalue(KeyValueInformation, *ResultLength,
+            KeyValueInformationClass, &key_name, &reg_type,
+            &data_length, &data
+        );
+    }
+
 Logging::
 
-    B buffer ResultLength, KeyValueInformation
     u regkey regkey
+    u key_name key_name
+    R value &reg_type, &data_length, data
 
 
 NtQueryMultipleValueKey

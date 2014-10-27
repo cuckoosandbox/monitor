@@ -1,3 +1,4 @@
+- Tweak: Improved logging of values for registry APIs.
 - Bugfix: Incorrect prelog output when the first API on a new thread uses it.
 - Feature: Resolve magic values to flags.
 - Add: A few Crypto and OLE signatures.

@@ -392,26 +392,40 @@ void log_api(int index, int is_success, uintptr_t return_value,
             log_wargv(&b, idx, argc, argv);
         }
         else if(key == 'r' || key == 'R') {
-            unsigned long type = va_arg(args, unsigned long);
-            unsigned long size = va_arg(args, unsigned long);
-            unsigned char *data = va_arg(args, unsigned char *);
+            uint32_t *type = va_arg(args, uint32_t *);
+            uint32_t *size = va_arg(args, uint32_t *);
+            uint8_t *data = va_arg(args, uint8_t *);
 
-            if(type == REG_NONE) {
-                log_string(&b, idx, "", 0);
+            uint32_t _type = REG_NONE, _size = 0;
+
+            if(type == NULL) {
+                type = &_type;
             }
-            else if(type == REG_DWORD || type == REG_DWORD_LITTLE_ENDIAN) {
+            if(size == NULL) {
+                size = &_size;
+            }
+
+            if(*type == REG_NONE) {
+                log_string(&b, idx, NULL, 0);
+            }
+            else if(*type == REG_DWORD || *type == REG_DWORD_LITTLE_ENDIAN) {
                 unsigned int value = *(unsigned int *) data;
                 log_int32(&b, idx, value);
             }
-            else if(type == REG_DWORD_BIG_ENDIAN) {
+            else if(*type == REG_DWORD_BIG_ENDIAN) {
                 unsigned int value = *(unsigned int *) data;
                 log_int32(&b, idx, htonl(value));
             }
-            else if(type == REG_EXPAND_SZ || type == REG_SZ) {
-                log_buffer(&b, idx, data, size);
+            else if(*type == REG_EXPAND_SZ || *type == REG_SZ) {
+                if(key == 'r') {
+                    log_string(&b, idx, (const char *) data, *size);
+                }
+                else {
+                    log_wstring(&b, idx, (const wchar_t *) data, *size);
+                }
             }
             else {
-                log_buffer(&b, idx, data, 0);
+                log_buffer(&b, idx, data, *size);
             }
         }
         else if(key == 'q') {

@@ -229,7 +229,7 @@ Pre::
 Logging::
 
     u regkey regkey
-    B buffer lpcbData, lpData
+    r value lpType, lpcbData, lpData
 
 
 RegEnumValueW
@@ -258,7 +258,7 @@ Pre::
 Logging::
 
     u regkey regkey
-    B buffer lpcbData, lpData
+    R value lpType, lpcbData, lpData
 
 
 RegSetValueExA
@@ -281,7 +281,7 @@ Pre::
 Logging::
 
     u regkey regkey
-    b buffer cbData, lpData
+    r value &dwType, &cbData, lpData
 
 
 RegSetValueExW
@@ -304,7 +304,7 @@ Pre::
 Logging::
 
     u regkey regkey
-    b buffer cbData, lpData
+    R value &dwType, &cbData, lpData
 
 
 RegQueryValueExA
@@ -331,7 +331,7 @@ Pre::
 Logging::
 
     u regkey regkey
-    B buffer lpcbData, lpData
+    r value lpType, lpcbData, lpData
 
 
 RegQueryValueExW
@@ -358,7 +358,7 @@ Pre::
 Logging::
 
     u regkey regkey
-    B buffer lpcbData, lpData
+    R value lpType, lpcbData, lpData
 
 
 RegDeleteValueA
