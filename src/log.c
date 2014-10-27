@@ -416,13 +416,19 @@ void log_api(int index, int is_success, uintptr_t return_value,
                 unsigned int value = *(unsigned int *) data;
                 log_int32(&b, idx, htonl(value));
             }
-            else if(*type == REG_EXPAND_SZ || *type == REG_SZ) {
+            else if(*type == REG_EXPAND_SZ || *type == REG_SZ ||
+                    *type == REG_MULTI_SZ) {
                 if(key == 'r') {
                     log_string(&b, idx, (const char *) data, *size);
                 }
                 else {
-                    log_wstring(&b, idx, (const wchar_t *) data, *size);
+                    log_wstring(&b, idx, (const wchar_t *) data,
+                        *size / sizeof(wchar_t));
                 }
+            }
+            else if(*type == REG_QWORD || *type == REG_QWORD_LITTLE_ENDIAN) {
+                uint64_t value = *(uint64_t *) data;
+                log_int64(&b, idx, value);
             }
             else {
                 log_buffer(&b, idx, data, *size);
