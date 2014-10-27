@@ -468,7 +468,14 @@ void log_new_process()
 
 void log_new_thread()
 {
+    // We temporarily pop any value off the TLS while logging the new thread.
+    // (To handle the first API called on a thread using prelog).
+    void *value = TlsGetValue(g_tls_idx);
+    TlsSetValue(g_tls_idx, NULL);
+
     log_api(1, 1, 0, "l", GetCurrentProcessId());
+
+    TlsSetValue(g_tls_idx, value);
 }
 
 void log_anomaly(const char *subcategory, int success,
