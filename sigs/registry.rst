@@ -327,12 +327,15 @@ Parameters::
 
 Ensure::
 
+    lpType
     lpcbData
 
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpValueName, regkey);
+
+    *lpType = REG_NONE, *lpcbData = 0;
 
 Logging::
 
@@ -354,12 +357,15 @@ Parameters::
 
 Ensure::
 
+    lpType
     lpcbData
 
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpValueName, regkey);
+
+    *lpType = REG_NONE, *lpcbData = 0;
 
 Logging::
 
