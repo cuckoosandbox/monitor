@@ -1,3 +1,6 @@
+- Bugfix: Incorrect prelog output when the first API on a new thread uses it.
+- Feature: Resolve magic values to flags.
+- Add: A few Crypto and OLE signatures.
 - Tweak: Remove dead unhook detection regions when unloading a DLL.
 - Bugfix: Unhook detection was not working due to a copy 'n paste fail.
 - Tweak: Minimum OS version to ignore unresolved symbols when hooking.
