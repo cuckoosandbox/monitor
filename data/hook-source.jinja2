@@ -129,10 +129,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     {% if hook.signature.special: %}
     if(hook_info()->hook_count == 1) {
-    {% endif %}
-    {{ log_api(hook) }}
-    {% if hook.signature.special: %}
+        {{ log_api(hook)|indent }}
     }
+    {% else %}
+    {{ log_api(hook) }}
     {% endif %}
 
     {%- if hook.post: %}
