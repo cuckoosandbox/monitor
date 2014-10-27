@@ -227,7 +227,7 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpValueName, regkey);
 
-    *lpType = REG_NONE, *lpcbData = 0;
+    *lpType = REG_NONE;
 
 Logging::
 
@@ -259,7 +259,7 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpValueName, regkey);
 
-    *lpType = REG_NONE, *lpcbData = 0;
+    *lpType = REG_NONE;
 
 Logging::
 
@@ -335,7 +335,7 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpValueName, regkey);
 
-    *lpType = REG_NONE, *lpcbData = 0;
+    *lpType = REG_NONE;
 
 Logging::
 
@@ -365,7 +365,7 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpValueName, regkey);
 
-    *lpType = REG_NONE, *lpcbData = 0;
+    *lpType = REG_NONE;
 
 Logging::
 
