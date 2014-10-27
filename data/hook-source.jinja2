@@ -30,6 +30,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sleep.h"
 #include "unhook.h"
 
+{% macro log_api(hook) -%}
+    log_api({{ hook.index }},
+        {{ hook.signature.is_success }},
+        {%- if hook.signature.return_value != 'void' %}
+        (uintptr_t) ret,
+        {%- else %}
+        0,
+        {%- endif %}
+        "
+    {%- for param in hook.parameters: -%}
+        {%- if param.log == True: -%}
+            {{ types[param.argtype] }}
+        {%- endif -%}
+    {%- endfor -%}
+    {%- for log in hook.logging: -%}
+        {{ log.argtype }}
+    {%- endfor -%}
+    {%- for flag in hook.flags: -%}
+        u
+    {%- endfor -%}
+        "
+    {%- for param in hook.parameters: -%}
+        {% if param.log == True: -%}
+        ,
+        {{ param.argname }}
+        {%- endif %}
+    {%- endfor %}
+    {%- for log in hook.logging: -%}
+        ,
+        {{ log.argvalue }}
+    {%- endfor %}
+    {%- for flag in hook.flags: -%}
+        ,
+        flag_to_string(FLAG_{{ flag.flagname }}, {{ flag.arg }})
+    {%- endfor %}
+    );
+{%- endmacro %}
+
 {%- for hook in sigs if hook.is_hook: %}
 
 
@@ -92,41 +130,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {% if hook.signature.special: %}
     if(hook_info()->hook_count == 1) {
     {% endif %}
-    log_api({{ hook.index }},
-        {{ hook.signature.is_success }},
-        {%- if hook.signature.return_value != 'void' %}
-        (uintptr_t) ret,
-        {%- else %}
-        0,
-        {%- endif %}
-        "
-    {%- for param in hook.parameters: -%}
-        {%- if param.log == True: -%}
-            {{ types[param.argtype] }}
-        {%- endif -%}
-    {%- endfor -%}
-    {%- for log in hook.logging: -%}
-        {{ log.argtype }}
-    {%- endfor -%}
-    {%- for flag in hook.flags: -%}
-        u
-    {%- endfor -%}
-        "
-    {%- for param in hook.parameters: -%}
-        {% if param.log == True: -%}
-        ,
-        {{ param.argname }}
-        {%- endif %}
-    {%- endfor %}
-    {%- for log in hook.logging: -%}
-        ,
-        {{ log.argvalue }}
-    {%- endfor %}
-    {%- for flag in hook.flags: -%}
-        ,
-        flag_to_string(FLAG_{{ flag.flagname }}, {{ flag.arg }})
-    {%- endfor %}
-    );
+    {{ log_api(hook) }}
     {% if hook.signature.special: %}
     }
     {% endif %}
