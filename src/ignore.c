@@ -28,11 +28,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 BOOL is_ignored_file_unicode(const wchar_t *fname, int length)
 {
-    IGNORE_MATCH(L"\\\\?\\PIPE\\");
     IGNORE_MATCH(L"\\\\?\\MountPointManager");
+
+    IGNORE_START(L"\\\\?\\PIPE\\");
     IGNORE_START(L"\\\\?\\IDE#");
     IGNORE_START(L"\\\\?\\STORAGE#");
     IGNORE_START(L"\\\\?\\root#");
-    // IGNORE_START(L"\\Device\\");
+    IGNORE_START(L"\\Device\\");
     return FALSE;
 }
