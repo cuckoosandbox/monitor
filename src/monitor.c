@@ -34,6 +34,9 @@ static os_version_t g_os_version = WINDOWS_XP;
 
 void monitor_init(HMODULE module_handle)
 {
+    // Sends crashes to the process rather than showing error popup boxes etc.
+    SetErrorMode(SEM_FAILCRITICALERRORS);
+
     config_t cfg;
     config_read(&cfg);
 
@@ -47,9 +50,6 @@ void monitor_init(HMODULE module_handle)
     sleep_init(cfg.first_process, cfg.force_sleep_skip, cfg.startup_time);
 
     unhook_init_detection(cfg.first_process);
-
-    // Make sure advapi32 is loaded.
-    LoadLibrary("advapi32.dll");
 
     hide_module_from_peb(module_handle);
 
