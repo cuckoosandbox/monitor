@@ -30,11 +30,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sleep.h"
 #include "unhook.h"
 
-{% macro log_api(hook) -%}
+{% macro log_api(hook, ret='') -%}
     log_api({{ hook.index }},
-        {{ hook.signature.is_success }},
+        {{ ret or hook.signature.is_success }},
         {%- if hook.signature.return_value != 'void' %}
-        (uintptr_t) ret,
+        {% if ret %}{{ ret }}{% else %}(uintptr_t) ret{% endif %},
         {%- else %}
         0,
         {%- endif %}
@@ -107,7 +107,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {% endif %}
 
     {%- if hook.signature.prelog == 'instant' %}
-    {{ log_api(hook) }}
+    {{ log_api(hook, ret='0') }}
     {% endif %}
 
     {%- if hook.signature.return_value != 'void' %}
