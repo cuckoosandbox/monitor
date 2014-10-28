@@ -61,6 +61,7 @@ ExitThread
 
 Signature::
 
+    * Prelog: instant
     * Return value: void
 
 Parameters::

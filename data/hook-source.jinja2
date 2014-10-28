@@ -106,6 +106,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     log_api_pre({{ hook.prelog|join(',', attribute='argvalue') }});
     {% endif %}
 
+    {%- if hook.signature.prelog == 'instant' %}
+    {{ log_api(hook) }}
+    {% endif %}
+
     {%- if hook.signature.return_value != 'void' %}
     {{ hook.signature.return_value }} ret = Old_{{ hook.apiname }}(
     {%- else %}

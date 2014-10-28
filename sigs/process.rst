@@ -74,6 +74,7 @@ Signature::
 
     * Library: kernel32
     * Return value: void
+    * Prelog: instant
 
 Parameters::
 

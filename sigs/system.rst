@@ -163,6 +163,7 @@ ExitWindowsEx
 Signature::
 
     * Library: user32
+    * Prelog: instant
     * Return value: BOOL
 
 Parameters::

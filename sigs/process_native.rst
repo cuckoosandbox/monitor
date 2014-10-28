@@ -168,6 +168,10 @@ Logging::
 NtTerminateProcess
 ==================
 
+Signature::
+
+    * Prelog: instant
+
 Parameters::
 
     ** HANDLE ProcessHandle process_handle
