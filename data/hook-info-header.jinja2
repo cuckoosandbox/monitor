@@ -22,4 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MONITOR_FIRSTHOOKIDX {{ first_hook }}
 #define MONITOR_HOOKCNT {{ sigs|length }}
 
+typedef enum _signature_index_t {
+{%- for sig in sigs: %}
+    SIG_{{ sig.apiname }},
+{%- endfor %}
+} signature_index_t;
+
 #endif

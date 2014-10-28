@@ -20,15 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MONITOR_LOG_H
 
 #include <stdint.h>
+#include "hook-info.h"
 
 void log_init(uint32_t ip, uint16_t port);
 void log_free();
 
-void log_explain();
-
 void log_api_pre(uint32_t length, const void *buffer);
 
-void log_api(int index, int is_success, uintptr_t return_value,
+void log_api(signature_index_t index, int is_success, uintptr_t return_value,
     const char *fmt, ...);
 
 void log_anomaly(const char *subcategory, int success,

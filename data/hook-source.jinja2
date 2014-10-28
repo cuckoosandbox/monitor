@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "dropped.h"
 #include "flags.h"
 #include "hooking.h"
+#include "hook-info.h"
 #include "monitor.h"
 #include "ntapi.h"
 #include "log.h"
@@ -31,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "unhook.h"
 
 {% macro log_api(hook, ret='') -%}
-    log_api({{ hook.index }},
+    log_api(SIG_{{ hook.apiname }},
         {{ ret or hook.signature.is_success }},
         {%- if hook.signature.return_value != 'void' %}
         {% if ret %}{{ ret }}{% else %}(uintptr_t) ret{% endif %},

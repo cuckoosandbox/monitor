@@ -158,7 +158,7 @@ static void log_buffer(bson *b, const char *idx,
         (const char *) buf, trunclength);
 }
 
-void log_explain(int index)
+void log_explain(signature_index_t index)
 {
     bson b; char argidx[4];
 
@@ -254,7 +254,7 @@ static void _log_stacktrace(bson *b)
 
 #endif
 
-void log_api(int index, int is_success, uintptr_t return_value,
+void log_api(signature_index_t index, int is_success, uintptr_t return_value,
     const char *fmt, ...)
 {
     va_list args; char key = 0; char idx[4];
