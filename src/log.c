@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include <winsock.h>
 #include "bson/bson.h"
+#include "flags.h"
 #include "hooking.h"
 #include "hook-info.h"
 #include "misc.h"
@@ -193,6 +194,24 @@ void log_explain(signature_index_t index)
     }
 
     bson_append_finish_array(&b);
+    bson_append_start_object(&b, "flags");
+
+    static const char *types[] = {
+        [FLAGTYP_NONE] = "none",
+        [FLAGTYP_ENUM] = "enum",
+        [FLAGTYP_VALUE] = "value",
+    };
+
+    for (uint32_t idx = 0; g_api_flags[index][idx] != FLAG_NONE; idx++) {
+        const flag_repr_t *f = g_flags[g_api_flags[index][idx]];
+        bson_append_start_array(&b, g_api_flagnames[index][idx]);
+        bson_append_string(&b, "0", types[f->type]);
+        bson_append_int(&b, "1", f->value);
+        bson_append_string(&b, "2", f->repr);
+        bson_append_finish_array(&b);
+    }
+
+    bson_append_finish_object(&b);
     bson_finish(&b);
     log_raw(bson_data(&b), bson_size(&b));
     bson_destroy(&b);

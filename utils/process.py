@@ -480,10 +480,10 @@ class FlagsProcessor(object):
 
                 if 'enum' in flag:
                     flag['rows'] = flag['enum']
-                    flag['type'] = 'FLAG_ENUM'
+                    flag['type'] = 'FLAGTYP_ENUM'
                 elif 'value' in flag:
                     flag['rows'] = flag['value']
-                    flag['type'] = 'FLAG_VALUE'
+                    flag['type'] = 'FLAGTYP_VALUE'
                 else:
                     raise Exception('Either a value or an enum entry should '
                                     'be present for a flag.')

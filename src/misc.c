@@ -1034,9 +1034,10 @@ wchar_t *flag_to_string(flag_t which, uint32_t flag)
     }
 
     wchar_t *ret = get_unicode_buffer();
-    for (const flag_repr_t *f = g_flags[which]; f->type != FLAG_NONE; f++) {
+    for (const flag_repr_t *f = g_flags[which]; f->type != FLAGTYP_NONE;
+            f++) {
         switch (f->type) {
-        case FLAG_ENUM:
+        case FLAGTYP_ENUM:
             if((flag & f->value) == f->value) {
                 if(*ret != 0) {
                     wcscat(ret, L"|");
@@ -1047,7 +1048,7 @@ wchar_t *flag_to_string(flag_t which, uint32_t flag)
             }
             break;
 
-        case FLAG_VALUE:
+        case FLAGTYP_VALUE:
             if(f->value == flag) {
                 wcsncpyA(ret, f->repr, MAX_PATH_W);
                 return ret;

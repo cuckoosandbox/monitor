@@ -48,9 +48,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- for log in hook.logging: -%}
         {{ log.argtype }}
     {%- endfor -%}
-    {%- for flag in hook.flags: -%}
-        u
-    {%- endfor -%}
         "
     {%- for param in hook.parameters: -%}
         {% if param.log == True: -%}
@@ -61,10 +58,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- for log in hook.logging: -%}
         ,
         {{ log.argvalue }}
-    {%- endfor %}
-    {%- for flag in hook.flags: -%}
-        ,
-        flag_to_string(FLAG_{{ flag.flagname }}, {{ flag.arg }})
     {%- endfor %}
     );
 {%- endmacro %}
@@ -179,9 +172,6 @@ const char *g_explain_paramtypes[] = {
     {%- for param in hook.logging: -%}
         {{ param.argtype }}
     {%- endfor -%}
-    {%- for flag in hook.flags: -%}
-        u
-    {%- endfor -%}
     ",
 {%- endfor %}
 };
@@ -199,9 +189,6 @@ const char *g_explain_paramnames[][16] = {
     {%- for param in hook.logging: -%}
         {% if True %}"{{ param.argname }}", {% endif %}
     {%- endfor -%}
-    {%- for flag in hook.flags: -%}
-        {% if True %}"{{ flag.name }}_s", {% endif %}
-    {%- endfor -%}
     },
 {%- endfor %}
 };
@@ -213,4 +200,26 @@ hook_t g_hooks[] = {
     {%- endif %}
 {%- endfor %}
     {NULL, NULL, NULL, NULL, 0, 0, NULL, 0, NULL},
+};
+
+const flag_t g_api_flags[MONITOR_HOOKCNT][8] = {
+{%- for sig in sigs: %}
+    [SIG_{{ sig.apiname }}] = {
+        {%- for flag in sig.flags: %}
+        FLAG_{{ flag.flagname }},
+        {%- endfor %}
+        FLAG_NONE,
+    },
+{%- endfor %}
+};
+
+const char *g_api_flagnames[MONITOR_HOOKCNT][8] = {
+{%- for sig in sigs: %}
+    [SIG_{{ sig.apiname }}] = {
+        {%- for flag in sig.flags: %}
+        "{{ flag.name }}",
+        {%- endfor %}
+        NULL,
+    },
+{%- endfor %}
 };

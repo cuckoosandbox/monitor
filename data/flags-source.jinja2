@@ -26,11 +26,12 @@ static const flag_repr_t _{{ flag.name }}[] = {
     {%- for row in flag.rows: %}
     {{ "{" }}{{ flag.type }}, {{ row }}, "{{ row }}"},
     {%- endfor %}
-    {FLAG_NONE, 0, NULL},
+    {FLAGTYP_NONE, 0, NULL},
 };
 {% endfor %}
 
 const flag_repr_t *g_flags[FLAGCNT] = {
+    FLAG_NONE,
 {%- for name in flags: %}
     _{{ name }},
 {%- endfor %}

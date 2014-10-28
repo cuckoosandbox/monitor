@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MONITOR_HOOK_INFO_H
 #define MONITOR_HOOK_INFO_H
 
+#include "flags.h"
+
 #define MONITOR_FIRSTHOOKIDX {{ first_hook }}
 #define MONITOR_HOOKCNT {{ sigs|length }}
 
@@ -27,5 +29,8 @@ typedef enum _signature_index_t {
     SIG_{{ sig.apiname }},
 {%- endfor %}
 } signature_index_t;
+
+const flag_t g_api_flags[MONITOR_HOOKCNT][8];
+const char *g_api_flagnames[MONITOR_HOOKCNT][8];
 
 #endif
