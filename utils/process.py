@@ -164,8 +164,14 @@ class SignatureProcessor(object):
 
     def _parse_flags(self, text):
         ret = []
-        for flag in text.split():
-            ret.append(dict(name=flag))
+        for line in text.split('\n'):
+            line = line.split()
+            if len(line) == 1:
+                ret.append(dict(name=line[0]))
+            elif len(line) == 2:
+                ret.append(dict(name=line[0], arg=line[1], argtype=None))
+            elif len(line) == 3:
+                ret.append(dict(name=line[0], arg=line[1], argtype=line[2]))
         return ret
 
     def _parse_ensure(self, text):
@@ -342,7 +348,8 @@ class SignatureProcessor(object):
                         flag['arg'] = arg['argname']
                         flag['argtype'] = arg['argtype']
                         break
-                else:
+
+                if 'arg' not in flag:
                     raise Exception('Alias %r not found in %r!' % (
                                     flag, row['apiname']))
 

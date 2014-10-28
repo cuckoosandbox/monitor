@@ -28,6 +28,10 @@ Parameters::
     *  LPPROCESS_INFORMATION lpProcessInformation
     *  LPVOID lpUnknown2
 
+Flags::
+
+    creation_flags creation_flags
+
 Ensure::
 
     lpProcessInformation

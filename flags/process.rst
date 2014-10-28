@@ -1,5 +1,5 @@
-CreateProcessInternalW_CreationFlags
-====================================
+CreateProcessInternalW_creation_flags
+=====================================
 
 Inherits::
 
