@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "config.h"
 #include "dropped.h"
 #include "hooking.h"
+#include "ignore.h"
 #include "log.h"
 #include "misc.h"
 #include "monitor.h"
@@ -123,9 +124,11 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
 
     switch (dwReason) {
     case DLL_PROCESS_ATTACH:
-        monitor_init(hModule);
-        monitor_hook(NULL);
-        monitor_notify();
+        if(is_ignored_process() == 0) {
+            monitor_init(hModule);
+            monitor_hook(NULL);
+            monitor_notify();
+        }
         break;
     }
 

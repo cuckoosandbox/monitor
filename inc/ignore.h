@@ -23,5 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ntapi.h"
 
 int is_ignored_filepath(const wchar_t *fname);
+int is_ignored_process();
 
 #endif
