@@ -260,27 +260,27 @@ Parameters::
 
 Pre::
 
-    DWORD length = 0;
-    for (DWORD i = 0; i < cToBeHashed; i++) {
-        length += rgcbToBeHashed[i];
+    uint32_t length = 0;
+    for (uint32_t idx = 0; idx < cToBeHashed; idx++) {
+        length += rgcbToBeHashed[idx];
     }
 
-    uint8_t *mem = malloc(length);
-    if(mem != NULL) {
-        for (DWORD i = 0, off = 0; i < cToBeHashed; i++) {
-            memcpy(mem + off, rgpbToBeHashed[i], rgcbToBeHashed[i]);
-            off += rgcbToBeHashed[i];
+    uint8_t *buf = malloc(length);
+    if(buf != NULL) {
+        for (uint32_t idx = 0, offset = 0; idx < cToBeHashed; idx++) {
+            memcpy(&buf[offset], rgpbToBeHashed[idx], rgcbToBeHashed[idx]);
+            offset += rgcbToBeHashed[idx];
         }
     }
 
 Logging::
 
-    b buffer length, mem
+    b buffer length, buf
 
 Post::
 
-    if(mem != NULL) {
-        free(mem);
+    if(buf != NULL) {
+        free(buf);
     }
 
 
