@@ -1,3 +1,93 @@
+FILE_INFORMATION_CLASS
+======================
+
+Value::
+
+    FileDirectoryInformation
+    FileFullDirectoryInformation
+    FileBothDirectoryInformation
+    FileBasicInformation
+    FileStandardInformation
+    FileInternalInformation
+    FileEaInformation
+    FileAccessInformation
+    FileNameInformation
+    FileRenameInformation
+    FileLinkInformation
+    FileNamesInformation
+    FileDispositionInformation
+    FilePositionInformation
+    FileFullEaInformation
+    FileModeInformation
+    FileAlignmentInformation
+    FileAllInformation
+    FileAllocationInformation
+    FileEndOfFileInformation
+    FileAlternateNameInformation
+    FileStreamInformation
+    FilePipeInformation
+    FilePipeLocalInformation
+    FilePipeRemoteInformation
+    FileMailslotQueryInformation
+    FileMailslotSetInformation
+    FileCompressionInformation
+    FileObjectIdInformation
+    FileCompletionInformation
+    FileMoveClusterInformation
+    FileQuotaInformation
+    FileReparsePointInformation
+    FileNetworkOpenInformation
+    FileAttributeTagInformation
+    FileTrackingInformation
+    FileIdBothDirectoryInformation
+    FileIdFullDirectoryInformation
+    FileValidDataLengthInformation
+    FileShortNameInformation
+    FileIoCompletionNotificationInformation
+    FileIoStatusBlockRangeInformation
+    FileIoPriorityHintInformation
+    FileSfioReserveInformation
+    FileSfioVolumeInformation
+    FileHardLinkInformation
+    FileProcessIdsUsingFileInformation
+    FileNormalizedNameInformation
+    FileNetworkPhysicalNameInformation
+    FileIdGlobalTxDirectoryInformation
+    FileIsRemoteDeviceInformation
+    FileAttributeCacheInformation
+    FileNumaNodeInformation
+    FileStandardLinkInformation
+    FileRemoteProtocolInformation
+
+
+FILE_INFO_BY_HANDLE_CLASS
+=========================
+
+Value::
+
+    FileBasicInfo
+    FileStandardInfo
+    FileNameInfo
+    FileRenameInfo
+    FileDispositionInfo
+    FileAllocationInfo
+    FileEndOfFileInfo
+    FileStreamInfo
+    FileCompressionInfo
+    FileAttributeTagInfo
+    FileIdBothDirectoryInfo
+    FileIdBothDirectoryRestartInfo
+    FileIoPriorityHintInfo
+    FileRemoteProtocolInfo
+    FileFullDirectoryInfo
+    FileFullDirectoryRestartInfo
+    FileStorageInfo
+    FileAlignmentInfo
+    FileIdInfo
+    FileIdExtdDirectoryInfo
+    FileIdExtdDirectoryRestartInfo
+
+
 NtCreateFile_DesiredAccess
 ==========================
 

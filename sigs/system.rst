@@ -19,6 +19,10 @@ Parameters::
     ** HINSTANCE hMod module_address
     ** DWORD dwThreadId thread_identifier
 
+Flags::
+
+    hook_identifier
+
 
 SetWindowsHookExW
 =================
@@ -34,6 +38,10 @@ Parameters::
     ** HOOKPROC lpfn callback_function
     ** HINSTANCE hMod module_address
     ** DWORD dwThreadId thread_identifier
+
+Flags::
+
+    hook_identifier
 
 
 UnhookWindowsHookEx

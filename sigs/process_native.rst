@@ -20,6 +20,10 @@ Parameters::
     *  HANDLE DebugPort
     *  HANDLE ExceptionPort
 
+Flags::
+
+    desired_access
+
 Pre::
 
     wchar_t *filepath = get_unicode_buffer();
@@ -51,6 +55,10 @@ Parameters::
     *  HANDLE DebugPort
     *  HANDLE ExceptionPort
     *  BOOLEAN InJob
+
+Flags::
+
+    desired_access
 
 Pre::
 
@@ -89,6 +97,11 @@ Parameters::
     *  PRTL_USER_PROCESS_PARAMETERS ProcessParameters
     *  PPS_CREATE_INFO CreateInfo
     *  PPS_ATTRIBUTE_LIST AttributeList
+
+Flags::
+
+    desired_access_process
+    desired_access_thread
 
 Pre::
 
@@ -156,6 +169,10 @@ Parameters::
     *  POBJECT_ATTRIBUTES ObjectAttributes
     *  PCLIENT_ID ClientId
 
+Flags::
+
+    desired_access
+
 Ensure::
 
     ClientId
@@ -191,6 +208,10 @@ Parameters::
     *  ULONG AllocationAttributes
     ** HANDLE FileHandle file_handle
 
+Flags::
+
+    desired_access
+
 Pre::
 
     COPY_OBJECT_ATTRIBUTES(section_name, ObjectAttributes);
@@ -224,6 +245,10 @@ Parameters::
     ** PHANDLE SectionHandle section_handle
     ** ACCESS_MASK DesiredAccess desired_access
     *  POBJECT_ATTRIBUTES ObjectAttributes
+
+Flags::
+
+    desired_access
 
 Pre::
 

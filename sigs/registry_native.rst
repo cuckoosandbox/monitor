@@ -12,12 +12,16 @@ NtCreateKey
 Parameters::
 
     ** PHANDLE KeyHandle key_handle
-    ** ACCESS_MASK DesiredAccess access
+    ** ACCESS_MASK DesiredAccess desired_access
     *  POBJECT_ATTRIBUTES ObjectAttributes
     ** ULONG TitleIndex index
     *  PUNICODE_STRING Class
     ** ULONG CreateOptions options
     ** PULONG Disposition disposition
+
+Flags::
+
+    desired_access
 
 Pre::
 
@@ -38,8 +42,12 @@ NtOpenKey
 Parameters::
 
     ** PHANDLE KeyHandle key_handle
-    ** ACCESS_MASK DesiredAccess access
+    ** ACCESS_MASK DesiredAccess desired_access
     *  POBJECT_ATTRIBUTES ObjectAttributes
+
+Flags::
+
+    desired_access
 
 Pre::
 
@@ -61,9 +69,13 @@ Signature::
 Parameters::
 
     ** PHANDLE KeyHandle key_handle
-    ** ACCESS_MASK DesiredAccess access
+    ** ACCESS_MASK DesiredAccess desired_access
     *  POBJECT_ATTRIBUTES ObjectAttributes
     ** ULONG OpenOptions options
+
+Flags::
+
+    desired_access
 
 Pre::
 
@@ -130,10 +142,14 @@ Parameters::
 
     ** HANDLE KeyHandle key_handle
     ** ULONG Index index
-    ** KEY_INFORMATION_CLASS KeyInformationClass class
+    ** KEY_INFORMATION_CLASS KeyInformationClass information_class
     *  PVOID KeyInformation
     *  ULONG Length
     *  PULONG ResultLength
+
+Flags::
+
+    information_class
 
 Pre::
 
@@ -153,10 +169,14 @@ Parameters::
 
     ** HANDLE KeyHandle key_handle
     ** ULONG Index index
-    ** KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass class
+    ** KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass information_class
     *  PVOID KeyValueInformation
     *  ULONG Length
     *  PULONG ResultLength
+
+Flags::
+
+    information_class
 
 Ensure::
 
@@ -216,10 +236,14 @@ Parameters::
 
     ** HANDLE KeyHandle key_handle
     *  PUNICODE_STRING ValueName
-    ** KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass class
+    ** KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass information_class
     *  PVOID KeyValueInformation
     *  ULONG Length
     *  PULONG ResultLength
+
+Flags::
+
+    information_class
 
 Ensure::
 
@@ -390,10 +414,14 @@ NtQueryKey
 Parameters::
 
     ** HANDLE KeyHandle key_handle
-    ** KEY_INFORMATION_CLASS KeyInformationClass class
+    ** KEY_INFORMATION_CLASS KeyInformationClass information_class
     *  PVOID KeyInformation
     *  ULONG Length
     *  PULONG ResultLength
+
+Flags::
+
+    information_class
 
 Pre::
 

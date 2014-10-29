@@ -386,6 +386,10 @@ Parameters::
     *  LPVOID lpFIleInformation
     *  DWORD dwBufferSize
 
+Flags::
+
+    information_class
+
 
 DeviceIoControl
 ===============
@@ -404,6 +408,10 @@ Parameters::
     *  DWORD nOutBufferSize
     *  LPDWORD lpBytesReturned
     *  LPOVERLAPPED lpOverlapped
+
+Flags::
+
+    control_code
 
 Ensure::
 

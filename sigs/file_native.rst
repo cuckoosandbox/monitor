@@ -172,6 +172,10 @@ Parameters::
     *  PVOID OutputBuffer
     *  ULONG OutputBufferLength
 
+Flags::
+
+    control_code
+
 Ensure::
 
     IoStatusBlock
@@ -206,6 +210,10 @@ Parameters::
     *  PUNICODE_STRING FileName
     *  BOOLEAN RestartScan
 
+Flags::
+
+    information_class
+
 Ensure::
 
     IoStatusBlock
@@ -235,6 +243,10 @@ Parameters::
     *  ULONG Length
     ** FILE_INFORMATION_CLASS FileInformationClass information_class
 
+Flags::
+
+    information_class
+
 Ensure::
 
     IoStatusBlock
@@ -258,6 +270,10 @@ Parameters::
     *  PVOID FileInformation
     *  ULONG Length
     ** FILE_INFORMATION_CLASS FileInformationClass information_class
+
+Flags::
+
+    information_class
 
 Pre::
 
@@ -283,6 +299,10 @@ Parameters::
     ** ACCESS_MASK DesiredAccess desired_access
     *  POBJECT_ATTRIBUTES ObjectAttributes
 
+Flags::
+
+    desired_access
+
 Pre::
 
     wchar_t *dirpath = get_unicode_buffer();
@@ -301,6 +321,10 @@ Parameters::
     ** PHANDLE DirectoryHandle directory_handle
     ** ACCESS_MASK DesiredAccess desired_access
     *  POBJECT_ATTRIBUTES ObjectAttributes
+
+Flags::
+
+    desired_access
 
 Pre::
 
