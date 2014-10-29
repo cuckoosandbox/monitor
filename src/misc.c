@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <stdint.h>
+#include <winsock2.h>
 #include <windows.h>
 #include <shlwapi.h>
 #include "bson/bson.h"
@@ -1060,6 +1061,21 @@ wchar_t *flag_to_string(flag_t which, uint32_t flag)
     if(flag != 0) {
         const wchar_t *fmt = *ret != 0 ? L"|0x%08x" : L"0x%08x";
         wsprintfW(ret + lstrlenW(ret), fmt, flag);
+    }
+    return ret;
+}
+
+void *wsabuf_get_buffer(uint32_t buffer_count, WSABUF *buffers,
+    uint32_t length)
+{
+    uint8_t *ret = (uint8_t *) malloc(length);
+    if(ret != NULL) {
+        for (uint32_t idx = 0, offset = 0; idx < buffer_count; idx++) {
+            if(buffers[idx].buf != NULL && buffers[idx].len != 0) {
+                memcpy(&ret[offset], buffers[idx].buf, buffers[idx].len);
+                offset += buffers[idx].len;
+            }
+        }
     }
     return ret;
 }

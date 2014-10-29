@@ -359,6 +359,25 @@ Parameters::
     *  LPWSAOVERLAPPED lpOverlapped
     *  LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
 
+Ensure::
+
+    lpNumberOfBytesRecvd
+
+Middle::
+
+    uint8_t *buf = wsabuf_get_buffer(dwBufferCount, lpBuffers,
+        *lpNumberOfBytesRecvd);
+
+Logging::
+
+    B buffer lpNumberOfBytesRecvd, buf
+
+Post::
+
+    if(buf != NULL) {
+        free(buf);
+    }
+
 
 WSARecvFrom
 ===========
@@ -380,15 +399,31 @@ Parameters::
     *  LPWSAOVERLAPPED lpOverlapped
     *  LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
 
+Ensure::
+
+    lpNumberOfBytesRecvd
+
 Pre::
 
     const char *ip = NULL; int port = 0;
     get_ip_port(lpFrom, &ip, &port);
 
+Middle::
+
+    uint8_t *buf = wsabuf_get_buffer(dwBufferCount, lpBuffers,
+        *lpNumberOfBytesRecvd);
+
 Logging::
 
     s ip_address ip
     i port port
+    B buffer lpNumberOfBytesRecvd, buf
+
+Post::
+
+    if(buf != NULL) {
+        free(buf);
+    }
 
 
 WSASend
@@ -408,6 +443,25 @@ Parameters::
     *  DWORD dwFlags
     *  LPWSAOVERLAPPED lpOverlapped
     *  LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
+
+Ensure::
+
+    lpNumberOfBytesSent
+
+Middle::
+
+    uint8_t *buf = wsabuf_get_buffer(dwBufferCount, lpBuffers,
+        *lpNumberOfBytesSent);
+
+Logging::
+
+    B buffer lpNumberOfBytesSent, buf
+
+Post::
+
+    if(buf != NULL) {
+        free(buf);
+    }
 
 
 WSASendTo
@@ -430,15 +484,31 @@ Parameters::
     *  LPWSAOVERLAPPED lpOverlapped
     *  LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
 
+Ensure::
+
+    lpNumberOfBytesSent
+
 Pre::
 
     const char *ip = NULL; int port = 0;
     get_ip_port(lpTo, &ip, &port);
 
+Middle::
+
+    uint8_t *buf = wsabuf_get_buffer(dwBufferCount, lpBuffers,
+        *lpNumberOfBytesSent);
+
 Logging::
 
     s ip_address ip
     i port port
+    B buffer lpNumberOfBytesSent, buf
+
+Post::
+
+    if(buf != NULL) {
+        free(buf);
+    }
 
 
 WSASocketA
