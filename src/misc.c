@@ -983,7 +983,7 @@ static LONG CALLBACK _exception_handler(
     bson_finish(&s);
     bson_finish(&b);
 
-    log_api(3, 1, 0, "zzz", &e, &b, &s);
+    log_api(SIG___exception__, 1, 0, "zzz", &e, &b, &s);
 
     bson_destroy(&e);
     bson_destroy(&s);

@@ -508,8 +508,9 @@ void log_new_process()
     FILETIME st;
     GetSystemTimeAsFileTime(&st);
 
-    log_api(0, 1, 0, "llllu", st.dwLowDateTime, st.dwHighDateTime,
-        GetCurrentProcessId(), parent_process_id(), module_path);
+    log_api(SIG___process__, 1, 0, "llllu", st.dwLowDateTime,
+        st.dwHighDateTime, GetCurrentProcessId(),
+        parent_process_id(), module_path);
 }
 
 void log_new_thread()
@@ -519,7 +520,7 @@ void log_new_thread()
     void *value = TlsGetValue(g_tls_idx);
     TlsSetValue(g_tls_idx, NULL);
 
-    log_api(1, 1, 0, "l", GetCurrentProcessId());
+    log_api(SIG___thread__, 1, 0, "l", GetCurrentProcessId());
 
     TlsSetValue(g_tls_idx, value);
 }
@@ -527,7 +528,7 @@ void log_new_thread()
 void log_anomaly(const char *subcategory, int success,
     const char *funcname, const char *msg)
 {
-    log_api(2, success, 0, "lsss",
+    log_api(SIG___anomaly__, success, 0, "lsss",
         GetCurrentThreadId(), subcategory, funcname, msg);
 }
 
