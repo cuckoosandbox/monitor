@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% for flag in flags.values(): %}
 static const flag_repr_t _{{ flag.name }}[] = {
     {%- for row in flag.rows: %}
-    {{ "{" }}{{ flag.type }}, {{ row }}, "{{ row }}"},
+    {{ "{" }}{{ row.type_ }}, {{ row.name }}, "{{ row.name }}"},
     {%- endfor %}
     {FLAGTYP_NONE, 0, NULL},
 };

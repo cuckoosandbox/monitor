@@ -356,8 +356,8 @@ class SignatureProcessor(object):
                 flagname = '%s_%s' % (row['apiname'], flag['arg'])
                 if flagname not in self.flags:
                     if flag['argtype'] not in self.flags:
-                        raise Exception('Flag %r of %r is unknown!' % (
-                                        flag['name'], row['apiname']))
+                        raise Exception('Flag %r of %r (%r) is unknown!' % (
+                            flag['name'], row['apiname'], flagname))
 
                     flag['flagname'] = flag['argtype']
                 else:
@@ -474,19 +474,17 @@ class FlagsProcessor(object):
             for flag in self.normalize(dp.read_document(flag_path)):
                 flags[flag['name']] = flag
 
-                if 'enum' in flag and 'value' in flag:
-                    raise Exception('Do not specify both value and enum '
-                                    'for one flag.')
+                flag['rows'] = []
 
                 if 'enum' in flag:
-                    flag['rows'] = flag['enum']
-                    flag['type'] = 'FLAGTYP_ENUM'
-                elif 'value' in flag:
-                    flag['rows'] = flag['value']
-                    flag['type'] = 'FLAGTYP_VALUE'
-                else:
-                    raise Exception('Either a value or an enum entry should '
-                                    'be present for a flag.')
+                    for f in flag['enum']:
+                        row = dict(name=f, type_='FLAGTYP_ENUM')
+                        flag['rows'].append(row)
+
+                if 'value' in flag:
+                    for f in flag['value']:
+                        row = dict(name=f, type_='FLAGTYP_VALUE')
+                        flag['rows'].append(row)
 
         # Handle inheritance.
         for flag in flags.values():
@@ -494,7 +492,7 @@ class FlagsProcessor(object):
             for inherit in flag.get('inherits', []):
                 rows += flags[inherit]['rows']
 
-            flag['rows'] = rows + flag['rows']
+            flag['rows'] = rows + flag.get('rows', [])
 
         dp.render('flags-source', self.flags_c, flags=flags)
         dp.render('flags-header', self.flags_h, flags=flags)
