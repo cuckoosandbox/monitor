@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MONITOR_MISC_H
 #define MONITOR_MISC_H
 
-#include <winsock2.h>
 #include <windows.h>
 #include "flags.h"
 #include "ntapi.h"
@@ -89,8 +88,6 @@ int page_is_readable(const uint8_t *addr);
 void clsid_to_string(REFCLSID rclsid, wchar_t *buf);
 
 wchar_t *flag_to_string(flag_t which, uint32_t flag);
-void *wsabuf_get_buffer(uint32_t buffer_count, WSABUF *buffers,
-    uint32_t length);
 
 #define COPY_UNICODE_STRING(local_name, param_name) \
     UNICODE_STRING local_name; \

@@ -16,24 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef MONITOR_MISC2_H
+#define MONITOR_MISC2_H
+
 #include <stdint.h>
 #include <winsock2.h>
-#include <windows.h>
-#include "flags.h"
-#include "ntapi.h"
 
-{% for flag in flags.values(): %}
-static const flag_repr_t _{{ flag.name }}[] = {
-    {%- for row in flag.rows: %}
-    {{ "{" }}{{ flag.type }}, {{ row }}, "{{ row }}"},
-    {%- endfor %}
-    {FLAGTYP_NONE, 0, NULL},
-};
-{% endfor %}
+void *wsabuf_get_buffer(uint32_t buffer_count, WSABUF *buffers,
+    uint32_t length);
 
-const flag_repr_t *g_flags[FLAGCNT] = {
-    FLAG_NONE,
-{%- for name in flags: %}
-    _{{ name }},
-{%- endfor %}
-};
+#endif
