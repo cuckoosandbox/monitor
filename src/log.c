@@ -205,9 +205,16 @@ void log_explain(signature_index_t index)
     for (uint32_t idx = 0; g_api_flags[index][idx] != FLAG_NONE; idx++) {
         const flag_repr_t *f = g_flags[g_api_flags[index][idx]];
         bson_append_start_array(&b, g_api_flagnames[index][idx]);
-        bson_append_string(&b, "0", types[f->type]);
-        bson_append_int(&b, "1", f->value);
-        bson_append_string(&b, "2", f->repr);
+
+        for (uint32_t idx2 = 0; f->type != FLAGTYP_NONE; idx2++, f++) {
+            sprintf(argidx, "%d", idx2);
+            bson_append_start_array(&b, argidx);
+            bson_append_string(&b, "0", types[f->type]);
+            bson_append_int(&b, "1", f->value);
+            bson_append_string(&b, "2", f->repr);
+            bson_append_finish_array(&b);
+        }
+
         bson_append_finish_array(&b);
     }
 
