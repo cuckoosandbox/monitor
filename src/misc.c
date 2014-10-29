@@ -270,6 +270,7 @@ int copy_unicode_string(const UNICODE_STRING *in,
         out->MaximumLength = length;
 
         memcpy(out->Buffer, in->Buffer, in->Length);
+        out->Buffer[in->Length / sizeof(wchar_t)] = 0;
         return 0;
     }
     return -1;
