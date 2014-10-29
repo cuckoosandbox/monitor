@@ -261,9 +261,19 @@ Parameters::
     *  PULONG BufferLength
     *  PULONG RequiredBufferLength
 
+Ensure::
+
+    BufferLength
+
+Pre::
+
+    wchar_t *regkey = get_unicode_buffer();
+    reg_get_key(KeyHandle, regkey);
+
 Logging::
 
-    B buffer RequiredBufferLength, ValueBuffer
+    B buffer BufferLength, ValueBuffer
+    u regkey regkey
 
 
 NtDeleteKey
