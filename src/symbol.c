@@ -28,21 +28,17 @@ static uint32_t *g_monitor_names_addresses;
 static uint16_t *g_monitor_ordinals;
 static uint32_t g_monitor_number_of_names;
 
+// Just a little wrapper that does some extra checks.
 static const uint8_t *_module_from_address(const uint8_t *addr)
 {
-    MEMORY_BASIC_INFORMATION mbi;
-
-    if(VirtualQuery(addr, &mbi, sizeof(mbi)) != sizeof(mbi) ||
-            page_is_readable(mbi.AllocationBase) == 0) {
-        return NULL;
-    }
+    addr = module_from_address(addr);
 
     // We're looking for either an MZ header or the image base address
     // of our monitor.
-    if(memcmp(mbi.AllocationBase, "MZ", 2) == 0 ||
-            mbi.AllocationBase == g_monitor_base_address) {
-        return mbi.AllocationBase;
+    if(memcmp(addr, "MZ", 2) == 0 || addr == g_monitor_base_address) {
+        return addr;
     }
+
     return NULL;
 }
 

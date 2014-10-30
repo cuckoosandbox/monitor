@@ -237,17 +237,6 @@ void log_api_pre(uint32_t length, const void *buffer)
 
 #if DEBUG
 
-#if !__x86_64__
-
-static inline uintptr_t get_ebp()
-{
-    uintptr_t ret;
-    __asm__ volatile("movl %%ebp, %0" : "=r" (ret));
-    return ret;
-}
-
-#endif
-
 static void _log_stacktrace(bson *b)
 {
     uintptr_t addrs[32]; uint32_t count = 0; char number[20], sym[512];

@@ -89,6 +89,9 @@ void clsid_to_string(REFCLSID rclsid, wchar_t *buf);
 
 wchar_t *flag_to_string(flag_t which, uint32_t flag);
 
+const uint8_t *module_from_address(const uint8_t *addr);
+uint32_t module_image_size(const uint8_t *addr);
+
 #define COPY_UNICODE_STRING(local_name, param_name) \
     UNICODE_STRING local_name; \
     wchar_t *local_name##_buffer = get_unicode_buffer(); \
@@ -108,5 +111,16 @@ wchar_t *flag_to_string(flag_t which, uint32_t flag);
     (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | \
      PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | \
      PAGE_EXECUTE_WRITECOPY)
+
+#if !__x86_64__
+
+static inline uintptr_t get_ebp()
+{
+    uintptr_t ret;
+    __asm__ volatile("movl %%ebp, %0" : "=r" (ret));
+    return ret;
+}
+
+#endif
 
 #endif
