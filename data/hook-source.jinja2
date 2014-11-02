@@ -106,7 +106,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         {{ param }} = &_{{ param }};
         memset(&_{{ param }}, 0, sizeof({{ hook.ensure[param] }}));
     }
-    {%- endfor %}
+    {% endfor %}
 
     {%- if hook.pre: %}
     {%- for line in hook.pre: %}
@@ -116,34 +116,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     {%- if hook.prelog: %}
     log_api_pre({{ hook.prelog|join(',', attribute='argvalue') }});
-    {% endif %}
+    {% endif -%}
 
     {%- if hook.signature.prelog == 'instant' %}
     {{ log_api(hook, ret='0') }}
     {% endif %}
 
-    {{ call_old(hook) }}
+    {{- call_old(hook) }}
 
     {%- if hook.middle: %}
-    {%- for line in hook.middle: %}
+    {% for line in hook.middle: %}
     {{ line }}
     {%- endfor %}
-    {% endif %}
+    {%- endif %}
 
-    {% if hook.signature.special: %}
+    {%- if hook.signature.special: %}
     if(hook_info()->hook_count == 1) {
         {{ log_api(hook)|indent }}
     }
-    {% else %}
+    {%- else %}
+
     {{ log_api(hook) }}
-    {% endif %}
+    {%- endif %}
 
     {%- if hook.post: %}
     {% for line in hook.post: %}
     {{ line }}
     {%- endfor %}
-    {% endif %}
-    {% if hook.signature.return_value != 'void' %}
+    {%- endif %}
+    {%- if hook.signature.return_value != 'void' %}
     return ret;
     {%- endif %}
 }
