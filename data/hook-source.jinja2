@@ -63,6 +63,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     );
 {%- endmacro %}
 
+{% macro call_old(hook) -%}
+    {%- if hook.signature.return_value != 'void' %}
+    {{ hook.signature.return_value }} ret = Old_{{ hook.apiname }}(
+    {%- else %}
+    Old_{{ hook.apiname }}(
+    {%- endif %}
+    {%- for param in hook.parameters: %}
+        {% if param.argname in hook.replace -%}
+            {{ hook.replace[param.argname] }}
+        {%- else -%}
+            {{ param.argname }}
+        {%- endif %}
+        {%- if not loop.last %},{% endif -%}
+    {%- endfor %}
+    );
+{%- endmacro %}
+
 {%- for hook in sigs if hook.is_hook: %}
 
 
@@ -105,20 +122,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {{ log_api(hook, ret='0') }}
     {% endif %}
 
-    {%- if hook.signature.return_value != 'void' %}
-    {{ hook.signature.return_value }} ret = Old_{{ hook.apiname }}(
-    {%- else %}
-    Old_{{ hook.apiname }}(
-    {%- endif %}
-    {%- for param in hook.parameters: %}
-        {% if param.argname in hook.replace -%}
-            {{ hook.replace[param.argname] }}
-        {%- else -%}
-            {{ param.argname }}
-        {%- endif %}
-        {%- if not loop.last %},{% endif -%}
-    {%- endfor %}
-    );
+    {{ call_old(hook) }}
 
     {%- if hook.middle: %}
     {%- for line in hook.middle: %}
@@ -141,8 +145,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {% endif %}
     {% if hook.signature.return_value != 'void' %}
     return ret;
-    {%- else %}
-    return;
     {%- endif %}
 }
 
@@ -157,13 +159,15 @@ const char *g_explain_apinames[] = {
 
 const char *g_explain_categories[] = {
 {%- for hook in sigs: %}
-    /* {{ '%-32s'|format(hook.apiname) }} */ "{{ hook.signature.category }}",
+    // {{ hook.apiname }}
+    "{{ hook.signature.category }}",
 {%- endfor %}
 };
 
 const char *g_explain_paramtypes[] = {
 {%- for hook in sigs: %}
-    /* {{ '%-32s'|format(hook.apiname) }} */ "
+    // {{ hook.apiname }}
+    "
     {%- for param in hook.prelog: -%}
         {{ param.argtype }}
     {%- endfor -%}
@@ -179,17 +183,17 @@ const char *g_explain_paramtypes[] = {
 
 const char *g_explain_paramnames[][16] = {
 {%- for hook in sigs: %}
-    /* {{ hook.apiname }} */
+    // {{ hook.apiname }}
     {
-    {%- for param in hook.prelog: -%}
-        {% if True %}"{{ param.argname }}", {% endif %}
-    {%- endfor -%}
-    {%- for param in hook.parameters: -%}
-        {% if param.log %}"{{ param.alias }}", {% endif %}
-    {%- endfor -%}
-    {%- for param in hook.logging: -%}
-        {% if True %}"{{ param.argname }}", {% endif %}
-    {%- endfor -%}
+    {%- for param in hook.prelog: %}
+        "{{ param.argname }}",
+    {%- endfor %}
+    {%- for param in hook.parameters|selectattr('log'): %}
+        "{{ param.alias }}",
+    {%- endfor %}
+    {%- for param in hook.logging: %}
+        "{{ param.argname }}",
+    {%- endfor %}
     },
 {%- endfor %}
 };
