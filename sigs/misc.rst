@@ -215,3 +215,53 @@ Parameters::
     ** PULARGE_INTEGER lpFreeBytesAvailable free_bytes_available
     ** PULARGE_INTEGER lpTotalNumberOfBytes total_number_of_bytes
     ** PULARGE_INTEGER lpTotalNumberOfFreeBytes total_number_of_free_bytes
+
+
+WriteConsoleA
+=============
+
+Signature::
+
+    * Library: kernel32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hConsoleOutput console_handle
+    *  const VOID *lpBuffer
+    *  DWORD nNumberOfCharsToWrite
+    *  LPDWORD lpNumberOfCharsWritten
+    *  LPVOID lpReseverd
+
+Ensure::
+
+    lpNumberOfCharsWritten
+
+Logging::
+
+    S buffer *lpNumberOfCharsWritten, lpBuffer
+
+
+WriteConsoleW
+=============
+
+Signature::
+
+    * Library: kernel32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hConsoleOutput console_handle
+    *  const VOID *lpBuffer
+    *  DWORD nNumberOfCharsToWrite
+    *  LPDWORD lpNumberOfCharsWritten
+    *  LPVOID lpReseverd
+
+Ensure::
+
+    lpNumberOfCharsWritten
+
+Logging::
+
+    U buffer *lpNumberOfCharsWritten, lpBuffer
