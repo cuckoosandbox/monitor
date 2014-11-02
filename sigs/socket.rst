@@ -161,7 +161,7 @@ Parameters::
     *  struct sockaddr *from
     *  int *fromlen
 
-Pre::
+Middle::
 
     const char *ip = NULL; int port = 0;
     get_ip_port(from, &ip, &port);
@@ -185,7 +185,7 @@ Parameters::
     *  struct sockaddr *addr
     *  int *addrlen
 
-Pre::
+Middle::
 
     const char *ip = NULL; int port = 0;
     get_ip_port(addr, &ip, &port);
@@ -330,7 +330,7 @@ Parameters::
     *  LPCONDITIONPROC lpfnCondition
     *  DWORD_PTR dwCallbackData
 
-Pre::
+Middle::
 
     const char *ip = NULL; int port = 0;
     get_ip_port(addr, &ip, &port);
@@ -403,12 +403,10 @@ Ensure::
 
     lpNumberOfBytesRecvd
 
-Pre::
+Middle::
 
     const char *ip = NULL; int port = 0;
     get_ip_port(lpFrom, &ip, &port);
-
-Middle::
 
     uint8_t *buf = wsabuf_get_buffer(dwBufferCount, lpBuffers,
         *lpNumberOfBytesRecvd);
