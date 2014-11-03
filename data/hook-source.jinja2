@@ -41,10 +41,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         0,
         {%- endif %}
         "
-    {%- for param in hook.parameters: -%}
-        {%- if param.log == True: -%}
-            {{ types[param.argtype] }}
-        {%- endif -%}
+    {%- for param in hook.parameters|selectattr('log'): -%}
+        {{ types[param.argtype] }}
     {%- endfor -%}
     {%- for log in hook.logging: -%}
         {{ log.argtype }}
