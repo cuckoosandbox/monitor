@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <windows.h>
 #include "config.h"
+#include "diffing.h"
 #include "dropped.h"
 #include "hooking.h"
 #include "ignore.h"
@@ -43,6 +44,7 @@ void monitor_init(HMODULE module_handle)
     misc_init(cfg.shutdown_mutex);
     dropped_init();
     pipe_init(cfg.pipe_name);
+    diffing_init(cfg.hashes_path);
 
     log_init(cfg.host_ip, cfg.host_port);
     setup_exception_handler();

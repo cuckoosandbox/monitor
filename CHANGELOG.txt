@@ -1,3 +1,5 @@
+- Feature: Calculate a hash for each call, allow hashes to be ignored.
+- Tweak: Move flag representation logic to the Cuckoo side.
 - Tweak: "Instant" logging for functions that terminate.
 - Tweak: Improved logging of values for registry APIs.
 - Bugfix: Incorrect prelog output when the first API on a new thread uses it.

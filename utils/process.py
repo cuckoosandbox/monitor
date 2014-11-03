@@ -174,6 +174,16 @@ class SignatureProcessor(object):
                 ret.append(dict(name=line[0], arg=line[1], argtype=line[2]))
         return ret
 
+    def _parse_interesting(self, text):
+        ret = []
+        for line in text.split('\n'):
+            if line.startswith('*'):
+                line = line[1:].strip()
+
+            argtype, argvalue = line.strip().split(' ', 1)
+            ret.append(dict(argtype=argtype, argvalue=argvalue))
+        return ret
+
     def _parse_ensure(self, text):
         ret = []
         for line in text.split('\n'):

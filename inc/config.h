@@ -39,6 +39,9 @@ typedef struct _config_t {
     // Server ip and port.
     uint32_t host_ip;
     uint16_t host_port;
+
+    // Path to non-interesting hashes.
+    char hashes_path[MAX_PATH];
 } config_t;
 
 void config_read(config_t *cfg);

@@ -983,7 +983,7 @@ static LONG CALLBACK _exception_handler(
     bson_finish(&s);
     bson_finish(&b);
 
-    log_api(SIG___exception__, 1, 0, "zzz", &e, &b, &s);
+    log_api(SIG___exception__, 1, 0, 0, "zzz", &e, &b, &s);
 
     bson_destroy(&e);
     bson_destroy(&s);
@@ -1079,6 +1079,38 @@ void *wsabuf_get_buffer(uint32_t buffer_count, WSABUF *buffers,
         }
     }
     return ret;
+}
+
+uint64_t hash_buffer(const void *buf, uint32_t length)
+{
+    const uint8_t *p = (const uint8_t *) buf;
+    uint64_t ret = *p << 7;
+    for (uint32_t idx = 0; idx < length; idx++) {
+        ret = (ret * 1000003) ^ *p++;
+    }
+    return ret ^ length;
+}
+
+uint64_t hash_string(const char *buf, int32_t length)
+{
+    if(length < 0) length = strlen(buf);
+
+    uint64_t ret = *buf << 7;
+    for (int32_t idx = 0; idx < length; idx++) {
+        ret = (ret * 1000003) ^ (uint8_t) *buf++;
+    }
+    return ret ^ length;
+}
+
+uint64_t hash_stringW(const wchar_t *buf, int32_t length)
+{
+    if(length < 0) length = lstrlenW(buf);
+
+    uint64_t ret = *buf << 7;
+    for (int32_t idx = 0; idx < length; idx++) {
+        ret = (ret * 1000003) ^ (uint16_t) *buf++;
+    }
+    return ret ^ length;
 }
 
 const uint8_t *module_from_address(const uint8_t *addr)

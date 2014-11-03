@@ -89,6 +89,10 @@ void clsid_to_string(REFCLSID rclsid, wchar_t *buf);
 
 wchar_t *flag_to_string(flag_t which, uint32_t flag);
 
+uint64_t hash_buffer(const void *buf, uint32_t length);
+uint64_t hash_string(const char *buf, int32_t length);
+uint64_t hash_stringW(const wchar_t *buf, int32_t length);
+
 const uint8_t *module_from_address(const uint8_t *addr);
 uint32_t module_image_size(const uint8_t *addr);
 

@@ -16,29 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MONITOR_LOG_H
-#define MONITOR_LOG_H
+#ifndef MONITOR_DIFFING_H
+#define MONITOR_DIFFING_H
 
 #include <stdint.h>
-#include "hook-info.h"
 
-void log_init(uint32_t ip, uint16_t port);
-void log_free();
-
-void log_api_pre(uint32_t length, const void *buffer);
-
-void log_api(signature_index_t index, int is_success, uintptr_t return_value,
-    uint64_t hash, const char *fmt, ...);
-
-void log_anomaly(const char *subcategory, int success,
-    const char *funcname, const char *msg);
-
-void log_new_process();
-void log_new_thread();
-
-extern const char *g_explain_apinames[];
-extern const char *g_explain_categories[];
-extern const char *g_explain_paramtypes[];
-extern const char *g_explain_paramnames[][16];
+void diffing_init(const char *path);
+uint64_t call_hash(const char *fmt, ...);
+int is_interesting_hash(uint64_t hash);
 
 #endif

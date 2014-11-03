@@ -68,6 +68,9 @@ void config_read(config_t *cfg)
             else if(strcmp(key, "force-sleepskip") == 0) {
                 cfg->force_sleep_skip = value[0] == '1';
             }
+            else if(strcmp(key, "hashes-path") == 0) {
+                strcpy(cfg->hashes_path, value);
+            }
         }
         fclose(fp);
         DeleteFile(config_fname);

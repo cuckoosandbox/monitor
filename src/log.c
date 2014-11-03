@@ -270,7 +270,7 @@ static void _log_stacktrace(bson *b)
 #endif
 
 void log_api(signature_index_t index, int is_success, uintptr_t return_value,
-    const char *fmt, ...)
+    uint64_t hash, const char *fmt, ...)
 {
     va_list args; char key = 0; char idx[4];
     va_start(args, fmt);
@@ -296,6 +296,7 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
     bson_append_int(&b, "I", index);
     bson_append_int(&b, "T", GetCurrentThreadId());
     bson_append_int(&b, "t", GetTickCount() - g_starttick);
+    bson_append_long(&b, "h", hash);
 
 #if DEBUG
     _log_stacktrace(&b);
@@ -497,7 +498,7 @@ void log_new_process()
     FILETIME st;
     GetSystemTimeAsFileTime(&st);
 
-    log_api(SIG___process__, 1, 0, "llllu", st.dwLowDateTime,
+    log_api(SIG___process__, 1, 0, 0, "llllu", st.dwLowDateTime,
         st.dwHighDateTime, GetCurrentProcessId(),
         parent_process_id(), module_path);
 }
@@ -509,7 +510,7 @@ void log_new_thread()
     void *value = TlsGetValue(g_tls_idx);
     TlsSetValue(g_tls_idx, NULL);
 
-    log_api(SIG___thread__, 1, 0, "l", GetCurrentProcessId());
+    log_api(SIG___thread__, 1, 0, 0, "l", GetCurrentProcessId());
 
     TlsSetValue(g_tls_idx, value);
 }
@@ -517,7 +518,7 @@ void log_new_thread()
 void log_anomaly(const char *subcategory, int success,
     const char *funcname, const char *msg)
 {
-    log_api(SIG___anomaly__, success, 0, "lsss",
+    log_api(SIG___anomaly__, success, 0, 0, "lsss",
         GetCurrentThreadId(), subcategory, funcname, msg);
 }
 
@@ -550,7 +551,7 @@ void log_init(uint32_t ip, uint16_t port)
     if(connect(g_sock, (struct sockaddr *) &addr,
             sizeof(addr)) == SOCKET_ERROR) {
         pipe("CRITICAL:Error connecting to the host.");
-        g_sock = -1;
+        g_sock = INVALID_SOCKET;
         return;
     }
 

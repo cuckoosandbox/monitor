@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdint.h>
 #include "hooks.h"
+#include "diffing.h"
 #include "dropped.h"
 #include "flags.h"
 #include "hooking.h"
@@ -37,8 +38,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         {{ ret or hook.signature.is_success }},
         {%- if hook.signature.return_value != 'void' %}
         {% if ret %}{{ ret }}{% else %}(uintptr_t) ret{% endif %},
+        hash,
         {%- else %}
         0,
+        hash,
         {%- endif %}
         "
     {%- for param in hook.parameters|selectattr('log'): -%}
@@ -110,7 +113,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- for line in hook.pre: %}
     {{ line }}
     {%- endfor %}
-    {% endif %}
+    {%- endif %}
+
+    uint64_t hash = call_hash("{{ hook.interesting|join(attribute='argtype') }}"
+            {%- if hook.interesting %}, {% endif %}
+            {{- hook.interesting|join(', ', attribute='argname') }});
+    if(is_interesting_hash(hash) == 0) {
+        {{- call_old(hook)|indent }}
+        {%- if hook.signature.return_value != 'void' %}
+        return ret;
+        {%- else %}
+        return;
+        {%- endif %}
+    }
 
     {%- if hook.prelog: %}
     log_api_pre({{ hook.prelog|join(',', attribute='argvalue') }});
