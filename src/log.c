@@ -248,7 +248,7 @@ static void _log_stacktrace(bson *b)
 #endif
 
     for (uint32_t idx = 3; idx < count; idx++) {
-        sprintf(number, "%d", idx);
+        sprintf(number, "%d", idx-3);
 
 #if __x86_64__
         sym[0] = 0;
@@ -260,7 +260,6 @@ static void _log_stacktrace(bson *b)
         }
 
         sprintf(sym + strlen(sym), "0x%p", (const uint8_t *) addrs[idx]);
-
         bson_append_string(b, number, sym);
     }
 

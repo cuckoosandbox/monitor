@@ -934,7 +934,7 @@ static LONG CALLBACK _exception_handler(
         return_addresses, sizeof(return_addresses) / sizeof(uint32_t));
 #endif
 
-    char sym[512], argidx[12];
+    char sym[512], number[20];
 
     const uint8_t *exception_address = (const uint8_t *)
         exception_pointers->ExceptionRecord->ExceptionAddress;
@@ -963,20 +963,20 @@ static LONG CALLBACK _exception_handler(
     for (uint32_t idx = 0; idx < count; idx++) {
         if(return_addresses[idx] == 0) break;
 
-        sprintf(argidx, "%d", idx);
-        bson_append_start_array(&s, argidx);
-
-        sprintf(argidx, "0x%p", (void *) return_addresses[idx]);
-        bson_append_string(&s, "0", argidx);
+        sprintf(number, "%d", idx);
 
 #if __x86_64__
         sym[0] = 0;
 #else
-        symbol((const uint8_t *) return_addresses[idx], sym, sizeof(sym));
+        symbol((const uint8_t *) return_addresses[idx], sym, sizeof(sym)-32);
 #endif
 
-        bson_append_string(&s, "1", sym);
-        bson_append_finish_array(&s);
+        if(sym[0] != 0) {
+            strcat(sym, " @ ");
+        }
+
+        sprintf(sym + strlen(sym), "0x%p", (void *) return_addresses[idx]);
+        bson_append_string(&s, number, sym);
     }
 
     bson_finish(&e);
