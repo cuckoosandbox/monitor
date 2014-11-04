@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // O  -> (OBJECT_ATTRIBUTES *) -> wrapper around unicode string
 // d  -> (int) -> integer
 // x  -> (int) -> hexadecimal integer
+// x  -> (uint64_t) -> 64-bit hexadecimal integer
 //
 
 void pipe_init(const char *pipe_name);

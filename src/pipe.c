@@ -112,6 +112,12 @@ static int _pipe_sprintf(char *out, const char *fmt, va_list args)
             sprintf(s, "%x", va_arg(args, int));
             ret += _pipe_ascii(&out, s, strlen(s));
         }
+        else if(*fmt == 'X') {
+            char s[32];
+            long unsigned int value = va_arg(args, uint64_t);
+            sprintf(s, "%lx", value);
+            ret += _pipe_ascii(&out, s, strlen(s));
+        }
         fmt++;
     }
     return ret;
