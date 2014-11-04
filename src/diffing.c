@@ -103,7 +103,7 @@ static uint64_t _parameter_hash(const char *fmt, va_list args)
     uint64_t hashes[64];
 
     while (*fmt != 0) {
-        switch (*fmt) {
+        switch (*fmt++) {
         case 's':
             hashes[hashcnt++] = hash_string(va_arg(args, const char *), -1);
             break;
@@ -206,7 +206,10 @@ uint64_t call_hash(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
 
-    return _stacktrace_hash() ^ _parameter_hash(fmt, args);
+    uint64_t ret = _stacktrace_hash() ^ _parameter_hash(fmt, args);
+
+    va_end(args);
+    return ret;
 }
 
 int is_interesting_hash(uint64_t hash)
