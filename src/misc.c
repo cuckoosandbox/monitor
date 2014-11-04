@@ -1112,31 +1112,3 @@ uint64_t hash_stringW(const wchar_t *buf, int32_t length)
     }
     return ret ^ length;
 }
-
-const uint8_t *module_from_address(const uint8_t *addr)
-{
-    MEMORY_BASIC_INFORMATION mbi;
-
-    if(VirtualQuery(addr, &mbi, sizeof(mbi)) != sizeof(mbi) ||
-            page_is_readable(mbi.AllocationBase) == 0) {
-        return NULL;
-    }
-
-    return mbi.AllocationBase;
-}
-
-uint32_t module_image_size(const uint8_t *addr)
-{
-    IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) addr;
-    if(image_dos_header->e_magic != IMAGE_DOS_SIGNATURE) {
-        return 0;
-    }
-
-    IMAGE_NT_HEADERS *image_nt_headers =
-        (IMAGE_NT_HEADERS *)(addr + image_dos_header->e_lfanew);
-    if(image_nt_headers->Signature != IMAGE_NT_SIGNATURE) {
-        return 0;
-    }
-
-    return image_nt_headers->OptionalHeader.SizeOfImage;
-}

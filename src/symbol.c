@@ -27,11 +27,18 @@ static uint32_t *g_monitor_function_addresses;
 static uint32_t *g_monitor_names_addresses;
 static uint16_t *g_monitor_ordinals;
 static uint32_t g_monitor_number_of_names;
+static uint32_t g_monitor_image_size;
 
-// Just a little wrapper that does some extra checks.
-static const uint8_t *_module_from_address(const uint8_t *addr)
+const uint8_t *module_from_address(const uint8_t *addr)
 {
-    addr = module_from_address(addr);
+    MEMORY_BASIC_INFORMATION mbi;
+
+    if(VirtualQuery(addr, &mbi, sizeof(mbi)) != sizeof(mbi) ||
+            page_is_readable(mbi.AllocationBase) == 0) {
+        return NULL;
+    }
+
+    addr = mbi.AllocationBase;
 
     // We're looking for either an MZ header or the image base address
     // of our monitor.
@@ -40,6 +47,26 @@ static const uint8_t *_module_from_address(const uint8_t *addr)
     }
 
     return NULL;
+}
+
+uint32_t module_image_size(const uint8_t *addr)
+{
+    if(addr == g_monitor_base_address) {
+        return g_monitor_image_size;
+    }
+
+    IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) addr;
+    if(image_dos_header->e_magic != IMAGE_DOS_SIGNATURE) {
+        return 0;
+    }
+
+    IMAGE_NT_HEADERS *image_nt_headers =
+        (IMAGE_NT_HEADERS *)(addr + image_dos_header->e_lfanew);
+    if(image_nt_headers->Signature != IMAGE_NT_SIGNATURE) {
+        return 0;
+    }
+
+    return image_nt_headers->OptionalHeader.SizeOfImage;
 }
 
 static int _eat_pointers_for_module(const uint8_t *mod,
@@ -91,6 +118,12 @@ void symbol_init(HMODULE module_handle)
         &g_monitor_function_addresses, &g_monitor_names_addresses,
         &g_monitor_ordinals, &g_monitor_number_of_names);
 
+    g_monitor_image_size = module_image_size((const uint8_t *) module_handle);
+
+    // It's important to resolve the base address at the end of this function
+    // because otherwise the earlier function calls will return NULL pointers
+    // as the base address has already been initialized, but the fetched
+    // values have not.
     g_monitor_base_address = (const uint8_t *) module_handle;
 }
 
@@ -98,7 +131,7 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
 {
     int len; *sym = 0;
 
-    const uint8_t *mod = _module_from_address(addr);
+    const uint8_t *mod = module_from_address(addr);
     if(mod == NULL) {
         pipe("DEBUG:Unable to find module for address 0x%x.", addr);
         return -1;
