@@ -173,25 +173,43 @@ wchar_t *get_unicode_buffer()
 
 uintptr_t pid_from_process_handle(HANDLE process_handle)
 {
-    PROCESS_BASIC_INFORMATION pbi; ULONG size;
+    PROCESS_BASIC_INFORMATION pbi; ULONG size; HANDLE query_handle;
 
-    if(NT_SUCCESS(pNtQueryInformationProcess(process_handle,
+    if(DuplicateHandle(GetCurrentProcess(), process_handle,
+            GetCurrentProcess(), &query_handle, PROCESS_QUERY_INFORMATION,
+            FALSE, 0) == FALSE) {
+        return 0;
+    }
+
+    if(NT_SUCCESS(pNtQueryInformationProcess(query_handle,
             ProcessBasicInformation, &pbi, sizeof(pbi), &size)) != FALSE &&
             size == sizeof(pbi)) {
+        CloseHandle(query_handle);
         return pbi.UniqueProcessId;
     }
+
+    CloseHandle(query_handle);
     return 0;
 }
 
 uintptr_t pid_from_thread_handle(HANDLE thread_handle)
 {
-    THREAD_BASIC_INFORMATION tbi; ULONG size;
+    THREAD_BASIC_INFORMATION tbi; ULONG size; HANDLE query_handle;
 
-    if(NT_SUCCESS(pNtQueryInformationThread(thread_handle,
+    if(DuplicateHandle(GetCurrentProcess(), thread_handle,
+            GetCurrentProcess(), &query_handle, THREAD_QUERY_INFORMATION,
+            FALSE, 0) == FALSE) {
+        return 0;
+    }
+
+    if(NT_SUCCESS(pNtQueryInformationThread(query_handle,
             ThreadBasicInformation, &tbi, sizeof(tbi), &size)) != FALSE &&
             size == sizeof(tbi)) {
+        CloseHandle(query_handle);
         return (uintptr_t) tbi.ClientId.UniqueProcess;
     }
+
+    CloseHandle(query_handle);
     return 0;
 }
 
