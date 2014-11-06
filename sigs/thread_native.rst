@@ -207,6 +207,10 @@ Pre::
 
     pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
 
+Logging::
+
+    i process_identifier pid_from_thread_handle(ThreadHandle)
+
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
