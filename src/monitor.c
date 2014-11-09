@@ -55,7 +55,8 @@ void monitor_init(HMODULE module_handle)
 
     hide_module_from_peb(module_handle);
 
-    // First initialize the EAT pointers before destroying the PE header.
+    // First fetch the SizeOfImage and EAT pointers before
+    // destroying the PE header.
     symbol_init(module_handle);
     destroy_pe_header(module_handle);
 
