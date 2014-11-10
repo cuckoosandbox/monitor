@@ -195,7 +195,8 @@ void diffing_init(const char *path)
         uint32_t filesize = ftell(fp);
         fseek(fp, 0, SEEK_SET);
 
-        g_list = (uint64_t *) malloc(filesize);
+        g_list = (uint64_t *) VirtualAlloc(NULL, filesize,
+            MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
         if(g_list != NULL) {
             fread(g_list, filesize, 1, fp);
 
