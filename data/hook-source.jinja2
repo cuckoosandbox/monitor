@@ -116,9 +116,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endif %}
 
     {%- if hook.interesting or hook.signature.interesting %}
-    uint64_t hash = call_hash("{{ hook.interesting|join(attribute='argtype') }}"
-            {%- if hook.interesting %}, {% endif %}
-            {{- hook.interesting|join(', ', attribute='argvalue') }});
+    uint64_t hash = call_hash(
+        "{{ hook.interesting|join(attribute='argtype') }}"
+        {%- if hook.interesting %}, {% endif %}
+        {{ hook.interesting|join(',\n        ', attribute='argvalue') }}
+    );
     if(is_interesting_hash(hash) == 0) {
         {{- call_old(hook)|indent }}
         {%- if hook.signature.return_value != 'void' %}
