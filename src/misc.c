@@ -852,11 +852,8 @@ void library_from_unicode_string(const UNICODE_STRING *us,
         }
 
         // Strip off any remaining ".dll".
-        for (char *ptr = library; *ptr != 0; ptr++) {
-            if(stricmp(ptr, ".dll") == 0) {
-                *ptr = 0;
-                break;
-            }
+        if(stricmp(&library[length - 4], ".dll") == 0) {
+            library[length - 4] = 0;
         }
     }
 }
