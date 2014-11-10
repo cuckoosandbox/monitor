@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <windows.h>
 #include "misc.h"
+#include "pipe.h"
 
 typedef struct _module_t {
     uintptr_t base;
@@ -78,6 +79,12 @@ static uint64_t _stacktrace_hash()
             // If there's no module associated with this address then we
             // automatically tag this address as interesting.
             if(module_address == NULL) {
+                return 0;
+            }
+
+            if(g_module_count == MAX_MODULE_COUNT) {
+                pipe("CRITICAL:Exceeding the maximum amount of "
+                    "supported modules!");
                 return 0;
             }
 
