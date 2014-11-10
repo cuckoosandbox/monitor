@@ -18,6 +18,12 @@ Parameters::
     ** LPCTSTR lpDatabaseName database_name
     ** DWORD dwDesiredAccess desired_access
 
+Interesting::
+
+    s machine_name
+    s database_name
+    i desired_access
+
 
 OpenSCManagerW
 ==============
@@ -31,6 +37,12 @@ Parameters::
     ** LPWSTR lpMachineName machine_name
     ** LPWSTR lpDatabaseName database_name
     ** DWORD dwDesiredAccess desired_access
+
+Interesting::
+
+    u machine_name
+    u database_name
+    i desired_access
 
 
 CreateServiceA
@@ -94,6 +106,11 @@ Parameters::
     ** LPCTSTR lpServiceName service_name
     ** DWORD dwDesiredAccess desired_access
 
+Interesting::
+
+    s service_name
+    i desired_access
+
 
 OpenServiceW
 ============
@@ -107,6 +124,11 @@ Parameters::
     ** SC_HANDLE hSCManager service_manager_handle
     ** LPWSTR lpServiceName service_name
     ** DWORD dwDesiredAccess desired_access
+
+Interesting::
+
+    u service_name
+    i desired_access
 
 
 StartServiceA

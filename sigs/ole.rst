@@ -19,3 +19,9 @@ Parameters::
     ** DWORD dwClsContext class_context
     ** REFIID riid
     *  LPVOID *ppv
+
+Interesting::
+
+    b sizeof(CLSID), rclsid
+    i class_context
+    b sizeof(IID), riid

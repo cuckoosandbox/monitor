@@ -61,6 +61,10 @@ Pre::
     COPY_OBJECT_ATTRIBUTES(objattr, ObjectAttributes);
     pipe("FILE_DEL:%Z", filepath);
 
+Interesting::
+
+    u filepath
+
 Replace::
 
     ObjectAttributes &objattr
@@ -308,6 +312,11 @@ Pre::
     wchar_t *dirpath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, dirpath);
 
+Interesting::
+
+    u dirpath
+    i desired_access
+
 Logging::
 
     u dirpath dirpath
@@ -330,6 +339,11 @@ Pre::
 
     wchar_t *dirpath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, dirpath);
+
+Interesting::
+
+    u dirpath
+    i desired_access
 
 Logging::
 

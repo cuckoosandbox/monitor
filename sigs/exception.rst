@@ -17,6 +17,10 @@ Parameters::
 
     *  LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter
 
+Interesting::
+
+    p lpTopLevelExceptionFilter
+
 
 RtlAddVectoredExceptionHandler
 ==============================
@@ -31,6 +35,11 @@ Parameters::
 
     ** ULONG FirstHandler
     *  PVECTORED_EXCEPTION_HANDLER VectoredHandler
+
+Interesting::
+
+    p VectoredHandler
+    i FirstHandler
 
 
 RtlAddVectoredContinueHandler
@@ -48,6 +57,10 @@ Parameters::
     ** ULONG FirstHandler
     *  PVECTORED_EXCEPTION_HANDLER VectoredHandler
 
+Interesting::
+
+    p VectoredHandler
+
 
 RtlRemoveVectoredExceptionHandler
 =================================
@@ -61,6 +74,10 @@ Signature::
 Parameters::
 
     *  PVOID VectoredHandlerHandle
+
+Interesting::
+
+    p VectoredHandlerHandle
 
 
 RtlRemoveVectoredContinueHandler
@@ -76,3 +93,7 @@ Signature::
 Parameters::
 
     *  PVOID VectoredHandlerHandle
+
+Interesting::
+
+    p VectoredHandlerHandle

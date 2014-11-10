@@ -46,6 +46,14 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_pathW(lpApplicationName, filepath);
 
+Interesting::
+
+    u filepath
+    u command_line
+    i inherit_handles
+    i creation_flags
+    u current_directory
+
 Logging::
 
     u filepath filepath
@@ -84,6 +92,10 @@ Parameters::
 
     ** UINT uExitCode status_code
 
+Interesting::
+
+    i status_code
+
 
 ShellExecuteExW
 ===============
@@ -105,6 +117,18 @@ Pre::
 
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_pathW(pExecInfo->lpFile, filepath);
+
+Interesting::
+
+    u filepath
+    i pExecInfo->fMask
+    u pExecInfo->lpVerb
+    u pExecInfo->lpFile
+    u pExecInfo->lpParameters
+    u pExecInfo->lpDirectory
+    i pExecInfo->nShow
+    u pExecInfo->lpClass
+    i pExecInfo->dwHotKey
 
 Logging::
 
@@ -209,6 +233,10 @@ Parameters::
 
     ** const char *command
 
+Interesting::
+
+    s command
+
 
 CreateToolhelp32Snapshot
 ========================
@@ -222,6 +250,11 @@ Parameters::
 
     ** DWORD dwFlags flags
     ** DWORD th32ProcessID process_identifier
+
+Interesting::
+
+    i flags
+    i process_identifier
 
 
 Process32FirstW

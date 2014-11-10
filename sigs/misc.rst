@@ -17,6 +17,10 @@ Parameters::
 
     ** int nIndex index
 
+Interesting::
+
+    i index
+
 
 GetCursorPos
 ============
@@ -41,6 +45,7 @@ GetComputerNameA
 
 Signature::
 
+    * Interesting: yes
     * Library: kernel32
     * Return value: BOOL
 
@@ -63,6 +68,7 @@ GetComputerNameW
 
 Signature::
 
+    * Interesting: yes
     * Library: kernel32
     * Return value: BOOL
 
@@ -85,6 +91,7 @@ GetUserNameA
 
 Signature::
 
+    * Interesting: yes
     * Library: advapi32
     * Return value: BOOL
 
@@ -107,6 +114,7 @@ GetUserNameW
 
 Signature::
 
+    * Interesting: yes
     * Library: advapi32
     * Return value: BOOL
 
@@ -129,6 +137,7 @@ GetUserNameExA
 
 Signature::
 
+    * Interesting: yes
     * Library: secur32
     * Return value: BOOL
 
@@ -152,6 +161,7 @@ GetUserNameExW
 
 Signature::
 
+    * Interesting: yes
     * Library: secur32
     * Return value: BOOL
 
@@ -189,6 +199,7 @@ GetDiskFreeSpaceW
 
 Signature::
 
+    * Interesting: yes
     * Library: kernel32
     * Return value: BOOL
 
@@ -206,6 +217,7 @@ GetDiskFreeSpaceExW
 
 Signature::
 
+    * Interesting: yes
     * Library: kernel32
     * Return value: BOOL
 

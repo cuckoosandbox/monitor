@@ -29,6 +29,12 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
+Interesting::
+
+    u filepath
+    i desired_access
+    i inherit_handles
+
 Logging::
 
     u filepath filepath
@@ -64,6 +70,12 @@ Pre::
 
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
+
+Interesting::
+
+    u filepath
+    i desired_access
+    i flags
 
 Logging::
 
@@ -144,6 +156,12 @@ Pre::
 
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_unistr(ImagePath, filepath);
+
+Interesting::
+
+    u filepath
+    i flags
+    i inherit_handles
 
 Logging::
 

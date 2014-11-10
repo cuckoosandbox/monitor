@@ -22,6 +22,11 @@ Pre::
         class_name = value;
     }
 
+Interesting::
+
+    s class_name
+    s window_name
+
 Logging::
 
     s class_name class_name
@@ -42,6 +47,11 @@ Pre::
         wsprintfW(value, L"#%d", (uint16_t) (uintptr_t) lpClassName);
         class_name = value;
     }
+
+Interesting::
+
+    u class_name
+    u window_name
 
 Logging::
 
@@ -66,6 +76,11 @@ Pre::
         class_name = value;
     }
 
+Interesting::
+
+    s class_name
+    s window_name
+
 Logging::
 
     s class_name class_name
@@ -89,6 +104,11 @@ Pre::
         class_name = value;
     }
 
+Interesting::
+
+    u class_name
+    u window_name
+
 Logging::
 
     s class_name class_name
@@ -106,6 +126,13 @@ Parameters::
     ** WORD wLanguageId language_identifier
     *  INT Unknown
 
+Interesting::
+
+    s text
+    s caption
+    i flags
+    i language_identifier
+
 
 MessageBoxTimeoutW
 ==================
@@ -118,3 +145,10 @@ Parameters::
     ** UINT uType flags
     ** WORD wLanguageId language_identifier
     *  INT Unknown
+
+Interesting::
+
+    u text
+    u caption
+    i flags
+    i language_identifier

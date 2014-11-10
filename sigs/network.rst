@@ -20,6 +20,11 @@ Parameters::
     *  DWORD dwReserved
     *  LPVOID lpfnCB
 
+Interesting::
+
+    u url
+    u filepath
+
 Post::
 
     if(ret == S_OK) {
@@ -43,6 +48,14 @@ Parameters::
     ** LPCTSTR lpszProxyBypass proxy_bypass
     ** DWORD dwFlags flags
 
+Interesting::
+
+    s user_agent
+    i access_type
+    s proxy_name
+    s proxy_bypass
+    i flags
+
 
 InternetOpenW
 =============
@@ -59,6 +72,14 @@ Parameters::
     ** LPWSTR lpszProxyName proxy_name
     ** LPWSTR lpszProxyBypass proxy_bypass
     ** DWORD dwFlags flags
+
+Interesting::
+
+    u user_agent
+    i access_type
+    u proxy_name
+    u proxy_bypass
+    i flags
 
 
 InternetConnectA
@@ -80,6 +101,15 @@ Parameters::
     ** DWORD dwFlags flags
     *  DWORD_PTR dwContext
 
+Interesting::
+
+    s hostname
+    i port
+    s username
+    s password
+    i service
+    i flags
+
 
 InternetConnectW
 ================
@@ -99,6 +129,15 @@ Parameters::
     ** DWORD dwService service
     ** DWORD dwFlags flags
     *  DWORD_PTR dwContext
+
+Interesting::
+
+    u hostname
+    i port
+    u username
+    u password
+    i service
+    i flags
 
 
 InternetOpenUrlA
@@ -124,6 +163,12 @@ Pre::
     if(lpszHeaders != NULL && headers_length == -1) {
         headers_length = strlen(lpszHeaders);
     }
+
+Interesting::
+
+    s url
+    S headers_length, lpszHeaders
+    i flags
 
 Logging::
 
@@ -154,6 +199,12 @@ Pre::
         headers_length = lstrlenW(lpszHeaders);
     }
 
+Interesting::
+
+    u url
+    U headers_length, lpszHeaders
+    i flags
+
 Logging::
 
     b headers headers_length, lpszHeaders
@@ -178,6 +229,14 @@ Parameters::
     ** DWORD dwFlags flags
     *  DWORD_PTR dwContext
 
+Interesting::
+
+    s http_method
+    s path
+    s http_version
+    s referer
+    i flags
+
 
 HttpOpenRequestW
 ================
@@ -197,6 +256,14 @@ Parameters::
     *  LPWSTR *lplpszAcceptTypes
     ** DWORD dwFlags flags
     *  DWORD_PTR dwContext
+
+Interesting::
+
+    u http_method
+    u path
+    u http_version
+    u referer
+    i flags
 
 
 HttpSendRequestA
@@ -221,6 +288,11 @@ Pre::
     if(lpszHeaders != NULL && headers_length == -1) {
         headers_length = strlen(lpszHeaders);
     }
+
+Interesting::
+
+    S dwHeadersLength, lpszHeaders
+    b dwOptionalLength, lpOptional
 
 Logging::
 
@@ -250,6 +322,11 @@ Pre::
     if(lpszHeaders != NULL && headers_length == -1) {
         headers_length = lstrlenW(lpszHeaders);
     }
+
+Interesting::
+
+    U dwHeadersLength, lpszHeaders
+    b dwOptionalLength, lpOptional
 
 Logging::
 
@@ -327,6 +404,12 @@ Parameters::
     *  PDNS_RECORD *ppQueryResultsSet
     *  PVOID *pReserved
 
+Interesting::
+
+    s hostname
+    i dns_type
+    i options
+
 
 DnsQuery_UTF8
 =============
@@ -344,6 +427,12 @@ Parameters::
     *  PVOID pExtra
     *  PDNS_RECORD *ppQueryResultsSet
     *  PVOID *pReserved
+
+Interesting::
+
+    s lpstrName
+    i dns_type
+    i options
 
 Logging::
 
@@ -367,6 +456,12 @@ Parameters::
     *  PDNS_RECORD *ppQueryResultsSet
     *  PVOID *pReserved
 
+Interesting::
+
+    u hostname
+    i dns_type
+    i options
+
 
 getaddrinfo
 ===========
@@ -384,6 +479,11 @@ Parameters::
     *  const ADDRINFOA *pHints
     *  PADDRINFOA *ppResult
 
+Interesting::
+
+    s hostname
+    s service_name
+
 
 GetAddrInfoW
 ============
@@ -400,3 +500,8 @@ Parameters::
     ** PCWSTR pServiceName service_name
     *  const ADDRINFOW *pHints
     *  PADDRINFOW *ppResult
+
+Interesting::
+
+    u hostname
+    u service_name

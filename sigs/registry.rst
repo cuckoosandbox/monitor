@@ -23,6 +23,12 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpSubKey, regkey);
 
+Interesting::
+
+    u regkey
+    i options
+    i access
+
 Logging::
 
     u regkey regkey
@@ -43,6 +49,12 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpSubKey, regkey);
+
+Interesting::
+
+    u regkey
+    i options
+    i access
 
 Logging::
 
@@ -69,6 +81,14 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpSubKey, regkey);
 
+Interesting::
+
+    u regkey
+    s class
+    i options
+    i access
+    I disposition
+
 Logging::
 
     u regkey regkey
@@ -94,6 +114,14 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpSubKey, regkey);
 
+Interesting::
+
+    u regkey
+    u class
+    i options
+    i access
+    I disposition
+
 Logging::
 
     u regkey regkey
@@ -112,6 +140,10 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpSubKey, regkey);
 
+Interesting::
+
+    u regkey
+
 Logging::
 
     u regkey regkey
@@ -129,6 +161,10 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpSubKey, regkey);
+
+Interesting::
+
+    u regkey
 
 Logging::
 
@@ -149,6 +185,11 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key(hKey, regkey);
+
+Interesting::
+
+    u regkey
+    i index
 
 Logging::
 
@@ -174,6 +215,11 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key(hKey, regkey);
 
+Interesting::
+
+    u regkey
+    i index
+
 Logging::
 
     u regkey regkey
@@ -197,6 +243,11 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key(hKey, regkey);
+
+Interesting::
+
+    u regkey
+    i index
 
 Logging::
 
@@ -284,6 +335,12 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpValueName, regkey);
 
+Interesting::
+
+    u regkey
+    i reg_type
+    b cbData, lpData
+
 Logging::
 
     u regkey regkey
@@ -306,6 +363,12 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpValueName, regkey);
+
+Interesting::
+
+    u regkey
+    i reg_type
+    b cbData, lpData
 
 Logging::
 
@@ -337,6 +400,10 @@ Pre::
 
     *lpType = REG_NONE;
 
+Interesting::
+
+    u regkey
+
 Logging::
 
     u regkey regkey
@@ -367,6 +434,10 @@ Pre::
 
     *lpType = REG_NONE;
 
+Interesting::
+
+    u regkey
+
 Logging::
 
     u regkey regkey
@@ -386,6 +457,10 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_asciiz(hKey, lpValueName, regkey);
 
+Interesting::
+
+    u regkey
+
 Logging::
 
     u regkey regkey
@@ -403,6 +478,10 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_uniz(hKey, lpValueName, regkey);
+
+Interesting::
+
+    u regkey
 
 Logging::
 

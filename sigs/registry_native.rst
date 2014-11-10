@@ -30,6 +30,14 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(ObjectAttributes, regkey);
 
+Interesting::
+
+    u regkey
+    i desired_access
+    i index
+    i options
+    i disposition
+
 Logging::
 
     u regkey regkey
@@ -53,6 +61,11 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(ObjectAttributes, regkey);
+
+Interesting::
+
+    u regkey
+    i desired_access
 
 Logging::
 
@@ -81,6 +94,11 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(ObjectAttributes, regkey);
+
+Interesting::
+
+    u regkey
+    i desired_access
 
 Logging::
 
@@ -156,6 +174,11 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
 
+Interesting::
+
+    u regkey
+    i index
+
 Logging::
 
     B buffer ResultLength, KeyInformation
@@ -186,6 +209,11 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
+
+Interesting::
+
+    u regkey
+    i index
 
 Middle::
 
@@ -223,6 +251,13 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_unistr(KeyHandle, ValueName, regkey);
 
+Interesting::
+
+    u regkey
+    i index
+    i reg_type
+    b DataSize, Data
+
 Logging::
 
     R value &Type, &DataSize, Data
@@ -253,6 +288,11 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_unistr(KeyHandle, ValueName, regkey);
+
+Interesting::
+
+    u regkey
+    i information_class
 
 Middle::
 
@@ -312,6 +352,10 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
 
+Interesting::
+
+    u regkey
+
 Logging::
 
     u regkey regkey
@@ -329,6 +373,10 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_unistr(KeyHandle, ValueName, regkey);
+
+Interesting::
+
+    u regkey
 
 Logging::
 
@@ -350,6 +398,11 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(TargetKey, regkey);
+
+Interesting::
+
+    u regkey
+    u source_file
 
 Logging::
 
@@ -373,6 +426,12 @@ Pre::
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(TargetKey, regkey);
+
+Interesting::
+
+    u regkey
+    u source_file
+    i flags
 
 Logging::
 
@@ -402,6 +461,12 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(TargetKey, regkey);
 
+Interesting::
+
+    u regkey
+    u source_file
+    i flags
+
 Logging::
 
     u filepath source_file
@@ -428,6 +493,11 @@ Pre::
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
 
+Interesting::
+
+    u regkey
+    i information_class
+
 Logging::
 
     B buffer ResultLength, KeyInformation
@@ -449,6 +519,11 @@ Pre::
 
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_handle(FileHandle, filepath);
+
+Interesting::
+
+    u regkey
+    u filepath
 
 Logging::
 
@@ -472,6 +547,11 @@ Pre::
 
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_handle(FileHandle, filepath);
+
+Interesting::
+
+    u regkey
+    u filepath
 
 Logging::
 

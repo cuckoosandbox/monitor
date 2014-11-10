@@ -18,6 +18,10 @@ Parameters::
     ** WORD wVersionRequested
     *  LPWSADATA lpWSAData
 
+Interesting::
+
+    i wVersionRequested
+
 
 gethostbyname
 =============
@@ -30,6 +34,10 @@ Signature::
 Parameters::
 
     ** const char *name hostname
+
+Interesting::
+
+    s hostname
 
 
 socket
@@ -44,6 +52,12 @@ Parameters::
     ** int af
     ** int type
     ** int protocol
+
+Interesting::
+
+    i af
+    i type
+    i protocol
 
 Logging::
 
@@ -68,6 +82,11 @@ Pre::
 
     const char *ip = NULL; int port = 0;
     get_ip_port(name, &ip, &port);
+
+Interesting::
+
+    s ip
+    i port
 
 Logging::
 
@@ -525,6 +544,13 @@ Parameters::
     *  GROUP g
     ** DWORD dwFlags flags
 
+Interesting::
+
+    i af
+    i type
+    i protocol
+    i flags
+
 Logging::
 
     i socket ret
@@ -545,6 +571,13 @@ Parameters::
     *  LPWSAPROTOCOL_INFO lpProtocolInfo
     *  GROUP g
     ** DWORD dwFlags flags
+
+Interesting::
+
+    i af
+    i type
+    i protocol
+    i flags
 
 Logging::
 

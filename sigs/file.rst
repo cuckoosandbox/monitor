@@ -22,6 +22,10 @@ Pre::
     wchar_t *dirpath = get_unicode_buffer();
     path_get_full_pathW(lpPathName, dirpath);
 
+Interesting::
+
+    u dirpath
+
 Logging::
 
     u dirpath dirpath
@@ -45,6 +49,10 @@ Pre::
     wchar_t *dirpath = get_unicode_buffer();
     path_get_full_pathW(lpNewDirectory, dirpath);
 
+Interesting::
+
+    u dirpath
+
 Logging::
 
     u dirpath dirpath
@@ -66,6 +74,10 @@ Pre::
     wchar_t *dirpath = get_unicode_buffer();
     path_get_full_pathA(lpPathName, dirpath);
 
+Interesting::
+
+    u dirpath
+
 Logging::
 
     u dirpath dirpath
@@ -86,6 +98,10 @@ Pre::
 
     wchar_t *dirpath = get_unicode_buffer();
     path_get_full_pathW(lpPathName, dirpath);
+
+Interesting::
+
+    u dirpath
 
 Logging::
 
@@ -116,6 +132,11 @@ Pre::
     if(lpNewFileName != NULL) {
         path_get_full_pathW(lpNewFileName, newfilepath);
     }
+
+Interesting::
+
+    u oldfilepath
+    u newfilepath
 
 Logging::
 
@@ -207,6 +228,11 @@ Pre::
     wchar_t *newfilepath = get_unicode_buffer();
     path_get_full_pathA(lpNewFileName, newfilepath);
 
+Interesting::
+
+    u oldfilepath
+    u newfilepath
+
 Logging::
 
     u oldfilepath oldfilepath
@@ -233,6 +259,11 @@ Pre::
 
     wchar_t *newfilepath = get_unicode_buffer();
     path_get_full_pathW(lpNewFileName, newfilepath);
+
+Interesting::
+
+    u oldfilepath
+    u newfilepath
 
 Logging::
 
@@ -264,6 +295,11 @@ Pre::
     wchar_t *newfilepath = get_unicode_buffer();
     path_get_full_pathW(lpNewFileName, newfilepath);
 
+Interesting::
+
+    u oldfilepath
+    u newfilepath
+
 Logging::
 
     u oldfilepath oldfilepath
@@ -287,6 +323,10 @@ Pre::
     path_get_full_pathA(lpFileName, filepath);
     pipe("FILE_DEL:%Z", filepath);
 
+Interesting::
+
+    u filepath
+
 Logging::
 
     u filepath filepath
@@ -308,6 +348,10 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_pathW(lpFileName, filepath);
     pipe("FILE_DEL:%Z", filepath);
+
+Interesting::
+
+    u filepath
 
 Logging::
 

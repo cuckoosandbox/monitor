@@ -23,6 +23,11 @@ Flags::
 
     hook_identifier
 
+Interesting::
+
+    i hook_identifier
+    i thread_identifier
+
 
 SetWindowsHookExW
 =================
@@ -42,6 +47,11 @@ Parameters::
 Flags::
 
     hook_identifier
+
+Interesting::
+
+    i hook_identifier
+    i thread_identifier
 
 
 UnhookWindowsHookEx
