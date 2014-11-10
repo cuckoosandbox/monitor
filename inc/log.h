@@ -28,7 +28,7 @@ void log_free();
 void log_api_pre(uint32_t length, const void *buffer);
 
 void log_api(signature_index_t index, int is_success, uintptr_t return_value,
-    uint64_t hash, const char *fmt, ...);
+    uint64_t hash, ...);
 
 void log_anomaly(const char *subcategory, int success,
     const char *funcname, const char *msg);

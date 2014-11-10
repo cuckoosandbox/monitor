@@ -269,10 +269,10 @@ static void _log_stacktrace(bson *b)
 #endif
 
 void log_api(signature_index_t index, int is_success, uintptr_t return_value,
-    uint64_t hash, const char *fmt, ...)
+    uint64_t hash, ...)
 {
-    va_list args; char key = 0; char idx[4];
-    va_start(args, fmt);
+    va_list args; char idx[4];
+    va_start(args, hash);
 
     EnterCriticalSection(&g_mutex);
 
@@ -318,56 +318,54 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
         TlsSetValue(g_tls_idx, NULL);
     }
 
-    while (*fmt != 0) {
-        key = *fmt++;
-
+    for (const char *fmt = g_explain_paramtypes[index]; *fmt != 0; fmt++) {
         snprintf(idx, 4, "%u", argnum++);
 
-        if(key == 's') {
+        if(*fmt == 's') {
             const char *s = va_arg(args, const char *);
             if(s == NULL) s = "";
             log_string(&b, idx, s, -1);
         }
-        else if(key == 'S') {
+        else if(*fmt == 'S') {
             int len = va_arg(args, int);
             const char *s = va_arg(args, const char *);
             if(s == NULL) s = "", len = 0;
             log_string(&b, idx, s, len);
         }
-        else if(key == 'u') {
+        else if(*fmt == 'u') {
             const wchar_t *s = va_arg(args, const wchar_t *);
             if(s == NULL) s = L"";
             log_wstring(&b, idx, s, -1);
         }
-        else if(key == 'U') {
+        else if(*fmt == 'U') {
             int len = va_arg(args, int);
             const wchar_t *s = va_arg(args, const wchar_t *);
             if(s == NULL) s = L"", len = 0;
             log_wstring(&b, idx, s, len);
         }
-        else if(key == 'b') {
+        else if(*fmt == 'b') {
             size_t len = va_arg(args, size_t);
             const uint8_t *s = va_arg(args, const uint8_t *);
             log_buffer(&b, idx, s, len);
         }
-        else if(key == 'B') {
+        else if(*fmt == 'B') {
             size_t *len = va_arg(args, size_t *);
             const uint8_t *s = va_arg(args, const uint8_t *);
             log_buffer(&b, idx, s, len == NULL ? 0 : *len);
         }
-        else if(key == 'i') {
+        else if(*fmt == 'i') {
             int value = va_arg(args, int);
             log_int32(&b, idx, value);
         }
-        else if(key == 'l' || key == 'p') {
+        else if(*fmt == 'l' || *fmt == 'p') {
             long value = va_arg(args, long);
             log_int32(&b, idx, value);
         }
-        else if(key == 'L' || key == 'P') {
+        else if(*fmt == 'L' || *fmt == 'P') {
             long *ptr = va_arg(args, long *);
             log_int32(&b, idx, ptr != NULL ? *ptr : 0);
         }
-        else if(key == 'o') {
+        else if(*fmt == 'o') {
             ANSI_STRING *str = va_arg(args, ANSI_STRING *);
             if(str == NULL) {
                 log_string(&b, idx, "", 0);
@@ -376,7 +374,7 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
                 log_string(&b, idx, str->Buffer, str->Length);
             }
         }
-        else if(key == 'O') {
+        else if(*fmt == 'O') {
             UNICODE_STRING *str = va_arg(args, UNICODE_STRING *);
             if(str == NULL) {
                 log_string(&b, idx, "", 0);
@@ -386,7 +384,7 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
                     str->Length / sizeof(wchar_t));
             }
         }
-        else if(key == 'x') {
+        else if(*fmt == 'x') {
             OBJECT_ATTRIBUTES *obj = va_arg(args, OBJECT_ATTRIBUTES *);
             if(obj == NULL || obj->ObjectName == NULL) {
                 log_string(&b, idx, "", 0);
@@ -396,17 +394,17 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
                     obj->ObjectName->Length / sizeof(wchar_t));
             }
         }
-        else if(key == 'a') {
+        else if(*fmt == 'a') {
             int argc = va_arg(args, int);
             const char **argv = va_arg(args, const char **);
             log_argv(&b, idx, argc, argv);
         }
-        else if(key == 'A') {
+        else if(*fmt == 'A') {
             int argc = va_arg(args, int);
             const wchar_t **argv = va_arg(args, const wchar_t **);
             log_wargv(&b, idx, argc, argv);
         }
-        else if(key == 'r' || key == 'R') {
+        else if(*fmt == 'r' || *fmt == 'R') {
             uint32_t *type = va_arg(args, uint32_t *);
             uint32_t *size = va_arg(args, uint32_t *);
             uint8_t *data = va_arg(args, uint8_t *);
@@ -433,7 +431,7 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
             }
             else if(*type == REG_EXPAND_SZ || *type == REG_SZ ||
                     *type == REG_MULTI_SZ) {
-                if(key == 'r') {
+                if(*fmt == 'r') {
                     log_string(&b, idx, (const char *) data, *size);
                 }
                 else {
@@ -449,15 +447,15 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
                 log_buffer(&b, idx, data, *size);
             }
         }
-        else if(key == 'q') {
+        else if(*fmt == 'q') {
             int64_t value = va_arg(args, int64_t);
             log_int64(&b, idx, value);
         }
-        else if(key == 'Q') {
+        else if(*fmt == 'Q') {
             LARGE_INTEGER *value = va_arg(args, LARGE_INTEGER *);
             log_int64(&b, idx, value != NULL ? value->QuadPart : 0);
         }
-        else if(key == 'z') {
+        else if(*fmt == 'z') {
             bson *value = va_arg(args, bson *);
             if(value == NULL) {
                 bson_append_null(&b, idx);
@@ -466,14 +464,14 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
                 bson_append_bson(&b, idx, value);
             }
         }
-        else if(key == 'c') {
+        else if(*fmt == 'c') {
             wchar_t buf[64];
             REFCLSID rclsid = va_arg(args, REFCLSID);
             clsid_to_string(rclsid, buf);
             log_wstring(&b, idx, buf, -1);
         }
         else {
-            char buf[2] = {key, 0};
+            char buf[2] = {*fmt, 0};
             pipe("CRITICAL:Invalid format specifier: %z", buf);
         }
     }
