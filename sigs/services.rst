@@ -68,6 +68,27 @@ Parameters::
     ** LPCTSTR lpServiceStartName service_start_name
     ** LPCTSTR lpPassword password
 
+Pre::
+
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathA(lpBinaryPathName, filepath);
+
+Interesting::
+
+    s service_name
+    s display_name
+    i desired_access
+    i service_type
+    i start_type
+    i error_control
+    u filepath
+    s service_start_name
+    s password
+
+Logging::
+
+    u filepath filepath
+
 
 CreateServiceW
 ==============
@@ -91,6 +112,27 @@ Parameters::
     *  LPWSTR lpDependencies
     ** LPWSTR lpServiceStartName service_start_name
     ** LPWSTR lpPassword password
+
+Pre::
+
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathW(lpBinaryPathName, filepath);
+
+Interesting::
+
+    u service_name
+    u display_name
+    i desired_access
+    i service_type
+    i start_type
+    i error_control
+    u filepath
+    u service_start_name
+    u password
+
+Logging::
+
+    u filepath filepath
 
 
 OpenServiceA
