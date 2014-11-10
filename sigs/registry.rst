@@ -14,7 +14,7 @@ Parameters::
 
     ** HKEY hKey base_handle
     *  LPCTSTR lpSubKey
-    *  DWORD ulOptions options
+    ** DWORD ulOptions options
     ** REGSAM samDesired access
     ** PHKEY phkResult key_handle
 
@@ -35,7 +35,7 @@ Parameters::
 
     ** HKEY hKey base_handle
     *  LPWSTR lpSubKey
-    *  DWORD ulOptions
+    ** DWORD ulOptions options
     ** REGSAM samDesired access
     ** PHKEY phkResult key_handle
 
@@ -58,7 +58,7 @@ Parameters::
     *  LPCTSTR lpSubKey
     *  DWORD Reserved
     ** LPTSTR lpClass class
-    *  DWORD dwOptions
+    ** DWORD dwOptions options
     ** REGSAM samDesired access
     *  LPSECURITY_ATTRIBUTES lpSecurityAttributes
     ** PHKEY phkResult key_handle
@@ -83,7 +83,7 @@ Parameters::
     *  LPWSTR lpSubKey
     *  DWORD Reserved
     ** LPWSTR lpClass class
-    *  DWORD dwOptions
+    ** DWORD dwOptions options
     ** REGSAM samDesired access
     *  LPSECURITY_ATTRIBUTES lpSecurityAttributes
     ** PHKEY phkResult key_handle

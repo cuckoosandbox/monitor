@@ -141,10 +141,10 @@ Signature::
 Parameters::
 
     ** HINTERNET hInternet
-    ** LPWSTR lpszUrl
+    ** LPWSTR lpszUrl url
     *  LPWSTR lpszHeaders
     *  DWORD dwHeadersLength
-    ** DWORD dwFlags
+    ** DWORD dwFlags flags
     *  DWORD_PTR dwContext
 
 Pre::

@@ -20,7 +20,7 @@ Parameters::
     ** LPWSTR lpCommandLine command_line
     *  LPSECURITY_ATTRIBUTES lpProcessAttributes
     *  LPSECURITY_ATTRIBUTES lpThreadAttributes
-    *  BOOL bInheritHandles
+    ** BOOL bInheritHandles inherit_handles
     *  DWORD dwCreationFlags
     *  LPVOID lpEnvironment
     ** LPWSTR lpCurrentDirectory current_directory

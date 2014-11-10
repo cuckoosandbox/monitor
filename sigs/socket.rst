@@ -523,7 +523,7 @@ Parameters::
     ** int protocol
     *  LPWSAPROTOCOL_INFO lpProtocolInfo
     *  GROUP g
-    *  DWORD dwFlags
+    ** DWORD dwFlags flags
 
 Logging::
 
@@ -544,7 +544,7 @@ Parameters::
     ** int protocol
     *  LPWSAPROTOCOL_INFO lpProtocolInfo
     *  GROUP g
-    *  DWORD dwFlags
+    ** DWORD dwFlags flags
 
 Logging::
 

@@ -49,7 +49,7 @@ Parameters::
     ** DWORD dwServiceType service_type
     ** DWORD dwStartType start_type
     ** DWORD dwErrorControl error_control
-    ** LPCTSTR lpBinaryPathName filepath
+    *  LPCTSTR lpBinaryPathName
     *  LPCTSTR lpLoadOrderGroup
     *  LPDWORD lpdwTagId
     *  LPCTSTR lpDependencies
@@ -73,7 +73,7 @@ Parameters::
     ** DWORD dwServiceType service_type
     ** DWORD dwStartType start_type
     ** DWORD dwErrorControl error_control
-    ** LPWSTR lpBinaryPathName filepath
+    *  LPWSTR lpBinaryPathName
     *  LPWSTR lpLoadOrderGroup
     *  LPDWORD lpdwTagId
     *  LPWSTR lpDependencies

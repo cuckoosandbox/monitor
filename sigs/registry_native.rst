@@ -445,8 +445,9 @@ Parameters::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    wchar_t *filepath = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
+
+    wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_handle(FileHandle, filepath);
 
 Logging::
@@ -467,8 +468,9 @@ Parameters::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    wchar_t *filepath = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
+
+    wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_handle(FileHandle, filepath);
 
 Logging::
