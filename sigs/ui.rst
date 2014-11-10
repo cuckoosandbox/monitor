@@ -152,3 +152,51 @@ Interesting::
     u caption
     i flags
     i language_identifier
+
+
+CreateWindowExA
+===============
+
+Parameters::
+
+    ** DWORD dwExStyle extended_style
+    ** LPCTSTR lpClassName class_name
+    ** LPCTSTR lpWindowName window_name
+    ** DWORD dwStyle style
+    ** int x
+    ** int y
+    ** int nWidth width
+    ** int nHeight height
+    ** HWND hWndParent parent_handle
+    ** HMENU hMenu menu_handle
+    ** HINSTANCE hInstance instance_handle
+    *  LPVOID lpParam
+
+Flags::
+
+    extended_style
+    style
+
+
+CreateWindowExW
+===============
+
+Parameters::
+
+    ** DWORD dwExStyle extended_style
+    ** LPWSTR lpClassName class_name
+    ** LPWSTR lpWindowName window_name
+    ** DWORD dwStyle style
+    ** int x
+    ** int y
+    ** int nWidth width
+    ** int nHeight height
+    ** HWND hWndParent parent_handle
+    ** HMENU hMenu menu_handle
+    ** HINSTANCE hInstance instance_handle
+    *  LPVOID lpParam
+
+Flags::
+
+    extended_style
+    style
