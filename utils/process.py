@@ -178,7 +178,7 @@ class SignatureProcessor(object):
         ret = []
         for line in text.split('\n'):
             if line.startswith('*'):
-                line = line[1:].strip()
+                raise Exception('Do not use asterisks in Interesting blocks.')
 
             argtype, argvalue = line.strip().split(' ', 1)
             ret.append(dict(argtype=argtype, argvalue=argvalue))
@@ -188,7 +188,7 @@ class SignatureProcessor(object):
         ret = []
         for line in text.split('\n'):
             if line.startswith('*'):
-                raise Exception('Do not use asterisks in ensure blocks.')
+                raise Exception('Do not use asterisks in Ensure blocks.')
 
             ret.append(line)
         return ret
@@ -351,6 +351,9 @@ class SignatureProcessor(object):
 
                     ensure[arg['argname']] = self.dereference[arg['argtype']]
 
+            # Dictionary with the dereferenced types for each parameter.
+            row['ensure'] = ensure
+
             # Check whether every flag alias exists.
             for idx, flag in enumerate(row.get('flags', [])):
                 for arg in row.get('parameters', []):
@@ -373,8 +376,16 @@ class SignatureProcessor(object):
                 else:
                     flag['flagname'] = flagname
 
-            # Dictionary with the dereferenced types for each parameter.
-            row['ensure'] = ensure
+            # Resolve any aliases in Interesting blocks.
+            for interesting in row.get('interesting', []):
+                for arg in row.get('parameters', []):
+                    if interesting['argvalue'] == arg['alias']:
+                        interesting['argvalue'] = arg['argname']
+                        break
+
+            row['signature']['interesting'] = \
+                'interesting' in row['signature']
+
             yield row
 
     def process(self):

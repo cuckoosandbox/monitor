@@ -115,6 +115,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endfor %}
     {%- endif %}
 
+    {%- if hook.interesting or hook.signature.interesting %}
     uint64_t hash = call_hash("{{ hook.interesting|join(attribute='argtype') }}"
             {%- if hook.interesting %}, {% endif %}
             {{- hook.interesting|join(', ', attribute='argvalue') }});
@@ -126,6 +127,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         return;
         {%- endif %}
     }
+    {%- else %}
+    uint64_t hash = 0;
+    {%- endif %}
 
     {%- if hook.prelog: %}
     log_api_pre({{ hook.prelog|join(',', attribute='argvalue') }});

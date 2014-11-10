@@ -21,6 +21,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 
+//
+// Diffing API
+//
+// The following Format Specifiers are available:
+// s  -> (char *) -> zero-terminated ascii string
+// S  -> (int, char *) -> ascii string with length
+// u  -> (wchar_t *) -> zero-terminated unicode string
+// U  -> (int, wchar_t *) -> unicode string with length
+// i  -> (int) -> 32-bit integer
+// I  -> (int *) -> pointer to a 32-bit integer
+// l  -> (int) -> 32-bit integer
+// L  -> (int *) -> pointer to a 32-bit integer
+// p  -> (void *) -> pointer
+// P  -> (void **) -> pointer to a pointer
+// b  -> (int, void *) -> buffer with length
+//
+
 void diffing_init(const char *path);
 uint64_t call_hash(const char *fmt, ...);
 int is_interesting_hash(uint64_t hash);
