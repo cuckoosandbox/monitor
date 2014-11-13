@@ -30,6 +30,9 @@ typedef struct _module_t {
 } module_t;
 
 #define MAX_MODULE_COUNT 256
+#define INTERESTING_HASH 0
+#define ENSURE_NOT_INTERESTING(value) \
+    ((value) == INTERESTING_HASH ? INTERESTING_HASH+1 : (value))
 
 static uint32_t g_module_count, g_list_length;
 static module_t g_modules[MAX_MODULE_COUNT];
@@ -53,10 +56,34 @@ static uint64_t _address_hash(uintptr_t addr)
         if(addr >= g_modules[idx].base && addr < g_modules[idx].end) {
             uint64_t ret =
                 g_modules[idx].hash ^ hash_uint64(addr - g_modules[idx].base);
-            return ret == 0 ? 1 : ret;
+            return ENSURE_NOT_INTERESTING(ret);
         }
     }
-    return 0;
+
+    // If we can't find the module hash then we have to create one.
+    const uint8_t *module_address =
+        module_from_address((const uint8_t *) addr);
+
+    // If there's no module associated with this address then we
+    // automatically tag this address as interesting.
+    if(module_address == NULL) {
+        return INTERESTING_HASH;
+    }
+
+    // What else to return?
+    if(g_module_count == MAX_MODULE_COUNT) {
+        pipe("CRITICAL:Exceeding the maximum amount of "
+            "supported modules!");
+        return INTERESTING_HASH;
+    }
+
+    // Add an entry for this module. TODO Spinlock around this code.
+    g_modules[g_module_count].base = (uintptr_t) module_address;
+    g_modules[g_module_count].end = (uintptr_t) module_address +
+        module_image_size(module_address);
+    g_modules[g_module_count++].hash =
+        _get_module_hash((HMODULE) module_address);
+    return _address_hash(addr);
 }
 
 static uint64_t _stacktrace_hash()
@@ -71,42 +98,20 @@ static uint64_t _stacktrace_hash()
 
     for (uint32_t idx = 0; idx < count; idx++) {
         uint64_t hash = _address_hash(return_addresses[idx]);
-        if(hash == 0) {
-            // If we can't find the module hash then we have to create one.
-            const uint8_t *module_address =
-                module_from_address((const uint8_t *) return_addresses[idx]);
-
-            // If there's no module associated with this address then we
-            // automatically tag this address as interesting.
-            if(module_address == NULL) {
-                return 0;
-            }
-
-            if(g_module_count == MAX_MODULE_COUNT) {
-                pipe("CRITICAL:Exceeding the maximum amount of "
-                    "supported modules!");
-                return 0;
-            }
-
-            // Add an entry for this module. TODO Spinlock around this code.
-            g_modules[g_module_count].base = (uintptr_t) module_address;
-            g_modules[g_module_count].end = (uintptr_t) module_address +
-                module_image_size(module_address);
-            g_modules[g_module_count++].hash =
-                _get_module_hash((HMODULE) module_address);
-
-            hash = _address_hash(return_addresses[idx]);
+        if(hash == INTERESTING_HASH) {
+            return INTERESTING_HASH;
         }
 
         hashes[hashcnt++] = hash;
     }
 
-    return hash_buffer(hashes, sizeof(uint64_t) * hashcnt);
+    uint64_t ret = hash_buffer(hashes, sizeof(uint64_t) * hashcnt);
+    return ENSURE_NOT_INTERESTING(ret);
 }
 
 static uint64_t _parameter_hash(const char *fmt, va_list args)
 {
-    uint32_t value, hashcnt = 0, *valueptr;
+    uint32_t value, hashcnt = 0, *valueptr; uintptr_t addr;
     uint64_t hashes[64];
 
     while (*fmt != 0) {
@@ -151,7 +156,8 @@ static uint64_t _parameter_hash(const char *fmt, va_list args)
         }
     }
 
-    return hash_buffer(hashes, sizeof(uint64_t) * hashcnt);
+    uint64_t ret = hash_buffer(hashes, sizeof(uint64_t) * hashcnt);
+    return ENSURE_NOT_INTERESTING(ret);
 }
 
 static int _value_in_list(uint64_t value, uint64_t *list, uint32_t length)
@@ -221,13 +227,20 @@ uint64_t call_hash(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
 
-    uint64_t ret = _stacktrace_hash() ^ _parameter_hash(fmt, args);
+    uint64_t hash1 = _stacktrace_hash();
+    uint64_t hash2 = _parameter_hash(fmt, args);
 
     va_end(args);
-    return ret;
+
+    if(hash1 == INTERESTING_HASH || hash2 == INTERESTING_HASH) {
+        return INTERESTING_HASH;
+    }
+
+    return ENSURE_NOT_INTERESTING(hash1 ^ hash2);
 }
 
 int is_interesting_hash(uint64_t hash)
 {
-    return _value_in_list(hash, g_list, g_list_length);
+    return hash == INTERESTING_HASH ||
+        _value_in_list(hash, g_list, g_list_length);
 }
