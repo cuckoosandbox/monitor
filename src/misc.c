@@ -1148,3 +1148,8 @@ uint64_t hash_stringW(const wchar_t *buf, int32_t length)
     }
     return ret ^ length;
 }
+
+uint64_t hash_uint64(uint64_t value)
+{
+    return hash_buffer(&value, sizeof(value));
+}

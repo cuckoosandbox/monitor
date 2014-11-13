@@ -51,8 +51,8 @@ static uint64_t _address_hash(uintptr_t addr)
     // TODO Use divide and conquer here as well.
     for (uint32_t idx = 0; idx < g_module_count; idx++) {
         if(addr >= g_modules[idx].base && addr < g_modules[idx].end) {
-            uint64_t ret = addr - g_modules[idx].base;
-            ret = g_modules[idx].hash ^ hash_buffer(&ret, sizeof(uint32_t));
+            uint64_t ret =
+                g_modules[idx].hash ^ hash_uint64(addr - g_modules[idx].base);
             return ret == 0 ? 1 : ret;
         }
     }
