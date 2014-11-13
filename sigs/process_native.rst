@@ -131,7 +131,7 @@ Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
         pipe("PROCESS:%d,%d", pid_from_process_handle(*ProcessHandle),
-            pid_from_thread_handle(*ThreadHandle));
+            tid_from_thread_handle(*ThreadHandle));
         sleep_skip_disable();
     }
 
@@ -172,7 +172,7 @@ Post::
     if(NT_SUCCESS(ret) != FALSE) {
         pipe("PROCESS:%d,%d",
             pid_from_process_handle(ProcessInformation->ProcessHandle),
-            pid_from_thread_handle(ProcessInformation->ThreadHandle));
+            tid_from_thread_handle(ProcessInformation->ThreadHandle));
         sleep_skip_disable();
     }
 

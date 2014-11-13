@@ -29,6 +29,7 @@ wchar_t *get_unicode_buffer();
 
 uintptr_t pid_from_process_handle(HANDLE process_handle);
 uintptr_t pid_from_thread_handle(HANDLE thread_handle);
+uintptr_t tid_from_thread_handle(HANDLE thread_handle);
 uintptr_t parent_process_id();
 
 uint32_t path_from_handle(HANDLE handle, wchar_t *path);
