@@ -1119,6 +1119,10 @@ void *wsabuf_get_buffer(uint32_t buffer_count, WSABUF *buffers,
 
 uint64_t hash_buffer(const void *buf, uint32_t length)
 {
+    if(buf == NULL || length == 0) {
+        return 0;
+    }
+
     const uint8_t *p = (const uint8_t *) buf;
     uint64_t ret = *p << 7;
     for (uint32_t idx = 0; idx < length; idx++) {
@@ -1129,7 +1133,13 @@ uint64_t hash_buffer(const void *buf, uint32_t length)
 
 uint64_t hash_string(const char *buf, int32_t length)
 {
-    if(length < 0) length = strlen(buf);
+    if(buf == NULL || length == 0) {
+        return 0;
+    }
+
+    if(length < 0) {
+        length = strlen(buf);
+    }
 
     uint64_t ret = *buf << 7;
     for (int32_t idx = 0; idx < length; idx++) {
@@ -1140,7 +1150,13 @@ uint64_t hash_string(const char *buf, int32_t length)
 
 uint64_t hash_stringW(const wchar_t *buf, int32_t length)
 {
-    if(length < 0) length = lstrlenW(buf);
+    if(buf == NULL || length == 0) {
+        return 0;
+    }
+
+    if(length < 0) {
+        length = lstrlenW(buf);
+    }
 
     uint64_t ret = *buf << 7;
     for (int32_t idx = 0; idx < length; idx++) {
