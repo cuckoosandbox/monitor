@@ -89,13 +89,6 @@ Logging::
     O thread_name &thread_name
     i process_identifier pid_from_thread_handle(ThreadHandle)
 
-Post::
-
-    if(NT_SUCCESS(ret) != FALSE) {
-        pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
-        sleep_skip_disable();
-    }
-
 
 NtGetContextThread
 ==================

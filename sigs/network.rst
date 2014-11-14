@@ -28,7 +28,7 @@ Interesting::
 Post::
 
     if(ret == S_OK) {
-        pipe("FILE_NEW:%S", szFileName);
+        pipe("FILE_NEW:%Z", szFileName);
     }
 
 
