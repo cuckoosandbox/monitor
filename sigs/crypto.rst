@@ -4,6 +4,40 @@ Signature::
     * Category: crypto
 
 
+CryptAcquireContextA
+====================
+
+Signature::
+
+    * Library: advapi32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HCRYPTPROV *phProv crypto_handle
+    ** LPCSTR szContainer container
+    ** LPCSTR szProvider provider
+    ** DWORD dwProvType provider_type
+    ** DWORD dwFlags flags
+
+
+CryptAcquireContextW
+====================
+
+Signature::
+
+    * Library: advapi32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HCRYPTPROV *phProv crypto_handle
+    ** LPCWSTR szContainer container
+    ** LPCWSTR szProvider provider
+    ** DWORD dwProvType provider_type
+    ** DWORD dwFlags flags
+
+
 CryptProtectData
 ================
 

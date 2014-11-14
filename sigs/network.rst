@@ -387,6 +387,20 @@ Parameters::
     ** HINTERNET hInternet internet_handle
 
 
+InternetGetConnectedState
+=========================
+
+Signature::
+
+    * Library: wininet
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPDWORD lpdwFlags flags
+    *  DWORD dwReserved
+
+
 DnsQuery_A
 ==========
 
