@@ -978,12 +978,10 @@ static LONG CALLBACK _exception_handler(
     sprintf(buf, "0x%p", exception_address);
     bson_append_string(&e, "address", buf);
 
-#if DEBUG
     char insn[DISASM_BUFSIZ];
     if(disasm(exception_address, insn) == 0) {
         bson_append_string(&e, "instruction", insn);
     }
-#endif
 
 #if __x86_64__
     sym[0] = 0;
