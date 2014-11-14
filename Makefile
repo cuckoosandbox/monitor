@@ -50,10 +50,8 @@ DLL64 = monitor-x64.dll
 
 ifdef DEBUG
 	CFLAGS += -DDEBUG=1
-	CSCONF = data/capstone-config-debug.mk
 else
 	CFLAGS += -DDEBUG=0
-	CSCONF = data/capstone-config-release.mk
 endif
 
 all: dirs $(LIBCAPSTONE32) $(LIBCAPSTONE64) \
@@ -81,7 +79,7 @@ $(LIBBSON64): $(BSONOBJ64)
 
 $(LIBCAPSTONE32) $(LIBCAPSTONE64):
 	git submodule update --init
-	cp $(CSCONF) src/capstone/config.mk
+	cp data/capstone-config.mk src/capstone/config.mk
 	cd src/capstone/ && \
 	BUILDDIR=../../objects/x86/capstone/ ./make.sh cross-win32 && \
 	cp ../../objects/x86/capstone/capstone.lib capstone-x86.lib && \
