@@ -432,11 +432,26 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
             else if(*type == REG_EXPAND_SZ || *type == REG_SZ ||
                     *type == REG_MULTI_SZ) {
                 if(*fmt == 'r') {
-                    log_string(&b, idx, (const char *) data, *size);
+                    uint32_t length = *size;
+                    // Strings tend to be zero-terminated twice, so check for
+                    // that and if that's the case, then ignore the trailing
+                    // nullbyte.
+                    if(data != NULL &&
+                            strlen((const char *) data) == length - 1) {
+                        length--;
+                    }
+                    log_string(&b, idx, (const char *) data, length);
                 }
                 else {
-                    log_wstring(&b, idx, (const wchar_t *) data,
-                        *size / sizeof(wchar_t));
+                    uint32_t length = *size / sizeof(wchar_t);
+                    // Strings tend to be zero-terminated twice, so check for
+                    // that and if that's the case, then ignore the trailing
+                    // nullbyte.
+                    if(data != NULL &&
+                            lstrlenW((const wchar_t *) data) == length - 1) {
+                        length--;
+                    }
+                    log_wstring(&b, idx, (const wchar_t *) data, length);
                 }
             }
             else if(*type == REG_QWORD || *type == REG_QWORD_LITTLE_ENDIAN) {
