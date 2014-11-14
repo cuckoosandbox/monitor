@@ -24,8 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 void config_read(config_t *cfg)
 {
     char buf[512], config_fname[MAX_PATH];
-    sprintf(config_fname, "%s\\%lu.ini",
-        getenv("TEMP"), GetCurrentProcessId());
+    sprintf(config_fname, "C:\\cuckoo_%lu.ini", GetCurrentProcessId());
 
     memset(cfg, 0, sizeof(config_t));
 
