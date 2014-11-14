@@ -111,7 +111,7 @@ static uint64_t _stacktrace_hash()
 
 static uint64_t _parameter_hash(const char *fmt, va_list args)
 {
-    uint32_t value, hashcnt = 0, *valueptr; uintptr_t addr;
+    uint32_t value, hashcnt = 0, *valueptr; uintptr_t addr, value2;
     uint64_t hashes[64];
 
     while (*fmt != 0) {
@@ -137,15 +137,27 @@ static uint64_t _parameter_hash(const char *fmt, va_list args)
                 hash_stringW(va_arg(args, const wchar_t *), value);
             break;
 
-        case 'i': case 'l': case 'p':
+        case 'i':
             value = va_arg(args, uint32_t);
             hashes[hashcnt++] = hash_buffer(&value, sizeof(uint32_t));
             break;
 
-        case 'I': case 'L': case 'P':
+        case 'p':
+            value2 = va_arg(args, uintptr_t);
+            hashes[hashcnt++] = hash_buffer(&value2, sizeof(uintptr_t));
+            break;
+
+        case 'I':
             valueptr = va_arg(args, uint32_t *);
             if(valueptr != NULL) {
                 hashes[hashcnt++] = hash_buffer(valueptr, sizeof(uint32_t));
+            }
+            break;
+
+        case 'P':
+            valueptr = va_arg(args, uintptr_t *);
+            if(valueptr != NULL) {
+                hashes[hashcnt++] = hash_buffer(valueptr, sizeof(uintptr_t));
             }
             break;
 
