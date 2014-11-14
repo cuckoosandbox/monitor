@@ -268,6 +268,10 @@ Parameters::
     *  LPBYTE lpData
     *  LPDWORD lpcbData
 
+Flags::
+
+    reg_type
+
 Ensure::
 
     lpType
@@ -300,6 +304,10 @@ Parameters::
     *  LPBYTE lpData
     *  LPDWORD lpcbData
 
+Flags::
+
+    reg_type
+
 Ensure::
 
     lpType
@@ -330,6 +338,10 @@ Parameters::
     *  const BYTE *lpData
     *  DWORD cbData
 
+Flags::
+
+    reg_type
+
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
@@ -359,6 +371,10 @@ Parameters::
     *  const BYTE *lpData
     *  DWORD cbData
 
+Flags::
+
+    reg_type
+
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
@@ -387,6 +403,10 @@ Parameters::
     ** LPDWORD lpType reg_type
     *  LPBYTE lpData
     *  LPDWORD lpcbData
+
+Flags::
+
+    reg_type
 
 Ensure::
 
@@ -421,6 +441,10 @@ Parameters::
     ** LPDWORD lpType reg_type
     *  LPBYTE lpData
     *  LPDWORD lpcbData
+
+Flags::
+
+    reg_type
 
 Ensure::
 

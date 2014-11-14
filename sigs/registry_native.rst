@@ -200,6 +200,7 @@ Parameters::
 Flags::
 
     information_class
+    reg_type reg_type
 
 Ensure::
 
@@ -231,6 +232,7 @@ Logging::
 
     u regkey regkey
     u key_name key_name
+    i reg_type reg_type
     R value &reg_type, &data_length, data
 
 
@@ -246,6 +248,10 @@ Parameters::
     *  PVOID Data
     *  ULONG DataSize
 
+Flags::
+
+    reg_type reg_type
+
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
@@ -260,6 +266,7 @@ Interesting::
 
 Logging::
 
+    i reg_type Type
     R value &Type, &DataSize, Data
     u regkey regkey
 
@@ -279,6 +286,7 @@ Parameters::
 Flags::
 
     information_class
+    reg_type reg_type
 
 Ensure::
 
@@ -310,6 +318,7 @@ Logging::
 
     u regkey regkey
     u key_name key_name
+    i reg_type reg_type
     R value &reg_type, &data_length, data
 
 
