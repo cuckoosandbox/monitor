@@ -443,7 +443,7 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
                     log_string(&b, idx, (const char *) data, length);
                 }
                 else {
-                    uint32_t length = *size / sizeof(wchar_t);
+                    int32_t length = *size / sizeof(wchar_t);
                     // Strings tend to be zero-terminated twice, so check for
                     // that and if that's the case, then ignore the trailing
                     // nullbyte.
