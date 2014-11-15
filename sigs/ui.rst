@@ -154,8 +154,8 @@ Interesting::
     i language_identifier
 
 
-CreateWindowExA
-===============
+CreateWindowExA_
+================
 
 Parameters::
 
@@ -178,8 +178,8 @@ Flags::
     style
 
 
-CreateWindowExW
-===============
+CreateWindowExW_
+================
 
 Parameters::
 
