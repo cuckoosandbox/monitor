@@ -111,6 +111,7 @@ Parameters::
 
 Logging::
 
+    i sent ret
     b buffer len, buf
 
 
@@ -140,7 +141,8 @@ Logging::
 
     s ip_address ip
     i port port
-    b buffer ret > 0 ? ret : 0, buf
+    i sent ret
+    b buffer len, buf
 
 
 recv
@@ -160,7 +162,7 @@ Parameters::
 
 Logging::
 
-    b buffer len, buf
+    b buffer ret > 0 ? ret : 0, buf
 
 
 recvfrom
@@ -189,6 +191,7 @@ Logging::
 
     s ip_address ip
     i port port
+    b buffer ret > 0 ? ret : 0, buf
 
 
 accept
