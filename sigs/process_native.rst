@@ -285,6 +285,18 @@ Parameters::
     ** HANDLE ProcessHandle process_handle
     ** PVOID BaseAddress base_address
 
+Pre::
+
+    MEMORY_BASIC_INFORMATION mbi; uintptr_t region_size = 0;
+    if(VirtualQueryEx(ProcessHandle, BaseAddress, &mbi,
+            sizeof(mbi)) == sizeof(mbi)) {
+        region_size = mbi.RegionSize;
+    }
+
+Logging::
+
+    i region_size region_size
+
 
 NtAllocateVirtualMemory
 =======================
