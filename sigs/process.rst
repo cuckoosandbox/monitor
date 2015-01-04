@@ -116,7 +116,16 @@ Ensure::
 Pre::
 
     wchar_t *filepath = get_unicode_buffer();
-    path_get_full_pathW(pExecInfo->lpFile, filepath);
+    if(pExecInfo->lpFile != NULL) {
+        // In case it's a relative path we'll just stick to it.
+        wcsncpy(filepath, pExecInfo->lpFile);
+
+        // If this is not a relative path then we resolve the full path.
+        if(lstrlenW(pExecInfo->lpFile) > 2 && pExecInfo->lpFile[1] == ':' &&
+                pExecInfo->lpFile[2] == '\\') {
+            path_get_full_pathW(pExecInfo->lpFile, filepath);
+        }
+    }
 
 Interesting::
 
