@@ -32,6 +32,38 @@ Post::
     }
 
 
+InternetCrackUrlA
+=================
+
+Signature::
+
+    * Library: wininet
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPCSTR lpszUrl url
+    *  DWORD dwUrlLength
+    ** DWORD dwFlags flags
+    *  LPURL_COMPONENTSA lpUrlComponents
+
+
+InternetCrackUrlW
+=================
+
+Signature::
+
+    * Library: wininet
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPCWSTR lpszUrl url
+    *  DWORD dwUrlLength
+    ** DWORD dwFlags flags
+    *  LPURL_COMPONENTSW lpUrlComponents
+
+
 InternetOpenA
 =============
 
