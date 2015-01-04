@@ -279,6 +279,11 @@ Parameters::
     ** HANDLE hSnapshot snapshot_handle
     *  LPPROCESSENTRY32W lppe
 
+Logging::
+
+    u process_name lppe->szExeFile
+    i process_id lppe->th32ProcessID
+
 
 Process32NextW
 ==============
@@ -292,6 +297,11 @@ Parameters::
 
     ** HANDLE hSnapshot snapshot_handle
     *  LPPROCESSENTRY32W lppe
+
+Logging::
+
+    u process_name lppe->szExeFile
+    i process_id lppe->th32ProcessID
 
 
 Module32FirstW
