@@ -373,10 +373,10 @@ Parameters::
     *  ULONG_PTR ZeroBits
     ** SIZE_T CommitSize commit_size
     ** PLARGE_INTEGER SectionOffset section_offset
-    *  PSIZE_T ViewSize
+    ** PSIZE_T ViewSize view_size
     *  UINT InheritDisposition
     ** ULONG AllocationType allocation_type
-    *  ULONG Win32Protect
+    ** ULONG Win32Protect win32_protect
 
 Post::
 
