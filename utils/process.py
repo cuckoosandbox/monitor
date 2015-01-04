@@ -348,7 +348,7 @@ class SignatureProcessor(object):
                         raise Exception(
                             'No dereference definition available for '
                             'argument type %r. Please add it to '
-                            'conf/dereference.conf' % arg['argtype'])
+                            'data/dereference.conf' % arg['argtype'])
 
                     ensure[arg['argname']] = self.dereference[arg['argtype']]
 

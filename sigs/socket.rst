@@ -592,6 +592,7 @@ WSAConnect
 
 Signature::
 
+    * Is success: ret == 0
     * Return value: int
 
 Parameters::
