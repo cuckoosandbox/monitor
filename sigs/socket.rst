@@ -587,6 +587,36 @@ Logging::
     i socket ret
 
 
+WSAConnect
+==========
+
+Signature::
+
+    * Return value: int
+
+Parameters::
+
+    ** SOCKET s
+    *  const struct sockaddr *name
+    *  int namelen
+    *  LPWSABUF lpCallerData
+    *  LPWSABUF lpCalleeData
+    *  LPQOS lpSQOS
+    *  LPQOS lpGQOS
+
+Pre::
+
+    const char *ip = NULL; int port = 0;
+    get_ip_port(name, &ip, &port);
+
+    // TODO Dump lpCallerData and lpCalleeData.
+
+Logging::
+
+    s ip_address ip
+    i port port
+
+
 ConnectEx
 =========
 
