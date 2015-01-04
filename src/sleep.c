@@ -81,16 +81,23 @@ void sleep_skip_disable()
     }
 }
 
+void sleep_apply_filetime(FILETIME *ft)
+{
+    LARGE_INTEGER li;
+
+    li.HighPart = ft->dwHighDateTime;
+    li.LowPart = ft->dwLowDateTime;
+    li.QuadPart += g_time_skipped.QuadPart;
+    ft->dwHighDateTime = li.HighPart;
+    ft->dwLowDateTime = li.LowPart;
+}
+
 void sleep_apply_systemtime(SYSTEMTIME *st)
 {
-    LARGE_INTEGER li; FILETIME ft;
+    FILETIME ft;
 
     SystemTimeToFileTime(st, &ft);
-    li.HighPart = ft.dwHighDateTime;
-    li.LowPart = ft.dwLowDateTime;
-    li.QuadPart += g_time_skipped.QuadPart;
-    ft.dwHighDateTime = li.HighPart;
-    ft.dwLowDateTime = li.LowPart;
+    sleep_apply_filetime(&ft);
     FileTimeToSystemTime(&ft, st);
 }
 

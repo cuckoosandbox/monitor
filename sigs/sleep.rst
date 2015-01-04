@@ -83,6 +83,24 @@ Post::
     ret += sleep_skipped() / 10000;
 
 
+GetSystemTimeAsFileTime
+=======================
+
+Signature::
+
+    * Is success: 1
+    * Library: kernel32
+    * Return value: void
+
+Parameters::
+
+    *  LPFILETIME lpSystemTimeAsFileTime
+
+Post::
+
+    sleep_apply_filetime(lpSystemTimeAsFileTime);
+
+
 NtQuerySystemTime
 =================
 

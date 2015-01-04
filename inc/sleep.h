@@ -29,6 +29,7 @@ int sleep_skip(LARGE_INTEGER *delay);
 
 void sleep_skip_disable();
 
+void sleep_apply_filetime(FILETIME *ft);
 void sleep_apply_systemtime(SYSTEMTIME *st);
 uint64_t sleep_skipped();
 
