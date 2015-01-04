@@ -1,0 +1,18 @@
+ALG_ID
+======
+
+Value::
+
+    CALG_MD2
+    CALG_MD5
+    CALG_SHA1
+    CALG_MAC
+    CALG_HMAC
+    CALG_SSL3_SHAMD5
+    CALG_RSA_SIGN
+    CALG_RSA_KEYX
+    CALG_RC2
+    CALG_RC4
+    CALG_DES
+    CALG_3DES
+    CALG_3DES_112

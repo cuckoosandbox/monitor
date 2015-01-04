@@ -374,6 +374,10 @@ Parameters::
     ** DWORD dwFlags flags
     ** HCRYPTKEY *phKey crypto_handle
 
+Flags::
+
+    algorithm_identifier
+
 
 CryptCreateHash
 ===============
@@ -390,3 +394,7 @@ Parameters::
     ** HCRYPTKEY hKey crypto_handle
     ** DWORD dwFlags flags
     ** HCRYPTHASH *phHash hash_handle
+
+Flags::
+
+    algorithm_identifier
