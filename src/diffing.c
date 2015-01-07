@@ -72,8 +72,7 @@ static uint64_t _address_hash(uintptr_t addr)
 
     // What else to return?
     if(g_module_count == MAX_MODULE_COUNT) {
-        pipe("CRITICAL:Exceeding the maximum amount of "
-            "supported modules!");
+        pipe("CRITICAL:Exceeding the maximum amount of supported modules!");
         return INTERESTING_HASH;
     }
 
