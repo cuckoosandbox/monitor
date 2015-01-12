@@ -282,3 +282,21 @@ Parameters::
     ** LPCWSTR username username
     ** DWORD level level
     *  LPBYTE *bufptr
+
+
+SetErrorMode
+============
+
+Signature::
+
+    * Is success: 1
+    * Library: kernel32
+    * Return value: UINT
+
+Parameters::
+
+    ** UINT uMode mode
+
+Flags::
+
+    mode

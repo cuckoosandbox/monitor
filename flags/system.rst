@@ -34,3 +34,14 @@ SetWindowsHookExW_idHook
 Inherits::
 
     WINDOWS_HOOKS
+
+
+SetErrorMode_uMode
+==================
+
+Enum::
+
+    SEM_FAILCRITICALERRORS
+    SEM_NOALIGNMENTFAULTEXCEPT
+    SEM_NOGPFAULTERRORBOX
+    SEM_NOOPENFILEERRORBOX
