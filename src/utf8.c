@@ -27,13 +27,13 @@ int utf8_encode(unsigned short c, unsigned char *out)
         return 1;
     }
     else if(c < 0x800) {
-        *out = 0xc0 + ((c >> 8) << 2) + (c >> 6);
+        out[0] = 0xc0 + ((c >> 6) & 0x1f);
         out[1] = 0x80 + (c & 0x3f);
         return 2;
     }
     else {
-        *out = 0xe0 + (c >> 12);
-        out[1] = 0x80 + (((c >> 8) & 0x1f) << 2) + ((c >> 6) & 0x3);
+        out[0] = 0xe0 + ((c >> 12) & 0x0f);
+        out[1] = 0x80 + ((c >> 6) & 0x3f);
         out[2] = 0x80 + (c & 0x3f);
         return 3;
     }
