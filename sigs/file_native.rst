@@ -27,7 +27,7 @@ Flags::
 
     desired_access
     file_attributes
-    share_access
+    ShareAccess
     create_disposition
 
 Pre::
@@ -95,6 +95,7 @@ Parameters::
 Flags::
 
     desired_access
+    ShareAccess
 
 Pre::
 

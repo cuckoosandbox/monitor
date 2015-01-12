@@ -109,6 +109,14 @@ Enum::
     FILE_TRAVERSE
 
 
+NtOpenFile_DesiredAccess
+========================
+
+Inherits::
+
+    NtCreateFile_DesiredAccess
+
+
 NtCreateFile_FileAttributes
 ===========================
 
@@ -143,6 +151,14 @@ Enum::
     FILE_SHARE_READ
     FILE_SHARE_WRITE
     FILE_SHARE_DELETE
+
+
+NtOpenFile_ShareAccess
+======================
+
+Inherits::
+
+    NtCreateFile_ShareAccess
 
 
 NtCreateFile_CreateDisposition
