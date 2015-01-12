@@ -265,3 +265,20 @@ Parameters::
 Logging::
 
     i processor_count lpSystemInfo->dwNumberOfProcessors
+
+
+NetUserGetSystem
+================
+
+Signature::
+
+    * Is success: ret == 0
+    * Library: netapi32
+    * Return value: int
+
+Parameters::
+
+    ** LPCWSTR servername server_name
+    ** LPCWSTR username username
+    ** DWORD level level
+    *  LPBYTE *bufptr
