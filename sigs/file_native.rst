@@ -17,7 +17,7 @@ Parameters::
     *  PIO_STATUS_BLOCK IoStatusBlock
     *  PLARGE_INTEGER AllocationSize
     ** ULONG FileAttributes file_attributes
-    ** ULONG ShareAccess share_access
+    *  ULONG ShareAccess
     ** ULONG CreateDisposition create_disposition
     ** ULONG CreateOptions create_options
     *  PVOID EaBuffer
@@ -30,6 +30,11 @@ Flags::
     share_access
     create_disposition
 
+Pre::
+
+    uint32_t share_access = ShareAccess;
+    ShareAccess |= FILE_SHARE_READ;
+
 Middle::
 
     wchar_t *filepath = get_unicode_buffer();
@@ -37,6 +42,7 @@ Middle::
 
 Logging::
 
+    i share_access share_access
     u filepath filepath
 
 Post::
@@ -83,12 +89,17 @@ Parameters::
     ** ACCESS_MASK DesiredAccess desired_access
     *  POBJECT_ATTRIBUTES ObjectAttributes
     *  PIO_STATUS_BLOCK IoStatusBlock
-    ** ULONG ShareAccess share_access
+    *  ULONG ShareAccess
     ** ULONG OpenOptions open_options
 
 Flags::
 
     desired_access
+
+Pre::
+
+    uint32_t share_access = ShareAccess;
+    ShareAccess |= FILE_SHARE_READ;
 
 Middle::
 
@@ -97,6 +108,7 @@ Middle::
 
 Logging::
 
+    i share_access share_access
     u filepath filepath
 
 Post::
