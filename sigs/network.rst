@@ -42,10 +42,21 @@ Signature::
 
 Parameters::
 
-    ** LPCSTR lpszUrl url
+    *  LPCSTR lpszUrl
     *  DWORD dwUrlLength
     ** DWORD dwFlags flags
     *  LPURL_COMPONENTSA lpUrlComponents
+
+Pre::
+
+    uint32_t length = dwUrlLength;
+    if(length == 0 && lpszUrl != NULL) {
+        length = strlen(lpszUrl);
+    }
+
+Logging::
+
+    S url length, lpszUrl
 
 
 InternetCrackUrlW
@@ -58,10 +69,21 @@ Signature::
 
 Parameters::
 
-    ** LPCWSTR lpszUrl url
+    *  LPCWSTR lpszUrl
     *  DWORD dwUrlLength
     ** DWORD dwFlags flags
     *  LPURL_COMPONENTSW lpUrlComponents
+
+Pre::
+
+    uint32_t length = dwUrlLength;
+    if(length == 0 && lpszUrl != NULL) {
+        length = lstrlenW(lpszUrl);
+    }
+
+Logging::
+
+    U url length, lpszUrl
 
 
 InternetOpenA
