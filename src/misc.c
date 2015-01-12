@@ -339,7 +339,7 @@ int copy_object_attributes(const OBJECT_ATTRIBUTES *in,
     return -1;
 }
 
-uint32_t path_from_handle(HANDLE handle, wchar_t *path)
+static uint32_t _path_from_handle(HANDLE handle, wchar_t *path)
 {
     IO_STATUS_BLOCK status; FILE_FS_VOLUME_INFORMATION volume_information;
 
@@ -390,7 +390,7 @@ uint32_t path_from_handle(HANDLE handle, wchar_t *path)
     return 0;
 }
 
-uint32_t path_from_unicode_string(const UNICODE_STRING *unistr,
+static uint32_t _path_from_unicode_string(const UNICODE_STRING *unistr,
     wchar_t *path, uint32_t length)
 {
     if(unistr != NULL && unistr->Buffer != NULL && unistr->Length != 0) {
@@ -403,7 +403,7 @@ uint32_t path_from_unicode_string(const UNICODE_STRING *unistr,
     return 0;
 }
 
-uint32_t path_from_object_attributes(
+static uint32_t _path_from_object_attributes(
     const OBJECT_ATTRIBUTES *obj, wchar_t *path)
 {
     if(obj == NULL || obj->ObjectName == NULL ||
@@ -412,13 +412,13 @@ uint32_t path_from_object_attributes(
     }
 
     if(obj->RootDirectory == NULL) {
-        return path_from_unicode_string(obj->ObjectName, path, MAX_PATH_W);
+        return _path_from_unicode_string(obj->ObjectName, path, MAX_PATH_W);
     }
 
-    uint32_t offset = path_from_handle(obj->RootDirectory, path);
+    uint32_t offset = _path_from_handle(obj->RootDirectory, path);
     path[offset++] = '\\';
 
-    return path_from_unicode_string(obj->ObjectName,
+    return _path_from_unicode_string(obj->ObjectName,
         &path[offset], MAX_PATH_W - offset);
 }
 
@@ -543,7 +543,7 @@ uint32_t path_get_full_path_handle(HANDLE file_handle, wchar_t *out)
 {
     wchar_t *input = get_unicode_buffer();
 
-    if(path_from_handle(file_handle, input) != 0) {
+    if(_path_from_handle(file_handle, input) != 0) {
         return path_get_full_pathW(input, out);
     }
 
@@ -569,7 +569,7 @@ uint32_t path_get_full_path_objattr(const OBJECT_ATTRIBUTES *in, wchar_t *out)
 {
     wchar_t *input = get_unicode_buffer();
 
-    if(path_from_object_attributes(in, input) != 0) {
+    if(_path_from_object_attributes(in, input) != 0) {
         return path_get_full_pathW(input, out);
     }
 

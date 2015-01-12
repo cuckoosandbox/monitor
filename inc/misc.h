@@ -32,12 +32,6 @@ uintptr_t pid_from_thread_handle(HANDLE thread_handle);
 uintptr_t tid_from_thread_handle(HANDLE thread_handle);
 uintptr_t parent_process_id();
 
-uint32_t path_from_handle(HANDLE handle, wchar_t *path);
-uint32_t path_from_unicode_string(const UNICODE_STRING *unistr,
-    wchar_t *path, uint32_t length);
-uint32_t path_from_object_attributes(
-    const OBJECT_ATTRIBUTES *obj, wchar_t *path);
-
 uint32_t path_get_full_pathA(const char *in, wchar_t *out);
 uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out);
 uint32_t path_get_full_path_handle(HANDLE file_handle, wchar_t *out);
