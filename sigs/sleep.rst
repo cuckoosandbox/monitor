@@ -119,3 +119,17 @@ Post::
     if(NT_SUCCESS(ret) != FALSE) {
         SystemTime->QuadPart += sleep_skipped();
     }
+
+
+timeGetTime
+===========
+
+Signature::
+
+    * Is success: 1
+    * Library: winmm
+    * Return value: DWORD
+
+Post::
+
+    ret += sleep_skipped() / 10000;
