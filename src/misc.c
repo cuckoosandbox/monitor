@@ -407,77 +407,88 @@ uint32_t path_get_full_pathA(const char *in, wchar_t *out)
     return path_get_full_pathW(input, out);
 }
 
+static inline void swap(wchar_t **a, wchar_t **b)
+{
+    wchar_t *tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
 uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
 {
-    wchar_t *input = get_unicode_buffer(), *partial = get_unicode_buffer();
-    wchar_t *partial2 = get_unicode_buffer(), *last_ptr = NULL, *partial_ptr;
+    wchar_t *buf1 = get_unicode_buffer(), *buf2 = get_unicode_buffer();
+    wchar_t *pathi, *patho, *last_ptr = NULL;
 
     if(in == NULL) {
         out[0] = 0;
         return 0;
     }
 
+    wcscpy(buf1, in);
+    pathi = buf1, patho = buf2;
+
     // Check whether any of the known aliases are being used.
     for (uint32_t idx = 0; idx < g_alias_index; idx++) {
         uint32_t length = lstrlenW(g_aliases[idx][0]);
-        if(wcsnicmp(in, g_aliases[idx][0], length) == 0) {
-            wcscpy(input, g_aliases[idx][1]);
-            wcsncat(input, &in[length], MAX_PATH_W+1 - lstrlenW(input));
+        if(wcsnicmp(pathi, g_aliases[idx][0], length) == 0) {
+            wcscpy(patho, g_aliases[idx][1]);
+            wcsncat(patho, &pathi[length], MAX_PATH_W+1 - lstrlenW(patho));
+            swap(&pathi, &patho);
             break;
         }
     }
 
-    // First normalize the input file path.
-    if(wcsncmp(in, L"\\??\\", 4) == 0 || wcsncmp(in, L"\\\\?\\", 4) == 0) {
-        wcscpy(input, L"\\\\?\\");
-        wcsncat(input, in + 4, MAX_PATH_W+1 - 4);
+    // Normalize the input file path.
+    if(wcsncmp(pathi, L"\\??\\", 4) == 0 ||
+            wcsncmp(pathi, L"\\\\?\\", 4) == 0) {
+        memcpy(pathi, L"\\\\?\\", 4 * sizeof(wchar_t));
     }
-    // If the path doesn't start with C: or similar then it's not an absolute
-    // path and we shouldn't prepend "\\\\?\\".
-    else if(in[1] != ':') {
-        wcsncpy(input, in, MAX_PATH_W+1);
-    }
-    else {
-        wcscpy(input, L"\\\\?\\");
-        wcsncat(input, in, MAX_PATH_W+1 - 4);
+    // If the path starts with C: or similar then it's an absolute
+    // path and we should prepend "\\\\?\\".
+    else if(pathi[1] == ':') {
+        wcscpy(patho, L"\\\\?\\");
+        wcsncat(patho, pathi, MAX_PATH_W+1 - 4);
+        swap(&pathi, &patho);
     }
 
     // We don't further modify ignored filepaths.
-    if(is_ignored_filepath(input) != 0) {
-        wcscpy(out, input);
+    if(is_ignored_filepath(pathi) != 0) {
+        wcscpy(out, pathi);
         return lstrlenW(out);
     }
 
     // Try to obtain the full path. If this fails, then we don't do any
     // further modifications to the path as it is not an actual file.
-    if(GetFullPathNameW(input, MAX_PATH_W+1, partial, NULL) == 0) {
+    if(GetFullPathNameW(pathi, MAX_PATH_W+1, patho, NULL) == 0) {
         // Ignore the "\\\\?\\" part.
-        if(wcsnicmp(input, L"\\\\?\\", 4) == 0) {
-            wcscpy(out, input + 4);
+        if(wcsnicmp(pathi, L"\\\\?\\", 4) == 0) {
+            wcscpy(out, pathi + 4);
         }
         else {
-            wcscpy(out, input);
+            wcscpy(out, pathi);
         }
         return lstrlenW(out);
     }
 
-    partial_ptr = partial;
-    if(wcsnicmp(partial, L"\\\\?\\", 4) == 0) {
-        partial_ptr = &partial[4];
+    swap(&pathi, &patho);
+
+    wchar_t *baseptr = pathi;
+    if(wcsnicmp(pathi, L"\\\\?\\", 4) == 0) {
+        baseptr = &pathi[4];
     }
 
     // Find the longest path that we can query as long path and use that to
     // craft our final path.
     while (1) {
         // Ignore the "\\\\?\\" part.
-        wchar_t *ptr = wcsrchr(partial_ptr, '\\');
+        wchar_t *ptr = wcsrchr(baseptr, '\\');
         if(ptr == NULL) {
             // No matches, copy the whole thing over.
             if(last_ptr != NULL) {
                 *last_ptr = '\\';
             }
 
-            wcscpy(out, partial_ptr);
+            wcscpy(out, baseptr);
             return lstrlenW(out);
         }
 
@@ -486,22 +497,21 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
             *ptr = 0;
         }
 
-        if(GetLongPathNameW(partial, partial2, MAX_PATH_W+1) != 0) {
+        if(GetLongPathNameW(pathi, patho, MAX_PATH_W+1) != 0) {
             // Copy the first part except for the "\\\\?\\" part.
-            if(wcsnicmp(partial2, L"\\\\?\\", 4) == 0) {
-                wcscpy(out, partial2 + 4);
+            if(wcsnicmp(patho, L"\\\\?\\", 4) == 0) {
+                wcscpy(out, patho + 4);
             }
             else {
-                wcscpy(out, partial2);
+                wcscpy(out, patho);
             }
 
             // Only append the remainder if this is not the full path.
             if(last_ptr != NULL) {
-                // Directory separator.
-                wcscat(out, L"\\");
-
-                // Everything that's behind the long path that we found.
-                wcscat(out, ptr + 1);
+                // Everything that's behind the long path that we found
+                // including directory seperator.
+                *ptr = '\\';
+                wcscat(out, ptr);
             }
             return lstrlenW(out);
         }
