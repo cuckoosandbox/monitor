@@ -143,8 +143,8 @@ Enum::
     FILE_FLAG_WRITE_THROUGH
 
 
-NtCreateFile_ShareAccess
-========================
+ShareAccessFlags
+================
 
 Enum::
 
@@ -153,12 +153,20 @@ Enum::
     FILE_SHARE_DELETE
 
 
+NtCreateFile_ShareAccess
+========================
+
+Inherits::
+
+    ShareAccessFlags
+
+
 NtOpenFile_ShareAccess
 ======================
 
 Inherits::
 
-    NtCreateFile_ShareAccess
+    ShareAccessFlags
 
 
 NtCreateFile_CreateDisposition
