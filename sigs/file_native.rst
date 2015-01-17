@@ -29,6 +29,7 @@ Flags::
     file_attributes
     share_access
     create_disposition
+    create_options
 
 Pre::
 
@@ -96,6 +97,7 @@ Flags::
 
     desired_access
     share_access
+    open_options
 
 Pre::
 
