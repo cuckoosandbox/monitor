@@ -490,6 +490,19 @@ typedef struct _KEY_NAME_INFORMATION {
     WCHAR Name[1];
 } KEY_NAME_INFORMATION, *PKEY_NAME_INFORMATION;
 
+typedef enum _OBJECT_INFORMATION_CLASS {
+    ObjectBasicInformation,
+    ObjectNameInformation,
+    ObjectTypeInformation,
+    ObjectAllInformation,
+    ObjectDataInformation
+} OBJECT_INFORMATION_CLASS;
+
+typedef struct _OBJECT_NAME_INFORMATION {
+    UNICODE_STRING Name;
+    WCHAR NameBuffer[1];
+} OBJECT_NAME_INFORMATION, *POBJECT_NAME_INFORMATION;
+
 typedef int EXTENDED_NAME_FORMAT;
 
 static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)

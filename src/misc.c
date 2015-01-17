@@ -67,20 +67,20 @@ static NTSTATUS (WINAPI *pNtQueryVolumeInformationFile)(
     FS_INFORMATION_CLASS FsInformationClass
 );
 
-static NTSTATUS (WINAPI *pNtQueryInformationFile)(
-    HANDLE FileHandle,
-    PIO_STATUS_BLOCK IoStatusBlock,
-    PVOID FileInformation,
-    ULONG Length,
-    FILE_INFORMATION_CLASS FileInformationClass
-);
-
 static NTSTATUS (WINAPI *pNtQueryKey)(
     HANDLE KeyHandle,
     KEY_INFORMATION_CLASS KeyInformationClass,
     PVOID KeyInformation,
     ULONG Length,
     PULONG ResultLength
+);
+
+static NTSTATUS (WINAPI *pNtQueryObject)(
+    HANDLE Handle,
+    OBJECT_INFORMATION_CLASS ObjectInformationClass,
+    PVOID ObjectInformation,
+    ULONG ObjectInformationLength,
+    PULONG ReturnLength
 );
 
 static PVOID (WINAPI *pRtlAddVectoredExceptionHandler)(
@@ -116,11 +116,11 @@ void misc_init(const char *shutdown_mutex)
     *(FARPROC *) &pNtQueryVolumeInformationFile =
         GetProcAddress(mod, "NtQueryVolumeInformationFile");
 
-    *(FARPROC *) &pNtQueryInformationFile =
-        GetProcAddress(mod, "NtQueryInformationFile");
-
     *(FARPROC *) &pNtQueryKey =
         GetProcAddress(mod, "NtQueryKey");
+
+    *(FARPROC *) &pNtQueryObject =
+        GetProcAddress(mod, "NtQueryObject");
 
     *(FARPROC *) &pRtlAddVectoredExceptionHandler =
         GetProcAddress(mod, "RtlAddVectoredExceptionHandler");
@@ -341,53 +341,24 @@ int copy_object_attributes(const OBJECT_ATTRIBUTES *in,
 
 static uint32_t _path_from_handle(HANDLE handle, wchar_t *path)
 {
-    IO_STATUS_BLOCK status; FILE_FS_VOLUME_INFORMATION volume_information;
+    ULONG return_length;
 
-    // Get the volume serial number of the directory handle.
-    if(NT_SUCCESS(pNtQueryVolumeInformationFile(handle, &status,
-            &volume_information, sizeof(volume_information),
-            FileFsVolumeInformation)) == FALSE) {
-        *path = 0;
+    OBJECT_NAME_INFORMATION *object_name = (OBJECT_NAME_INFORMATION *)
+        calloc(1, OBJECT_NAME_INFORMATION_REQUIRED_SIZE);
+    if(object_name == NULL) return 0;
+
+    if(NT_SUCCESS(pNtQueryObject(handle, ObjectNameInformation, object_name,
+            OBJECT_NAME_INFORMATION_REQUIRED_SIZE,
+            &return_length)) == FALSE) {
+        free(object_name);
         return 0;
     }
 
-    FILE_NAME_INFORMATION *name_information = (FILE_NAME_INFORMATION *)
-        calloc(1, FILE_NAME_INFORMATION_REQUIRED_SIZE);
-    if(name_information == NULL) return 0;
+    memcpy(path, object_name->Name.Buffer, object_name->Name.Length);
+    path[object_name->Name.Length / sizeof(wchar_t)] = 0;
 
-    unsigned long serial_number;
-
-    // Enumerate all harddisks in order to find the
-    // corresponding serial number.
-    wcscpy(path, L"?:\\");
-    for (path[0] = 'A'; path[0] <= 'Z'; path[0]++) {
-        if(GetVolumeInformationW(path, NULL, 0, &serial_number, NULL,
-                NULL, NULL, 0) == FALSE ||
-                serial_number != volume_information.VolumeSerialNumber) {
-            continue;
-        }
-
-        // Obtain the relative path for this filename on the given harddisk.
-        if(NT_SUCCESS(pNtQueryInformationFile(handle, &status,
-                name_information, FILE_NAME_INFORMATION_REQUIRED_SIZE,
-                FileNameInformation)) == FALSE) {
-            continue;
-        }
-
-        uint32_t length = name_information->FileNameLength / sizeof(wchar_t);
-
-        // NtQueryInformationFile returns the filepath. Either relative
-        // (without backslash) or full path (with backslash.)
-        memcpy(path + 2, name_information->FileName,
-            name_information->FileNameLength);
-
-        path[2 + length] = 0;
-
-        free(name_information);
-        return length + 2;
-    }
-    free(name_information);
-    return 0;
+    free(object_name);
+    return lstrlenW(path);
 }
 
 static uint32_t _path_from_unicode_string(const UNICODE_STRING *unistr,

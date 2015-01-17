@@ -104,8 +104,8 @@ uint32_t module_image_size(const uint8_t *addr);
     copy_object_attributes(param_name, &local_name, &local_name##_unistr, \
         local_name##_buffer, sizeof(local_name##_buffer));
 
-#define FILE_NAME_INFORMATION_REQUIRED_SIZE \
-    sizeof(FILE_NAME_INFORMATION) + sizeof(wchar_t) * MAX_PATH_W
+#define OBJECT_NAME_INFORMATION_REQUIRED_SIZE \
+    sizeof(OBJECT_NAME_INFORMATION) + sizeof(wchar_t) * MAX_PATH_W
 
 #define PAGE_READABLE \
     (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | \
