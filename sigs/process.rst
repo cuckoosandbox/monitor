@@ -212,6 +212,10 @@ Parameters::
     ** DWORD flNewProtect protection
     *  PDWORD lpflOldProtect
 
+Flags::
+
+    protection
+
 
 VirtualFreeEx
 =============

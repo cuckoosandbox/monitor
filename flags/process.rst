@@ -23,3 +23,37 @@ Enum::
     DETACHED_PROCESS
     EXTENDED_STARTUPINFO_PRESENT
     INHERIT_PARENT_AFFINITY
+
+
+MemoryProtectionFlags
+=====================
+
+Enum::
+
+    PAGE_EXECUTE
+    PAGE_EXECUTE_READ
+    PAGE_EXECUTE_READWRITE
+    PAGE_EXECUTE_WRITECOPY
+    PAGE_NOACCESS
+    PAGE_READONLY
+    PAGE_READWRITE
+    PAGE_WRITECOPY
+    PAGE_GUARD
+    PAGE_NOCACHE
+    PAGE_WRITECOMBINE
+
+
+VirtualProtectEx_flNewProtect
+=============================
+
+Inherits::
+
+    MemoryProtectionFlags
+
+
+NtProtectVirtualMemory_NewAccessProtection
+==========================================
+
+Inherits::
+
+    MemoryProtectionFlags

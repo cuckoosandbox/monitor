@@ -362,6 +362,10 @@ Parameters::
     ** ULONG NewAccessProtection protection
     *  PULONG OldAccessProtection
 
+Flags::
+
+    protection
+
 
 NtFreeVirtualMemory
 ===================
