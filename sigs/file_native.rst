@@ -17,7 +17,7 @@ Parameters::
     *  PIO_STATUS_BLOCK IoStatusBlock
     *  PLARGE_INTEGER AllocationSize
     ** ULONG FileAttributes file_attributes
-    *  ULONG ShareAccess
+    *  ULONG ShareAccess share_access
     ** ULONG CreateDisposition create_disposition
     ** ULONG CreateOptions create_options
     *  PVOID EaBuffer
@@ -27,7 +27,7 @@ Flags::
 
     desired_access
     file_attributes
-    ShareAccess
+    share_access
     create_disposition
 
 Pre::
@@ -89,13 +89,13 @@ Parameters::
     ** ACCESS_MASK DesiredAccess desired_access
     *  POBJECT_ATTRIBUTES ObjectAttributes
     *  PIO_STATUS_BLOCK IoStatusBlock
-    *  ULONG ShareAccess
+    *  ULONG ShareAccess share_access
     ** ULONG OpenOptions open_options
 
 Flags::
 
     desired_access
-    ShareAccess
+    share_access
 
 Pre::
 
