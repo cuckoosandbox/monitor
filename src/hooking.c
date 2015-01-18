@@ -33,54 +33,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "slist.h"
 #include "unhook.h"
 
-#if __x86_64__
-#define TLS_HOOK_INFO 0x80
-#else
-#define TLS_HOOK_INFO 0x44
-#endif
-
 static uintptr_t g_retaddr_spoofed[MONITOR_HOOKCNT][2];
 static uint32_t g_retaddr_length = 0;
 
-hook_info_t *hook_alloc()
-{
-    // As we hook the system call for allocating one or more page(s) of
-    // memory, NtAllocateVirtualMemory, and we have to allocate memory, we
-    // might enter an infinite loop when the heap layer runs out of heap
-    // memory and tries to fetch new memory; there will not be a hook_info_t
-    // object associated to this thread and the NtAllocateVirtualMemory will
-    // require such object as well. Therefore we temporarily spoof a
-    // hook_object_t object for this thread while we allocate memory for the
-    // real object. (Note that we also have to spoof the "simple list" as it's
-    // also initialized through heap memory allocated with malloc().)
-
-    uintptr_t retaddrs[32];
-
-    hook_info_t spoof = {
-        .hook_count = 0,
-        .last_error = 0,
-        .retaddr = (slist_t) {
-            .index = 0,
-            .length = 32,
-            .value = retaddrs,
-        },
-    };
-
-    writetls(TLS_HOOK_INFO, (uintptr_t) &spoof);
-    hook_disable();
-
-    hook_info_t *ret = (hook_info_t *) calloc(1, sizeof(hook_info_t));
-    slist_init(&ret->retaddr, 128);
-    writetls(TLS_HOOK_INFO, (uintptr_t) ret);
-    return ret;
-}
+static hook_info_t **g_hook_infos;
+static uint32_t g_hook_info_length;
 
 hook_info_t *hook_info()
 {
-    hook_info_t *ret = (hook_info_t *) readtls(TLS_HOOK_INFO);
-    if(ret == NULL) {
-        ret = hook_alloc();
+    uintptr_t tid = tid_from_thread_handle(GetCurrentThread());
+
+    if(tid < g_hook_info_length && g_hook_infos[tid] != NULL) {
+        return g_hook_infos[tid];
     }
+
+    if(tid >= g_hook_info_length || g_hook_infos == NULL) {
+        g_hook_infos = (hook_info_t **)
+            realloc(g_hook_infos, tid * sizeof(hook_info_t *));
+        if(g_hook_infos == NULL) {
+            pipe("CRITICAL:Error reallocating hook-info list..");
+            return NULL;
+        }
+        g_hook_info_length = tid;
+    }
+
+    hook_info_t *ret = (hook_info_t *) calloc(1, sizeof(hook_info_t));
+    slist_init(&ret->retaddr, 128);
+    g_hook_infos[tid] = ret;
     return ret;
 }
 
