@@ -174,8 +174,11 @@ uintptr_t pid_from_process_handle(HANDLE process_handle)
 {
     PROCESS_BASIC_INFORMATION pbi; ULONG size; uintptr_t ret = 0;
 
-    if(process_handle != GetCurrentProcess() &&
-            DuplicateHandle(GetCurrentProcess(), process_handle,
+    if(process_handle == GetCurrentProcess()) {
+        return GetCurrentProcessId();
+    }
+
+    if(DuplicateHandle(GetCurrentProcess(), process_handle,
             GetCurrentProcess(), &process_handle, PROCESS_QUERY_INFORMATION,
             FALSE, 0) == FALSE) {
         return 0;
@@ -187,9 +190,7 @@ uintptr_t pid_from_process_handle(HANDLE process_handle)
         ret = pbi.UniqueProcessId;
     }
 
-    if(process_handle != GetCurrentProcess()) {
-        CloseHandle(process_handle);
-    }
+    CloseHandle(process_handle);
     return ret;
 }
 
@@ -197,8 +198,11 @@ uintptr_t pid_from_thread_handle(HANDLE thread_handle)
 {
     THREAD_BASIC_INFORMATION tbi; ULONG size; uintptr_t ret = 0;
 
-    if(thread_handle != GetCurrentThread() &&
-            DuplicateHandle(GetCurrentProcess(), thread_handle,
+    if(thread_handle == GetCurrentThread()) {
+        return GetCurrentProcessId();
+    }
+
+    if(DuplicateHandle(GetCurrentProcess(), thread_handle,
             GetCurrentProcess(), &thread_handle, THREAD_QUERY_INFORMATION,
             FALSE, 0) == FALSE) {
         return 0;
@@ -210,9 +214,7 @@ uintptr_t pid_from_thread_handle(HANDLE thread_handle)
         ret = (uintptr_t) tbi.ClientId.UniqueProcess;
     }
 
-    if(thread_handle != GetCurrentThread()) {
-        CloseHandle(thread_handle);
-    }
+    CloseHandle(thread_handle);
     return ret;
 }
 
@@ -220,8 +222,11 @@ uintptr_t tid_from_thread_handle(HANDLE thread_handle)
 {
     THREAD_BASIC_INFORMATION tbi; ULONG size; uintptr_t ret = 0;
 
-    if(thread_handle != GetCurrentThread() &&
-            DuplicateHandle(GetCurrentProcess(), thread_handle,
+    if(thread_handle == GetCurrentThread()) {
+        return GetCurrentThreadId();
+    }
+
+    if(DuplicateHandle(GetCurrentProcess(), thread_handle,
             GetCurrentProcess(), &thread_handle, THREAD_QUERY_INFORMATION,
             FALSE, 0) == FALSE) {
         return 0;
@@ -233,9 +238,7 @@ uintptr_t tid_from_thread_handle(HANDLE thread_handle)
         ret = (uintptr_t) tbi.ClientId.UniqueThread;
     }
 
-    if(thread_handle != GetCurrentThread()) {
-        CloseHandle(thread_handle);
-    }
+    CloseHandle(thread_handle);
     return ret;
 }
 
