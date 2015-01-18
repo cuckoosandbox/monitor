@@ -50,12 +50,12 @@ hook_info_t *hook_info()
 
     if(tid >= g_hook_info_length || g_hook_infos == NULL) {
         g_hook_infos = (hook_info_t **)
-            realloc(g_hook_infos, tid * sizeof(hook_info_t *));
+            realloc(g_hook_infos, (tid + 1) * sizeof(hook_info_t *));
         if(g_hook_infos == NULL) {
             pipe("CRITICAL:Error reallocating hook-info list..");
             return NULL;
         }
-        g_hook_info_length = tid;
+        g_hook_info_length = tid + 1;
     }
 
     hook_info_t *ret = (hook_info_t *) calloc(1, sizeof(hook_info_t));
