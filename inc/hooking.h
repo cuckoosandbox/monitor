@@ -54,6 +54,7 @@ typedef struct _hook_t {
     hook_data_t *data;
 } hook_t;
 
+void hook_init();
 hook_info_t *hook_info();
 
 void hook_disable();

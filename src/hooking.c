@@ -39,13 +39,23 @@ static uint32_t g_retaddr_length = 0;
 
 static hook_info_t **g_hook_infos;
 static uint32_t g_hook_info_length;
+static CRITICAL_SECTION g_hook_info_cs;
+
+void hook_init()
+{
+    InitializeCriticalSection(&g_hook_info_cs);
+}
 
 hook_info_t *hook_info()
 {
     uintptr_t tid = tid_from_thread_handle(GetCurrentThread()) / 4;
 
+    EnterCriticalSection(&g_hook_info_cs);
+
     if(tid < g_hook_info_length && g_hook_infos[tid] != NULL) {
-        return g_hook_infos[tid];
+        hook_info_t *ret = g_hook_infos[tid];
+        LeaveCriticalSection(&g_hook_info_cs);
+        return ret;
     }
 
     if(tid >= g_hook_info_length || g_hook_infos == NULL) {
@@ -53,6 +63,7 @@ hook_info_t *hook_info()
             realloc(g_hook_infos, (tid + 1) * sizeof(hook_info_t *));
         if(g_hook_infos == NULL) {
             pipe("CRITICAL:Error reallocating hook-info list..");
+            LeaveCriticalSection(&g_hook_info_cs);
             return NULL;
         }
 
@@ -65,6 +76,7 @@ hook_info_t *hook_info()
     hook_info_t *ret = (hook_info_t *) calloc(1, sizeof(hook_info_t));
     slist_init(&ret->retaddr, 128);
     g_hook_infos[tid] = ret;
+    LeaveCriticalSection(&g_hook_info_cs);
     return ret;
 }
 
