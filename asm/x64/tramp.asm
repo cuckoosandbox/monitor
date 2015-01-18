@@ -19,7 +19,6 @@
 %ifndef tramp_special
 global asm_tramp
 global asm_tramp_size
-global asm_tramp_hook_alloc_off
 global asm_tramp_hook_handler_off
 global asm_tramp_orig_func_stub_off
 global asm_tramp_retaddr_off
@@ -27,14 +26,14 @@ global asm_tramp_retaddr_add_off
 %else
 global asm_tramp_special
 global asm_tramp_special_size
-global asm_tramp_special_hook_alloc_off
 global asm_tramp_special_hook_handler_off
 global asm_tramp_special_orig_func_stub_off
 global asm_tramp_special_retaddr_off
 global asm_tramp_special_retaddr_add_off
 %endif
 
-%define TLS_HOOK_INFO 0x80
+extern hook_info
+
 %define TLS_TEB       0x30
 %define TEB_LASTERR   0x68
 
@@ -44,13 +43,16 @@ global asm_tramp_special_retaddr_add_off
 _asm_tramp:
 
     ; fetch hook-info
-    mov rax, qword [gs:TLS_HOOK_INFO]
+    push rax
+    pushad
+    call qword [hook_info]
+    mov qword [rsp+128], rax
+    popad
+    pop rax
+
     jmp _tramp_addresses
 
 align 8
-
-_tramp_hook_alloc:
-    dq 0xcccccccccccccccc
 
 _tramp_hook_handler:
     dq 0xcccccccccccccccc
@@ -65,23 +67,6 @@ _tramp_retaddr_add:
     dq 0xcccccccccccccccc
 
 _tramp_addresses:
-
-    test rax, rax
-    jnz _tramp_check_count
-
-    ; create hook-info
-    call _tramp_getpc
-
-_tramp_getpc:
-    pop rax
-
-    pushad
-    call qword [rax+_tramp_hook_alloc-_tramp_getpc]
-    popad
-
-    mov rax, qword [gs:TLS_HOOK_INFO]
-
-_tramp_check_count:
 
 %ifndef tramp_special
 
@@ -137,7 +122,6 @@ _tramp_end:
 %ifndef tramp_special
 asm_tramp dq _asm_tramp
 asm_tramp_size dd _tramp_end - _asm_tramp
-asm_tramp_hook_alloc_off dd _tramp_hook_alloc - _asm_tramp
 asm_tramp_hook_handler_off dd _tramp_hook_handler - _asm_tramp
 asm_tramp_orig_func_stub_off dd _tramp_orig_func_stub - _asm_tramp
 asm_tramp_retaddr_off dd _tramp_retaddr - _asm_tramp
@@ -145,7 +129,6 @@ asm_tramp_retaddr_add_off dd _tramp_retaddr_add - _asm_tramp
 %else
 asm_tramp_special dq _asm_tramp
 asm_tramp_special_size dd _tramp_end - _asm_tramp
-asm_tramp_special_hook_alloc_off dd _tramp_hook_alloc - _asm_tramp
 asm_tramp_special_hook_handler_off dd _tramp_hook_handler - _asm_tramp
 asm_tramp_special_orig_func_stub_off dd _tramp_orig_func_stub - _asm_tramp
 asm_tramp_special_retaddr_off dd _tramp_retaddr - _asm_tramp

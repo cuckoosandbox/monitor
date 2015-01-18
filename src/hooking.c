@@ -486,7 +486,6 @@ int hook2(hook_t *h)
     // Copy all buffers and patch a couple of pointers.
     if(h->special == 0) {
         memcpy(hd->trampoline, asm_tramp, asm_tramp_size);
-        PATCH(hd->trampoline, asm_tramp_hook_alloc_off, hook_alloc);
         PATCH(hd->trampoline, asm_tramp_hook_handler_off, h->handler);
         PATCH(hd->trampoline, asm_tramp_orig_func_stub_off, hd->func_stub);
         PATCH(hd->trampoline, asm_tramp_retaddr_off, hd->clean);
@@ -495,8 +494,6 @@ int hook2(hook_t *h)
     else {
         memcpy(hd->trampoline,
             asm_tramp_special, asm_tramp_special_size);
-        PATCH(hd->trampoline,
-            asm_tramp_special_hook_alloc_off, hook_alloc);
         PATCH(hd->trampoline,
             asm_tramp_special_hook_handler_off, h->handler);
         PATCH(hd->trampoline,

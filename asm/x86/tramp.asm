@@ -17,7 +17,6 @@
 %ifndef tramp_special
 global _asm_tramp
 global _asm_tramp_size
-global _asm_tramp_hook_alloc_off
 global _asm_tramp_hook_handler_off
 global _asm_tramp_orig_func_stub_off
 global _asm_tramp_retaddr_off
@@ -25,12 +24,13 @@ global _asm_tramp_retaddr_add_off
 %else
 global _asm_tramp_special
 global _asm_tramp_special_size
-global _asm_tramp_special_hook_alloc_off
 global _asm_tramp_special_hook_handler_off
 global _asm_tramp_special_orig_func_stub_off
 global _asm_tramp_special_retaddr_off
 global _asm_tramp_special_retaddr_add_off
 %endif
+
+extern _hook_info
 
 %define TLS_HOOK_INFO 0x44
 %define TLS_LASTERR 0x34
@@ -41,11 +41,9 @@ global _asm_tramp_special_retaddr_add_off
 asm_tramp:
 
     ; fetch hook-info
-    mov eax, dword [fs:TLS_HOOK_INFO]
-    jmp _tramp_addresses
+    call dword [_hook_info]
 
-_tramp_hook_alloc:
-    dd 0xcccccccc
+    jmp _tramp_addresses
 
 _tramp_hook_handler:
     dd 0xcccccccc
@@ -60,23 +58,6 @@ _tramp_retaddr_add:
     dd 0xcccccccc
 
 _tramp_addresses:
-
-    test eax, eax
-    jnz _tramp_check_count
-
-    ; create hook-info
-    call _tramp_getpc
-
-_tramp_getpc:
-    pop eax
-
-    pushad
-    call dword [eax+_tramp_hook_alloc-_tramp_getpc]
-    popad
-
-    mov eax, dword [fs:TLS_HOOK_INFO]
-
-_tramp_check_count:
 
 %ifndef tramp_special
 
@@ -129,7 +110,6 @@ _tramp_end:
 %ifndef tramp_special
 _asm_tramp dd asm_tramp
 _asm_tramp_size dd _tramp_end - asm_tramp
-_asm_tramp_hook_alloc_off dd _tramp_hook_alloc - asm_tramp
 _asm_tramp_hook_handler_off dd _tramp_hook_handler - asm_tramp
 _asm_tramp_orig_func_stub_off dd _tramp_orig_func_stub - asm_tramp
 _asm_tramp_retaddr_off dd _tramp_retaddr - asm_tramp
@@ -137,7 +117,6 @@ _asm_tramp_retaddr_add_off dd _tramp_retaddr_add - asm_tramp
 %else
 _asm_tramp_special dd asm_tramp
 _asm_tramp_special_size dd _tramp_end - asm_tramp
-_asm_tramp_special_hook_alloc_off dd _tramp_hook_alloc - asm_tramp
 _asm_tramp_special_hook_handler_off dd _tramp_hook_handler - asm_tramp
 _asm_tramp_special_orig_func_stub_off dd _tramp_orig_func_stub - asm_tramp
 _asm_tramp_special_retaddr_off dd _tramp_retaddr - asm_tramp
