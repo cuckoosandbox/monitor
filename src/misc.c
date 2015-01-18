@@ -870,7 +870,7 @@ void library_from_unicode_string(const UNICODE_STRING *us,
 
 int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length)
 {
-    uint32_t top = readtls(0x04);
+    uint32_t top = readtls(0x04) - 2 * sizeof(uint32_t);
     uint32_t bottom = readtls(0x08);
 
     int count = 0;
