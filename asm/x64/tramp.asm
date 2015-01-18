@@ -32,7 +32,7 @@ global asm_tramp_special_retaddr_off
 global asm_tramp_special_retaddr_add_off
 %endif
 
-extern hook_info
+extern hook_info_wrapper
 
 %define TLS_TEB       0x30
 %define TEB_LASTERR   0x68
@@ -43,12 +43,7 @@ extern hook_info
 _asm_tramp:
 
     ; fetch hook-info
-    push rax
-    pushad
-    call qword [hook_info]
-    mov qword [rsp+128], rax
-    popad
-    pop rax
+    call qword [hook_info_wrapper]
 
     jmp _tramp_addresses
 

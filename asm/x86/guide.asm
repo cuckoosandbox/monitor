@@ -21,7 +21,8 @@ global _asm_guide_retaddr_add_off
 global _asm_guide_retaddr_pop_off
 global _asm_guide_next_off
 
-%define TLS_HOOK_INFO 0x44
+extern _hook_info_wrapper
+
 %define TLS_TEMPORARY 0x48
 %define TLS_LASTERR 0x34
 
@@ -30,7 +31,7 @@ global _asm_guide_next_off
 asm_guide:
 
     ; restore the last error
-    mov eax, dword [fs:TLS_HOOK_INFO]
+    call dword [_hook_info_wrapper]
     mov eax, dword [eax+LASTERR_OFF]
     mov dword [fs:TLS_LASTERR], eax
 
@@ -68,7 +69,7 @@ _guide_next:
     push eax
 
     ; save last error
-    mov eax, dword [fs:TLS_HOOK_INFO]
+    call dword [_hook_info_wrapper]
     push dword [fs:TLS_LASTERR]
     pop dword [eax+LASTERR_OFF]
 

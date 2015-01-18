@@ -18,7 +18,8 @@ global _asm_clean
 global _asm_clean_size
 global _asm_clean_retaddr_pop_off
 
-%define TLS_HOOK_INFO 0x44
+extern _hook_info_wrapper
+
 %define TLS_TEMPORARY 0x48
 %define TLS_LASTERR 0x34
 
@@ -30,7 +31,7 @@ asm_clean:
     push eax
 
     ; restore last error
-    mov eax, dword [fs:TLS_HOOK_INFO]
+    call dword [_hook_info_wrapper]
     push dword [eax+LASTERR_OFF]
     pop dword [fs:TLS_LASTERR]
 

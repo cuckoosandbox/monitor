@@ -23,7 +23,8 @@ global asm_guide_retaddr_add_off
 global asm_guide_retaddr_pop_off
 global asm_guide_next_off
 
-%define TLS_HOOK_INFO 0x80
+extern hook_info_wrapper
+
 %define TLS_TEMPORARY 0x88
 %define TLS_TEB       0x30
 %define TEB_LASTERR   0x68
@@ -34,7 +35,7 @@ _asm_guide:
 
     ; restore the last error
     push rbx
-    mov rax, qword [gs:TLS_HOOK_INFO]
+    call qword [hook_info_wrapper]
     mov rbx, qword [gs:TLS_TEB]
     mov eax, dword [rax+LASTERR_OFF]
     mov dword [rbx+TEB_LASTERR], eax
@@ -78,7 +79,7 @@ _guide_next:
 
     ; save last error
     push rbx
-    mov rax, qword [gs:TLS_HOOK_INFO]
+    call qword [hook_info_wrapper]
     mov rbx, qword [gs:TLS_TEB]
     mov ebx, dword [rbx+TEB_LASTERR]
     mov dword [rax+LASTERR_OFF], ebx

@@ -30,9 +30,8 @@ global _asm_tramp_special_retaddr_off
 global _asm_tramp_special_retaddr_add_off
 %endif
 
-extern _hook_info
+extern _hook_info_wrapper
 
-%define TLS_HOOK_INFO 0x44
 %define TLS_LASTERR 0x34
 
 %define HOOKCNT_OFF 0
@@ -41,7 +40,7 @@ extern _hook_info
 asm_tramp:
 
     ; fetch hook-info
-    call dword [_hook_info]
+    call dword [_hook_info_wrapper]
 
     jmp _tramp_addresses
 

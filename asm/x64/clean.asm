@@ -20,7 +20,8 @@ global asm_clean
 global asm_clean_size
 global asm_clean_retaddr_pop_off
 
-%define TLS_HOOK_INFO 0x80
+extern hook_info_wrapper
+
 %define TLS_TEMPORARY 0x88
 %define TLS_TEB       0x30
 %define TEB_LASTERR   0x68
@@ -33,7 +34,7 @@ _asm_clean:
     push rax
 
     ; restore last error
-    mov rax, qword [gs:TLS_HOOK_INFO]
+    call qword [hook_info_wrapper]
 
     push rax
     push rbx
