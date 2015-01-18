@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "capstone/include/x86.h"
 #include "hooking.h"
 #include "hook-info.h"
+#include "misc.h"
 #include "ntapi.h"
 #include "pipe.h"
 #include "slist.h"
