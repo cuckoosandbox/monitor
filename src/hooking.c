@@ -42,7 +42,7 @@ static uint32_t g_hook_info_length;
 
 hook_info_t *hook_info()
 {
-    uintptr_t tid = tid_from_thread_handle(GetCurrentThread());
+    uintptr_t tid = tid_from_thread_handle(GetCurrentThread()) / 4;
 
     if(tid < g_hook_info_length && g_hook_infos[tid] != NULL) {
         return g_hook_infos[tid];
@@ -55,6 +55,10 @@ hook_info_t *hook_info()
             pipe("CRITICAL:Error reallocating hook-info list..");
             return NULL;
         }
+
+        memset(&g_hook_infos[g_hook_info_length], 0,
+            sizeof(hook_info_t *) * (tid + 1 - g_hook_info_length));
+
         g_hook_info_length = tid + 1;
     }
 
