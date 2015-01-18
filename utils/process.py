@@ -278,6 +278,10 @@ class SignatureProcessor(object):
             apiname = entry.children[0].astext()
             children = entry.children
 
+            if apiname.startswith('_'):
+                print 'Skipping ignored API Signature:', apiname[1:]
+                continue
+
             row = copy.deepcopy(global_values)
 
             row['apiname'] = apiname

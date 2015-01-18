@@ -154,7 +154,7 @@ Interesting::
     i language_identifier
 
 
-CreateWindowExA_
+_CreateWindowExA
 ================
 
 Parameters::
@@ -178,7 +178,7 @@ Flags::
     style
 
 
-CreateWindowExW_
+_CreateWindowExW
 ================
 
 Parameters::
