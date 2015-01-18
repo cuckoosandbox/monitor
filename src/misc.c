@@ -562,31 +562,31 @@ static uint32_t _reg_root_handle(HANDLE key_handle, wchar_t *regkey)
 {
     const wchar_t *key = NULL;
     switch ((uintptr_t) key_handle) {
-    case 0x80000000:
+    case (uintptr_t) HKEY_CLASSES_ROOT:
         key = L"HKEY_CLASSES_ROOT";
         break;
 
-    case 0x80000001:
+    case (uintptr_t) HKEY_CURRENT_USER:
         key = L"HKEY_CURRENT_USER";
         break;
 
-    case 0x80000002:
+    case (uintptr_t) HKEY_LOCAL_MACHINE:
         key = L"HKEY_LOCAL_MACHINE";
         break;
 
-    case 0x80000003:
+    case (uintptr_t) HKEY_USERS:
         key = L"HKEY_USERS";
         break;
 
-    case 0x80000004:
+    case (uintptr_t) HKEY_PERFORMANCE_DATA:
         key = L"HKEY_PERFORMANCE_DATA";
         break;
 
-    case 0x80000005:
+    case (uintptr_t) HKEY_CURRENT_CONFIG:
         key = L"HKEY_CURRENT_CONFIG";
         break;
 
-    case 0x80000006:
+    case (uintptr_t) HKEY_DYN_DATA:
         key = L"HKEY_DYN_DATA";
         break;
     }
