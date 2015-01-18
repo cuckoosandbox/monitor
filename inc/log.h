@@ -33,6 +33,9 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
 void log_anomaly(const char *subcategory, int success,
     const char *funcname, const char *msg);
 
+void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
+    uintptr_t *return_addresses, uint32_t count);
+
 void log_new_process();
 void log_new_thread();
 

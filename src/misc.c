@@ -36,7 +36,6 @@ static uint32_t g_tls_unicode_buffer_index;
 
 #define HKCU_PREFIX L"\\REGISTRY\\USER\\S-1-5-"
 #define HKLM_PREFIX L"\\REGISTRY\\MACHINE"
-#define EXCEPTION_MAXCOUNT 1024
 
 static NTSTATUS (WINAPI *pNtQueryInformationProcess)(
     HANDLE ProcessHandle,
@@ -904,52 +903,9 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length)
 static LONG CALLBACK _exception_handler(
     EXCEPTION_POINTERS *exception_pointers)
 {
-    char buf[128]; CONTEXT *ctx = exception_pointers->ContextRecord;
-    bson b, s, e; static int exception_count;
-
     hook_disable();
 
-    if(exception_count++ == EXCEPTION_MAXCOUNT) {
-        sprintf(buf, "Encountered %d exceptions, quitting.", exception_count);
-        log_anomaly("exception", 1, NULL, buf);
-        ExitProcess(1);
-    }
-
-    bson_init(&b);
-    bson_init(&s);
-    bson_init(&e);
-
-#if __x86_64__
-    static const char *regnames[] = {
-        "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
-        "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",
-        NULL,
-    };
-
-    uintptr_t regvalues[] = {
-        ctx->Rax, ctx->Rcx, ctx->Rdx, ctx->Rbx,
-        ctx->Rsp, ctx->Rbp, ctx->Rsi, ctx->Rdi,
-        ctx->R8,  ctx->R9,  ctx->R10, ctx->R11,
-        ctx->R12, ctx->R13, ctx->R14, ctx->R15,
-    };
-#else
-    static const char *regnames[] = {
-        "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi",
-        NULL,
-    };
-
-    uintptr_t regvalues[] = {
-        ctx->Eax, ctx->Ecx, ctx->Edx, ctx->Ebx,
-        ctx->Esp, ctx->Ebp, ctx->Esi, ctx->Edi,
-    };
-#endif
-
-    for (uint32_t idx = 0; regnames[idx] != NULL; idx++) {
-        bson_append_long(&b, regnames[idx], regvalues[idx]);
-    }
-
     uintptr_t return_addresses[32]; uint32_t count = 0;
-
     memset(return_addresses, 0, sizeof(return_addresses));
 
 #if !__x86_64__
@@ -957,58 +913,8 @@ static LONG CALLBACK _exception_handler(
         return_addresses, sizeof(return_addresses) / sizeof(uint32_t));
 #endif
 
-    char sym[512], number[20];
-
-    const uint8_t *exception_address = (const uint8_t *)
-        exception_pointers->ExceptionRecord->ExceptionAddress;
-
-    sprintf(buf, "0x%p", exception_address);
-    bson_append_string(&e, "address", buf);
-
-    char insn[DISASM_BUFSIZ];
-    if(disasm(exception_address, insn) == 0) {
-        bson_append_string(&e, "instruction", insn);
-    }
-
-#if __x86_64__
-    sym[0] = 0;
-#else
-    symbol(exception_address, sym, sizeof(sym));
-#endif
-    bson_append_string(&e, "symbol", sym);
-
-    sprintf(buf, "0x%08x", (uint32_t)
-        exception_pointers->ExceptionRecord->ExceptionCode);
-    bson_append_string(&e, "exception_code", buf);
-
-    for (uint32_t idx = 0; idx < count; idx++) {
-        if(return_addresses[idx] == 0) break;
-
-        sprintf(number, "%d", idx);
-
-#if __x86_64__
-        sym[0] = 0;
-#else
-        symbol((const uint8_t *) return_addresses[idx], sym, sizeof(sym)-32);
-#endif
-
-        if(sym[0] != 0) {
-            strcat(sym, " @ ");
-        }
-
-        sprintf(sym + strlen(sym), "0x%p", (void *) return_addresses[idx]);
-        bson_append_string(&s, number, sym);
-    }
-
-    bson_finish(&e);
-    bson_finish(&s);
-    bson_finish(&b);
-
-    log_api(SIG___exception__, 1, 0, 0, &e, &b, &s);
-
-    bson_destroy(&e);
-    bson_destroy(&s);
-    bson_destroy(&b);
+    log_exception(exception_pointers->ContextRecord,
+        exception_pointers->ExceptionRecord, return_addresses, count);
 
     hook_enable();
 

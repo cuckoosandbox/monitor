@@ -47,11 +47,15 @@ static int g_thread_init_idx;
 
 // Maximum length of a buffer so we try to avoid polluting logs with garbage.
 #define BUFFER_LOG_MAX 4096
+#define EXCEPTION_MAXCOUNT 1024
 
 static CRITICAL_SECTION g_mutex;
 static SOCKET g_sock = INVALID_SOCKET;
 static unsigned int g_starttick;
 static uint8_t g_api_init[MONITOR_HOOKCNT];
+static int g_log_exception;
+
+static void _log_exception_perform();
 
 static void log_raw(const char *buf, size_t length)
 {
@@ -286,6 +290,12 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
     }
 
     EnterCriticalSection(&g_mutex);
+
+    // If there is an exception available for processing, then process it now.
+    if(g_log_exception != 0) {
+        pipe("INFO:Found exception!");
+        _log_exception_perform();
+    }
 
     if(g_api_init[index] == 0) {
         log_explain(index);
@@ -537,6 +547,123 @@ void log_anomaly(const char *subcategory, int success,
 {
     log_api(SIG___anomaly__, success, 0, 0,
         GetCurrentThreadId(), subcategory, funcname, msg);
+}
+
+static uintptr_t g_exception_return_addresses[32];
+static uint32_t g_exception_return_address_count;
+static CONTEXT g_exception_context;
+static EXCEPTION_RECORD g_exception_record;
+
+void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
+    uintptr_t *return_addresses, uint32_t count)
+{
+    g_exception_return_address_count = count;
+    memcpy(g_exception_return_addresses,
+        return_addresses, count * sizeof(uintptr_t));
+    memcpy(&g_exception_context, ctx, sizeof(CONTEXT));
+    memcpy(&g_exception_record, rec, sizeof(EXCEPTION_RECORD));
+    g_log_exception = 1;
+}
+
+static void _log_exception_perform()
+{
+    char buf[128]; bson b, s, e; CONTEXT *ctx = &g_exception_context;
+    static int exception_count;
+
+    g_log_exception = 0;
+
+    bson_init(&b);
+    bson_init(&s);
+    bson_init(&e);
+
+    if(exception_count++ == EXCEPTION_MAXCOUNT) {
+        sprintf(buf, "Encountered %d exceptions, quitting.", exception_count);
+        log_anomaly("exception", 1, NULL, buf);
+        ExitProcess(1);
+    }
+
+#if __x86_64__
+    static const char *regnames[] = {
+        "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
+        "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",
+        NULL,
+    };
+
+    uintptr_t regvalues[] = {
+        ctx->Rax, ctx->Rcx, ctx->Rdx, ctx->Rbx,
+        ctx->Rsp, ctx->Rbp, ctx->Rsi, ctx->Rdi,
+        ctx->R8,  ctx->R9,  ctx->R10, ctx->R11,
+        ctx->R12, ctx->R13, ctx->R14, ctx->R15,
+    };
+#else
+    static const char *regnames[] = {
+        "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi",
+        NULL,
+    };
+
+    uintptr_t regvalues[] = {
+        ctx->Eax, ctx->Ecx, ctx->Edx, ctx->Ebx,
+        ctx->Esp, ctx->Ebp, ctx->Esi, ctx->Edi,
+    };
+#endif
+
+    for (uint32_t idx = 0; regnames[idx] != NULL; idx++) {
+        bson_append_long(&b, regnames[idx], regvalues[idx]);
+    }
+
+    char sym[512], number[20];
+
+    const uint8_t *exception_address = (const uint8_t *)
+        g_exception_record.ExceptionAddress;
+
+    sprintf(buf, "0x%p", exception_address);
+    bson_append_string(&e, "address", buf);
+
+    char insn[DISASM_BUFSIZ];
+    if(disasm(exception_address, insn) == 0) {
+        bson_append_string(&e, "instruction", insn);
+    }
+
+#if __x86_64__
+    sym[0] = 0;
+#else
+    symbol(exception_address, sym, sizeof(sym));
+#endif
+    bson_append_string(&e, "symbol", sym);
+
+    sprintf(buf, "0x%08x", (uint32_t) g_exception_record.ExceptionCode);
+    bson_append_string(&e, "exception_code", buf);
+
+    for (uint32_t idx = 0; idx < g_exception_return_address_count; idx++) {
+        if(g_exception_return_addresses[idx] == 0) break;
+
+        sprintf(number, "%d", idx);
+
+#if __x86_64__
+        sym[0] = 0;
+#else
+        symbol((const uint8_t *) g_exception_return_addresses[idx],
+            sym, sizeof(sym)-32);
+#endif
+
+        if(sym[0] != 0) {
+            strcat(sym, " @ ");
+        }
+
+        sprintf(sym + strlen(sym), "0x%p",
+            (void *) g_exception_return_addresses[idx]);
+        bson_append_string(&s, number, sym);
+    }
+
+    bson_finish(&e);
+    bson_finish(&s);
+    bson_finish(&b);
+
+    log_api(SIG___exception__, 1, 0, 0, &e, &b, &s);
+
+    bson_destroy(&e);
+    bson_destroy(&s);
+    bson_destroy(&b);
 }
 
 void log_init(uint32_t ip, uint16_t port)
