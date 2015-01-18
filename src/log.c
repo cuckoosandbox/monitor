@@ -279,6 +279,12 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
     va_list args; char idx[4];
     va_start(args, hash);
 
+    void *value = TlsGetValue(g_thread_init_idx);
+    if(value == NULL && index >= MONITOR_FIRSTHOOKIDX) {
+        log_new_thread();
+        TlsSetValue(g_thread_init_idx, "init!");
+    }
+
     EnterCriticalSection(&g_mutex);
 
     if(g_api_init[index] == 0) {
@@ -287,12 +293,6 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
     }
 
     LeaveCriticalSection(&g_mutex);
-
-    void *value = TlsGetValue(g_thread_init_idx);
-    if(value == NULL && index >= MONITOR_FIRSTHOOKIDX) {
-        log_new_thread();
-        TlsSetValue(g_thread_init_idx, "init!");
-    }
 
     bson b;
 
