@@ -55,7 +55,12 @@ static uint8_t g_api_init[MONITOR_HOOKCNT];
 
 static void log_raw(const char *buf, size_t length)
 {
-    if(g_sock == INVALID_SOCKET) return;
+    if(g_sock == INVALID_SOCKET) {
+        FILE *fp = fopen("C:\\monitor.log", "ab");
+        fwrite(buf, 1, length, fp);
+        fclose(fp);
+        return;
+    }
 
     EnterCriticalSection(&g_mutex);
 
@@ -544,7 +549,8 @@ void log_init(uint32_t ip, uint16_t port)
     // Might be the case when debugging manually, but should never happen
     // during an actual analysis.
     if(ip == 0 || port == 0) {
-        pipe("CRITICAL:No connection information found!");
+        pipe("CRITICAL:No connection information found, logging to file!");
+        g_sock = INVALID_SOCKET;
         return;
     }
 
@@ -577,7 +583,7 @@ void log_init(uint32_t ip, uint16_t port)
 void log_free()
 {
     DeleteCriticalSection(&g_mutex);
-    if(g_sock > 0) {
+    if(g_sock != INVALID_SOCKET) {
         closesocket(g_sock);
     }
 }
