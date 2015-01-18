@@ -363,3 +363,39 @@ Interesting::
 Logging::
 
     u dirpath dirpath
+
+
+NtQueryAttributesFile
+=====================
+
+Parameters::
+
+    *  POBJECT_ATTRIBUTES ObjectAttributes
+    *  void *FileInformation
+
+Pre::
+
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, filepath);
+
+Logging::
+
+    u filepath filepath
+
+
+NtQueryFullAttributesFile
+=========================
+
+Parameters::
+
+    *  POBJECT_ATTRIBUTES ObjectAttributes
+    *  void *FileInformation
+
+Pre::
+
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, filepath);
+
+Logging::
+
+    u filepath filepath
