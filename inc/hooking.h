@@ -62,9 +62,6 @@ void hook_enable();
 
 uintptr_t hook_retaddr_get(uint32_t index);
 
-int hook(const char *library, const char *funcname,
-    FARPROC handler, FARPROC *orig, int special);
-
 int hook2(hook_t *h);
 
 int hook_is_spoofed_return_address(uintptr_t addr);

@@ -539,19 +539,6 @@ int hook2(hook_t *h)
     return 0;
 }
 
-int hook(const char *library, const char *funcname,
-    FARPROC handler, FARPROC *orig, int special)
-{
-    hook_t h = {
-        .library  = library,
-        .funcname = funcname,
-        .handler  = handler,
-        .orig     = orig,
-        .special  = special,
-    };
-    return hook2(&h);
-}
-
 int hook_is_spoofed_return_address(uintptr_t addr)
 {
     for (uint32_t idx = 0; idx < g_retaddr_length; idx++) {
