@@ -36,9 +36,9 @@
     {
         "apiname": "__exception__",
         "parameters": [
-            {"argtype": "LPCSTR", "argname": "exception"},
-            {"argtype": "LPCSTR", "argname": "registers"},
-            {"argtype": "LPCSTR", "argname": "stacktrace"}
+            {"argtype": "bson *", "argname": "exception"},
+            {"argtype": "bson *", "argname": "registers"},
+            {"argtype": "bson *", "argname": "stacktrace"}
         ],
         "signature": {
             "category": "__notification__"
