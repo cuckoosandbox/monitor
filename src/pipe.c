@@ -163,4 +163,3 @@ int pipe2(void *out, int *outlen, const char *fmt, ...)
     }
     return -1;
 }
-
