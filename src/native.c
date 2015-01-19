@@ -36,10 +36,15 @@ static NTSTATUS (WINAPI *pNtProtectVirtualMemory)(HANDLE ProcessHandle,
     VOID **BaseAddress, ULONG *NumberOfBytesToProtect,
     ULONG NewAccessProtection, ULONG *OldAccessProtection);
 
+static uint32_t (WINAPI *pRtlGetLastWin32Error)();
+static void (WINAPI *pRtlSetLastWin32Error)(uint32_t error_value);
+
 static const char *g_funcnames[] = {
     "NtQueryVirtualMemory",
     "NtAllocateVirtualMemory",
     "NtProtectVirtualMemory",
+    "RtlGetLastWin32Error",
+    "RtlSetLastWin32Error",
     NULL,
 };
 
@@ -47,6 +52,8 @@ static void **g_pointers[] = {
     (void **) &pNtQueryVirtualMemory,
     (void **) &pNtAllocateVirtualMemory,
     (void **) &pNtProtectVirtualMemory,
+    (void **) &pRtlGetLastWin32Error,
+    (void **) &pRtlSetLastWin32Error,
 };
 
 int native_init()
@@ -126,4 +133,14 @@ int virtual_protect_ex(HANDLE process_handle, void *addr,
 int virtual_protect(void *addr, uintptr_t size, uint32_t protection)
 {
     return virtual_protect_ex(g_current_process, addr, size, protection);
+}
+
+uint32_t get_last_error()
+{
+    return pRtlGetLastWin32Error();
+}
+
+void set_last_error(uint32_t error_value)
+{
+    pRtlSetLastWin32Error(error_value);
 }

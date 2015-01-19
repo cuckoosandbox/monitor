@@ -107,7 +107,6 @@ int hook_in_monitor()
             return 1;
         }
     }
-
     return 0;
 }
 

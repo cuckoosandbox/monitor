@@ -40,4 +40,7 @@ int virtual_protect_ex(HANDLE process_handle, void *addr,
 
 int virtual_protect(void *addr, uintptr_t size, uint32_t protection);
 
+uint32_t get_last_error();
+void set_last_error(uint32_t error_value);
+
 #endif
