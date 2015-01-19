@@ -24,9 +24,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "monitor.h"
 #include "slist.h"
 
+#define HOOKINFO_RETADDRCNT 32
+
 typedef struct _hook_info_t {
     uint32_t hook_count;
     uint32_t last_error;
+
+    uintptr_t return_addresses[HOOKINFO_RETADDRCNT];
+    uint32_t return_address_count;
 
     slist_t retaddr;
 } hook_info_t;
@@ -61,6 +66,8 @@ void hook_disable();
 void hook_enable();
 
 uintptr_t hook_retaddr_get(uint32_t index);
+
+int hook_in_monitor();
 
 int hook2(hook_t *h);
 

@@ -51,13 +51,14 @@ void monitor_init(HMODULE module_handle)
 
     sleep_init(cfg.first_process, cfg.force_sleep_skip, cfg.startup_time);
 
-    hook_init();
     unhook_init_detection(cfg.first_process);
 
     hide_module_from_peb(module_handle);
 
-    // First fetch the SizeOfImage and EAT pointers before
-    // destroying the PE header.
+    // Before we destroy the PE header of the monitor we first fetch the base
+    // address and imagesize for hooking and the same plus EAT pointers for
+    // obtaining symbols.
+    hook_init(module_handle);
     symbol_init(module_handle);
     destroy_pe_header(module_handle);
 

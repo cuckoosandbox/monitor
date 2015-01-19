@@ -41,9 +41,16 @@ static hook_info_t **g_hook_infos;
 static uint32_t g_hook_info_length;
 static CRITICAL_SECTION g_hook_info_cs;
 
-void hook_init()
+static uintptr_t g_monitor_start;
+static uintptr_t g_monitor_end;
+
+void hook_init(HMODULE module_handle)
 {
     InitializeCriticalSection(&g_hook_info_cs);
+
+    g_monitor_start = (uintptr_t) module_handle;
+    g_monitor_end = g_monitor_start +
+        module_image_size((const uint8_t *) module_handle);
 }
 
 hook_info_t *hook_info()
@@ -96,6 +103,29 @@ uintptr_t hook_retaddr_get(uint32_t index)
 {
     hook_info_t *h = hook_info();
     return slist_get(&h->retaddr, index);
+}
+
+int hook_in_monitor()
+{
+    hook_info_t *h = hook_info();
+
+#if __x86_64__
+    h->return_address_count = 0;
+#else
+    h->return_address_count =
+        stacktrace(get_ebp(), h->return_addresses, HOOKINFO_RETADDRCNT);
+#endif
+
+    // If an address that lies within the monitor DLL is found in the
+    // stacktrace then we consider this call not interesting.
+    for (uint32_t idx = 2; idx < h->return_address_count; idx++) {
+        if(h->return_addresses[idx] >= g_monitor_start &&
+                h->return_addresses[idx] < g_monitor_end) {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 void hook_disable()
@@ -328,7 +358,7 @@ static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
     return NULL;
 }
 
-int hook_create_jump(uint8_t *addr, uint8_t *target, int stub_used)
+int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 {
     unsigned long old_protect;
 
@@ -469,7 +499,7 @@ int hook2(hook_t *h)
     hd->func_stub = hd->clean + 16 + asm_clean_size;
     hd->func_stub = (uint8_t *)((uintptr_t) hd->func_stub & ~7);
 
-    *h->orig = (FARPROC) hd->guide;
+    *h->orig = (FARPROC) hd->func_stub;
 
     // Create the original function stub.
     int stub_used = hook_create_stub(hd->func_stub, h->addr, 5);
@@ -519,7 +549,8 @@ int hook2(hook_t *h)
     memcpy(region_original, h->addr, stub_used);
 
     // Patch the original function.
-    if(hook_create_jump(h->addr, hd->trampoline, stub_used) < 0) {
+    if(hook_create_jump(h->addr, (const uint8_t *) h->handler,
+            stub_used) < 0) {
         pipe("CRITICAL:Error creating function jump for %z!%z.",
             h->library, h->funcname);
         return -1;

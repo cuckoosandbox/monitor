@@ -56,14 +56,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     );
 {%- endmacro %}
 
-{% macro call_old(hook) -%}
+{% macro call_old(hook, replace_args=True) -%}
     {%- if hook.signature.return_value != 'void' %}
     {{ hook.signature.return_value }} ret = Old_{{ hook.apiname }}(
     {%- else %}
     Old_{{ hook.apiname }}(
     {%- endif %}
     {%- for param in hook.parameters: %}
-        {% if param.argname in hook.replace -%}
+        {% if replace_args and param.argname in hook.replace -%}
             {{ hook.replace[param.argname] }}
         {%- else -%}
             {{ param.argname }}
@@ -93,6 +93,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- if not loop.last %},{% endif -%}
 {%- endfor %}
 ) {
+    {%- if not hook.signature.special: %}
+    if(hook_in_monitor() != 0) {
+        {{- call_old(hook, replace_args=False)|indent }}
+        {%- if hook.signature.return_value != 'void' %}
+        return ret;
+        {%- else %}
+        return;
+        {%- endif %}
+    }
+    {% endif %}
+
     {%- for param in hook.ensure.keys(): %}
     {{ hook.ensure[param] }} _{{ param }};
     if({{ param }} == NULL) {
