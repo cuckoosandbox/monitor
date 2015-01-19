@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "log.h"
 #include "misc.h"
 #include "monitor.h"
+#include "native.h"
 #include "pipe.h"
 #include "sleep.h"
 #include "symbol.h"
@@ -55,6 +56,8 @@ void monitor_init(HMODULE module_handle)
 
     hide_module_from_peb(module_handle);
 
+    native_init();
+
     // Before we destroy the PE header of the monitor we first fetch the base
     // address and imagesize for hooking and the same plus EAT pointers for
     // obtaining symbols.
@@ -82,8 +85,7 @@ void monitor_init(HMODULE module_handle)
 
 void monitor_hook(const char *library)
 {
-    // TODO Make sure that special hooks are not handled.
-
+    // Initialize data about each hook.
     for (hook_t *h = g_hooks; h->funcname != NULL; h++) {
         // If a specific library has been specified then we skip all other
         // libraries. This feature is used in the special hook for LdrLoadDll.
@@ -100,7 +102,7 @@ void monitor_hook(const char *library)
             continue;
         }
 
-        hook2(h);
+        hook(h);
     }
 }
 

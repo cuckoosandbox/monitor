@@ -16,50 +16,28 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MONITOR_HOOKING_H
-#define MONITOR_HOOKING_H
+#ifndef MONITOR_NATIVE_H
+#define MONITOR_NATIVE_H
 
 #include <stdint.h>
 #include <windows.h>
-#include "monitor.h"
-#include "slist.h"
 
-#define HOOKINFO_RETADDRCNT 32
+int native_init();
 
-typedef struct _hook_info_t {
-    uint32_t hook_count;
-    uint32_t last_error;
+int virtual_query_ex(HANDLE process_handle, void *addr,
+    MEMORY_BASIC_INFORMATION *mbi);
 
-    uintptr_t return_addresses[HOOKINFO_RETADDRCNT];
-    uint32_t return_address_count;
-} hook_info_t;
+int virtual_query(void *addr, MEMORY_BASIC_INFORMATION *mbi);
 
-typedef struct _hook_t {
-    const char *library;
-    const char *funcname;
-    FARPROC handler;
-    FARPROC *orig;
-    int special;
-    os_version_t minimum_os;
+void *virtual_alloc_ex(HANDLE process_handle, void *addr,
+    uintptr_t size, uint32_t allocation_type, uint32_t protection);
 
-    uint8_t *addr;
-    uint32_t is_hooked;
+void *virtual_alloc(void *addr, uintptr_t size,
+    uint32_t allocation_type, uint32_t protection);
 
-    uint8_t *func_stub;
-    int32_t stub_used;
-} hook_t;
+int virtual_protect_ex(HANDLE process_handle, void *addr,
+    uintptr_t size, uint32_t protection);
 
-void hook_init();
-hook_info_t *hook_info();
-
-int hook_in_monitor();
-
-int hook(hook_t *h);
-
-#define DISASM_BUFSIZ 128
-
-int disasm(const void *addr, char *str);
-
-extern hook_t g_hooks[];
+int virtual_protect(void *addr, uintptr_t size, uint32_t protection);
 
 #endif

@@ -29,10 +29,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "hooking.h"
 #include "hook-info.h"
 #include "misc.h"
+#include "native.h"
 #include "ntapi.h"
 #include "pipe.h"
 #include "slist.h"
 #include "unhook.h"
+
+static SYSTEM_INFO g_si;
 
 static hook_info_t **g_hook_infos;
 static uint32_t g_hook_info_length;
@@ -48,6 +51,8 @@ void hook_init(HMODULE module_handle)
     g_monitor_start = (uintptr_t) module_handle;
     g_monitor_end = g_monitor_start +
         module_image_size((const uint8_t *) module_handle);
+
+    GetSystemInfo(&g_si);
 }
 
 hook_info_t *hook_info()
@@ -289,10 +294,7 @@ static uint8_t *_hook_alloc_closeby_ptr(uint8_t **last_ptr, uint32_t size)
 
 static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
 {
-    static uint8_t *last_ptr = NULL;
-    DWORD old_protect; SYSTEM_INFO si; MEMORY_BASIC_INFORMATION mbi;
-
-    GetSystemInfo(&si);
+    static uint8_t *last_ptr = NULL; MEMORY_BASIC_INFORMATION mbi;
 
     if(last_ptr != NULL && last_ptr >= target - CLOSEBY_RANGE &&
             last_ptr < target + CLOSEBY_RANGE) {
@@ -301,24 +303,21 @@ static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
 
     for (uint8_t *addr = target - CLOSEBY_RANGE;
             addr < target + CLOSEBY_RANGE;
-            addr += si.dwAllocationGranularity) {
+            addr += g_si.dwAllocationGranularity) {
 
-        if(VirtualQueryEx(GetCurrentProcess(), addr, &mbi,
-                sizeof(mbi)) != sizeof(mbi) || mbi.State != MEM_FREE) {
+        if(virtual_query(addr, &mbi) == FALSE || mbi.State != MEM_FREE) {
             continue;
         }
 
-        if(VirtualAllocEx(GetCurrentProcess(), mbi.BaseAddress,
-                si.dwPageSize, MEM_RESERVE | MEM_COMMIT,
-                PAGE_EXECUTE_READWRITE) == NULL) {
+        if(virtual_alloc(mbi.BaseAddress, g_si.dwPageSize,
+                MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE) == NULL) {
             continue;
         }
 
         // TODO Do we really need this?
-        if(VirtualProtectEx(GetCurrentProcess(), mbi.BaseAddress,
-                si.dwPageSize, PAGE_EXECUTE_READWRITE,
-                &old_protect) != FALSE) {
-            memset(mbi.BaseAddress, 0xcc, si.dwPageSize);
+        if(virtual_protect(mbi.BaseAddress, g_si.dwPageSize,
+                PAGE_EXECUTE_READWRITE) != FALSE) {
+            memset(mbi.BaseAddress, 0xcc, g_si.dwPageSize);
             last_ptr = mbi.BaseAddress;
             return _hook_alloc_closeby_ptr(&last_ptr, size);
         }
@@ -328,10 +327,7 @@ static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
 
 int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 {
-    unsigned long old_protect;
-
-    if(VirtualProtect(addr, stub_used, PAGE_EXECUTE_READWRITE,
-            &old_protect) == FALSE) {
+    if(virtual_protect(addr, stub_used, PAGE_EXECUTE_READWRITE) == FALSE) {
         return -1;
     }
 
@@ -350,7 +346,7 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
     // 64-bit jump.
     asm_jump_addr(closeby, target);
 
-    VirtualProtect(addr, stub_used, old_protect, &old_protect);
+    virtual_protect(addr, stub_used, PAGE_EXECUTE_READ);
     return 0;
 }
 
@@ -358,10 +354,7 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 
 int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 {
-    unsigned long old_protect;
-
-    if(VirtualProtect(addr, stub_used, PAGE_EXECUTE_READWRITE,
-            &old_protect) == FALSE) {
+    if(virtual_protect(addr, stub_used, PAGE_EXECUTE_READWRITE) == FALSE) {
         return -1;
     }
 
@@ -371,7 +364,7 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
     // Jump from the hooked address to the target address.
     asm_jump_32bit(addr, target);
 
-    VirtualProtect(addr, stub_used, old_protect, &old_protect);
+    virtual_protect(addr, stub_used, PAGE_EXECUTE_READ);
     return 0;
 }
 
@@ -422,12 +415,11 @@ static uint8_t *_hook_follow_jumps(const char *funcname, uint8_t *addr)
     return addr;
 }
 
-#define PATCH(buf, off, value) \
-    *(uintptr_t *)(buf + off) = (uintptr_t) value
-
-int hook2(hook_t *h)
+int hook(hook_t *h)
 {
-    if(h->is_hooked != 0) return 0;
+    if(h->is_hooked != 0) {
+        return 0;
+    }
 
     HMODULE module_handle = GetModuleHandle(h->library);
     if(module_handle == NULL) return 0;
@@ -446,32 +438,31 @@ int hook2(hook_t *h)
     h->func_stub = (uint8_t *) malloc(64);
     memset(h->func_stub, 0xcc, 64);
 
-    unsigned long old_protect;
-    VirtualProtect(h->func_stub, 64, PAGE_EXECUTE_READWRITE, &old_protect);
+    virtual_protect(h->func_stub, 64, PAGE_EXECUTE_READWRITE);
 
     *h->orig = (FARPROC) h->func_stub;
 
     // Create the original function stub.
-    int stub_used = hook_create_stub(h->func_stub, h->addr, 5);
-    if(stub_used < 0) {
+    h->stub_used = hook_create_stub(h->func_stub, h->addr, 5);
+    if(h->stub_used < 0) {
         pipe("CRITICAL:Error creating function stub for %z!%z.",
             h->library, h->funcname);
         return -1;
     }
 
     uint8_t region_original[32];
-    memcpy(region_original, h->addr, stub_used);
+    memcpy(region_original, h->addr, h->stub_used);
 
     // Patch the original function.
     if(hook_create_jump(h->addr, (const uint8_t *) h->handler,
-            stub_used) < 0) {
+            h->stub_used) < 0) {
         pipe("CRITICAL:Error creating function jump for %z!%z.",
             h->library, h->funcname);
         return -1;
     }
 
     unhook_detect_add_region(h->funcname, h->addr, region_original,
-        h->addr, stub_used);
+        h->addr, h->stub_used);
 
     h->is_hooked = 1;
     return 0;
