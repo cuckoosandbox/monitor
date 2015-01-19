@@ -602,10 +602,79 @@ static uint32_t _reg_root_handle(HANDLE key_handle, wchar_t *regkey)
     if(key != NULL) {
         uint32_t length = lstrlenW(key);
         memmove(regkey, key, length * sizeof(wchar_t));
-        regkey[length] = 0;
         return length;
     }
     return 0;
+}
+
+static uint32_t _reg_key_normalize(wchar_t *regkey)
+{
+    wchar_t *in = regkey, *out = regkey; uint32_t length = 0;
+    while (*in != 0) {
+        // Ignore superfluous backslashes.
+        while (*in == '\\' && in[1] == '\\') {
+            in++;
+        }
+
+        // Replace null-bytes with "\x00".
+        if(*in == 0) {
+            *out++ = '\\';
+            *out++ = 'x';
+            *out++ = '0';
+            *out++ = '0';
+            length += 4;
+        }
+        else {
+            *out++ = *in;
+            length++;
+        }
+
+        in++;
+    }
+
+    *out = 0;
+
+    // HKEY_CURRENT_USER is expanded into this ugly
+    // \\REGISTRY\\USER\\S-1-5-<bunch of numbers> thing which is not
+    // relevant to the monitor and thus we normalize it.
+    if(wcsnicmp(regkey, HKCU_PREFIX, lstrlenW(HKCU_PREFIX)) == 0) {
+        const wchar_t *subkey = wcschr(regkey + lstrlenW(HKCU_PREFIX), '\\');
+        uint32_t offset = _reg_root_handle(HKEY_CURRENT_USER, regkey);
+
+        // Shouldn't be a null pointer but let's just make sure.
+        if(subkey != NULL && length != 0) {
+            // Subtract the part of the key from the length that
+            // we're skipping.
+            length -= subkey - regkey;
+
+            memmove(&regkey[offset], subkey, length * sizeof(wchar_t));
+            regkey[offset + length] = 0;
+        }
+        return offset + length;
+    }
+
+    // HKEY_LOCAL_MACHINE might be expanded into \\REGISTRY\\MACHINE - we
+    // normalize this as well.
+    if(wcsnicmp(regkey, HKLM_PREFIX, lstrlenW(HKLM_PREFIX)) == 0) {
+        const wchar_t *subkey = &regkey[lstrlenW(HKLM_PREFIX)];
+
+        // Subtract the part of the key from the length that
+        // we're skipping.
+        length -= lstrlenW(HKLM_PREFIX);
+
+        // Because "HKEY_LOCAL_MACHINE" is actually a longer string than
+        // "\\REGISTRY\\MACHINE" we first move the subkey and only then
+        // write the HKEY_LOCAL_MACHINE prefix.
+        memmove(regkey + lstrlenW(L"HKEY_LOCAL_MACHINE"),
+            subkey, length * sizeof(wchar_t));
+
+        // The HKEY_LOCAL_MACHINE prefix.
+        length += _reg_root_handle(HKEY_LOCAL_MACHINE, regkey);
+
+        regkey[length] = 0;
+        return length;
+    }
+    return lstrlenW(regkey);
 }
 
 uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
@@ -616,7 +685,10 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
         sizeof(KEY_NAME_INFORMATION) + MAX_PATH_W * sizeof(wchar_t);
 
     uint32_t offset = _reg_root_handle(key_handle, regkey);
-    if(offset != 0) return offset;
+    if(offset != 0) {
+        regkey[offset] = 0;
+        return offset;
+    }
 
     KEY_NAME_INFORMATION *key_name_information =
         (KEY_NAME_INFORMATION *) calloc(1, buffer_length);
@@ -633,58 +705,12 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
         }
 
         uint32_t length = key_name_information->NameLength / sizeof(wchar_t);
-        key_name_information->Name[length] = 0;
-
-        // HKEY_CURRENT_USER is expanded into this ugly
-        // \\REGISTRY\\USER\\S-1-5-<bunch of numbers> thing which is not
-        // relevant to the monitor and thus we normalize it.
-        if(wcsnicmp(key_name_information->Name,
-                HKCU_PREFIX, lstrlenW(HKCU_PREFIX)) == 0) {
-            offset = _reg_root_handle(HKEY_CURRENT_USER, regkey);
-            const wchar_t *subkey = wcschr(
-                key_name_information->Name + lstrlenW(HKCU_PREFIX),
-                '\\'
-            );
-
-            // Shouldn't be a null pointer but let's just make sure.
-            if(subkey != NULL && length != 0) {
-                // Subtract the part of the key from the length that
-                // we're skipping.
-                length -= subkey - key_name_information->Name;
-
-                memmove(&regkey[offset], subkey, length * sizeof(wchar_t));
-                regkey[offset + length] = 0;
-            }
-
-            free(key_name_information);
-            return offset + length;
-        }
-
-        // HKEY_LOCAL_MACHINE might be expanded into \\REGISTRY\\MACHINE - we
-        // normalize this as well.
-        if(wcsnicmp(key_name_information->Name,
-                HKLM_PREFIX, lstrlenW(HKLM_PREFIX)) == 0) {
-            offset = _reg_root_handle(HKEY_LOCAL_MACHINE, regkey);
-            const wchar_t *ptr =
-                &key_name_information->Name[lstrlenW(HKLM_PREFIX)];
-
-            // Subtract the part of the key from the length that
-            // we're skipping.
-            length -= lstrlenW(HKLM_PREFIX);
-
-            memmove(&regkey[offset], ptr, length * sizeof(wchar_t));
-            regkey[offset + length] = 0;
-
-            free(key_name_information);
-            return offset + length;
-        }
-
-        memmove(&regkey[offset], key_name_information->Name,
+        memcpy(&regkey[offset], key_name_information->Name,
             length * sizeof(wchar_t));
         regkey[offset + length] = 0;
 
         free(key_name_information);
-        return offset + length;
+        return _reg_key_normalize(regkey);
     }
     return 0;
 }
@@ -704,7 +730,7 @@ uint32_t reg_get_key_ascii(HANDLE key_handle,
     regkey[offset++] = '\\';
     wcsncpyA(&regkey[offset], subkey, length);
     regkey[offset + length] = 0;
-    return offset + length;
+    return _reg_key_normalize(regkey);
 }
 
 uint32_t reg_get_key_asciiz(HANDLE key_handle,
@@ -729,7 +755,7 @@ uint32_t reg_get_key_uni(HANDLE key_handle,
     regkey[offset++] = '\\';
     memmove(&regkey[offset], subkey, length * sizeof(wchar_t));
     regkey[offset + length] = 0;
-    return offset + length;
+    return _reg_key_normalize(regkey);
 }
 
 uint32_t reg_get_key_uniz(HANDLE key_handle,
