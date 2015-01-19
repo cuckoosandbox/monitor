@@ -87,8 +87,6 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
 
     static int watcher_first = 1;
 
-    hook_disable();
-
     while (g_main_thread == NULL ||
             WaitForSingleObject(g_main_thread, 10) == WAIT_TIMEOUT) {
         if(WaitForSingleObject(g_watcher_thread_handle,
@@ -140,8 +138,6 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
 static DWORD WINAPI _unhook_watch_thread(LPVOID param)
 {
     (void) param;
-
-    hook_disable();
 
     while (WaitForSingleObject(g_unhook_thread_handle, 1000) == WAIT_TIMEOUT);
 

@@ -885,19 +885,6 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length)
             break;
         }
     }
-
-    // Check whether any of the return addresses are "spoofed", that is, they
-    // belong to one of our hooks. If so, then we fetch the original return
-    // address from the return address list and use that to provide a symbol.
-    // As the list traverses as last in first out we start at the "end" of the
-    // return address list (the oldest return address in it really) and
-    // iterate upwards from there on.
-    for (uint32_t idx = count, listidx = 0; idx != 0; idx--) {
-        if(hook_is_spoofed_return_address(addrs[idx - 1]) != 0) {
-            addrs[idx - 1] = hook_retaddr_get(listidx++);
-        }
-    }
-
     return count;
 }
 
@@ -906,8 +893,6 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length)
 static LONG CALLBACK _exception_handler(
     EXCEPTION_POINTERS *exception_pointers)
 {
-    hook_disable();
-
     uintptr_t return_addresses[32]; uint32_t count = 0;
     memset(return_addresses, 0, sizeof(return_addresses));
 
@@ -918,8 +903,6 @@ static LONG CALLBACK _exception_handler(
 
     log_exception(exception_pointers->ContextRecord,
         exception_pointers->ExceptionRecord, return_addresses, count);
-
-    hook_enable();
 
     return EXCEPTION_CONTINUE_SEARCH;
 }

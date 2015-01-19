@@ -34,9 +34,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "slist.h"
 #include "unhook.h"
 
-static uintptr_t g_retaddr_spoofed[MONITOR_HOOKCNT][2];
-static uint32_t g_retaddr_length = 0;
-
 static hook_info_t **g_hook_infos;
 static uint32_t g_hook_info_length;
 static CRITICAL_SECTION g_hook_info_cs;
@@ -81,28 +78,9 @@ hook_info_t *hook_info()
     }
 
     hook_info_t *ret = (hook_info_t *) calloc(1, sizeof(hook_info_t));
-    slist_init(&ret->retaddr, 128);
     g_hook_infos[tid] = ret;
     LeaveCriticalSection(&g_hook_info_cs);
     return ret;
-}
-
-void __stdcall hook_retaddr_add(uintptr_t retaddr)
-{
-    hook_info_t *h = hook_info();
-    slist_push(&h->retaddr, retaddr);
-}
-
-uintptr_t __stdcall hook_retaddr_pop()
-{
-    hook_info_t *h = hook_info();
-    return slist_pop(&h->retaddr);
-}
-
-uintptr_t hook_retaddr_get(uint32_t index)
-{
-    hook_info_t *h = hook_info();
-    return slist_get(&h->retaddr, index);
 }
 
 int hook_in_monitor()
@@ -126,16 +104,6 @@ int hook_in_monitor()
     }
 
     return 0;
-}
-
-void hook_disable()
-{
-    hook_info()->hook_count++;
-}
-
-void hook_enable()
-{
-    hook_info()->hook_count--;
 }
 
 static int g_capstone_init = 0; static csh g_capstone;
@@ -473,77 +441,23 @@ int hook2(hook_t *h)
 
     h->addr = _hook_follow_jumps(h->funcname, (uint8_t *) addr);
 
-    hook_data_t *hd = h->data =
-        (hook_data_t *) calloc(1, sizeof(hook_data_t));
-
     // We allocate 64 bytes for the function stub and 64 bytes for padding
     // in-between (for debugging purposes.)
-    uint32_t mem_size =
-        asm_tramp_size + asm_guide_size + asm_clean_size + 64 + 64;
-    hd->_mem = (uint8_t *) malloc(mem_size);
-    memset(hd->_mem, 0xcc, mem_size);
+    h->func_stub = (uint8_t *) malloc(64);
+    memset(h->func_stub, 0xcc, 64);
 
     unsigned long old_protect;
-    VirtualProtect(hd->_mem, mem_size, PAGE_EXECUTE_READWRITE, &old_protect);
+    VirtualProtect(h->func_stub, 64, PAGE_EXECUTE_READWRITE, &old_protect);
 
-    // Assign memory for each stub. Do note that for 64-bit support we require
-    // that every stub is 8-byte aligned - we enforce this also for x86.
-    hd->trampoline = hd->_mem;
-
-    hd->guide = hd->trampoline + 16 + asm_tramp_size;
-    hd->guide = (uint8_t *)((uintptr_t) hd->guide & ~7);
-
-    hd->clean = hd->guide + 16 + asm_guide_size;
-    hd->clean = (uint8_t *)((uintptr_t) hd->clean & ~7);
-
-    hd->func_stub = hd->clean + 16 + asm_clean_size;
-    hd->func_stub = (uint8_t *)((uintptr_t) hd->func_stub & ~7);
-
-    *h->orig = (FARPROC) hd->func_stub;
+    *h->orig = (FARPROC) h->func_stub;
 
     // Create the original function stub.
-    int stub_used = hook_create_stub(hd->func_stub, h->addr, 5);
+    int stub_used = hook_create_stub(h->func_stub, h->addr, 5);
     if(stub_used < 0) {
         pipe("CRITICAL:Error creating function stub for %z!%z.",
             h->library, h->funcname);
         return -1;
     }
-
-    // Copy all buffers and patch a couple of pointers.
-    if(h->special == 0) {
-        memcpy(hd->trampoline, asm_tramp, asm_tramp_size);
-        PATCH(hd->trampoline, asm_tramp_hook_handler_off, h->handler);
-        PATCH(hd->trampoline, asm_tramp_orig_func_stub_off, hd->func_stub);
-        PATCH(hd->trampoline, asm_tramp_retaddr_off, hd->clean);
-        PATCH(hd->trampoline, asm_tramp_retaddr_add_off, hook_retaddr_add);
-    }
-    else {
-        memcpy(hd->trampoline,
-            asm_tramp_special, asm_tramp_special_size);
-        PATCH(hd->trampoline,
-            asm_tramp_special_hook_handler_off, h->handler);
-        PATCH(hd->trampoline,
-            asm_tramp_special_orig_func_stub_off, hd->func_stub);
-        PATCH(hd->trampoline,
-            asm_tramp_special_retaddr_off, hd->clean);
-        PATCH(hd->trampoline,
-            asm_tramp_special_retaddr_add_off, hook_retaddr_add);
-    }
-
-    memcpy(hd->guide, asm_guide, asm_guide_size);
-    PATCH(hd->guide, asm_guide_orig_stub_off, hd->func_stub);
-    PATCH(hd->guide, asm_guide_retaddr_add_off, hook_retaddr_add);
-    PATCH(hd->guide, asm_guide_retaddr_pop_off, hook_retaddr_pop);
-
-    memcpy(hd->clean, asm_clean, asm_clean_size);
-    PATCH(hd->clean, asm_clean_retaddr_pop_off, hook_retaddr_pop);
-
-    // Register the spoofed return addresses so we can later retrieve
-    // this information when handling exceptions / obtaining stacktraces
-    // in general.
-    g_retaddr_spoofed[g_retaddr_length][0] = (uintptr_t) hd->clean;
-    g_retaddr_spoofed[g_retaddr_length++][1] =
-        (uintptr_t) hd->guide + asm_guide_next_off;
 
     uint8_t region_original[32];
     memcpy(region_original, h->addr, stub_used);
@@ -560,16 +474,5 @@ int hook2(hook_t *h)
         h->addr, stub_used);
 
     h->is_hooked = 1;
-    return 0;
-}
-
-int hook_is_spoofed_return_address(uintptr_t addr)
-{
-    for (uint32_t idx = 0; idx < g_retaddr_length; idx++) {
-        if(g_retaddr_spoofed[idx][0] == addr ||
-                g_retaddr_spoofed[idx][1] == addr) {
-            return 1;
-        }
-    }
     return 0;
 }

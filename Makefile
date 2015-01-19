@@ -1,6 +1,5 @@
 CC32 = i686-w64-mingw32-gcc -m32
 CC64 = x86_64-w64-mingw32-gcc -m64
-NASM = nasm
 AR = ar
 CFLAGS = -Wall -O0 -ggdb -Wextra -std=c99 -static \
 		 -Wno-missing-field-initializers -I inc/ -I objects/code/
@@ -27,14 +26,6 @@ SRC = $(wildcard src/*.c)
 SRCOBJ32 = $(SRC:%.c=objects/x86/%.o)
 SRCOBJ64 = $(SRC:%.c=objects/x64/%.o)
 HEADER = $(wildcard inc/*.h)
-
-ASM32 = $(wildcard asm/x86/*.asm)
-ASM64 = $(wildcard asm/x64/*.asm)
-ASMOBJ32 = $(ASM32:asm/x86/%.asm=objects/x86/asm/%.o)
-ASMOBJ64 = $(ASM64:asm/x64/%.asm=objects/x64/asm/%.o)
-
-ASMOBJ32 += objects/x86/asm/tramp-special.o
-ASMOBJ64 += objects/x64/asm/tramp-special.o
 
 BSON = $(wildcard src/bson/*.c)
 BSONOBJ32 = $(BSON:%.c=objects/x86/%.o)
@@ -63,7 +54,6 @@ dirs: | objects/
 
 objects/:
 	mkdir -p objects/code/
-	mkdir -p objects/x86/asm/ objects/x64/asm/
 	mkdir -p objects/x86/code/ objects/x64/code/
 	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
 
@@ -110,23 +100,11 @@ $(FLAGOBJ32): $(FLAGSRC) $(HEADER) Makefile
 $(FLAGOBJ64): $(FLAGSRC) $(HEADER) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS)
 
-objects/x86/asm/tramp-special.o: asm/x86/tramp.asm Makefile
-	$(NASM) -f elf32 -i asm/x86/ -d tramp_special=1 -o $@ $<
-
-objects/x64/asm/tramp-special.o: asm/x64/tramp.asm Makefile
-	$(NASM) -f elf64 -i asm/x64/ -d tramp_special=1 -o $@ $<
-
-objects/x86/asm/%.o: asm/x86/%.asm Makefile
-	$(NASM) -f elf32 -i asm/x86/ -o $@ $<
-
-objects/x64/asm/%.o: asm/x64/%.asm Makefile
-	$(NASM) -f elf64 -i asm/x64/ -o $@ $<
-
-$(DLL32): $(ASMOBJ32) $(SRCOBJ32) $(HOOKOBJ32) $(FLAGOBJ32) \
+$(DLL32): $(SRCOBJ32) $(HOOKOBJ32) $(FLAGOBJ32) \
 		$(LIBBSON32) $(LIBCAPSTONE32)
 	$(CC32) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
-$(DLL64): $(ASMOBJ64) $(SRCOBJ64) $(HOOKOBJ64) $(FLAGOBJ64) \
+$(DLL64): $(SRCOBJ64) $(HOOKOBJ64) $(FLAGOBJ64) \
 		$(LIBBSON64) $(LIBCAPSTONE64)
 	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 

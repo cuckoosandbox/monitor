@@ -32,18 +32,7 @@ typedef struct _hook_info_t {
 
     uintptr_t return_addresses[HOOKINFO_RETADDRCNT];
     uint32_t return_address_count;
-
-    slist_t retaddr;
 } hook_info_t;
-
-typedef struct _hook_data_t {
-    uint8_t *trampoline;
-    uint8_t *guide;
-    uint8_t *func_stub;
-    uint8_t *clean;
-
-    uint8_t *_mem;
-} hook_data_t;
 
 typedef struct _hook_t {
     const char *library;
@@ -56,22 +45,15 @@ typedef struct _hook_t {
     uint8_t *addr;
     uint32_t is_hooked;
 
-    hook_data_t *data;
+    uint8_t *func_stub;
 } hook_t;
 
 void hook_init();
 hook_info_t *hook_info();
 
-void hook_disable();
-void hook_enable();
-
-uintptr_t hook_retaddr_get(uint32_t index);
-
 int hook_in_monitor();
 
 int hook2(hook_t *h);
-
-int hook_is_spoofed_return_address(uintptr_t addr);
 
 #define DISASM_BUFSIZ 128
 

@@ -82,8 +82,7 @@ void monitor_init(HMODULE module_handle)
 
 void monitor_hook(const char *library)
 {
-    // TODO Make sure that special hooks are not handled regardless.
-    hook_disable();
+    // TODO Make sure that special hooks are not handled.
 
     for (hook_t *h = g_hooks; h->funcname != NULL; h++) {
         // If a specific library has been specified then we skip all other
@@ -103,14 +102,10 @@ void monitor_hook(const char *library)
 
         hook2(h);
     }
-
-    hook_enable();
 }
 
 void monitor_notify()
 {
-    hook_disable();
-
     // Notify Cuckoo that we're good to go.
     char name[64];
     sprintf(name, "CuckooEvent%ld", GetCurrentProcessId());
@@ -119,8 +114,6 @@ void monitor_notify()
         SetEvent(event_handle);
         CloseHandle(event_handle);
     }
-
-    hook_enable();
 }
 
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
