@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ntapi.h"
 #include "pipe.h"
 
+static HANDLE g_current_process;
+
 static NTSTATUS (WINAPI *pNtQueryVirtualMemory)(HANDLE ProcessHandle,
     VOID *BaseAddress, ULONG MemoryInformationClass,
     VOID *MemoryInformation, SIZE_T MemoryInformationLength,
@@ -49,6 +51,8 @@ static void **g_pointers[] = {
 
 int native_init()
 {
+    g_current_process = GetCurrentProcess();
+
     uint8_t *memory = VirtualAlloc(NULL, 0x1000,
         MEM_RESERVE|MEM_COMMIT, PAGE_EXECUTE_READWRITE);
     if(memory == NULL) return -1;
@@ -87,7 +91,7 @@ int virtual_query_ex(HANDLE process_handle, void *addr,
 
 int virtual_query(void *addr, MEMORY_BASIC_INFORMATION *mbi)
 {
-    return virtual_query_ex(GetCurrentProcess(), addr, mbi);
+    return virtual_query_ex(g_current_process, addr, mbi);
 }
 
 void *virtual_alloc_ex(HANDLE process_handle, void *addr,
@@ -104,7 +108,7 @@ void *virtual_alloc_ex(HANDLE process_handle, void *addr,
 void *virtual_alloc(void *addr, uintptr_t size,
     uint32_t allocation_type, uint32_t protection)
 {
-    return virtual_alloc_ex(GetCurrentProcess(), addr, size,
+    return virtual_alloc_ex(g_current_process, addr, size,
         allocation_type, protection);
 }
 
@@ -121,5 +125,5 @@ int virtual_protect_ex(HANDLE process_handle, void *addr,
 
 int virtual_protect(void *addr, uintptr_t size, uint32_t protection)
 {
-    return virtual_protect_ex(GetCurrentProcess(), addr, size, protection);
+    return virtual_protect_ex(g_current_process, addr, size, protection);
 }
