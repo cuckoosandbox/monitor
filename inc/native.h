@@ -22,6 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <windows.h>
 
+typedef struct _last_error_t {
+    uint32_t nt_status;
+    uint32_t lasterror;
+} last_error_t;
+
 int native_init();
 
 int virtual_query_ex(HANDLE process_handle, void *addr,
@@ -40,7 +45,7 @@ int virtual_protect_ex(HANDLE process_handle, void *addr,
 
 int virtual_protect(void *addr, uintptr_t size, uint32_t protection);
 
-uint32_t get_last_error();
-void set_last_error(uint32_t error_value);
+void get_last_error(last_error_t *error);
+void set_last_error(last_error_t *error);
 
 #endif

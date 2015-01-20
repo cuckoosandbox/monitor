@@ -58,6 +58,8 @@ typedef struct _hook_t {
 void hook_init();
 hook_info_t *hook_info();
 
+int lde(const void *addr);
+
 int hook_in_monitor();
 
 int hook(hook_t *h);

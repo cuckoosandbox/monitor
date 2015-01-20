@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <windows.h>
+#include "hooking.h"
+#include "native.h"
 #include "ntapi.h"
 #include "pipe.h"
 
@@ -37,14 +39,19 @@ static NTSTATUS (WINAPI *pNtProtectVirtualMemory)(HANDLE ProcessHandle,
     ULONG NewAccessProtection, ULONG *OldAccessProtection);
 
 static uint32_t (WINAPI *pRtlGetLastWin32Error)();
+static uint32_t (WINAPI *pRtlGetLastNtStatus)();
 static void (WINAPI *pRtlSetLastWin32Error)(uint32_t error_value);
+static void (WINAPI *pRtlSetLastWin32ErrorAndNtStatusFromNtStatus)(
+    uint32_t error_value);
 
 static const char *g_funcnames[] = {
     "NtQueryVirtualMemory",
     "NtAllocateVirtualMemory",
     "NtProtectVirtualMemory",
     "RtlGetLastWin32Error",
+    "RtlGetLastNtStatus",
     "RtlSetLastWin32Error",
+    "RtlSetLastWin32ErrorAndNtStatusFromNtStatus",
     NULL,
 };
 
@@ -53,8 +60,27 @@ static void **g_pointers[] = {
     (void **) &pNtAllocateVirtualMemory,
     (void **) &pNtProtectVirtualMemory,
     (void **) &pRtlGetLastWin32Error,
+    (void **) &pRtlGetLastNtStatus,
     (void **) &pRtlSetLastWin32Error,
+    (void **) &pRtlSetLastWin32ErrorAndNtStatusFromNtStatus,
 };
+
+static void _native_copy_function(uint8_t *dst, const uint8_t *src)
+{
+    int len = 0;
+    do {
+        src += len, dst += len;
+
+        len = lde(src);
+        memcpy(dst, src, len);
+
+#if !__x86_64__
+        if(*dst == 0xe8) {
+            *(uint32_t *)(dst + 1) += src - dst;
+        }
+#endif
+    } while (*src != 0xc2 && *src != 0xc3);
+}
 
 int native_init()
 {
@@ -68,7 +94,7 @@ int native_init()
         *g_pointers[idx] = memory;
         memory += 64;
 
-        FARPROC fp = GetProcAddress(
+        const uint8_t *fp = (const uint8_t *) GetProcAddress(
             GetModuleHandle("ntdll"), g_funcnames[idx]);
         if(fp == NULL) {
             pipe("CRITICAL:Error retrieving address of %z!",
@@ -79,7 +105,7 @@ int native_init()
         dpipe("INFO:Native function %z (0x%x) -> 0x%x",
             g_funcnames[idx], fp, *g_pointers[idx]);
 
-        memcpy(*g_pointers[idx], fp, 64);
+        _native_copy_function(*g_pointers[idx], fp);
     }
 
     unsigned long old_protect;
@@ -138,12 +164,14 @@ int virtual_protect(void *addr, uintptr_t size, uint32_t protection)
     return virtual_protect_ex(g_current_process, addr, size, protection);
 }
 
-uint32_t get_last_error()
+void get_last_error(last_error_t *error)
 {
-    return pRtlGetLastWin32Error();
+    error->lasterror = pRtlGetLastWin32Error();
+    error->nt_status = pRtlGetLastNtStatus();
 }
 
-void set_last_error(uint32_t error_value)
+void set_last_error(last_error_t *error)
 {
-    pRtlSetLastWin32Error(error_value);
+    pRtlSetLastWin32ErrorAndNtStatusFromNtStatus(error->nt_status);
+    pRtlSetLastWin32Error(error->lasterror);
 }

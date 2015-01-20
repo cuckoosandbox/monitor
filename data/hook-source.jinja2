@@ -59,7 +59,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 {% macro call_old(hook, replace_args=True, lasterr=True) -%}
     {%- if hook.signature.return_value != 'void' %}
-    set_last_error(lasterr);
+    set_last_error(&lasterror);
     {{ hook.signature.return_value }} ret = Old_{{ hook.apiname }}(
     {%- else %}
     Old_{{ hook.apiname }}(
@@ -74,7 +74,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endfor %}
     );
     {%- if lasterr %}
-    lasterr = get_last_error();
+    get_last_error(&lasterror);
     {%- endif %}
 {%- endmacro %}
 
@@ -98,7 +98,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- if not loop.last %},{% endif -%}
 {%- endfor %}
 ) {
-    uint32_t lasterr = get_last_error();
+    last_error_t lasterror;
+    get_last_error(&lasterror);
 
     {%- if not hook.signature.special: %}
     if(hook_in_monitor() != 0) {
@@ -178,7 +179,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endfor %}
     {%- endif %}
 
-    set_last_error(lasterr);
+    set_last_error(&lasterror);
 
     {%- if hook.signature.return_value != 'void' %}
     return ret;
