@@ -47,6 +47,9 @@ void monitor_init(HMODULE module_handle)
     pipe_init(cfg.pipe_name);
     diffing_init(cfg.hashes_path);
 
+    // Required to be initialized before any logging starts.
+    hook_init(module_handle);
+
     log_init(cfg.host_ip, cfg.host_port);
     setup_exception_handler();
 
@@ -61,8 +64,8 @@ void monitor_init(HMODULE module_handle)
     // Before we destroy the PE header of the monitor we first fetch the base
     // address and imagesize for hooking and the same plus EAT pointers for
     // obtaining symbols.
-    hook_init(module_handle);
     symbol_init(module_handle);
+
     destroy_pe_header(module_handle);
 
     OSVERSIONINFOEX version;
