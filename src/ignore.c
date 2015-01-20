@@ -34,7 +34,17 @@ int is_ignored_filepath(const wchar_t *fname)
     IGNORE_START(L"\\\\?\\IDE#");
     IGNORE_START(L"\\\\?\\STORAGE#");
     IGNORE_START(L"\\\\?\\root#");
+    IGNORE_START(L"\\BaseNamedObjects\\");
+    IGNORE_START(L"\\Callback\\");
     IGNORE_START(L"\\Device\\");
+    IGNORE_START(L"\\Drivers\\");
+    IGNORE_START(L"\\FileSystem\\");
+    IGNORE_START(L"\\KnownDlls\\");
+    IGNORE_START(L"\\Nls\\");
+    IGNORE_START(L"\\ObjectTypes\\");
+    IGNORE_START(L"\\RPC Controls\\");
+    IGNORE_START(L"\\Security\\");
+    IGNORE_START(L"\\Window\\");
     return 0;
 }
 
