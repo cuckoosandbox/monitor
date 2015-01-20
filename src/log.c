@@ -374,16 +374,6 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
                 log_string(&b, idx, str->Buffer, str->Length);
             }
         }
-        else if(*fmt == 'O') {
-            UNICODE_STRING *str = va_arg(args, UNICODE_STRING *);
-            if(str == NULL) {
-                log_string(&b, idx, "", 0);
-            }
-            else {
-                log_wstring(&b, idx, str->Buffer,
-                    str->Length / sizeof(wchar_t));
-            }
-        }
         else if(*fmt == 'a') {
             int argc = va_arg(args, int);
             const char **argv = va_arg(args, const char **);

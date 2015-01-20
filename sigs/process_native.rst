@@ -123,12 +123,17 @@ Pre::
     wchar_t *thread_name = get_unicode_buffer();
     path_get_full_path_objattr(ThreadObjectAttributes, thread_name);
 
+    wchar_t *filepath =
+        extract_unicode_string(&ProcessParameters->ImagePathName);
+    wchar_t *command_line =
+        extract_unicode_string(&ProcessParameters->CommandLine);
+
 Logging::
 
     u process_name process_name
     u thread_name thread_name
-    O filepath &ProcessParameters->ImagePathName
-    O command_line &ProcessParameters->CommandLine
+    u filepath filepath
+    u command_line command_line
 
 Post::
 

@@ -115,14 +115,14 @@ Parameters::
 
 Pre::
 
-    COPY_UNICODE_STRING(new_name, NewName);
+    wchar_t *new_name = extract_unicode_string(NewName);
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);
 
 Logging::
 
-    O new_name &new_name
+    u new_name new_name
     u regkey regkey
 
 
