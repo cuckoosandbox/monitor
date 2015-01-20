@@ -76,6 +76,9 @@ int native_init()
             continue;
         }
 
+        dpipe("INFO:Native function %z (0x%x) -> 0x%x",
+            g_funcnames[idx], fp, *g_pointers[idx]);
+
         memcpy(*g_pointers[idx], fp, 64);
     }
 

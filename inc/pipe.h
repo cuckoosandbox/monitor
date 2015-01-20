@@ -41,4 +41,10 @@ int pipe2(void *out, int *outlen, const char *fmt, ...);
 
 #define PIPE_MAX_TIMEOUT 10000
 
+#if DEBUG
+#define dpipe(fmt, ...) pipe(fmt, ##__VA_ARGS__)
+#else
+#define dpipe(fmt, ...) (void)0
+#endif
+
 #endif
