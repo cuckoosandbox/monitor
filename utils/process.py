@@ -340,8 +340,9 @@ class SignatureProcessor(object):
             ensure = {}
             for arg in row.get('parameters', []):
                 if arg['log'] and arg['argtype'] not in self.types:
-                    raise Exception('Unknown argtype %r, please add it to '
-                                    'data/types.conf.' % arg['argtype'])
+                    raise Exception('Unknown argtype %r in %s, please add it '
+                                    'to data/types.conf.' % (row['apiname'],
+                                                             arg['argtype']))
 
                 # Check whether we have to "ensure" this parameter. That is,
                 # it's a pointer and we'd like to have its contents after the

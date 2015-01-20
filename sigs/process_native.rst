@@ -117,13 +117,16 @@ Flags::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(process_name, ProcessObjectAttributes);
-    COPY_OBJECT_ATTRIBUTES(thread_name, ThreadObjectAttributes);
+    wchar_t *process_name = get_unicode_buffer();
+    path_get_full_path_objattr(ProcessObjectAttributes, process_name);
+
+    wchar_t *thread_name = get_unicode_buffer();
+    path_get_full_path_objattr(ThreadObjectAttributes, thread_name);
 
 Logging::
 
-    x process_name &process_name
-    x thread_name &thread_name
+    u process_name process_name
+    u thread_name thread_name
     O filepath &ProcessParameters->ImagePathName
     O command_line &ProcessParameters->CommandLine
 
@@ -232,11 +235,12 @@ Flags::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(section_name, ObjectAttributes);
+    wchar_t *section_name = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, section_name);
 
 Logging::
 
-    x section_name &section_name
+    u section_name section_name
 
 
 NtMakeTemporaryObject
@@ -270,11 +274,12 @@ Flags::
 
 Pre::
 
-    COPY_OBJECT_ATTRIBUTES(section_name, ObjectAttributes);
+    wchar_t *section_name = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, section_name);
 
 Logging::
 
-    x section_name &section_name
+    u section_name section_name
 
 
 NtUnmapViewOfSection

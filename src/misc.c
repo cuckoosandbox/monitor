@@ -323,6 +323,18 @@ int copy_unicode_string(const UNICODE_STRING *in,
     return -1;
 }
 
+wchar_t *extract_unicode_string(const UNICODE_STRING *unistr)
+{
+    wchar_t *ret = get_unicode_buffer();
+
+    if(unistr != NULL && unistr->Buffer != NULL) {
+        memcpy(ret, unistr->Buffer, unistr->Length * sizeof(wchar_t));
+        ret[unistr->Length / sizeof(wchar_t)] = 0;
+        return ret;
+    }
+    return NULL;
+}
+
 int copy_object_attributes(const OBJECT_ATTRIBUTES *in,
     OBJECT_ATTRIBUTES *out, UNICODE_STRING *unistr,
     wchar_t *buffer, uint32_t length)

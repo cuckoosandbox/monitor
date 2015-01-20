@@ -22,13 +22,14 @@ Parameters::
 
 Pre::
 
-    UNICODE_STRING *unistr = unistr_from_objattr(ObjectAttributes);
-    COPY_UNICODE_STRING(thread_name, unistr);
+    wchar_t *thread_name = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, thread_name);
+
     pipe("PROCESS:%d", pid_from_process_handle(ProcessHandle));
 
 Logging::
 
-    O thread_name &thread_name
+    u thread_name thread_name
 
 Post::
 
@@ -81,12 +82,12 @@ Parameters::
 
 Pre::
 
-    UNICODE_STRING *unistr = unistr_from_objattr(ObjectAttributes);
-    COPY_UNICODE_STRING(thread_name, unistr);
+    wchar_t *thread_name = get_unicode_buffer();
+    path_get_full_path_objattr(ObjectAttributes, thread_name);
 
 Logging::
 
-    O thread_name &thread_name
+    u thread_name thread_name
     i process_identifier pid_from_thread_handle(ThreadHandle)
 
 

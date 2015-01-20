@@ -25,7 +25,7 @@ Flags::
 
 Pre::
 
-    COPY_UNICODE_STRING(class, Class);
+    wchar_t *class = extract_unicode_string(Class);
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(ObjectAttributes, regkey);
@@ -41,7 +41,7 @@ Interesting::
 Logging::
 
     u regkey regkey
-    O class &class
+    u class class
 
 
 NtOpenKey

@@ -384,16 +384,6 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
                     str->Length / sizeof(wchar_t));
             }
         }
-        else if(*fmt == 'x') {
-            OBJECT_ATTRIBUTES *obj = va_arg(args, OBJECT_ATTRIBUTES *);
-            if(obj == NULL || obj->ObjectName == NULL) {
-                log_string(&b, idx, "", 0);
-            }
-            else {
-                log_wstring(&b, idx, obj->ObjectName->Buffer,
-                    obj->ObjectName->Length / sizeof(wchar_t));
-            }
-        }
         else if(*fmt == 'a') {
             int argc = va_arg(args, int);
             const char **argv = va_arg(args, const char **);

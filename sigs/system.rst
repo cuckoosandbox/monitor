@@ -86,13 +86,12 @@ Parameters::
 Pre::
 
     char library[MAX_PATH];
-
-    COPY_UNICODE_STRING(module_name, ModuleFileName);
+    wchar_t *module_name = extract_unicode_string(ModuleFileName);
     library_from_unicode_string(ModuleFileName, library, sizeof(library));
 
 Logging::
 
-    O module_name &module_name
+    u module_name module_name
 
 Post::
 
@@ -152,11 +151,11 @@ Parameters::
 
 Pre::
 
-    COPY_UNICODE_STRING(module_name, ModuleFileName);
+    wchar_t *module_name = extract_unicode_string(ModuleFileName);
 
 Logging::
 
-    O module_name &module_name
+    u module_name module_name
 
 
 LdrGetProcedureAddress

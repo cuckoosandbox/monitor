@@ -239,16 +239,18 @@ Ensure::
 
 Pre::
 
-    COPY_UNICODE_STRING(filename, FileName);
+    wchar_t *dirpath = get_unicode_buffer();
 
     OBJECT_ATTRIBUTES objattr;
-    InitializeObjectAttributes(&objattr, &filename, 0, FileHandle, NULL);
+    InitializeObjectAttributes(&objattr, FileName, 0, FileHandle, NULL);
+    path_get_full_path_objattr(&objattr, dirpath);
+
     memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
 
 Logging::
 
     b file_information IoStatusBlock->Information, FileInformation
-    x dirpath &objattr
+    u dirpath dirpath
 
 
 NtQueryInformationFile

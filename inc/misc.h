@@ -47,6 +47,8 @@ void destroy_pe_header(HANDLE module_handle);
 int copy_unicode_string(const UNICODE_STRING *in,
     UNICODE_STRING *out, wchar_t *buffer, uint32_t length);
 
+wchar_t *extract_unicode_string(const UNICODE_STRING *unistr);
+
 int copy_object_attributes(const OBJECT_ATTRIBUTES *in,
     OBJECT_ATTRIBUTES *out, UNICODE_STRING *unistr,
     wchar_t *buffer, uint32_t length);
