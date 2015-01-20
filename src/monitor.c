@@ -61,11 +61,10 @@ void monitor_init(HMODULE module_handle)
 
     native_init();
 
-    // Before we destroy the PE header of the monitor we first fetch the base
-    // address and imagesize for hooking and the same plus EAT pointers for
-    // obtaining symbols.
     symbol_init(module_handle);
 
+    // Should be the last as some of the other initialization routines extract
+    // the image size, EAT pointers, etc while the PE header is still intact.
     destroy_pe_header(module_handle);
 
     OSVERSIONINFOEX version;
