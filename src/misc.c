@@ -397,19 +397,20 @@ static uint32_t _path_from_unicode_string(const UNICODE_STRING *unistr,
 static uint32_t _path_from_object_attributes(
     const OBJECT_ATTRIBUTES *obj, wchar_t *path)
 {
-    if(obj == NULL || obj->ObjectName == NULL ||
-            obj->ObjectName->Buffer == NULL) {
+    if(obj == NULL) {
         return 0;
     }
 
-    if(obj->RootDirectory == NULL) {
-        return _path_from_unicode_string(obj->ObjectName, path, MAX_PATH_W);
+    uint32_t offset = _path_from_handle(obj->RootDirectory, path);
+
+    // Only append the backslash if both root directory and object name have
+    // been set.
+    if(offset != 0 && obj->ObjectName != NULL &&
+            obj->ObjectName->Buffer != NULL && obj->ObjectName->Length != 0) {
+        path[offset++] = '\\';
     }
 
-    uint32_t offset = _path_from_handle(obj->RootDirectory, path);
-    path[offset++] = '\\';
-
-    return _path_from_unicode_string(obj->ObjectName,
+    return offset + _path_from_unicode_string(obj->ObjectName,
         &path[offset], MAX_PATH_W - offset);
 }
 
