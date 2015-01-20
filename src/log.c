@@ -34,17 +34,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "symbol.h"
 #include "utf8.h"
 
-typedef struct _memblock_t {
-    uint32_t length;
-    void    *buffer;
-} memblock_t;
-
-// TLS index of the prelog buffer object.
-static int g_tls_idx;
-
-// TLS index to see whether a thread is new or not.
-static int g_thread_init_idx;
-
 // Maximum length of a buffer so we try to avoid polluting logs with garbage.
 #define BUFFER_LOG_MAX 4096
 #define EXCEPTION_MAXCOUNT 1024
@@ -235,13 +224,11 @@ void log_explain(signature_index_t index)
 
 void log_api_pre(uint32_t length, const void *buffer)
 {
-    void *dup = memdup(buffer, length);
-    memblock_t *mb = (memblock_t *) malloc(sizeof(memblock_t));
-    if(mb != NULL) {
-        mb->buffer = dup;
-        mb->length = length;
-        TlsSetValue(g_tls_idx, mb);
-    }
+    hook_info_t *h = hook_info();
+
+    h->pre_log_buf = memdup(buffer, length);
+    h->pre_log_len = length;
+    h->has_prelog = 1;
 }
 
 #if DEBUG
@@ -283,10 +270,11 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
     va_list args; char idx[4];
     va_start(args, hash);
 
-    void *value = TlsGetValue(g_thread_init_idx);
-    if(value == NULL && index >= MONITOR_FIRSTHOOKIDX) {
+    hook_info_t *h = hook_info();
+
+    if(h->is_new_thread != 0 && index >= MONITOR_FIRSTHOOKIDX) {
         log_new_thread();
-        TlsSetValue(g_thread_init_idx, "init!");
+        h->is_new_thread = 0;
     }
 
     EnterCriticalSection(&g_mutex);
@@ -322,15 +310,12 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
 
     int argnum = 2;
 
-    memblock_t *mb = (memblock_t *) TlsGetValue(g_tls_idx);
-    if(mb != NULL) {
+    if(h->has_prelog != 0) {
+        h->has_prelog = 0;
         snprintf(idx, 4, "%u", argnum++);
 
-        log_buffer(&b, idx, mb->buffer, mb->length);
-        free(mb->buffer);
-        free(mb);
-
-        TlsSetValue(g_tls_idx, NULL);
+        log_buffer(&b, idx, h->pre_log_buf, h->pre_log_len);
+        free(h->pre_log_buf);
     }
 
     for (const char *fmt = g_explain_paramtypes[index]; *fmt != 0; fmt++) {
@@ -532,14 +517,17 @@ void log_new_process()
 
 void log_new_thread()
 {
-    // We temporarily pop any value off the TLS while logging the new thread.
-    // (To handle the first API called on a thread using prelog).
-    void *value = TlsGetValue(g_tls_idx);
-    TlsSetValue(g_tls_idx, NULL);
+    hook_info_t *h = hook_info();
+
+    // We temporarily say that there's no prelog buffer as otherwise we might
+    // end up with a prelog buffer in the new_thread announcement - where it
+    // doesn't belong.
+    uint32_t has_prelog = h->has_prelog;
+    h->has_prelog = 0;
 
     log_api(SIG___thread__, 1, 0, 0, GetCurrentProcessId());
 
-    TlsSetValue(g_tls_idx, value);
+    h->has_prelog = has_prelog;
 }
 
 void log_anomaly(const char *subcategory, int success,
@@ -699,9 +687,6 @@ void log_init(uint32_t ip, uint16_t port)
         g_sock = INVALID_SOCKET;
         return;
     }
-
-    g_tls_idx = TlsAlloc();
-    g_thread_init_idx = TlsAlloc();
 
     log_raw("BSON\n", 5);
     log_new_process();

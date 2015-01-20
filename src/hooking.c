@@ -83,6 +83,7 @@ hook_info_t *hook_info()
     }
 
     hook_info_t *ret = (hook_info_t *) calloc(1, sizeof(hook_info_t));
+    ret->is_new_thread = 1;
     g_hook_infos[tid] = ret;
     LeaveCriticalSection(&g_hook_info_cs);
     return ret;
