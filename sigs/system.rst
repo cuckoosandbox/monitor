@@ -266,8 +266,8 @@ Logging::
     i processor_count lpSystemInfo->dwNumberOfProcessors
 
 
-NetUserGetSystem
-================
+NetUserGetInfo
+==============
 
 Signature::
 
