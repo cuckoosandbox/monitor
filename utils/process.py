@@ -55,6 +55,7 @@ class DefinitionProcessor(object):
 class SignatureProcessor(object):
     OSVERSIONS = {
         'Windows XP': 'WINDOWS_XP',
+        'Windows Vista': 'WINDOWS_7',
         'Windows 7': 'WINDOWS_7',
     }
 

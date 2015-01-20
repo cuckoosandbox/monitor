@@ -44,6 +44,7 @@ CryptProtectData
 Signature::
 
     * Library: crypt32
+    * Minimum: Windows Vista
     * Return value: BOOL
 
 Parameters::
@@ -71,6 +72,7 @@ CryptUnprotectData
 Signature::
 
     * Library: crypt32
+    * Minimum: Windows Vista
     * Return value: BOOL
 
 Parameters::
