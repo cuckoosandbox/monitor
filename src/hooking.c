@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "capstone/include/x86.h"
 #include "hooking.h"
 #include "hook-info.h"
+#include "memory.h"
 #include "misc.h"
 #include "native.h"
 #include "ntapi.h"
@@ -69,20 +70,17 @@ hook_info_t *hook_info()
 
     if(tid >= g_hook_info_length || g_hook_infos == NULL) {
         g_hook_infos = (hook_info_t **)
-            realloc(g_hook_infos, (tid + 1) * sizeof(hook_info_t *));
+            mem_realloc(g_hook_infos, (tid + 1) * sizeof(hook_info_t *));
         if(g_hook_infos == NULL) {
             pipe("CRITICAL:Error reallocating hook-info list..");
             LeaveCriticalSection(&g_hook_info_cs);
             return NULL;
         }
 
-        memset(&g_hook_infos[g_hook_info_length], 0,
-            sizeof(hook_info_t *) * (tid + 1 - g_hook_info_length));
-
         g_hook_info_length = tid + 1;
     }
 
-    hook_info_t *ret = (hook_info_t *) calloc(1, sizeof(hook_info_t));
+    hook_info_t *ret = (hook_info_t *) mem_alloc(sizeof(hook_info_t));
     ret->is_new_thread = 1;
     g_hook_infos[tid] = ret;
     LeaveCriticalSection(&g_hook_info_cs);
