@@ -41,21 +41,14 @@ static NTSTATUS (WINAPI *pNtProtectVirtualMemory)(HANDLE ProcessHandle,
     VOID **BaseAddress, ULONG *NumberOfBytesToProtect,
     ULONG NewAccessProtection, ULONG *OldAccessProtection);
 
-static uint32_t (WINAPI *pRtlGetLastWin32Error)();
-static uint32_t (WINAPI *pRtlGetLastNtStatus)();
-static void (WINAPI *pRtlSetLastWin32Error)(uint32_t error_value);
-static void (WINAPI *pRtlSetLastWin32ErrorAndNtStatusFromNtStatus)(
-    uint32_t error_value);
+static uint32_t g_win32_error_offset;
+static uint32_t g_nt_status_offset;
 
 static const char *g_funcnames[] = {
     "NtQueryVirtualMemory",
     "NtAllocateVirtualMemory",
     "NtFreeVirtualMemory",
     "NtProtectVirtualMemory",
-    "RtlGetLastWin32Error",
-    "RtlGetLastNtStatus",
-    "RtlSetLastWin32Error",
-    "RtlSetLastWin32ErrorAndNtStatusFromNtStatus",
     NULL,
 };
 
@@ -64,11 +57,23 @@ static void **g_pointers[] = {
     (void **) &pNtAllocateVirtualMemory,
     (void **) &pNtFreeVirtualMemory,
     (void **) &pNtProtectVirtualMemory,
-    (void **) &pRtlGetLastWin32Error,
-    (void **) &pRtlGetLastNtStatus,
-    (void **) &pRtlSetLastWin32Error,
-    (void **) &pRtlSetLastWin32ErrorAndNtStatusFromNtStatus,
 };
+
+// Extract the immediate offset from the first "mov eax, dword [eax+imm]" or
+// "mov eax, dword [rax+imm]" instruction that occurs.
+static int32_t _native_fetch_mov_eax_imm_offset(const uint8_t *func)
+{
+    for (uint32_t idx = 0; idx < 32; idx++) {
+        if(memcmp(func, "\x8b\x80", 2) == 0) {
+            return *(uint32_t *)(func + 2);
+        }
+        if(memcmp(func, "\x8b\x40", 2) == 0) {
+            return func[2];
+        }
+        func += lde(func);
+    }
+    return -1;
+}
 
 static void _native_copy_function(uint8_t *dst, const uint8_t *src)
 {
@@ -115,6 +120,23 @@ int native_init()
 
     unsigned long old_protect;
     VirtualProtect(*g_pointers[0], 0x1000, PAGE_EXECUTE_READ, &old_protect);
+
+    FARPROC pRtlGetLastWin32Error = GetProcAddress(
+        GetModuleHandle("ntdll"), "RtlGetLastWin32Error");
+
+    FARPROC pRtlGetLastNtStatus = GetProcAddress(
+        GetModuleHandle("ntdll"), "RtlGetLastNtStatus");
+
+    g_win32_error_offset = _native_fetch_mov_eax_imm_offset(
+        (const uint8_t *) pRtlGetLastWin32Error);
+
+    dpipe("INFO:Win32Error offset: 0x%x", g_win32_error_offset);
+
+    g_nt_status_offset = _native_fetch_mov_eax_imm_offset(
+        (const uint8_t *) pRtlGetLastNtStatus);
+
+    dpipe("INFO:NtStatus   offset: 0x%x", g_nt_status_offset);
+
     return 0;
 }
 
@@ -187,12 +209,22 @@ int virtual_protect(void *addr, uintptr_t size, uint32_t protection)
 
 void get_last_error(last_error_t *error)
 {
-    error->lasterror = pRtlGetLastWin32Error();
-    error->nt_status = pRtlGetLastNtStatus();
+#if __x86_64__
+    error->lasterror = *(uint32_t *)(readtls(0x30) + g_win32_error_offset);
+    error->nt_status = *(uint32_t *)(readtls(0x30) + g_nt_status_offset);
+#else
+    error->lasterror = *(uint32_t *)(readtls(0x18) + g_win32_error_offset);
+    error->nt_status = *(uint32_t *)(readtls(0x18) + g_nt_status_offset);
+#endif
 }
 
 void set_last_error(last_error_t *error)
 {
-    pRtlSetLastWin32ErrorAndNtStatusFromNtStatus(error->nt_status);
-    pRtlSetLastWin32Error(error->lasterror);
+#if __x86_64__
+    *(uint32_t *)(readtls(0x30) + g_win32_error_offset) = error->lasterror;
+    *(uint32_t *)(readtls(0x30) + g_nt_status_offset) = error->nt_status;
+#else
+    *(uint32_t *)(readtls(0x18) + g_win32_error_offset) = error->lasterror;
+    *(uint32_t *)(readtls(0x18) + g_nt_status_offset) = error->nt_status;
+#endif
 }
