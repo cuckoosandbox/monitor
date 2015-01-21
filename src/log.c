@@ -47,6 +47,31 @@ static int g_log_exception;
 
 static void _log_exception_perform();
 
+// http://stackoverflow.com/questions/9655202/how-to-convert-integer-to-string-in-c
+static void ultostr(int32_t value, char *str)
+{
+    const char digits[] = "0123456789";
+
+    // Negative values.
+    if(value < 0) {
+        *str++ = '-';
+        value = -value;
+    }
+
+    // Calculate the amount of numbers required.
+    int shifter = value;
+    do {
+        str++, shifter /= 10;
+    } while (shifter);
+
+    // Populate the string.
+    *str = 0;
+    do {
+        *--str = digits[value % 10];
+        value /= 10;
+    } while (value);
+}
+
 static void log_raw(const char *buf, size_t length)
 {
     if(g_sock == INVALID_SOCKET) {
@@ -125,7 +150,7 @@ static void log_argv(bson *b, const char *idx, int argc, const char **argv)
     char index[5];
 
     for (int i = 0; i < argc; i++) {
-        snprintf(index, 5, "%u", i);
+        ultostr(i, index);
         log_string(b, index, argv[i], -1);
     }
     bson_append_finish_array(b);
@@ -138,7 +163,7 @@ static void log_wargv(bson *b, const char *idx,
     char index[5];
 
     for (int i = 0; i < argc; i++) {
-        snprintf(index, 5, "%u", i);
+        ultostr(i, index);
         log_wstring(b, index, argv[i], -1);
     }
 
@@ -175,7 +200,7 @@ void log_explain(signature_index_t index)
     const char *fmt = g_explain_paramtypes[index];
 
     for (uint32_t argnum = 2; *fmt != 0; argnum++, fmt++) {
-        snprintf(argidx, 4, "%d", argnum);
+        ultostr(argnum, argidx);
 
         const char *argname = g_explain_paramnames[index][argnum-2];
 
@@ -206,7 +231,7 @@ void log_explain(signature_index_t index)
         bson_append_start_array(&b, g_api_flagnames[index][idx]);
 
         for (uint32_t idx2 = 0; f->type != FLAGTYP_NONE; idx2++, f++) {
-            sprintf(argidx, "%d", idx2);
+            ultostr(idx, argidx);
             bson_append_start_array(&b, argidx);
             bson_append_string(&b, "0", types[f->type]);
             bson_append_int(&b, "1", f->value);
@@ -245,7 +270,7 @@ static void _log_stacktrace(bson *b)
 #endif
 
     for (uint32_t idx = 3; idx < count; idx++) {
-        sprintf(number, "%d", idx-3);
+        ultostr(idx-3, number);
 
 #if __x86_64__
         sym[0] = 0;
@@ -313,14 +338,14 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
 
     if(h->has_prelog != 0) {
         h->has_prelog = 0;
-        snprintf(idx, 4, "%u", argnum++);
+        ultostr(argnum++, idx);
 
         log_buffer(&b, idx, h->pre_log_buf, h->pre_log_len);
         free(h->pre_log_buf);
     }
 
     for (const char *fmt = g_explain_paramtypes[index]; *fmt != 0; fmt++) {
-        snprintf(idx, 4, "%u", argnum++);
+        ultostr(argnum++, idx);
 
         if(*fmt == 's') {
             const char *s = va_arg(args, const char *);
@@ -606,7 +631,7 @@ static void _log_exception_perform()
     for (uint32_t idx = 0; idx < g_exception_return_address_count; idx++) {
         if(g_exception_return_addresses[idx] == 0) break;
 
-        sprintf(number, "%d", idx);
+        ultostr(idx, number);
 
 #if __x86_64__
         sym[0] = 0;
