@@ -363,6 +363,9 @@ typedef struct _PEB {
 
 #if __x86_64__
 
+#define TLS_TEB 0x30
+#define TLS_PEB 0x60
+
 static inline uintptr_t readtls(uint32_t index)
 {
     uintptr_t ret;
@@ -376,6 +379,9 @@ static inline void writetls(uint32_t index, uintptr_t value)
 }
 
 #else
+
+#define TLS_TEB 0x18
+#define TLS_PEB 0x30
 
 static inline uintptr_t readtls(uint32_t index)
 {

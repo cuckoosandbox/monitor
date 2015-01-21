@@ -209,22 +209,12 @@ int virtual_protect(void *addr, uintptr_t size, uint32_t protection)
 
 void get_last_error(last_error_t *error)
 {
-#if __x86_64__
-    error->lasterror = *(uint32_t *)(readtls(0x30) + g_win32_error_offset);
-    error->nt_status = *(uint32_t *)(readtls(0x30) + g_nt_status_offset);
-#else
-    error->lasterror = *(uint32_t *)(readtls(0x18) + g_win32_error_offset);
-    error->nt_status = *(uint32_t *)(readtls(0x18) + g_nt_status_offset);
-#endif
+    error->lasterror = *(uint32_t *)(readtls(TLS_TEB) + g_win32_error_offset);
+    error->nt_status = *(uint32_t *)(readtls(TLS_TEB) + g_nt_status_offset);
 }
 
 void set_last_error(last_error_t *error)
 {
-#if __x86_64__
-    *(uint32_t *)(readtls(0x30) + g_win32_error_offset) = error->lasterror;
-    *(uint32_t *)(readtls(0x30) + g_nt_status_offset) = error->nt_status;
-#else
-    *(uint32_t *)(readtls(0x18) + g_win32_error_offset) = error->lasterror;
-    *(uint32_t *)(readtls(0x18) + g_nt_status_offset) = error->nt_status;
-#endif
+    *(uint32_t *)(readtls(TLS_TEB) + g_win32_error_offset) = error->lasterror;
+    *(uint32_t *)(readtls(TLS_TEB) + g_nt_status_offset) = error->nt_status;
 }
