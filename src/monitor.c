@@ -49,6 +49,7 @@ void monitor_init(HMODULE module_handle)
 
     // Required to be initialized before any logging starts.
     hook_init(module_handle);
+    native_init();
 
     log_init(cfg.host_ip, cfg.host_port);
     setup_exception_handler();
@@ -58,8 +59,6 @@ void monitor_init(HMODULE module_handle)
     unhook_init_detection(cfg.first_process);
 
     hide_module_from_peb(module_handle);
-
-    native_init();
 
     symbol_init(module_handle);
 

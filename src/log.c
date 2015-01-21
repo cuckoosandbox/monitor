@@ -320,7 +320,7 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
 
     bson b;
 
-    bson_init(&b);
+    bson_init_size(&b, 0x1000 - sizeof(uint32_t));
     bson_append_int(&b, "I", index);
     bson_append_int(&b, "T", GetCurrentThreadId());
     bson_append_int(&b, "t", GetTickCount() - g_starttick);
@@ -679,6 +679,8 @@ void log_init(uint32_t ip, uint16_t port)
 {
     InitializeCriticalSection(&g_mutex);
 
+    bson_set_heap_stuff(&_bson_malloc, &_bson_realloc, &_bson_free);
+
     WSADATA wsa;
     WSAStartup(MAKEWORD(2, 2), &wsa);
 
@@ -708,8 +710,6 @@ void log_init(uint32_t ip, uint16_t port)
         g_sock = INVALID_SOCKET;
         return;
     }
-
-    bson_set_heap_stuff(&_bson_malloc, &_bson_realloc, &_bson_free);
 
     log_raw("BSON\n", 5);
     log_new_process();

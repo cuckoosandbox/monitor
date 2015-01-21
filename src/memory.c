@@ -19,12 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdint.h>
 #include <windows.h>
+#include "memory.h"
 #include "native.h"
 
 void *mem_alloc(uint32_t length)
 {
     void *ptr = virtual_alloc(NULL, length + sizeof(uint32_t),
-        PAGE_READWRITE, MEM_RESERVE|MEM_COMMIT);
+        MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
     if(ptr == NULL) return NULL;
 
     *(uint32_t *) ptr = length;
