@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "flags.h"
 #include "hooking.h"
 #include "hook-info.h"
+#include "memory.h"
 #include "misc.h"
 #include "ntapi.h"
 #include "log.h"
@@ -161,7 +162,7 @@ void log_explain(signature_index_t index)
 {
     bson b; char argidx[4];
 
-    bson_init(&b);
+    bson_init_size(&b, 0x1000 - sizeof(uint32_t));
     bson_append_int(&b, "I", index);
     bson_append_string(&b, "name", g_explain_apinames[index]);
     bson_append_string(&b, "type", "info");
@@ -634,6 +635,21 @@ static void _log_exception_perform()
     bson_destroy(&b);
 }
 
+static void *_bson_malloc(size_t length)
+{
+    return mem_alloc(length);
+}
+
+static void *_bson_realloc(void *ptr, size_t length)
+{
+    return mem_realloc(ptr, length);
+}
+
+static void _bson_free(void *ptr)
+{
+    mem_free(ptr);
+}
+
 void log_init(uint32_t ip, uint16_t port)
 {
     InitializeCriticalSection(&g_mutex);
@@ -667,6 +683,8 @@ void log_init(uint32_t ip, uint16_t port)
         g_sock = INVALID_SOCKET;
         return;
     }
+
+    bson_set_heap_stuff(&_bson_malloc, &_bson_realloc, &_bson_free);
 
     log_raw("BSON\n", 5);
     log_new_process();

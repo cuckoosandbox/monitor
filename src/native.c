@@ -34,6 +34,9 @@ static NTSTATUS (WINAPI *pNtAllocateVirtualMemory)(HANDLE ProcessHandle,
     VOID **BaseAddress, ULONG_PTR ZeroBits, SIZE_T *RegionSize,
     ULONG AllocationType, ULONG Protect);
 
+static NTSTATUS (WINAPI *pNtFreeVirtualMemory)(HANDLE ProcessHandle,
+    VOID **BaseAddress, SIZE_T *RegionSize, ULONG FreeType);
+
 static NTSTATUS (WINAPI *pNtProtectVirtualMemory)(HANDLE ProcessHandle,
     VOID **BaseAddress, ULONG *NumberOfBytesToProtect,
     ULONG NewAccessProtection, ULONG *OldAccessProtection);
@@ -47,6 +50,7 @@ static void (WINAPI *pRtlSetLastWin32ErrorAndNtStatusFromNtStatus)(
 static const char *g_funcnames[] = {
     "NtQueryVirtualMemory",
     "NtAllocateVirtualMemory",
+    "NtFreeVirtualMemory",
     "NtProtectVirtualMemory",
     "RtlGetLastWin32Error",
     "RtlGetLastNtStatus",
@@ -58,6 +62,7 @@ static const char *g_funcnames[] = {
 static void **g_pointers[] = {
     (void **) &pNtQueryVirtualMemory,
     (void **) &pNtAllocateVirtualMemory,
+    (void **) &pNtFreeVirtualMemory,
     (void **) &pNtProtectVirtualMemory,
     (void **) &pRtlGetLastWin32Error,
     (void **) &pRtlGetLastNtStatus,
@@ -146,6 +151,22 @@ void *virtual_alloc(void *addr, uintptr_t size,
 {
     return virtual_alloc_ex(g_current_process, addr, size,
         allocation_type, protection);
+}
+
+int virtual_free_ex(HANDLE process_handle, void *addr, uintptr_t size,
+    uint32_t free_type)
+{
+    SIZE_T real_size = size;
+    if(NT_SUCCESS(pNtFreeVirtualMemory(process_handle, &addr,
+            &real_size, free_type)) != FALSE) {
+        return 1;
+    }
+    return 0;
+}
+
+int virtual_free(void *addr, uintptr_t size, uint32_t free_type)
+{
+    return virtual_free_ex(g_current_process, addr, size, free_type);
 }
 
 int virtual_protect_ex(HANDLE process_handle, void *addr,

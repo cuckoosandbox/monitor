@@ -40,6 +40,11 @@ void *virtual_alloc_ex(HANDLE process_handle, void *addr,
 void *virtual_alloc(void *addr, uintptr_t size,
     uint32_t allocation_type, uint32_t protection);
 
+int virtual_free_ex(HANDLE process_handle, void *addr, uintptr_t size,
+    uint32_t free_type);
+
+int virtual_free(void *addr, uintptr_t size, uint32_t free_type);
+
 int virtual_protect_ex(HANDLE process_handle, void *addr,
     uintptr_t size, uint32_t protection);
 

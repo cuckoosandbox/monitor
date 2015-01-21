@@ -163,6 +163,11 @@ typedef struct {
     int t; /* time in seconds */
 } bson_timestamp_t;
 
+MONGO_EXPORT void bson_set_heap_stuff(
+    void *(*malloc)(size_t),
+    void *(*realloc)(void *, size_t),
+    void (*free)(void *));
+
 /* ----------------------------
    READING
    ------------------------------ */

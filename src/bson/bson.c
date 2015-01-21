@@ -58,6 +58,16 @@ static size_t _bson_position( const bson *b );
 static int ( *oid_fuzz_func )( void ) = NULL;
 static int ( *oid_inc_func )( void )  = NULL;
 
+MONGO_EXPORT void bson_set_heap_stuff(
+    void *(*malloc)(size_t),
+    void *(*realloc)(void *, size_t),
+    void (*free)(void *))
+{
+    bson_malloc_func = malloc;
+    bson_realloc_func = realloc;
+    bson_free_func = free;
+}
+
 /* ----------------------------
    READING
    ------------------------------ */
