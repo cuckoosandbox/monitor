@@ -26,8 +26,10 @@ Flags::
 
 Pre::
 
-    wchar_t *mutant_name = get_unicode_buffer();
-    path_get_full_path_objattr(ObjectAttributes, mutant_name);
+    wchar_t *mutant_name = NULL;
+    if(ObjectAttributes != NULL) {
+        mutant_name = extract_unicode_string(ObjectAttributes->ObjectName);
+    }
 
 Logging::
 

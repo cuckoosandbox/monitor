@@ -240,8 +240,10 @@ Flags::
 
 Pre::
 
-    wchar_t *section_name = get_unicode_buffer();
-    path_get_full_path_objattr(ObjectAttributes, section_name);
+    wchar_t *section_name = NULL;
+    if(ObjectAttributes != NULL) {
+        section_name = extract_unicode_string(ObjectAttributes->ObjectName);
+    }
 
 Logging::
 
@@ -279,8 +281,10 @@ Flags::
 
 Pre::
 
-    wchar_t *section_name = get_unicode_buffer();
-    path_get_full_path_objattr(ObjectAttributes, section_name);
+    wchar_t *section_name = NULL;
+    if(ObjectAttributes != NULL) {
+        section_name = extract_unicode_string(ObjectAttributes->ObjectName);
+    }
 
 Logging::
 
