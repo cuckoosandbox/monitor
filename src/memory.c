@@ -28,6 +28,8 @@ void *mem_alloc(uint32_t length)
         MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
     if(ptr == NULL) return NULL;
 
+    memset(ptr, 0, length + sizeof(uint32_t));
+
     *(uint32_t *) ptr = length;
     return (uint32_t *) ptr + 1;
 }
@@ -37,10 +39,11 @@ void *mem_realloc(void *ptr, uint32_t length)
     void *newptr = mem_alloc(length);
     if(newptr == NULL) return NULL;
 
-    uint32_t oldlength = *((uint32_t *) ptr - 1);
-    memcpy(newptr, ptr, min(length, oldlength));
-
-    mem_free(ptr);
+    if(ptr != NULL) {
+        uint32_t oldlength = *((uint32_t *) ptr - 1);
+        memcpy(newptr, ptr, min(length, oldlength));
+        mem_free(ptr);
+    }
     return newptr;
 }
 
