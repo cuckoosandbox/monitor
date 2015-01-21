@@ -481,9 +481,9 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
 
 void log_new_process()
 {
-    wchar_t module_path[MAX_PATH];
-    GetModuleFileNameW(NULL, module_path, ARRAYSIZE(module_path));
-    GetLongPathNameW(module_path, module_path, ARRAYSIZE(module_path));
+    wchar_t *module_path = get_unicode_buffer();
+    GetModuleFileNameW(NULL, module_path, MAX_PATH_W);
+    GetLongPathNameW(module_path, module_path, MAX_PATH_W);
 
     g_starttick = GetTickCount();
 
