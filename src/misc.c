@@ -623,26 +623,15 @@ static uint32_t _reg_root_handle(HANDLE key_handle, wchar_t *regkey)
 static uint32_t _reg_key_normalize(wchar_t *regkey)
 {
     wchar_t *in = regkey, *out = regkey; uint32_t length = 0;
+
+    // TODO Add support for handling null-bytes in registry keys.
     while (*in != 0) {
         // Ignore superfluous backslashes.
         while (*in == '\\' && in[1] == '\\') {
             in++;
         }
 
-        // Replace null-bytes with "\x00".
-        if(*in == 0) {
-            *out++ = '\\';
-            *out++ = 'x';
-            *out++ = '0';
-            *out++ = '0';
-            length += 4;
-        }
-        else {
-            *out++ = *in;
-            length++;
-        }
-
-        in++;
+        *out++ = *in++, length++;
     }
 
     *out = 0;
