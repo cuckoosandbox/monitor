@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ignore.h"
 #include "log.h"
 #include "misc.h"
+#include "native.h"
 #include "ntapi.h"
 #include "pipe.h"
 #include "symbol.h"
@@ -157,7 +158,7 @@ wchar_t *get_unicode_buffer()
     // If the buffers have not been allocated already then do so now.
     if(buffers == NULL) {
         // It's only 2MB per thread! What could possibly go wrong?
-        buffers = VirtualAlloc(NULL,
+        buffers = (wchar_t *) virtual_alloc(NULL,
             UNICODE_BUFFER_COUNT * (MAX_PATH_W+1) * sizeof(wchar_t),
             MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
         TlsSetValue(g_tls_unicode_buffers, buffers);
@@ -959,8 +960,8 @@ void *memdup(const void *addr, uint32_t length)
 int page_is_readable(const uint8_t *addr)
 {
     MEMORY_BASIC_INFORMATION mbi;
-    return VirtualQuery(addr, &mbi, sizeof(mbi)) == sizeof(mbi) &&
-            mbi.State & MEM_COMMIT && mbi.Protect & PAGE_READABLE;
+    return virtual_query(addr, &mbi) != FALSE &&
+        mbi.State & MEM_COMMIT && mbi.Protect & PAGE_READABLE;
 }
 
 void clsid_to_string(REFCLSID rclsid, wchar_t *buf)

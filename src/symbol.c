@@ -33,7 +33,7 @@ const uint8_t *module_from_address(const uint8_t *addr)
 {
     MEMORY_BASIC_INFORMATION mbi;
 
-    if(VirtualQuery(addr, &mbi, sizeof(mbi)) != sizeof(mbi) ||
+    if(virtual_query(addr, &mbi) == FALSE ||
             page_is_readable(mbi.AllocationBase) == 0) {
         return NULL;
     }

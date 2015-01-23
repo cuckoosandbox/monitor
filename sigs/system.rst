@@ -118,7 +118,7 @@ Pre::
     MEMORY_BASIC_INFORMATION mbi;
 
     memset(&mbi, 0, sizeof(mbi));
-    VirtualQuery(ModuleHandle, &mbi, sizeof(mbi));
+    virtual_query(ModuleHandle, &mbi);
 
     unhook_detect_disable();
 
