@@ -39,7 +39,7 @@ uint32_t path_get_full_path_unistr(const UNICODE_STRING *in, wchar_t *out);
 uint32_t path_get_full_path_objattr(
     const OBJECT_ATTRIBUTES *in, wchar_t *out);
 
-void wcsncpyA(wchar_t *str, const char *value, uint32_t length);
+void wcsncpyA(wchar_t *dst, const char *src, uint32_t length);
 
 void hide_module_from_peb(HMODULE module_handle);
 void destroy_pe_header(HANDLE module_handle);

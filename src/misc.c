@@ -299,12 +299,12 @@ void destroy_pe_header(HANDLE module_handle)
     }
 }
 
-void wcsncpyA(wchar_t *str, const char *value, uint32_t length)
+void wcsncpyA(wchar_t *dst, const char *src, uint32_t length)
 {
-    while (*value != 0 && length != 0) {
-        *str++ = *value++, length--;
+    while (*src != 0 && length != 0) {
+        *dst++ = *src++, length--;
     }
-    *str = 0;
+    *dst = 0;
 }
 
 int copy_unicode_string(const UNICODE_STRING *in,
