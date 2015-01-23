@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <windows.h>
 #include "misc.h"
+#include "native.h"
 #include "pipe.h"
 
 static const uint8_t *g_monitor_base_address;

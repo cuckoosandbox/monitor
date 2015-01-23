@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static HANDLE g_current_process;
 
 static NTSTATUS (WINAPI *pNtQueryVirtualMemory)(HANDLE ProcessHandle,
-    VOID *BaseAddress, ULONG MemoryInformationClass,
+    CONST VOID *BaseAddress, ULONG MemoryInformationClass,
     VOID *MemoryInformation, SIZE_T MemoryInformationLength,
     SIZE_T *ReturnLength);
 
@@ -35,10 +35,10 @@ static NTSTATUS (WINAPI *pNtAllocateVirtualMemory)(HANDLE ProcessHandle,
     ULONG AllocationType, ULONG Protect);
 
 static NTSTATUS (WINAPI *pNtFreeVirtualMemory)(HANDLE ProcessHandle,
-    VOID **BaseAddress, SIZE_T *RegionSize, ULONG FreeType);
+    CONST VOID **BaseAddress, SIZE_T *RegionSize, ULONG FreeType);
 
 static NTSTATUS (WINAPI *pNtProtectVirtualMemory)(HANDLE ProcessHandle,
-    VOID **BaseAddress, ULONG *NumberOfBytesToProtect,
+    CONST VOID **BaseAddress, ULONG *NumberOfBytesToProtect,
     ULONG NewAccessProtection, ULONG *OldAccessProtection);
 
 static uint32_t g_win32_error_offset;
@@ -140,7 +140,7 @@ int native_init()
     return 0;
 }
 
-int virtual_query_ex(HANDLE process_handle, void *addr,
+int virtual_query_ex(HANDLE process_handle, const void *addr,
     MEMORY_BASIC_INFORMATION *mbi)
 {
     SIZE_T return_length;
@@ -152,7 +152,7 @@ int virtual_query_ex(HANDLE process_handle, void *addr,
     return 0;
 }
 
-int virtual_query(void *addr, MEMORY_BASIC_INFORMATION *mbi)
+int virtual_query(const void *addr, MEMORY_BASIC_INFORMATION *mbi)
 {
     return virtual_query_ex(g_current_process, addr, mbi);
 }
@@ -175,7 +175,7 @@ void *virtual_alloc(void *addr, uintptr_t size,
         allocation_type, protection);
 }
 
-int virtual_free_ex(HANDLE process_handle, void *addr, uintptr_t size,
+int virtual_free_ex(HANDLE process_handle, const void *addr, uintptr_t size,
     uint32_t free_type)
 {
     SIZE_T real_size = size;
@@ -186,12 +186,12 @@ int virtual_free_ex(HANDLE process_handle, void *addr, uintptr_t size,
     return 0;
 }
 
-int virtual_free(void *addr, uintptr_t size, uint32_t free_type)
+int virtual_free(const void *addr, uintptr_t size, uint32_t free_type)
 {
     return virtual_free_ex(g_current_process, addr, size, free_type);
 }
 
-int virtual_protect_ex(HANDLE process_handle, void *addr,
+int virtual_protect_ex(HANDLE process_handle, const void *addr,
     uintptr_t size, uint32_t protection)
 {
     DWORD real_size = size; unsigned long old_protect;
@@ -202,7 +202,7 @@ int virtual_protect_ex(HANDLE process_handle, void *addr,
     return 0;
 }
 
-int virtual_protect(void *addr, uintptr_t size, uint32_t protection)
+int virtual_protect(const void *addr, uintptr_t size, uint32_t protection)
 {
     return virtual_protect_ex(g_current_process, addr, size, protection);
 }
