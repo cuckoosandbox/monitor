@@ -622,19 +622,20 @@ static uint32_t _reg_root_handle(HANDLE key_handle, wchar_t *regkey)
 
 static uint32_t _reg_key_normalize(wchar_t *regkey)
 {
-    wchar_t *in = regkey, *out = regkey; uint32_t length = 0;
+    uint32_t length = 0;
 
     // TODO Add support for handling null-bytes in registry keys.
-    while (*in != 0) {
+    for (wchar_t *in = regkey, *out = regkey; *in != 0;
+            in++, out++, length++) {
         // Ignore superfluous backslashes.
         while (*in == '\\' && in[1] == '\\') {
             in++;
         }
 
-        *out++ = *in++, length++;
+        *out = *in;
     }
 
-    *out = 0;
+    regkey[length] = 0;
 
     // HKEY_CURRENT_USER is expanded into this ugly
     // \\REGISTRY\\USER\\S-1-5-<bunch of numbers> thing which is not
@@ -651,8 +652,11 @@ static uint32_t _reg_key_normalize(wchar_t *regkey)
 
             memmove(&regkey[offset], subkey, length * sizeof(wchar_t));
             regkey[offset + length] = 0;
+            return offset + length;
         }
-        return offset + length;
+
+        regkey[offset] = 0;
+        return offset;
     }
 
     // HKEY_LOCAL_MACHINE might be expanded into \\REGISTRY\\MACHINE - we
