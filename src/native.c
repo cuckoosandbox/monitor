@@ -41,6 +41,28 @@ static NTSTATUS (WINAPI *pNtProtectVirtualMemory)(HANDLE ProcessHandle,
     CONST VOID **BaseAddress, ULONG *NumberOfBytesToProtect,
     ULONG NewAccessProtection, ULONG *OldAccessProtection);
 
+static NTSTATUS (WINAPI *pNtQueryInformationProcess)(HANDLE ProcessHandle,
+    ULONG ProcessInformationClass, VOID *ProcessInformation,
+    ULONG ProcessInformationLength, ULONG *ReturnLength);
+
+static NTSTATUS (WINAPI *pNtQueryInformationThread)(HANDLE ThreadHandle,
+    ULONG ThreadInformationClass, VOID *ThreadInformation,
+    ULONG ThreadInformationLength, ULONG *ReturnLength);
+
+static NTSTATUS (WINAPI *pNtQueryObject)(HANDLE Handle,
+    ULONG ObjectInformationClass, VOID *ObjectInformation,
+    ULONG ObjectInformationLength, ULONG *ReturnLength);
+
+static NTSTATUS (WINAPI *pNtQueryKey)(HANDLE KeyHandle,
+    KEY_INFORMATION_CLASS KeyInformationClass, PVOID KeyInformation,
+    ULONG Length, PULONG ResultLength);
+
+static NTSTATUS (WINAPI *pNtDuplicateObject)(HANDLE SourceProcessHandle,
+    HANDLE SourceHandle, HANDLE TargetProcessHandle, HANDLE *TargetHandle,
+    ACCESS_MASK DesiredAccess, ULONG HandleAttributes, ULONG Options);
+
+static NTSTATUS (WINAPI *pNtClose)(HANDLE Handle);
+
 static uint32_t g_win32_error_offset;
 static uint32_t g_nt_status_offset;
 
@@ -49,6 +71,12 @@ static const char *g_funcnames[] = {
     "NtAllocateVirtualMemory",
     "NtFreeVirtualMemory",
     "NtProtectVirtualMemory",
+    "NtQueryInformationProcess",
+    "NtQueryInformationThread",
+    "NtQueryObject",
+    "NtQueryKey",
+    "NtDuplicateObject",
+    "NtClose",
     NULL,
 };
 
@@ -57,6 +85,12 @@ static void **g_pointers[] = {
     (void **) &pNtAllocateVirtualMemory,
     (void **) &pNtFreeVirtualMemory,
     (void **) &pNtProtectVirtualMemory,
+    (void **) &pNtQueryInformationProcess,
+    (void **) &pNtQueryInformationThread,
+    (void **) &pNtQueryObject,
+    (void **) &pNtQueryKey,
+    (void **) &pNtDuplicateObject,
+    (void **) &pNtClose,
 };
 
 // Extract the immediate offset from the first "mov eax, dword [eax+imm]" or
@@ -205,6 +239,71 @@ int virtual_protect_ex(HANDLE process_handle, const void *addr,
 int virtual_protect(const void *addr, uintptr_t size, uint32_t protection)
 {
     return virtual_protect_ex(g_current_process, addr, size, protection);
+}
+
+uint32_t query_information_process(HANDLE process_handle,
+    uint32_t information_class, void *buf, uint32_t length)
+{
+    ULONG return_length;
+    if(NT_SUCCESS(pNtQueryInformationProcess(process_handle,
+            information_class, buf, length, &return_length)) != FALSE) {
+        return return_length;
+    }
+    return 0;
+}
+
+uint32_t query_information_thread(HANDLE process_handle,
+    uint32_t information_class, void *buf, uint32_t length)
+{
+    ULONG return_length;
+    if(NT_SUCCESS(pNtQueryInformationThread(process_handle,
+            information_class, buf, length, &return_length)) != FALSE) {
+        return return_length;
+    }
+    return 0;
+}
+
+uint32_t query_object(HANDLE handle, uint32_t information_class,
+    void *buf, uint32_t length)
+{
+    ULONG return_length;
+    if(NT_SUCCESS(pNtQueryObject(handle, information_class,
+            buf, length, &return_length)) != FALSE) {
+        return return_length;
+    }
+    return 0;
+}
+
+uint32_t query_key(HANDLE key_handle, uint32_t information_class,
+    void *buf, uint32_t length)
+{
+    ULONG return_length;
+    if(NT_SUCCESS(pNtQueryKey(key_handle, information_class,
+            buf, length, &return_length)) != FALSE) {
+        return return_length;
+    }
+    return 0;
+}
+
+int duplicate_handle(HANDLE source_process_handle, HANDLE source_handle,
+    HANDLE target_process_handle, HANDLE *target_handle,
+    uint32_t desired_access, int inherit_handle, uint32_t options)
+{
+    uint32_t handle_attributes = inherit_handle == FALSE ? 0 : 2;
+    if(NT_SUCCESS(pNtDuplicateObject(source_process_handle, source_handle,
+            target_process_handle, target_handle, desired_access,
+            handle_attributes, options)) != FALSE) {
+        return 1;
+    }
+    return 0;
+}
+
+int close_handle(HANDLE object_handle)
+{
+    if(NT_SUCCESS(pNtClose(object_handle)) != FALSE) {
+        return 1;
+    }
+    return 0;
 }
 
 void get_last_error(last_error_t *error)

@@ -38,51 +38,6 @@ static uint32_t g_tls_unicode_buffer_index;
 #define HKCU_PREFIX L"\\REGISTRY\\USER\\S-1-5-"
 #define HKLM_PREFIX L"\\REGISTRY\\MACHINE"
 
-static NTSTATUS (WINAPI *pNtQueryInformationProcess)(
-    HANDLE ProcessHandle,
-    ULONG ProcessInformationClass,
-    PVOID ProcessInformation,
-    ULONG ProcessInformationLength,
-    PULONG ReturnLength
-);
-
-static NTSTATUS (WINAPI *pNtQueryInformationThread)(
-    HANDLE ThreadHandle,
-    ULONG ThreadInformationClass,
-    PVOID ThreadInformation,
-    ULONG ThreadInformationLength,
-    PULONG ReturnLength
-);
-
-static NTSTATUS (WINAPI *pNtQueryAttributesFile)(
-    const OBJECT_ATTRIBUTES *ObjectAttributes,
-    PFILE_BASIC_INFORMATION FileInformation
-);
-
-static NTSTATUS (WINAPI *pNtQueryVolumeInformationFile)(
-    HANDLE FileHandle,
-    PIO_STATUS_BLOCK IoStatusBlock,
-    PVOID FsInformation,
-    ULONG Length,
-    FS_INFORMATION_CLASS FsInformationClass
-);
-
-static NTSTATUS (WINAPI *pNtQueryKey)(
-    HANDLE KeyHandle,
-    KEY_INFORMATION_CLASS KeyInformationClass,
-    PVOID KeyInformation,
-    ULONG Length,
-    PULONG ResultLength
-);
-
-static NTSTATUS (WINAPI *pNtQueryObject)(
-    HANDLE Handle,
-    OBJECT_INFORMATION_CLASS ObjectInformationClass,
-    PVOID ObjectInformation,
-    ULONG ObjectInformationLength,
-    PULONG ReturnLength
-);
-
 static PVOID (WINAPI *pRtlAddVectoredExceptionHandler)(
     ULONG FirstHandler,
     PVECTORED_EXCEPTION_HANDLER VectoredHandler
@@ -103,24 +58,6 @@ static uint32_t g_alias_index;
 void misc_init(const char *shutdown_mutex)
 {
     HMODULE mod = GetModuleHandle("ntdll");
-
-    *(FARPROC *) &pNtQueryInformationProcess =
-        GetProcAddress(mod, "NtQueryInformationProcess");
-
-    *(FARPROC *) &pNtQueryInformationThread =
-        GetProcAddress(mod, "NtQueryInformationThread");
-
-    *(FARPROC *) &pNtQueryAttributesFile =
-        GetProcAddress(mod, "NtQueryAttributesFile");
-
-    *(FARPROC *) &pNtQueryVolumeInformationFile =
-        GetProcAddress(mod, "NtQueryVolumeInformationFile");
-
-    *(FARPROC *) &pNtQueryKey =
-        GetProcAddress(mod, "NtQueryKey");
-
-    *(FARPROC *) &pNtQueryObject =
-        GetProcAddress(mod, "NtQueryObject");
 
     *(FARPROC *) &pRtlAddVectoredExceptionHandler =
         GetProcAddress(mod, "RtlAddVectoredExceptionHandler");
@@ -173,83 +110,83 @@ wchar_t *get_unicode_buffer()
 
 uintptr_t pid_from_process_handle(HANDLE process_handle)
 {
-    PROCESS_BASIC_INFORMATION pbi; ULONG size; uintptr_t ret = 0;
+    PROCESS_BASIC_INFORMATION pbi; uintptr_t ret = 0;
 
     if(process_handle == GetCurrentProcess()) {
         return GetCurrentProcessId();
     }
 
-    if(DuplicateHandle(GetCurrentProcess(), process_handle,
+    if(duplicate_handle(GetCurrentProcess(), process_handle,
             GetCurrentProcess(), &process_handle, PROCESS_QUERY_INFORMATION,
             FALSE, 0) == FALSE) {
         return 0;
     }
 
-    if(NT_SUCCESS(pNtQueryInformationProcess(process_handle,
-            ProcessBasicInformation, &pbi, sizeof(pbi), &size)) != FALSE &&
-            size == sizeof(pbi)) {
+    uint32_t length = query_information_process(process_handle,
+        ProcessBasicInformation, &pbi, sizeof(pbi));
+    if(length == sizeof(pbi)) {
         ret = pbi.UniqueProcessId;
     }
 
-    CloseHandle(process_handle);
+    close_handle(process_handle);
     return ret;
 }
 
 uintptr_t pid_from_thread_handle(HANDLE thread_handle)
 {
-    THREAD_BASIC_INFORMATION tbi; ULONG size; uintptr_t ret = 0;
+    THREAD_BASIC_INFORMATION tbi; uintptr_t ret = 0;
 
     if(thread_handle == GetCurrentThread()) {
         return GetCurrentProcessId();
     }
 
-    if(DuplicateHandle(GetCurrentProcess(), thread_handle,
+    if(duplicate_handle(GetCurrentProcess(), thread_handle,
             GetCurrentProcess(), &thread_handle, THREAD_QUERY_INFORMATION,
             FALSE, 0) == FALSE) {
         return 0;
     }
 
-    if(NT_SUCCESS(pNtQueryInformationThread(thread_handle,
-            ThreadBasicInformation, &tbi, sizeof(tbi), &size)) != FALSE &&
-            size == sizeof(tbi)) {
+    uint32_t length = query_information_thread(thread_handle,
+        ThreadBasicInformation, &tbi, sizeof(tbi));
+    if(length == sizeof(tbi)) {
         ret = (uintptr_t) tbi.ClientId.UniqueProcess;
     }
 
-    CloseHandle(thread_handle);
+    close_handle(thread_handle);
     return ret;
 }
 
 uintptr_t tid_from_thread_handle(HANDLE thread_handle)
 {
-    THREAD_BASIC_INFORMATION tbi; ULONG size; uintptr_t ret = 0;
+    THREAD_BASIC_INFORMATION tbi; uintptr_t ret = 0;
 
     if(thread_handle == GetCurrentThread()) {
         return GetCurrentThreadId();
     }
 
-    if(DuplicateHandle(GetCurrentProcess(), thread_handle,
+    if(duplicate_handle(GetCurrentProcess(), thread_handle,
             GetCurrentProcess(), &thread_handle, THREAD_QUERY_INFORMATION,
             FALSE, 0) == FALSE) {
         return 0;
     }
 
-    if(NT_SUCCESS(pNtQueryInformationThread(thread_handle,
-            ThreadBasicInformation, &tbi, sizeof(tbi), &size)) != FALSE &&
-            size == sizeof(tbi)) {
+    uint32_t length = query_information_thread(thread_handle,
+        ThreadBasicInformation, &tbi, sizeof(tbi));
+    if(length == sizeof(tbi)) {
         ret = (uintptr_t) tbi.ClientId.UniqueThread;
     }
 
-    CloseHandle(thread_handle);
+    close_handle(thread_handle);
     return ret;
 }
 
 uintptr_t parent_process_id()
 {
-    PROCESS_BASIC_INFORMATION pbi; ULONG size;
+    PROCESS_BASIC_INFORMATION pbi;
 
-    if(NT_SUCCESS(pNtQueryInformationProcess(GetCurrentProcess(),
-            ProcessBasicInformation, &pbi, sizeof(pbi), &size)) != FALSE &&
-            size == sizeof(pbi)) {
+    uint32_t length = query_information_process(GetCurrentProcess(),
+        ProcessBasicInformation, &pbi, sizeof(pbi));
+    if(length == sizeof(pbi)) {
         return (uintptr_t) pbi.InheritedFromUniqueProcessId;
     }
     return 0;
@@ -362,15 +299,13 @@ int copy_object_attributes(const OBJECT_ATTRIBUTES *in,
 
 static uint32_t _path_from_handle(HANDLE handle, wchar_t *path)
 {
-    ULONG return_length;
-
     OBJECT_NAME_INFORMATION *object_name = (OBJECT_NAME_INFORMATION *)
         calloc(1, OBJECT_NAME_INFORMATION_REQUIRED_SIZE);
     if(object_name == NULL) return 0;
 
-    if(NT_SUCCESS(pNtQueryObject(handle, ObjectNameInformation, object_name,
-            OBJECT_NAME_INFORMATION_REQUIRED_SIZE,
-            &return_length)) == FALSE) {
+    uint32_t length = query_object(handle, ObjectNameInformation,
+        object_name, OBJECT_NAME_INFORMATION_REQUIRED_SIZE);
+    if(length == 0) {
         free(object_name);
         return 0;
     }
@@ -686,8 +621,6 @@ static uint32_t _reg_key_normalize(wchar_t *regkey)
 
 uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
 {
-    ULONG ret;
-
     uint32_t buffer_length =
         sizeof(KEY_NAME_INFORMATION) + MAX_PATH_W * sizeof(wchar_t);
 
@@ -701,9 +634,8 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
         (KEY_NAME_INFORMATION *) calloc(1, buffer_length);
     if(key_name_information == NULL) return 0;
 
-    if(NT_SUCCESS(pNtQueryKey(key_handle, KeyNameInformation,
-            key_name_information, buffer_length, &ret)) != FALSE) {
-
+    if(query_key(key_handle, KeyNameInformation,
+                key_name_information, buffer_length) != 0) {
         if(key_name_information->NameLength > MAX_PATH_W * sizeof(wchar_t)) {
             pipe("CRITICAL:Registry key too long?! regkey length: %d",
                 key_name_information->NameLength / sizeof(wchar_t));
@@ -719,6 +651,7 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
         free(key_name_information);
         return _reg_key_normalize(regkey);
     }
+    free(key_name_information);
     return 0;
 }
 
@@ -867,7 +800,7 @@ int is_shutting_down()
 {
     HANDLE mutex_handle = OpenMutex(SYNCHRONIZE, FALSE, g_shutdown_mutex);
     if(mutex_handle != NULL) {
-        CloseHandle(mutex_handle);
+        close_handle(mutex_handle);
         return 1;
     }
     return 0;

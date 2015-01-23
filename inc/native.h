@@ -50,6 +50,24 @@ int virtual_protect_ex(HANDLE process_handle, const void *addr,
 
 int virtual_protect(const void *addr, uintptr_t size, uint32_t protection);
 
+uint32_t query_information_process(HANDLE process_handle,
+    uint32_t information_class, void *buf, uint32_t length);
+
+uint32_t query_information_thread(HANDLE process_handle,
+    uint32_t information_class, void *buf, uint32_t length);
+
+uint32_t query_object(HANDLE handle, uint32_t information_class,
+    void *buf, uint32_t length);
+
+uint32_t query_key(HANDLE key_handle, uint32_t information_class,
+    void *buf, uint32_t length);
+
+int duplicate_handle(HANDLE source_process_handle, HANDLE source_handle,
+    HANDLE target_process_handle, HANDLE *target_handle,
+    uint32_t desired_access, int inherit_handle, uint32_t options);
+
+int close_handle(HANDLE object_handle);
+
 void get_last_error(last_error_t *error);
 void set_last_error(last_error_t *error);
 
