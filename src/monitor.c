@@ -42,15 +42,14 @@ void monitor_init(HMODULE module_handle)
     config_t cfg;
     config_read(&cfg);
 
+    // Required to be initialized before any logging starts.
+    hook_init(module_handle, g_hooks);
     pipe_init(cfg.pipe_name);
     native_init();
 
     misc_init(cfg.shutdown_mutex);
     dropped_init();
     diffing_init(cfg.hashes_path);
-
-    // Required to be initialized before any logging starts.
-    hook_init(module_handle);
 
     log_init(cfg.host_ip, cfg.host_port);
     setup_exception_handler();
