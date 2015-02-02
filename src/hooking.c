@@ -33,7 +33,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "native.h"
 #include "ntapi.h"
 #include "pipe.h"
-#include "slist.h"
 #include "unhook.h"
 
 static SYSTEM_INFO g_si;
