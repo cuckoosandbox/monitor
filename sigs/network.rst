@@ -455,6 +455,64 @@ Parameters::
     *  DWORD dwReserved
 
 
+InternetGetConnectedStateExA
+============================
+
+Signature::
+
+    * Library: wininet
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPDWORD lpdwFlags flags
+    ** LPCSTR lpszConnectionName connection_name
+    *  DWORD dwNameLen
+    *  DWORD dwReserved
+
+
+InternetGetConnectedStateExW
+============================
+
+Signature::
+
+    * Library: wininet
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPDWORD lpdwFlags flags
+    ** LPWSTR lpszConnectionName connection_name
+    *  DWORD dwNameLen
+    *  DWORD dwReserved
+
+
+DeleteUrlCacheEntryA
+====================
+
+Signature::
+
+    * Library: wininet
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPCSTR lpszUrlName url
+
+
+DeleteUrlCacheEntryW
+====================
+
+Signature::
+
+    * Library: wininet
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPWSTR lpszUrlName url
+
+
 DnsQuery_A
 ==========
 
