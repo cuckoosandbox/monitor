@@ -56,13 +56,13 @@ void config_read(config_t *cfg)
                 cfg->first_process = value[0] == '1';
             }
             else if(strcmp(key, "startup-time") == 0) {
-                cfg->startup_time = atoi(value);
+                cfg->startup_time = strtoul(value, NULL, 10);
             }
             else if(strcmp(key, "host-ip") == 0) {
                 cfg->host_ip = inet_addr(value);
             }
             else if(strcmp(key, "host-port") == 0) {
-                cfg->host_port = atoi(value);
+                cfg->host_port = strtoul(value, NULL, 10);
             }
             else if(strcmp(key, "force-sleepskip") == 0) {
                 cfg->force_sleep_skip = value[0] == '1';
