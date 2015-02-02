@@ -301,7 +301,7 @@ Pre::
         length += rgcbToBeHashed[idx];
     }
 
-    uint8_t *buf = malloc(length);
+    uint8_t *buf = mem_alloc(length);
     if(buf != NULL) {
         for (uint32_t idx = 0, offset = 0; idx < cToBeHashed; idx++) {
             memcpy(&buf[offset], rgpbToBeHashed[idx], rgcbToBeHashed[idx]);
@@ -316,7 +316,7 @@ Logging::
 Post::
 
     if(buf != NULL) {
-        free(buf);
+        mem_free(buf);
     }
 
 

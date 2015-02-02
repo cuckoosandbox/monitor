@@ -122,7 +122,7 @@ static void log_string(bson *b, const char *idx, const char *str, int length)
         pipe("CRITICAL:Error creating bson string, error, %x utf8len %d.",
             b->err, utf8len);
     }
-    free(utf8s);
+    mem_free(utf8s);
 }
 
 static void log_wstring(bson *b, const char *idx,
@@ -141,7 +141,7 @@ static void log_wstring(bson *b, const char *idx,
         pipe("CRITICAL:Error creating bson wstring, error %x, utf8len %d.",
             b->err, utf8len);
     }
-    free(utf8s);
+    mem_free(utf8s);
 }
 
 static void log_argv(bson *b, const char *idx, int argc, const char **argv)
@@ -341,7 +341,7 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
         ultostr(argnum++, idx);
 
         log_buffer(&b, idx, h->pre_log_buf, h->pre_log_len);
-        free(h->pre_log_buf);
+        mem_free(h->pre_log_buf);
     }
 
     for (const char *fmt = g_explain_paramtypes[index]; *fmt != 0; fmt++) {

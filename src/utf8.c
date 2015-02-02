@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <windows.h>
+#include "memory.h"
 #include "utf8.h"
 
 int utf8_encode(unsigned short c, unsigned char *out)
@@ -72,7 +73,7 @@ char *utf8_string(const char *s, int len)
     if(len < 0) len = strlen(s);
 
     int encoded_length = utf8_bytecnt_ascii(s, len);
-    char *utf8string = (char *) malloc(encoded_length+4);
+    char *utf8string = (char *) mem_alloc(encoded_length+4);
     *((int *) utf8string) = encoded_length;
     int pos = 4;
 
@@ -87,7 +88,7 @@ char *utf8_wstring(const wchar_t *s, int len)
     if(len < 0) len = lstrlenW(s);
 
     int encoded_length = utf8_bytecnt_unicode(s, len);
-    char *utf8string = (char *) malloc(encoded_length+4);
+    char *utf8string = (char *) mem_alloc(encoded_length+4);
     *((int *) utf8string) = encoded_length;
     int pos = 4;
 

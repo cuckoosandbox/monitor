@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "hooking.h"
 #include "ignore.h"
 #include "log.h"
+#include "memory.h"
 #include "misc.h"
 #include "native.h"
 #include "ntapi.h"
@@ -300,20 +301,20 @@ int copy_object_attributes(const OBJECT_ATTRIBUTES *in,
 static uint32_t _path_from_handle(HANDLE handle, wchar_t *path)
 {
     OBJECT_NAME_INFORMATION *object_name = (OBJECT_NAME_INFORMATION *)
-        calloc(1, OBJECT_NAME_INFORMATION_REQUIRED_SIZE);
+        mem_alloc(OBJECT_NAME_INFORMATION_REQUIRED_SIZE);
     if(object_name == NULL) return 0;
 
     uint32_t length = query_object(handle, ObjectNameInformation,
         object_name, OBJECT_NAME_INFORMATION_REQUIRED_SIZE);
     if(length == 0) {
-        free(object_name);
+        mem_free(object_name);
         return 0;
     }
 
     memcpy(path, object_name->Name.Buffer, object_name->Name.Length);
     path[object_name->Name.Length / sizeof(wchar_t)] = 0;
 
-    free(object_name);
+    mem_free(object_name);
     return lstrlenW(path);
 }
 
@@ -631,7 +632,7 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
     }
 
     KEY_NAME_INFORMATION *key_name_information =
-        (KEY_NAME_INFORMATION *) calloc(1, buffer_length);
+        (KEY_NAME_INFORMATION *) mem_alloc(buffer_length);
     if(key_name_information == NULL) return 0;
 
     if(query_key(key_handle, KeyNameInformation,
@@ -639,7 +640,7 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
         if(key_name_information->NameLength > MAX_PATH_W * sizeof(wchar_t)) {
             pipe("CRITICAL:Registry key too long?! regkey length: %d",
                 key_name_information->NameLength / sizeof(wchar_t));
-            free(key_name_information);
+            mem_free(key_name_information);
             return 0;
         }
 
@@ -648,10 +649,10 @@ uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey)
             length * sizeof(wchar_t));
         regkey[offset + length] = 0;
 
-        free(key_name_information);
+        mem_free(key_name_information);
         return _reg_key_normalize(regkey);
     }
-    free(key_name_information);
+    mem_free(key_name_information);
     return 0;
 }
 
@@ -881,7 +882,7 @@ void setup_exception_handler()
 void *memdup(const void *addr, uint32_t length)
 {
     if(addr != NULL && length != 0) {
-        void *ret = malloc(length);
+        void *ret = mem_alloc(length);
         if(ret != NULL) {
             memcpy(ret, addr, length);
             return ret;
@@ -948,7 +949,7 @@ wchar_t *flag_to_string(flag_t which, uint32_t flag)
 void *wsabuf_get_buffer(uint32_t buffer_count, WSABUF *buffers,
     uint32_t length)
 {
-    uint8_t *ret = (uint8_t *) malloc(length);
+    uint8_t *ret = (uint8_t *) mem_alloc(length);
     if(ret != NULL) {
         for (uint32_t idx = 0, offset = 0; idx < buffer_count; idx++) {
             if(buffers[idx].buf != NULL && buffers[idx].len != 0) {

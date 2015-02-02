@@ -41,6 +41,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "hashtable.h"
+#include "memory.h"
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
@@ -131,8 +132,8 @@ static void hashtable_rehash(ht_t *ht, unsigned int new_size_index)
     if(new_size_index >= ARRAY_SIZE(hash_sizes)) return;
 
     // XXX: This code is redupped! fuck't
-    ht->table = (ht_entry_t *) calloc(hash_sizes[new_size_index].size,
-        sizeof(*ht->table) + ht->data_length);
+    ht->table = (ht_entry_t *) mem_alloc(hash_sizes[new_size_index].size *
+        (sizeof(*ht->table) + ht->data_length));
     if(ht->table == NULL) {
         return;
     }
@@ -153,7 +154,7 @@ static void hashtable_rehash(ht_t *ht, unsigned int new_size_index)
             ht_insert2(ht, e->hash, e->data, e->length);
         }
     }
-    free(old_ht.table);
+    mem_free(old_ht.table);
 }
 
 void ht_init(ht_t *ht, uint32_t data_length)
@@ -161,10 +162,9 @@ void ht_init(ht_t *ht, uint32_t data_length)
     ht->data_length = data_length != 0 ? data_length : sizeof(void *);
     // TODO: use slices here
     ht->size = hash_sizes[0].size;
-    ht->table = (ht_entry_t *) calloc(ht->size,
-        sizeof(*ht->table) + ht->data_length);
+    ht->table = (ht_entry_t *) mem_alloc(ht->size *
+        (sizeof(*ht->table) + ht->data_length));
     if(ht->table == NULL) {
-        free(ht);
         return;
     }
     ht->size_index = 0;
@@ -178,7 +178,7 @@ void ht_init(ht_t *ht, uint32_t data_length)
 void ht_free(ht_t *ht)
 {
     if(ht != NULL) {
-        free(ht->table);
+        mem_free(ht->table);
     }
 }
 

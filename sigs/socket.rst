@@ -397,7 +397,7 @@ Logging::
 Post::
 
     if(buf != NULL) {
-        free(buf);
+        mem_free(buf);
     }
 
 
@@ -442,7 +442,7 @@ Logging::
 Post::
 
     if(buf != NULL) {
-        free(buf);
+        mem_free(buf);
     }
 
 
@@ -480,7 +480,7 @@ Logging::
 Post::
 
     if(buf != NULL) {
-        free(buf);
+        mem_free(buf);
     }
 
 
@@ -527,7 +527,7 @@ Logging::
 Post::
 
     if(buf != NULL) {
-        free(buf);
+        mem_free(buf);
     }
 
 
