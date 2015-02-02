@@ -419,12 +419,26 @@ int hook(hook_t *h)
 
     h->addr = _hook_follow_jumps(h->funcname, (uint8_t *) addr);
 
-    // We allocate 64 bytes for the function stub and 64 bytes for padding
-    // in-between (for debugging purposes.)
-    h->func_stub = (uint8_t *) malloc(64);
-    memset(h->func_stub, 0xcc, 64);
+    static uint8_t *func_stubs = NULL;
 
-    virtual_protect(h->func_stub, 64, PAGE_EXECUTE_READWRITE);
+    if(func_stubs == NULL) {
+        func_stubs = virtual_alloc(NULL, MONITOR_HOOKCNT * 64 + 8,
+            MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+        if(func_stubs == NULL) {
+            pipe("CRITICAL:Error allocating memory for hooks!");
+            return -1;
+        }
+
+        // 8-byte align.
+        func_stubs += 8 - ((uintptr_t) func_stubs & 7);
+    }
+
+    // We allocate 64 bytes for the function stub and 64 bytes for padding
+    // in-between (for debugging purposes).
+    h->func_stub = func_stubs;
+    func_stubs += 64;
+
+    memset(h->func_stub, 0xcc, 64);
 
     *h->orig = (FARPROC) h->func_stub;
 
