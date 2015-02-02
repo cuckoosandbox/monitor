@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "monitor.h"
 
-#define HOOKINFO_RETADDRCNT 32
+#define HOOKINFO_RETADDRCNT 64
 
 typedef struct _hook_info_t {
     uint32_t hook_count;
