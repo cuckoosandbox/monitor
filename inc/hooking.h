@@ -54,7 +54,7 @@ typedef struct _hook_t {
     int32_t stub_used;
 } hook_t;
 
-void hook_init();
+void hook_init(HMODULE module_handle);
 hook_info_t *hook_info();
 
 int lde(const void *addr);
