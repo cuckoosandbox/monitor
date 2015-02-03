@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "flags.h"
 #include "ntapi.h"
 
-void misc_init();
+void misc_init(const char *shutdown_mutex);
 
 wchar_t *get_unicode_buffer();
 
@@ -79,7 +79,6 @@ void library_from_unicode_string(const UNICODE_STRING *us,
 
 int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length);
 
-void setup_exception_handler();
 void *memdup(const void *addr, uint32_t length);
 int page_is_readable(const uint8_t *addr);
 void clsid_to_string(REFCLSID rclsid, wchar_t *buf);

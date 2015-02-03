@@ -44,6 +44,9 @@ static PVOID (WINAPI *pRtlAddVectoredExceptionHandler)(
     PVECTORED_EXCEPTION_HANDLER VectoredHandler
 );
 
+static LONG CALLBACK _exception_handler(
+    EXCEPTION_POINTERS *exception_pointers);
+
 static wchar_t g_aliases[64][2][MAX_PATH];
 static uint32_t g_alias_index;
 
@@ -62,6 +65,8 @@ void misc_init(const char *shutdown_mutex)
 
     *(FARPROC *) &pRtlAddVectoredExceptionHandler =
         GetProcAddress(mod, "RtlAddVectoredExceptionHandler");
+
+    pRtlAddVectoredExceptionHandler(TRUE, &_exception_handler);
 
     strncpy(g_shutdown_mutex, shutdown_mutex, sizeof(g_shutdown_mutex));
 
@@ -872,11 +877,6 @@ static LONG CALLBACK _exception_handler(
         exception_pointers->ExceptionRecord, return_addresses, count);
 
     return EXCEPTION_CONTINUE_SEARCH;
-}
-
-void setup_exception_handler()
-{
-    pRtlAddVectoredExceptionHandler(TRUE, &_exception_handler);
 }
 
 void *memdup(const void *addr, uint32_t length)

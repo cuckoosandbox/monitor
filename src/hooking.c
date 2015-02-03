@@ -59,6 +59,10 @@ void hook_init(HMODULE module_handle)
 #else
     cs_open(CS_ARCH_X86, CS_MODE_32, &g_capstone);
 #endif
+
+    // TODO Initialize memory allocation routines for capstone. Libraries
+    // can be loaded on-the-fly and in such cases it is preferred to use
+    // our own allocation routines rather than relying on malloc()/free().
 }
 
 hook_info_t *hook_info()
@@ -116,6 +120,12 @@ int hook_in_monitor()
 
 int lde(const void *addr)
 {
+    if(g_capstone == NULL) {
+        MessageBox(NULL, "Error",
+            "Capstone has not been initialized yet!", 0);
+        return 0;
+    }
+
     cs_insn *insn;
 
     size_t count =
@@ -130,6 +140,12 @@ int lde(const void *addr)
 
 int disasm(const void *addr, char *str)
 {
+    if(g_capstone == NULL) {
+        MessageBox(NULL, "Error",
+            "Capstone has not been initialized yet!", 0);
+        return 0;
+    }
+
     cs_insn *insn;
 
     size_t count =
@@ -319,6 +335,10 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
     // As the target is probably not close enough addr for a 32-bit relative
     // jump we allocate a separate page for an intermediate jump.
     uint8_t *closeby = _hook_alloc_closeby(addr, ASM_JUMP_ADDR_SIZE);
+    if(closeby == NULL) {
+        pipe("CRITICAL:Unable to find closeby page for hooking!");
+        return -1;
+    }
 
     // Nop all used bytes out with int3's.
     memset(addr, 0xcc, stub_used);
@@ -430,14 +450,13 @@ int hook(hook_t *h)
 
         // 8-byte align.
         func_stubs += 8 - ((uintptr_t) func_stubs & 7);
+        memset(func_stubs, 0xcc, MONITOR_HOOKCNT * 64);
     }
 
     // We allocate 64 bytes for the function stub and 64 bytes for padding
     // in-between (for debugging purposes).
     h->func_stub = func_stubs;
     func_stubs += 64;
-
-    memset(h->func_stub, 0xcc, 64);
 
     *h->orig = (FARPROC) h->func_stub;
 

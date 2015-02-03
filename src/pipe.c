@@ -130,6 +130,11 @@ void pipe_init(const char *pipe_name)
 
 int pipe(const char *fmt, ...)
 {
+    if(g_pipe_name[0] == 0) {
+        MessageBox(NULL, "Error", "Pipe has not been initialized yet!", 0);
+        return -1;
+    }
+
     va_list args;
     va_start(args, fmt);
     int len = _pipe_sprintf(NULL, fmt, args);
@@ -148,6 +153,11 @@ int pipe(const char *fmt, ...)
 
 int pipe2(void *out, int *outlen, const char *fmt, ...)
 {
+    if(g_pipe_name[0] == 0) {
+        MessageBox(NULL, "Error", "Pipe has not been initialized yet!", 0);
+        return -1;
+    }
+
     va_list args;
     va_start(args, fmt);
     int len = _pipe_sprintf(NULL, fmt, args);
