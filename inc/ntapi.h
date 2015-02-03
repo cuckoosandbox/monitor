@@ -369,13 +369,13 @@ typedef struct _PEB {
 static inline uintptr_t readtls(uint32_t index)
 {
     uintptr_t ret;
-    __asm__("movq %%gs:(%1), %0" : "=r" (ret) : "r" (index));
+    __asm__ volatile("movq %%gs:(%1), %0" : "=r" (ret) : "r" (index));
     return ret;
 }
 
 static inline void writetls(uint32_t index, uintptr_t value)
 {
-    __asm__("movq %0, %%gs:(%1)" :: "r" (value), "r" (index));
+    __asm__ volatile("movq %0, %%gs:(%1)" :: "r" (value), "r" (index));
 }
 
 #else
@@ -386,13 +386,13 @@ static inline void writetls(uint32_t index, uintptr_t value)
 static inline uintptr_t readtls(uint32_t index)
 {
     uintptr_t ret;
-    __asm__("movl %%fs:(%1), %0" : "=r" (ret) : "r" (index));
+    __asm__ volatile("movl %%fs:(%1), %0" : "=r" (ret) : "r" (index));
     return ret;
 }
 
 static inline void writetls(uint32_t index, uintptr_t value)
 {
-    __asm__("movl %0, %%fs:(%1)" :: "r" (value), "r" (index));
+    __asm__ volatile("movl %0, %%fs:(%1)" :: "r" (value), "r" (index));
 }
 
 #endif
