@@ -116,29 +116,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         return;
         {%- endif %}
     }
-    {% endif %}
+    {%- endif %}
 
     {%- for param in hook.ensure.keys(): %}
+
     {{ hook.ensure[param] }} _{{ param }};
     if({{ param }} == NULL) {
         {{ param }} = &_{{ param }};
         memset(&_{{ param }}, 0, sizeof({{ hook.ensure[param] }}));
     }
-    {% endfor %}
+    {%- endfor %}
 
     {%- if hook.pre: %}
-    {%- for line in hook.pre: %}
+    {% for line in hook.pre: %}
     {{ line }}
     {%- endfor %}
-    {% endif %}
+    {%- endif %}
 
     {%- if hook.interesting %}
+
     uint64_t hash = call_hash(
         "{{ hook.interesting|join(attribute='argtype') }}"
         {%- if hook.interesting %}, {% endif %}
         {{ hook.interesting|join(',\n        ', attribute='argvalue') }}
     );
     {%- elif hook.signature.interesting %}
+
     uint64_t hash = call_hash("");
     {%- endif %}
     {%- if hook.interesting or hook.signature.interesting %}
@@ -151,6 +154,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         {%- endif %}
     }
     {% else %}
+
     uint64_t hash = 0;
     {% endif %}
 
