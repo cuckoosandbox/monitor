@@ -315,9 +315,7 @@ Logging::
 
 Post::
 
-    if(buf != NULL) {
-        mem_free(buf);
-    }
+    mem_free(buf);
 
 
 CertCreateCertificateContext

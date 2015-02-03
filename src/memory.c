@@ -49,7 +49,9 @@ void *mem_realloc(void *ptr, uint32_t length)
 
 void mem_free(void *ptr)
 {
-    uint32_t oldlength = *((uint32_t *) ptr - 1);
-    virtual_free((uint32_t *) ptr - 1,
-        oldlength + sizeof(uint32_t), MEM_RELEASE);
+    if(ptr != NULL) {
+        uint32_t oldlength = *((uint32_t *) ptr - 1);
+        virtual_free((uint32_t *) ptr - 1,
+            oldlength + sizeof(uint32_t), MEM_RELEASE);
+    }
 }

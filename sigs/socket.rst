@@ -396,9 +396,7 @@ Logging::
 
 Post::
 
-    if(buf != NULL) {
-        mem_free(buf);
-    }
+    mem_free(buf);
 
 
 WSARecvFrom
@@ -441,9 +439,7 @@ Logging::
 
 Post::
 
-    if(buf != NULL) {
-        mem_free(buf);
-    }
+    mem_free(buf);
 
 
 WSASend
@@ -479,9 +475,7 @@ Logging::
 
 Post::
 
-    if(buf != NULL) {
-        mem_free(buf);
-    }
+    mem_free(buf);
 
 
 WSASendTo
@@ -526,9 +520,7 @@ Logging::
 
 Post::
 
-    if(buf != NULL) {
-        mem_free(buf);
-    }
+    mem_free(buf);
 
 
 WSASocketA
