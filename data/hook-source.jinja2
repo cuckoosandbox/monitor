@@ -176,7 +176,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endif %}
 
     {%- if hook.signature.special: %}
-    if(hook_info()->hook_count == 1) {
+
+    if(hook_in_monitor() == 0) {
         {{ log_api(hook)|indent }}
     }
     {%- else %}

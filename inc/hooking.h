@@ -26,9 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define HOOKINFO_RETADDRCNT 64
 
 typedef struct _hook_info_t {
-    uint32_t hook_count;
-    uint32_t last_error;
-
     uintptr_t return_addresses[HOOKINFO_RETADDRCNT];
     uint32_t return_address_count;
 
