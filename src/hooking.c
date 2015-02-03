@@ -375,7 +375,7 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 
 #endif
 
-static uint8_t *_hook_follow_jumps(const char *funcname, uint8_t *addr)
+static uint8_t *_hook_determine_start(const char *funcname, uint8_t *addr)
 {
     // Under Windows 7 some functions have been replaced by a function stub
     // which in turn calls the original function. E.g., a lot of functions
@@ -417,6 +417,13 @@ static uint8_t *_hook_follow_jumps(const char *funcname, uint8_t *addr)
         break;
     }
 
+    // If this function is a system call wrapper (and thus its first
+    // instruction resembles "mov eax, imm32"), then skip the first
+    // instruction.
+    if(memcmp(funcname, "Nt", 2) == 0 && *addr == 0xb8) {
+        addr += 5;
+    }
+
     return addr;
 }
 
@@ -436,7 +443,7 @@ int hook(hook_t *h)
         return -1;
     }
 
-    h->addr = _hook_follow_jumps(h->funcname, (uint8_t *) addr);
+    h->addr = _hook_determine_start(h->funcname, (uint8_t *) addr);
 
     static uint8_t *func_stubs = NULL;
 
