@@ -37,17 +37,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static SYSTEM_INFO g_si;
 static csh g_capstone;
 
-static hook_info_t **g_hook_infos;
-static uint32_t g_hook_info_length;
-static CRITICAL_SECTION g_hook_info_cs;
-
 static uintptr_t g_monitor_start;
 static uintptr_t g_monitor_end;
 
 void hook_init(HMODULE module_handle)
 {
-    InitializeCriticalSection(&g_hook_info_cs);
-
     g_monitor_start = (uintptr_t) module_handle;
     g_monitor_end = g_monitor_start +
         module_image_size((const uint8_t *) module_handle);
@@ -65,53 +59,22 @@ void hook_init(HMODULE module_handle)
     // our own allocation routines rather than relying on malloc()/free().
 }
 
-hook_info_t *hook_info()
-{
-    uintptr_t tid = tid_from_thread_handle(GetCurrentThread()) / 4;
-
-    EnterCriticalSection(&g_hook_info_cs);
-
-    if(tid < g_hook_info_length && g_hook_infos[tid] != NULL) {
-        hook_info_t *ret = g_hook_infos[tid];
-        LeaveCriticalSection(&g_hook_info_cs);
-        return ret;
-    }
-
-    if(tid >= g_hook_info_length || g_hook_infos == NULL) {
-        g_hook_infos = (hook_info_t **)
-            mem_realloc(g_hook_infos, (tid + 1) * sizeof(hook_info_t *));
-        if(g_hook_infos == NULL) {
-            pipe("CRITICAL:Error reallocating hook-info list..");
-            LeaveCriticalSection(&g_hook_info_cs);
-            return NULL;
-        }
-
-        g_hook_info_length = tid + 1;
-    }
-
-    hook_info_t *ret = (hook_info_t *) mem_alloc(sizeof(hook_info_t));
-    ret->is_new_thread = 1;
-    g_hook_infos[tid] = ret;
-    LeaveCriticalSection(&g_hook_info_cs);
-    return ret;
-}
-
 int hook_in_monitor()
 {
-    hook_info_t *h = hook_info();
+    uintptr_t return_addresses[RETADDRCNT], return_address_count;
 
 #if __x86_64__
-    h->return_address_count = 0;
+    return_address_count = 0;
 #else
-    h->return_address_count =
-        stacktrace(get_ebp(), h->return_addresses, HOOKINFO_RETADDRCNT);
+    return_address_count =
+        stacktrace(get_ebp(), return_addresses, RETADDRCNT);
 #endif
 
     // If an address that lies within the monitor DLL is found in the
     // stacktrace then we consider this call not interesting.
-    for (uint32_t idx = 2; idx < h->return_address_count; idx++) {
-        if(h->return_addresses[idx] >= g_monitor_start &&
-                h->return_addresses[idx] < g_monitor_end) {
+    for (uint32_t idx = 2; idx < return_address_count; idx++) {
+        if(return_addresses[idx] >= g_monitor_start &&
+                return_addresses[idx] < g_monitor_end) {
             return 1;
         }
     }

@@ -23,14 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "monitor.h"
 
-#define HOOKINFO_RETADDRCNT 64
-
-typedef struct _hook_info_t {
-    uintptr_t return_addresses[HOOKINFO_RETADDRCNT];
-    uint32_t return_address_count;
-
-    uint32_t is_new_thread;
-} hook_info_t;
+#define RETADDRCNT 64
 
 typedef struct _hook_t {
     const char *library;
@@ -48,7 +41,6 @@ typedef struct _hook_t {
 } hook_t;
 
 void hook_init(HMODULE module_handle);
-hook_info_t *hook_info();
 
 int lde(const void *addr);
 

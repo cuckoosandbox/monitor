@@ -13,15 +13,6 @@
         }
     },
     {
-        "apiname": "__thread__",
-        "parameters": [
-            {"argtype": "ULONG", "argname": "process_identifier"}
-        ],
-        "signature": {
-            "category": "__notification__"
-        }
-    },
-    {
         "apiname": "__anomaly__",
         "parameters": [
             {"argtype": "ULONG", "argname": "thread_identifier"},

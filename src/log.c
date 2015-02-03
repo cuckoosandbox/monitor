@@ -287,13 +287,6 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
     va_list args; char idx[4];
     va_start(args, hash);
 
-    hook_info_t *h = hook_info();
-
-    if(h->is_new_thread != 0 && index >= MONITOR_FIRSTHOOKIDX) {
-        log_new_thread();
-        h->is_new_thread = 0;
-    }
-
     EnterCriticalSection(&g_mutex);
 
     // If there is an exception available for processing, then process it now.
@@ -502,11 +495,6 @@ void log_new_process()
     log_api(SIG___process__, 1, 0, 0, st.dwLowDateTime,
         st.dwHighDateTime, GetCurrentProcessId(),
         parent_process_id(), module_path);
-}
-
-void log_new_thread()
-{
-    log_api(SIG___thread__, 1, 0, 0, GetCurrentProcessId());
 }
 
 void log_anomaly(const char *subcategory, int success,

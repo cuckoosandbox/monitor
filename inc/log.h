@@ -35,7 +35,6 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
     uintptr_t *return_addresses, uint32_t count);
 
 void log_new_process();
-void log_new_thread();
 
 extern const char *g_explain_apinames[];
 extern const char *g_explain_categories[];
