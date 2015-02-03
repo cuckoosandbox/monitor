@@ -248,15 +248,6 @@ void log_explain(signature_index_t index)
     bson_destroy(&b);
 }
 
-void log_api_pre(uint32_t length, const void *buffer)
-{
-    hook_info_t *h = hook_info();
-
-    h->pre_log_buf = memdup(buffer, length);
-    h->pre_log_len = length;
-    h->has_prelog = 1;
-}
-
 #if DEBUG
 
 static void _log_stacktrace(bson *b)
@@ -335,14 +326,6 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
     bson_append_long(&b, "1", return_value);
 
     int argnum = 2;
-
-    if(h->has_prelog != 0) {
-        h->has_prelog = 0;
-        ultostr(argnum++, idx);
-
-        log_buffer(&b, idx, h->pre_log_buf, h->pre_log_len);
-        mem_free(h->pre_log_buf);
-    }
 
     for (const char *fmt = g_explain_paramtypes[index]; *fmt != 0; fmt++) {
         ultostr(argnum++, idx);
@@ -523,17 +506,7 @@ void log_new_process()
 
 void log_new_thread()
 {
-    hook_info_t *h = hook_info();
-
-    // We temporarily say that there's no prelog buffer as otherwise we might
-    // end up with a prelog buffer in the new_thread announcement - where it
-    // doesn't belong.
-    uint32_t has_prelog = h->has_prelog;
-    h->has_prelog = 0;
-
     log_api(SIG___thread__, 1, 0, 0, GetCurrentProcessId());
-
-    h->has_prelog = has_prelog;
 }
 
 void log_anomaly(const char *subcategory, int success,

@@ -33,10 +33,6 @@ typedef struct _hook_info_t {
     uint32_t return_address_count;
 
     uint32_t is_new_thread;
-
-    uint32_t has_prelog;
-    uint8_t *pre_log_buf;
-    uint32_t pre_log_len;
 } hook_info_t;
 
 typedef struct _hook_t {

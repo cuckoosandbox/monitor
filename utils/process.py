@@ -198,7 +198,13 @@ class SignatureProcessor(object):
         return text.split('\n')
 
     def _parse_prelog(self, text):
-        return self._parse_logging(text)
+        argtype, argname, parameter = text.split(' ', 2)
+        if argtype != 'b':
+            raise Exception('Prelog parameter must be a buffer.')
+
+        length, buffer = parameter.split(',')
+        return dict(argtype=argtype, argname=argname,
+                    length=length.strip(), buffer=buffer.strip())
 
     def _parse_middle(self, text):
         return text.split('\n')

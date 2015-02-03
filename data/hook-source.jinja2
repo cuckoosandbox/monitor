@@ -45,6 +45,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         0,
         hash
         {%- endif %}
+    {%- if hook.prelog: -%}
+        ,
+        prelen, prebuf
+    {%- endif %}
     {%- for param in hook.parameters: -%}
         {% if param.log == True: -%}
         ,
@@ -103,6 +107,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     get_last_error(&lasterror);
 
     {%- if not hook.signature.special: %}
+
     if(hook_in_monitor() != 0) {
         {{- call_old(hook, replace_args=False, lasterr=False)|indent }}
         {%- if hook.signature.return_value != 'void' %}
@@ -150,7 +155,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {% endif %}
 
     {%- if hook.prelog: %}
-    log_api_pre({{ hook.prelog|join(',', attribute='argvalue') }});
+    uint32_t prelen = {{ hook.prelog.length }};
+    uint8_t *prebuf = memdup({{ hook.prelog.buffer }}, prelen);
     {% endif -%}
 
     {%- if hook.signature.prelog == 'instant' %}
@@ -182,6 +188,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     set_last_error(&lasterror);
 
+    {%- if hook.prelog: %}
+    mem_free(prebuf);
+    {%- endif %}
+
     {%- if hook.signature.return_value != 'void' %}
     return ret;
     {%- endif %}
@@ -207,9 +217,9 @@ const char *g_explain_paramtypes[] = {
 {%- for hook in sigs: %}
     // {{ hook.apiname }}
     "
-    {%- for param in hook.prelog: -%}
-        {{ param.argtype }}
-    {%- endfor -%}
+    {%- if hook.prelog: -%}
+        {{ hook.prelog.argtype }}
+    {%- endif -%}
     {%- for param in hook.parameters: -%}
         {% if param.log %}{{ types[param.argtype] }}{% endif %}
     {%- endfor -%}
@@ -224,9 +234,9 @@ const char *g_explain_paramnames[][16] = {
 {%- for hook in sigs: %}
     // {{ hook.apiname }}
     {
-    {%- for param in hook.prelog: %}
-        "{{ param.argname }}",
-    {%- endfor %}
+    {%- if hook.prelog: %}
+        "{{ hook.prelog.argname }}",
+    {%- endif %}
     {%- for param in hook.parameters|selectattr('log'): %}
         "{{ param.alias }}",
     {%- endfor %}
