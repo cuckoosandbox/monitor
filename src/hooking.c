@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <windows.h>
 #include <psapi.h>
-#include "asm_global.h"
 #include "assembly.h"
 #include "capstone/include/capstone.h"
 #include "capstone/include/x86.h"
