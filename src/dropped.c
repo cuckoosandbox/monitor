@@ -19,68 +19,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <windows.h>
 #include <shlwapi.h>
-#include "hashtable.h"
 #include "ignore.h"
 #include "memory.h"
 #include "misc.h"
 #include "ntapi.h"
 #include "pipe.h"
 
-static ht_t g_files;
-static CRITICAL_SECTION g_mutex;
-
-typedef struct _dropped_entry_t {
-    uint32_t written;
-    uint32_t length;
-    wchar_t path[MAX_PATH_W+1];
-} dropped_entry_t;
+static array_t g_handles;
 
 void dropped_init()
 {
-    ht_init(&g_files, sizeof(dropped_entry_t *));
-    InitializeCriticalSection(&g_mutex);
+    array_init(&g_handles);
 }
 
 void dropped_add(HANDLE file_handle, const wchar_t *filepath)
 {
-    if(PathIsDirectoryW(filepath) == FALSE &&
-            is_ignored_filepath(filepath) == 0) {
+    uintptr_t index = (uintptr_t) file_handle / 4;
 
-        dropped_entry_t *e =
-            (dropped_entry_t *) mem_alloc(sizeof(dropped_entry_t));
-        if(e != NULL) {
-            wcscpy(e->path, filepath);
-
-            EnterCriticalSection(&g_mutex);
-            ht_insert(&g_files, (uintptr_t) file_handle, e);
-            LeaveCriticalSection(&g_mutex);
-        }
+    if(is_ignored_filepath(filepath) == 0) {
+        array_set(&g_handles, index, wcsdup(filepath));
     }
 }
 
 void dropped_wrote(HANDLE file_handle)
 {
-    EnterCriticalSection(&g_mutex);
+    uintptr_t index = (uintptr_t) file_handle / 4;
 
-    dropped_entry_t **e = (dropped_entry_t **)
-        ht_lookup(&g_files, (uintptr_t) file_handle, NULL);
-    if(e != NULL && *e != NULL) {
-        pipe("FILE_NEW:%Z", (*e)->path);
-        mem_free(*e);
-        ht_remove(&g_files, (uintptr_t) file_handle);
+    wchar_t *filepath = (wchar_t *) array_get(&g_handles, index);
+    if(filepath != NULL) {
+        pipe("FILE_NEW:%Z", filepath);
+        array_unset(&g_handles, index);
+        mem_free(filepath);
     }
-
-    LeaveCriticalSection(&g_mutex);
 }
 
 void dropped_close(HANDLE file_handle)
 {
-    EnterCriticalSection(&g_mutex);
-    dropped_entry_t **e = (dropped_entry_t **)
-        ht_lookup(&g_files, (uintptr_t) file_handle, NULL);
-    if(e != NULL && *e != NULL) {
-        mem_free(*e);
-        ht_remove(&g_files, (uintptr_t) file_handle);
-    }
-    LeaveCriticalSection(&g_mutex);
+    uintptr_t index = (uintptr_t) file_handle / 4;
+
+    // If set, the value will be the filepath, so let's deallocate it.
+    mem_free(array_get(&g_handles, index));
+
+    array_unset(&g_handles, index);
 }

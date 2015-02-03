@@ -80,6 +80,7 @@ void library_from_unicode_string(const UNICODE_STRING *us,
 int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length);
 
 void *memdup(const void *addr, uint32_t length);
+wchar_t *wcsdup(const wchar_t *s);
 int page_is_readable(const uint8_t *addr);
 void clsid_to_string(REFCLSID rclsid, wchar_t *buf);
 

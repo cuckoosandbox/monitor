@@ -891,6 +891,19 @@ void *memdup(const void *addr, uint32_t length)
     return NULL;
 }
 
+wchar_t *wcsdup(const wchar_t *s)
+{
+    if(s != NULL) {
+        uint32_t length = lstrlenW(s) + 1;
+        wchar_t *ret = mem_alloc(length * sizeof(wchar_t));
+        if(ret != NULL) {
+            memcpy(ret, s, length * sizeof(wchar_t));
+        }
+        return ret;
+    }
+    return NULL;
+}
+
 int page_is_readable(const uint8_t *addr)
 {
     MEMORY_BASIC_INFORMATION mbi;

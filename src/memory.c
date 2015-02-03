@@ -26,7 +26,9 @@ void *mem_alloc(uint32_t length)
 {
     void *ptr = virtual_alloc(NULL, length + sizeof(uint32_t),
         MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
-    if(ptr == NULL) return NULL;
+    if(ptr == NULL) {
+        return NULL;
+    }
 
     memset(ptr, 0, length + sizeof(uint32_t));
 
@@ -37,7 +39,9 @@ void *mem_alloc(uint32_t length)
 void *mem_realloc(void *ptr, uint32_t length)
 {
     void *newptr = mem_alloc(length);
-    if(newptr == NULL) return NULL;
+    if(newptr == NULL) {
+        return NULL;
+    }
 
     if(ptr != NULL) {
         uint32_t oldlength = *((uint32_t *) ptr - 1);
@@ -54,4 +58,58 @@ void mem_free(void *ptr)
         virtual_free((uint32_t *) ptr - 1,
             oldlength + sizeof(uint32_t), MEM_RELEASE);
     }
+}
+
+void array_init(array_t *array)
+{
+    array->length = 0;
+    array->elements = NULL;
+    InitializeCriticalSection(&array->cs);
+}
+
+static int _array_ensure(array_t *array, uint32_t index)
+{
+    if(array->elements == NULL || index >= array->length) {
+        array->elements = (void **)
+            mem_realloc(array->elements, (index + 1) * sizeof(void *));
+        if(array->elements == NULL) {
+            return -1;
+        }
+
+        array->length = index + 1;
+    }
+    return 0;
+}
+
+int array_set(array_t *array, uintptr_t index, void *value)
+{
+    EnterCriticalSection(&array->cs);
+
+    if(_array_ensure(array, index) < 0) {
+        LeaveCriticalSection(&array->cs);
+        return -1;
+    }
+
+    array->elements[index] = value;
+
+    LeaveCriticalSection(&array->cs);
+    return 0;
+}
+
+void *array_get(array_t *array, uintptr_t index)
+{
+    EnterCriticalSection(&array->cs);
+
+    void *ret = NULL;
+    if(index < array->length) {
+        ret = array->elements[index];
+    }
+
+    LeaveCriticalSection(&array->cs);
+    return ret;
+}
+
+int array_unset(array_t *array, uintptr_t index)
+{
+    return array_set(array, index, NULL);
 }

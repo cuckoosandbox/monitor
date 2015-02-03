@@ -20,9 +20,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MONITOR_MEMORY_H
 
 #include <stdint.h>
+#include <windows.h>
+
+typedef struct _array_t {
+    uint32_t length;
+    void   **elements;
+    CRITICAL_SECTION cs;
+} array_t;
 
 void *mem_alloc(uint32_t length);
 void *mem_realloc(void *ptr, uint32_t length);
 void mem_free(void *ptr);
+
+void array_init(array_t *array);
+int array_set(array_t *array, uintptr_t index, void *value);
+void *array_get(array_t *array, uintptr_t index);
+int array_unset(array_t *array, uintptr_t index);
 
 #endif
