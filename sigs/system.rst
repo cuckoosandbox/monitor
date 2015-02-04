@@ -213,6 +213,44 @@ Parameters::
     *  PLUID lpLuid
 
 
+NtDuplicateObject
+=================
+
+Signature::
+
+    * Library: ntdll
+    * Return value: NTSTATUS
+    * Special: true
+
+Parameters::
+
+    ** HANDLE SourceProcessHandle source_process_handle
+    ** HANDLE SourceHandle source_handle
+    ** HANDLE TargetProcessHandle target_process_handle
+    ** HANDLE *TargetHandle target_handle
+    ** ACCESS_MASK DesiredAccess desired_access
+    ** ULONG HandleAttributes handle_attributes
+    ** ULONG Options options
+
+Logging::
+
+    i source_process_identifier pid_from_process_handle(SourceProcessHandle)
+    i target_process_identifier pid_from_process_handle(TargetProcessHandle)
+
+Post::
+
+    uintptr_t source_pid = pid_from_process_handle(SourceProcessHandle);
+    uintptr_t target_pid = pid_from_process_handle(TargetProcessHandle);
+    if(NT_SUCCESS(ret) != FALSE &&
+            source_pid == get_current_process_id() &&
+            target_pid == get_current_process_id()) {
+        // TODO Also handle dropped files.
+        if(is_ignored_object_handle(SourceHandle) != 0) {
+            ignored_object_add(*TargetHandle);
+        }
+    }
+
+
 NtClose
 =======
 
