@@ -63,8 +63,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {%- endmacro %}
 
 {% macro call_old(hook, replace_args=True, lasterr=True) -%}
-    {%- if hook.signature.return_value != 'void' %}
     set_last_error(&lasterror);
+    {%- if hook.signature.return_value != 'void' %}
     {{ hook.signature.return_value }} ret = Old_{{ hook.apiname }}(
     {%- else %}
     Old_{{ hook.apiname }}(
