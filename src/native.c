@@ -353,7 +353,7 @@ HANDLE get_current_process()
 
 uintptr_t get_current_process_id()
 {
-    assert(g_current_process_id != NULL, "Current process identifier is 0!");
+    assert(g_current_process_id != 0, "Current process identifier is 0!");
     return g_current_process_id;
 }
 
