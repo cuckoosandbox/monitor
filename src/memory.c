@@ -109,7 +109,13 @@ void *array_get(array_t *array, uintptr_t index)
     return ret;
 }
 
-int array_unset(array_t *array, uintptr_t index)
+void array_unset(array_t *array, uintptr_t index)
 {
-    return array_set(array, index, NULL);
+    EnterCriticalSection(&array->cs);
+
+    if(index < array->length) {
+        array->elements[index] = NULL;
+    }
+
+    LeaveCriticalSection(&array->cs);
 }

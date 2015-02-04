@@ -91,9 +91,7 @@ void ignored_object_remove(HANDLE object_handle)
 {
     uintptr_t index = (uintptr_t) object_handle / 4;
 
-    if(array_unset(&g_ignored_handles, index) < 0) {
-        pipe("CRITICAL:Error removing ignored object handle!");
-    }
+    array_unset(&g_ignored_handles, index);
 }
 
 int is_ignored_object_handle(HANDLE object_handle)
