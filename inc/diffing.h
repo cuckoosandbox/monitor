@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // p  -> (void *) -> pointer
 // P  -> (void **) -> pointer to a pointer
 // b  -> (int, void *) -> buffer with length
+// h  -> (HANDLE) -> object handle to be checked against ignored object list
 //
 
 void diffing_init(const char *path);

@@ -1,3 +1,30 @@
+- New: Logic for ignoring function calls referencing ignored object handles.
+- Tweak: Place hook after the "mov eax, imm32" instruction for hooked system
+  call wrappers (i.e., functions starting with Nt).
+- Tweak: Move prelog support logic from TLS entries to the relevant functions.
+- Tweak: Add verbose error reporting where useful to possibly avoid bricking
+  the monitor in the near future.
+- Tweak: Modify almost all native API usage to go through our custom system
+  call wrappers and memory allocator.
+- New: Introduce various native system call wrappers for directly executing
+  system calls. Implement basic memory allocator based on it.
+- Tweak: Properly fetch and restore last error codes by directly modifying
+  the TEB.
+- Huge tweak: Completely get rid of the TLS-based hook information state. The
+  relevant hook information (i.e., are we inside a hook?) is now obtained
+  through stacktraces.
+- Tweak: A couple more ignored special filepaths.
+- Tweak: Properly normalize registry keys.
+- Tweak: Move actual exception logging outside of the exception handler.
+- Tweak: Log bson data to a file if no socket configuration was specified.
+- Tweak: Simplified resolving of absolute paths (thanks Accuvant).
+- Bugfix: Resolved issues in UTF-8 encoding (thanks Accuvant).
+- New: Various signatures, parameters, flags, and "interesting" blocks.
+- Bugfix: Do not fetch configuration from $TEMP as it might vary between
+  processes (thanks Accuvant).
+- Tweak: Always enable Capstone string support.
+- Bugfix: APC Injection requires the thread identifier (thanks Accuvant).
+- Tweak: Include "interesting" blocks into many signatures.
 - Feature: Calculate a hash for each call, allow hashes to be ignored.
 - Tweak: Move flag representation logic to the Cuckoo side.
 - Tweak: "Instant" logging for functions that terminate.
