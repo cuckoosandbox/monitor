@@ -31,8 +31,10 @@ typedef struct _module_t {
 
 #define MAX_MODULE_COUNT 256
 #define INTERESTING_HASH 0
-#define ENSURE_NOT_INTERESTING(value) \
-    ((value) == INTERESTING_HASH ? INTERESTING_HASH+1 : (value))
+#define IGNORE_HASH 1
+#define ENSURE_HASH_NOT_SPECIAL(value) \
+    ((value) == INTERESTING_HASH || (value) == IGNORE_HASH ? \
+        INTERESTING_HASH+2 : (value))
 
 static uint32_t g_module_count, g_list_length;
 static module_t g_modules[MAX_MODULE_COUNT];
@@ -56,7 +58,7 @@ static uint64_t _address_hash(uintptr_t addr)
         if(addr >= g_modules[idx].base && addr < g_modules[idx].end) {
             uint64_t ret =
                 g_modules[idx].hash ^ hash_uint64(addr - g_modules[idx].base);
-            return ENSURE_NOT_INTERESTING(ret);
+            return ENSURE_HASH_NOT_SPECIAL(ret);
         }
     }
 
@@ -105,13 +107,13 @@ static uint64_t _stacktrace_hash()
     }
 
     uint64_t ret = hash_buffer(hashes, sizeof(uint64_t) * hashcnt);
-    return ENSURE_NOT_INTERESTING(ret);
+    return ENSURE_HASH_NOT_SPECIAL(ret);
 }
 
 static uint64_t _parameter_hash(const char *fmt, va_list args)
 {
     uint32_t value, hashcnt = 0; uintptr_t value2, *valueptr;
-    uint64_t hashes[64];
+    uint64_t hashes[64]; HANDLE object_handle;
 
     while (*fmt != 0) {
         switch (*fmt++) {
@@ -164,11 +166,18 @@ static uint64_t _parameter_hash(const char *fmt, va_list args)
             value = va_arg(args, uint32_t);
             hashes[hashcnt++] = hash_buffer(va_arg(args, void *), value);
             break;
+
+        case 'h':
+            object_handle = va_arg(args, HANDLE);
+            if(is_ignored_object_handle(object_handle) != 0) {
+                return IGNORE_HASH;
+            }
+            break;
         }
     }
 
     uint64_t ret = hash_buffer(hashes, sizeof(uint64_t) * hashcnt);
-    return ENSURE_NOT_INTERESTING(ret);
+    return ENSURE_HASH_NOT_SPECIAL(ret);
 }
 
 static int _value_in_list(uint64_t value, uint64_t *list, uint32_t length)
@@ -243,15 +252,26 @@ uint64_t call_hash(const char *fmt, ...)
 
     va_end(args);
 
+    if(hash1 == IGNORE_HASH || hash2 == IGNORE_HASH) {
+        return IGNORE_HASH;
+    }
+
     if(hash1 == INTERESTING_HASH || hash2 == INTERESTING_HASH) {
         return INTERESTING_HASH;
     }
 
-    return ENSURE_NOT_INTERESTING(hash1 ^ hash2);
+    return ENSURE_HASH_NOT_SPECIAL(hash1 ^ hash2);
 }
 
 int is_interesting_hash(uint64_t hash)
 {
-    return hash == INTERESTING_HASH ||
-        _value_in_list(hash, g_list, g_list_length);
+    if(hash == IGNORE_HASH) {
+        return 0;
+    }
+
+    if(hash == INTERESTING_HASH) {
+        return 1;
+    }
+
+    return _value_in_list(hash, g_list, g_list_length);
 }

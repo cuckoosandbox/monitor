@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <windows.h>
+#include "memory.h"
 #include "ntapi.h"
 
 #define IGNORE_MATCH(s) \
@@ -25,6 +26,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define IGNORE_START(s) \
     if(wcsnicmp(fname, s, sizeof(s)/sizeof(wchar_t)-1) == 0) return 1
+
+static array_t g_ignored_handles;
+
+void ignore_init()
+{
+    array_init(&g_ignored_handles);
+}
 
 int is_ignored_filepath(const wchar_t *fname)
 {
@@ -67,4 +75,30 @@ int is_ignored_process()
         }
     }
     return 0;
+}
+
+void ignored_object_add(HANDLE object_handle)
+{
+    uintptr_t index = (uintptr_t) object_handle / 4;
+
+    // The value doesn't matter - it just has to be non-null.
+    if(array_set(&g_ignored_handles, index, &ignored_object_add) < 0) {
+        pipe("CRITICAL:Error adding ignored object handle!");
+    }
+}
+
+void ignored_object_remove(HANDLE object_handle)
+{
+    uintptr_t index = (uintptr_t) object_handle / 4;
+
+    if(array_unset(&g_ignored_handles, index) < 0) {
+        pipe("CRITICAL:Error removing ignored object handle!");
+    }
+}
+
+int is_ignored_object_handle(HANDLE object_handle)
+{
+    uintptr_t index = (uintptr_t) object_handle / 4;
+
+    return array_get(&g_ignored_handles, index) != NULL;
 }

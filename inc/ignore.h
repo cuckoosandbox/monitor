@@ -22,7 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "ntapi.h"
 
+void ignore_init();
+
 int is_ignored_filepath(const wchar_t *fname);
 int is_ignored_process();
+
+void ignored_object_add(HANDLE object_handle);
+void ignored_object_remove(HANDLE object_handle);
+int is_ignored_object_handle(HANDLE object_handle);
 
 #endif
