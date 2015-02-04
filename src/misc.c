@@ -118,12 +118,12 @@ uintptr_t pid_from_process_handle(HANDLE process_handle)
 {
     PROCESS_BASIC_INFORMATION pbi; uintptr_t ret = 0;
 
-    if(process_handle == GetCurrentProcess()) {
-        return GetCurrentProcessId();
+    if(process_handle == get_current_process()) {
+        return get_current_process_id();
     }
 
-    if(duplicate_handle(GetCurrentProcess(), process_handle,
-            GetCurrentProcess(), &process_handle, PROCESS_QUERY_INFORMATION,
+    if(duplicate_handle(get_current_process(), process_handle,
+            get_current_process(), &process_handle, PROCESS_QUERY_INFORMATION,
             FALSE, 0) == FALSE) {
         return 0;
     }
@@ -142,12 +142,12 @@ uintptr_t pid_from_thread_handle(HANDLE thread_handle)
 {
     THREAD_BASIC_INFORMATION tbi; uintptr_t ret = 0;
 
-    if(thread_handle == GetCurrentThread()) {
-        return GetCurrentProcessId();
+    if(thread_handle == get_current_thread()) {
+        return get_current_process_id();
     }
 
-    if(duplicate_handle(GetCurrentProcess(), thread_handle,
-            GetCurrentProcess(), &thread_handle, THREAD_QUERY_INFORMATION,
+    if(duplicate_handle(get_current_process(), thread_handle,
+            get_current_process(), &thread_handle, THREAD_QUERY_INFORMATION,
             FALSE, 0) == FALSE) {
         return 0;
     }
@@ -166,12 +166,8 @@ uintptr_t tid_from_thread_handle(HANDLE thread_handle)
 {
     THREAD_BASIC_INFORMATION tbi; uintptr_t ret = 0;
 
-    if(thread_handle == GetCurrentThread()) {
-        return GetCurrentThreadId();
-    }
-
-    if(duplicate_handle(GetCurrentProcess(), thread_handle,
-            GetCurrentProcess(), &thread_handle, THREAD_QUERY_INFORMATION,
+    if(duplicate_handle(get_current_process(), thread_handle,
+            get_current_process(), &thread_handle, THREAD_QUERY_INFORMATION,
             FALSE, 0) == FALSE) {
         return 0;
     }
@@ -190,7 +186,7 @@ uintptr_t parent_process_id()
 {
     PROCESS_BASIC_INFORMATION pbi;
 
-    uint32_t length = query_information_process(GetCurrentProcess(),
+    uint32_t length = query_information_process(get_current_process(),
         ProcessBasicInformation, &pbi, sizeof(pbi));
     if(length == sizeof(pbi)) {
         return (uintptr_t) pbi.InheritedFromUniqueProcessId;

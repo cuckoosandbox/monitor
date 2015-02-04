@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "pipe.h"
 
 static HANDLE g_current_process;
+static uintptr_t g_current_process_id;
+static HANDLE g_current_thread;
 
 static NTSTATUS (WINAPI *pNtQueryVirtualMemory)(HANDLE ProcessHandle,
     CONST VOID *BaseAddress, ULONG MemoryInformationClass,
@@ -129,6 +131,8 @@ static void _native_copy_function(uint8_t *dst, const uint8_t *src)
 int native_init()
 {
     g_current_process = GetCurrentProcess();
+    g_current_process_id = GetCurrentProcessId();
+    g_current_thread = GetCurrentThread();
 
     uint8_t *memory = VirtualAlloc(NULL, 0x1000,
         MEM_RESERVE|MEM_COMMIT, PAGE_EXECUTE_READWRITE);
@@ -316,4 +320,24 @@ void set_last_error(last_error_t *error)
 {
     *(uint32_t *)(readtls(TLS_TEB) + g_win32_error_offset) = error->lasterror;
     *(uint32_t *)(readtls(TLS_TEB) + g_nt_status_offset) = error->nt_status;
+}
+
+HANDLE get_current_process()
+{
+    return g_current_process;
+}
+
+uintptr_t get_current_process_id()
+{
+    return g_current_process_id;
+}
+
+HANDLE get_current_thread()
+{
+    return g_current_thread;
+}
+
+uintptr_t get_current_thread_id()
+{
+    return tid_from_thread_handle(g_current_thread);
 }
