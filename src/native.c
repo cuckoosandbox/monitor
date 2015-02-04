@@ -33,6 +33,9 @@ static HANDLE g_current_process;
 static uintptr_t g_current_process_id;
 static HANDLE g_current_thread;
 
+static uint32_t g_win32_error_offset;
+static uint32_t g_nt_status_offset;
+
 static NTSTATUS (WINAPI *pNtQueryVirtualMemory)(HANDLE ProcessHandle,
     CONST VOID *BaseAddress, ULONG MemoryInformationClass,
     VOID *MemoryInformation, SIZE_T MemoryInformationLength,
@@ -70,9 +73,6 @@ static NTSTATUS (WINAPI *pNtDuplicateObject)(HANDLE SourceProcessHandle,
     ACCESS_MASK DesiredAccess, ULONG HandleAttributes, ULONG Options);
 
 static NTSTATUS (WINAPI *pNtClose)(HANDLE Handle);
-
-static uint32_t g_win32_error_offset;
-static uint32_t g_nt_status_offset;
 
 static const char *g_funcnames[] = {
     "NtQueryVirtualMemory",
