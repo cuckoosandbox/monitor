@@ -220,6 +220,7 @@ Signature::
 
     * Library: ntdll
     * Return value: NTSTATUS
+    * Special: true
 
 Parameters::
 
@@ -229,6 +230,7 @@ Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
         dropped_close(Handle);
+        ignored_object_remove(Handle);
     }
 
 

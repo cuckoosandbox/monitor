@@ -9,6 +9,10 @@ Signature::
 NtCreateFile
 ============
 
+Signature::
+
+    * Special: true
+
 Parameters::
 
     ** PHANDLE FileHandle file_handle
@@ -48,8 +52,13 @@ Logging::
 
 Post::
 
-    if(NT_SUCCESS(ret) != FALSE && (DesiredAccess & DUMP_FILE_MASK) != 0) {
-        dropped_add(*FileHandle, filepath);
+    if(NT_SUCCESS(ret) != FALSE) {
+        if(hook_in_monitor() != 0) {
+            ignored_object_add(*FileHandle);
+        }
+        else if((DesiredAccess & DUMP_FILE_MASK) != 0) {
+            dropped_add(*FileHandle, filepath);
+        }
     }
 
 
@@ -84,6 +93,10 @@ Logging::
 NtOpenFile
 ==========
 
+Signature::
+
+    * Special: true
+
 Parameters::
 
     ** PHANDLE FileHandle file_handle
@@ -116,8 +129,13 @@ Logging::
 
 Post::
 
-    if(NT_SUCCESS(ret) != FALSE && (DesiredAccess & DUMP_FILE_MASK) != 0) {
-        dropped_add(*FileHandle, filepath);
+    if(NT_SUCCESS(ret) != FALSE) {
+        if(hook_in_monitor() != 0) {
+            ignored_object_add(*FileHandle);
+        }
+        else if((DesiredAccess & DUMP_FILE_MASK) != 0) {
+            dropped_add(*FileHandle, filepath);
+        }
     }
 
 
@@ -144,6 +162,10 @@ Pre::
 
     memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
 
+Interesting::
+
+    h file_handle
+
 Logging::
 
     * b buffer IoStatusBlock->Information, Buffer
@@ -167,6 +189,10 @@ Parameters::
 Logging::
 
     b buffer Length, Buffer
+
+Interesting::
+
+    h file_handle
 
 Post::
 
@@ -202,6 +228,10 @@ Ensure::
 Pre::
 
     memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
+
+Interesting::
+
+    h file_handle
 
 Prelog::
 
@@ -247,6 +277,10 @@ Pre::
 
     memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
 
+Interesting::
+
+    h file_handle
+
 Logging::
 
     b file_information IoStatusBlock->Information, FileInformation
@@ -275,6 +309,10 @@ Ensure::
 Pre::
 
     memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
+
+Interesting::
+
+    h file_handle
 
 Logging::
 
@@ -305,6 +343,10 @@ Pre::
         path_get_full_path_handle(FileHandle, filepath);
         pipe("FILE_DEL:%Z", filepath);
     }
+
+Interesting::
+
+    h file_handle
 
 Logging::
 
@@ -380,6 +422,10 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
+Interesting::
+
+    h file_handle
+
 Logging::
 
     u filepath filepath
@@ -397,6 +443,10 @@ Pre::
 
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
+
+Interesting::
+
+    h file_handle
 
 Logging::
 

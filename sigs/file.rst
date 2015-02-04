@@ -461,6 +461,10 @@ Ensure::
 
     lpBytesReturned
 
+Interesting::
+
+    h device_handle
+
 Prelog::
 
     b input_buffer nInBufferSize, lpInBuffer
