@@ -19,14 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <windows.h>
 #include "hooking.h"
+#include "misc.h"
 #include "native.h"
 #include "ntapi.h"
 #include "pipe.h"
 
-#define assert(expression, message) \
+#define assert(expression, message, return_value) \
     if((expression) == 0) { \
         MessageBox(NULL, "Error", message, 0); \
-        return 0; \
+        return return_value; \
     }
 
 static HANDLE g_current_process;
@@ -187,7 +188,8 @@ int native_init()
 int virtual_query_ex(HANDLE process_handle, const void *addr,
     MEMORY_BASIC_INFORMATION *mbi)
 {
-    assert(pNtQueryVirtualMemory != NULL, "pNtQueryVirtualMemory is NULL!");
+    assert(pNtQueryVirtualMemory != NULL,
+        "pNtQueryVirtualMemory is NULL!", 0);
     SIZE_T return_length;
     if(NT_SUCCESS(pNtQueryVirtualMemory(process_handle, addr, 0, mbi,
             sizeof(MEMORY_BASIC_INFORMATION), &return_length)) != FALSE &&
@@ -206,7 +208,7 @@ void *virtual_alloc_ex(HANDLE process_handle, void *addr,
     uintptr_t size, uint32_t allocation_type, uint32_t protection)
 {
     assert(pNtAllocateVirtualMemory != NULL,
-        "pNtAllocateVirtualMemory is NULL!");
+        "pNtAllocateVirtualMemory is NULL!", NULL);
     SIZE_T real_size = size;
     if(NT_SUCCESS(pNtAllocateVirtualMemory(process_handle, &addr, 0,
             &real_size, allocation_type, protection)) != FALSE) {
@@ -225,7 +227,7 @@ void *virtual_alloc(void *addr, uintptr_t size,
 int virtual_free_ex(HANDLE process_handle, const void *addr, uintptr_t size,
     uint32_t free_type)
 {
-    assert(pNtFreeVirtualMemory != NULL, "pNtFreeVirtualMemory is NULL!");
+    assert(pNtFreeVirtualMemory != NULL, "pNtFreeVirtualMemory is NULL!", 0);
     SIZE_T real_size = size;
     if(NT_SUCCESS(pNtFreeVirtualMemory(process_handle, &addr,
             &real_size, free_type)) != FALSE) {
@@ -242,7 +244,8 @@ int virtual_free(const void *addr, uintptr_t size, uint32_t free_type)
 int virtual_protect_ex(HANDLE process_handle, const void *addr,
     uintptr_t size, uint32_t protection)
 {
-    assert(pNtProtectVirtualMemory != NULL, "pNtQueryVirtualMemory is NULL!");
+    assert(pNtProtectVirtualMemory != NULL,
+        "pNtQueryVirtualMemory is NULL!", 0);
     DWORD real_size = size; unsigned long old_protect;
     if(NT_SUCCESS(pNtProtectVirtualMemory(process_handle, &addr, &real_size,
             protection, &old_protect)) != FALSE) {
@@ -260,7 +263,7 @@ uint32_t query_information_process(HANDLE process_handle,
     uint32_t information_class, void *buf, uint32_t length)
 {
     assert(pNtQueryInformationProcess != NULL,
-        "pNtQueryInformationProcess is NULL!");
+        "pNtQueryInformationProcess is NULL!", 0);
     ULONG return_length;
     if(NT_SUCCESS(pNtQueryInformationProcess(process_handle,
             information_class, buf, length, &return_length)) != FALSE) {
@@ -273,7 +276,7 @@ uint32_t query_information_thread(HANDLE process_handle,
     uint32_t information_class, void *buf, uint32_t length)
 {
     assert(pNtQueryInformationThread != NULL,
-        "pNtQueryInformationThread is NULL!");
+        "pNtQueryInformationThread is NULL!", 0);
     ULONG return_length;
     if(NT_SUCCESS(pNtQueryInformationThread(process_handle,
             information_class, buf, length, &return_length)) != FALSE) {
@@ -285,7 +288,7 @@ uint32_t query_information_thread(HANDLE process_handle,
 uint32_t query_object(HANDLE handle, uint32_t information_class,
     void *buf, uint32_t length)
 {
-    assert(pNtQueryObject != NULL, "pNtQueryObject is NULL!");
+    assert(pNtQueryObject != NULL, "pNtQueryObject is NULL!", 0);
     ULONG return_length;
     if(NT_SUCCESS(pNtQueryObject(handle, information_class,
             buf, length, &return_length)) != FALSE) {
@@ -297,7 +300,7 @@ uint32_t query_object(HANDLE handle, uint32_t information_class,
 uint32_t query_key(HANDLE key_handle, uint32_t information_class,
     void *buf, uint32_t length)
 {
-    assert(pNtQueryKey != NULL, "pNtQueryKey is NULL!");
+    assert(pNtQueryKey != NULL, "pNtQueryKey is NULL!", 0);
     ULONG return_length;
     if(NT_SUCCESS(pNtQueryKey(key_handle, information_class,
             buf, length, &return_length)) != FALSE) {
@@ -310,7 +313,7 @@ int duplicate_handle(HANDLE source_process_handle, HANDLE source_handle,
     HANDLE target_process_handle, HANDLE *target_handle,
     uint32_t desired_access, int inherit_handle, uint32_t options)
 {
-    assert(pNtDuplicateObject != NULL, "pNtDuplicateObject is NULL!");
+    assert(pNtDuplicateObject != NULL, "pNtDuplicateObject is NULL!", 0);
     uint32_t handle_attributes = inherit_handle == FALSE ? 0 : 2;
     if(NT_SUCCESS(pNtDuplicateObject(source_process_handle, source_handle,
             target_process_handle, target_handle, desired_access,
@@ -322,7 +325,7 @@ int duplicate_handle(HANDLE source_process_handle, HANDLE source_handle,
 
 int close_handle(HANDLE object_handle)
 {
-    assert(pNtClose != NULL, "pNtClose is NULL!");
+    assert(pNtClose != NULL, "pNtClose is NULL!", 0);
     if(NT_SUCCESS(pNtClose(object_handle)) != FALSE) {
         return 1;
     }
@@ -331,40 +334,41 @@ int close_handle(HANDLE object_handle)
 
 void get_last_error(last_error_t *error)
 {
-    assert(g_win32_error_offset != 0, "Win32 error offset is 0!");
-    assert(g_nt_status_offset != 0, "NT Status offset is 0!");
+    assert(g_win32_error_offset != 0, "Win32 error offset is 0!", );
+    assert(g_nt_status_offset != 0, "NT Status offset is 0!", );
     error->lasterror = *(uint32_t *)(readtls(TLS_TEB) + g_win32_error_offset);
     error->nt_status = *(uint32_t *)(readtls(TLS_TEB) + g_nt_status_offset);
 }
 
 void set_last_error(last_error_t *error)
 {
-    assert(g_win32_error_offset != 0, "Win32 error offset is 0!");
-    assert(g_nt_status_offset != 0, "NT Status offset is 0!");
+    assert(g_win32_error_offset != 0, "Win32 error offset is 0!", );
+    assert(g_nt_status_offset != 0, "NT Status offset is 0!", );
     *(uint32_t *)(readtls(TLS_TEB) + g_win32_error_offset) = error->lasterror;
     *(uint32_t *)(readtls(TLS_TEB) + g_nt_status_offset) = error->nt_status;
 }
 
 HANDLE get_current_process()
 {
-    assert(g_current_process != NULL, "Current process handle is NULL!");
+    assert(g_current_process != NULL,
+        "Current process handle is NULL!", NULL);
     return g_current_process;
 }
 
 uintptr_t get_current_process_id()
 {
-    assert(g_current_process_id != 0, "Current process identifier is 0!");
+    assert(g_current_process_id != 0, "Current process identifier is 0!", 0);
     return g_current_process_id;
 }
 
 HANDLE get_current_thread()
 {
-    assert(g_current_thread != NULL, "Current thread handle is NULL!");
+    assert(g_current_thread != NULL, "Current thread handle is NULL!", NULL);
     return g_current_thread;
 }
 
 uintptr_t get_current_thread_id()
 {
-    assert(g_current_thread != NULL, "Current thread handle is NULL!");
+    assert(g_current_thread != NULL, "Current thread handle is NULL!", 0);
     return tid_from_thread_handle(g_current_thread);
 }
