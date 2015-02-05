@@ -164,6 +164,10 @@ class SignatureProcessor(object):
         return ret
 
     def _parse_flags(self, text):
+        # Don't parse flags if they're not provided.
+        if not self.flags:
+            return []
+
         ret = []
         for line in text.split('\n'):
             line = line.split()
@@ -440,9 +444,9 @@ class SignatureProcessor(object):
 
 
 class FlagsProcessor(object):
-    def __init__(self, data_dir, output_directory, flags_dirpath):
+    def __init__(self, data_dir, output_directory):
         self.data_dir = data_dir
-        self.flags_dirpath = flags_dirpath
+        self.flags = {}
 
         self.flags_c = os.path.join(output_directory, 'flags.c')
         self.flags_h = os.path.join(output_directory, 'flags.h')
@@ -495,18 +499,20 @@ class FlagsProcessor(object):
 
             yield row
 
-    def process(self):
+    def process(self, dirpath):
         dp = DefinitionProcessor(self.data_dir)
 
+        if not dirpath:
+            return
+
         # Fetch all available flags.
-        flags = {}
         for flag_file in os.listdir(self.flags_dirpath):
             if not flag_file.endswith('.rst'):
                 continue
 
             flag_path = os.path.join(self.flags_dirpath, flag_file)
             for flag in self.normalize(dp.read_document(flag_path)):
-                flags[flag['name']] = flag
+                self.flags[flag['name']] = flag
 
                 flag['rows'] = []
 
@@ -521,29 +527,31 @@ class FlagsProcessor(object):
                         flag['rows'].append(row)
 
         # Handle inheritance.
-        for flag in flags.values():
+        for flag in self.flags.values():
             rows = []
             for inherit in flag.get('inherits', []):
-                rows += flags[inherit]['rows']
+                rows += self.flags[inherit]['rows']
 
             flag['rows'] = rows + flag.get('rows', [])
 
-        dp.render('flags-source', self.flags_c, flags=flags)
-        dp.render('flags-header', self.flags_h, flags=flags)
-        return flags.keys()
+    def write(self):
+        dp = DefinitionProcessor(self.data_dir)
+
+        dp.render('flags-source', self.flags_c, flags=self.flags)
+        dp.render('flags-header', self.flags_h, flags=self.flags)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('data_directory', type=str, help='Path to data directory.')
     parser.add_argument('output_directory', type=str, help='Output directory.')
     parser.add_argument('signatures_directory', type=str, help='Signature directory.')
-    parser.add_argument('flags_directory', type=str, help='Flags directory.')
+    parser.add_argument('flags_directory', type=str, nargs='?', help='Flags directory.')
     args = parser.parse_args()
 
-    fp = FlagsProcessor(args.data_directory, args.output_directory,
-                        args.flags_directory)
-    flags = fp.process()
+    fp = FlagsProcessor(args.data_directory, args.output_directory)
+    fp.process(args.flags_directory)
+    fp.write()
 
     dp = SignatureProcessor(args.data_directory, args.output_directory,
-                            args.signatures_directory, flags)
+                            args.signatures_directory, fp.flags.keys())
     dp.process()
