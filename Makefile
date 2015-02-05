@@ -30,8 +30,6 @@ HEADER = $(wildcard inc/*.h)
 BSON = $(wildcard src/bson/*.c)
 BSONOBJ32 = $(BSON:%.c=objects/x86/%.o)
 BSONOBJ64 = $(BSON:%.c=objects/x64/%.o)
-LIBBSON32 = objects/x86/src/libbson.a
-LIBBSON64 = objects/x64/src/libbson.a
 
 LIBCAPSTONE32 = src/capstone/capstone-x86.lib
 LIBCAPSTONE64 = src/capstone/capstone-x64.lib
@@ -60,12 +58,6 @@ objects/:
 # If there's a way to do this while only calling Python once, let me know!
 $(HOOKSRC) $(FLAGSRC): $(SIGS) $(JINJA2) $(HOOKREQ)
 	python utils/process.py data/ objects/code/ sigs/ flags/
-
-$(LIBBSON32): $(BSONOBJ32)
-	$(AR) cr $@ $^
-
-$(LIBBSON64): $(BSONOBJ64)
-	$(AR) cr $@ $^
 
 $(LIBCAPSTONE32) $(LIBCAPSTONE64):
 	git submodule update --init
@@ -100,12 +92,10 @@ $(FLAGOBJ32): $(FLAGSRC) $(HEADER) Makefile
 $(FLAGOBJ64): $(FLAGSRC) $(HEADER) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS)
 
-$(DLL32): $(SRCOBJ32) $(HOOKOBJ32) $(FLAGOBJ32) \
-		$(LIBBSON32) $(LIBCAPSTONE32)
+$(DLL32): $(SRCOBJ32) $(HOOKOBJ32) $(FLAGOBJ32) $(BSONOBJ32) $(LIBCAPSTONE32)
 	$(CC32) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
-$(DLL64): $(SRCOBJ64) $(HOOKOBJ64) $(FLAGOBJ64) \
-		$(LIBBSON64) $(LIBCAPSTONE64)
+$(DLL64): $(SRCOBJ64) $(HOOKOBJ64) $(FLAGOBJ64) $(BSONOBJ64) $(LIBCAPSTONE64)
 	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 clean:
