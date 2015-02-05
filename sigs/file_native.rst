@@ -422,10 +422,6 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
-Interesting::
-
-    h file_handle
-
 Logging::
 
     u filepath filepath
@@ -443,10 +439,6 @@ Pre::
 
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
-
-Interesting::
-
-    h file_handle
 
 Logging::
 
