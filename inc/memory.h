@@ -35,6 +35,6 @@ void mem_free(void *ptr);
 void array_init(array_t *array);
 int array_set(array_t *array, uintptr_t index, void *value);
 void *array_get(array_t *array, uintptr_t index);
-int array_unset(array_t *array, uintptr_t index);
+void array_unset(array_t *array, uintptr_t index);
 
 #endif

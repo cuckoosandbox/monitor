@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "hook-info.h"
 #include "memory.h"
 #include "misc.h"
+#include "native.h"
 #include "ntapi.h"
 #include "log.h"
 #include "pipe.h"

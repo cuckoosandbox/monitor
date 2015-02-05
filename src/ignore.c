@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "memory.h"
 #include "ntapi.h"
+#include "pipe.h"
 
 #define IGNORE_MATCH(s) \
     if(wcsicmp(fname, s) == 0) return 1

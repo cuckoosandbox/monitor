@@ -83,7 +83,7 @@ int hook_in_monitor()
 
 int lde(const void *addr)
 {
-    if(g_capstone == NULL) {
+    if(g_capstone == 0) {
         MessageBox(NULL, "Error",
             "Capstone has not been initialized yet!", 0);
         return 0;
@@ -103,7 +103,7 @@ int lde(const void *addr)
 
 int disasm(const void *addr, char *str)
 {
-    if(g_capstone == NULL) {
+    if(g_capstone == 0) {
         MessageBox(NULL, "Error",
             "Capstone has not been initialized yet!", 0);
         return 0;
