@@ -110,7 +110,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- if not hook.signature.special: %}
 
     if(hook_in_monitor() != 0) {
-        {{- call_old(hook, replace_args=False, lasterr=False)|indent }}
+        {{ call_old(hook, replace_args=False, lasterr=False)|indent }}
         {%- if hook.signature.return_value != 'void' %}
         return ret;
         {%- else %}
@@ -147,28 +147,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endif %}
     {%- if hook.interesting or hook.signature.interesting %}
     if(is_interesting_hash(hash) == 0) {
-        {{- call_old(hook, lasterr=False)|indent }}
+        {{ call_old(hook, lasterr=False)|indent }}
         {%- if hook.signature.return_value != 'void' %}
         return ret;
         {%- else %}
         return;
         {%- endif %}
     }
-    {% else %}
+    {%- else %}
 
     uint64_t hash = 0;
-    {% endif %}
+    {%- endif %}
 
     {%- if hook.prelog: %}
     uint32_t prelen = {{ hook.prelog.length }};
     uint8_t *prebuf = memdup({{ hook.prelog.buffer }}, prelen);
-    {% endif -%}
+    {%- endif %}
 
     {%- if hook.signature.prelog == 'instant' %}
     {{ log_api(hook, ret='0') }}
     {% endif %}
 
-    {{- call_old(hook) }}
+    {{ call_old(hook) }}
 
     {%- if hook.middle: %}
     {% for line in hook.middle: %}
