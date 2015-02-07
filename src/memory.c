@@ -24,16 +24,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 void *mem_alloc(uint32_t length)
 {
-    void *ptr = virtual_alloc(NULL, length + sizeof(uint32_t),
+    void *ptr = virtual_alloc(NULL, length + sizeof(uintptr_t),
         MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
     if(ptr == NULL) {
         return NULL;
     }
 
-    memset(ptr, 0, length + sizeof(uint32_t));
+    memset(ptr, 0, length + sizeof(uintptr_t));
 
-    *(uint32_t *) ptr = length;
-    return (uint32_t *) ptr + 1;
+    *(uintptr_t *) ptr = length;
+    return (uintptr_t *) ptr + 1;
 }
 
 void *mem_realloc(void *ptr, uint32_t length)
@@ -44,7 +44,7 @@ void *mem_realloc(void *ptr, uint32_t length)
     }
 
     if(ptr != NULL) {
-        uint32_t oldlength = *((uint32_t *) ptr - 1);
+        uintptr_t oldlength = *((uintptr_t *) ptr - 1);
         memcpy(newptr, ptr, min(length, oldlength));
         mem_free(ptr);
     }
@@ -54,9 +54,9 @@ void *mem_realloc(void *ptr, uint32_t length)
 void mem_free(void *ptr)
 {
     if(ptr != NULL) {
-        uint32_t oldlength = *((uint32_t *) ptr - 1);
-        virtual_free((uint32_t *) ptr - 1,
-            oldlength + sizeof(uint32_t), MEM_RELEASE);
+        uintptr_t oldlength = *((uintptr_t *) ptr - 1);
+        virtual_free((uintptr_t *) ptr - 1,
+            oldlength + sizeof(uintptr_t), MEM_RELEASE);
     }
 }
 
