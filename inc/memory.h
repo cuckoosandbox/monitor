@@ -28,6 +28,9 @@ typedef struct _array_t {
     CRITICAL_SECTION cs;
 } array_t;
 
+uintptr_t roundup2(uintptr_t value);
+uintptr_t mem_suggested_size(uintptr_t size);
+
 void *mem_alloc(uint32_t length);
 void *mem_realloc(void *ptr, uint32_t length);
 void mem_free(void *ptr);

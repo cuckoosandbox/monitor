@@ -22,6 +22,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "memory.h"
 #include "native.h"
 
+uintptr_t roundup2(uintptr_t value)
+{
+    value--;
+    value |= value >> 1;
+    value |= value >> 2;
+    value |= value >> 4;
+    value |= value >> 8;
+    value |= value >> 16;
+    value |= value >> 32;
+    return ++value;
+}
+
+uintptr_t mem_suggested_size(uintptr_t size)
+{
+    uintptr_t size = roundup2(size);
+
+    // Go for at least one page.
+    if(size < 4096) {
+        size = 4096;
+    }
+
+    return size - sizeof(uintptr_t);
+}
+
 void *mem_alloc(uint32_t length)
 {
     void *ptr = virtual_alloc(NULL, length + sizeof(uintptr_t),
@@ -67,28 +91,9 @@ void array_init(array_t *array)
     InitializeCriticalSection(&array->cs);
 }
 
-static uintptr_t _roundup2(uintptr_t value)
+static uintptr_t _suggested_array_length(uintptr_t length)
 {
-    value--;
-    value |= value >> 1;
-    value |= value >> 2;
-    value |= value >> 4;
-    value |= value >> 8;
-    value |= value >> 16;
-    value |= value >> 32;
-    return ++value;
-}
-
-static uint32_t _suggested_array_length(uint32_t length)
-{
-    uintptr_t size = _roundup2(length * sizeof(void *));
-
-    // Go for at least one page.
-    if(size < 4096) {
-        size = 4096;
-    }
-
-    return (size - sizeof(uintptr_t)) / sizeof(void *);
+    return mem_suggested_size(length * sizeof(void *)) / sizeof(void *);
 }
 
 static int _array_ensure(array_t *array, uint32_t index)
