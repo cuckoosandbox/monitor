@@ -67,16 +67,42 @@ void array_init(array_t *array)
     InitializeCriticalSection(&array->cs);
 }
 
+static uintptr_t _roundup2(uintptr_t value)
+{
+    value--;
+    value |= value >> 1;
+    value |= value >> 2;
+    value |= value >> 4;
+    value |= value >> 8;
+    value |= value >> 16;
+    value |= value >> 32;
+    return ++value;
+}
+
+static uint32_t _suggested_array_length(uint32_t length)
+{
+    uintptr_t size = _roundup2(length * sizeof(void *));
+
+    // Go for at least one page.
+    if(size < 4096) {
+        size = 4096;
+    }
+
+    return (size - sizeof(uintptr_t)) / sizeof(void *);
+}
+
 static int _array_ensure(array_t *array, uint32_t index)
 {
     if(array->elements == NULL || index >= array->length) {
+        uintptr_t newlength = _suggested_array_length(index + 1);
+
         array->elements = (void **)
-            mem_realloc(array->elements, (index + 1) * sizeof(void *));
+            mem_realloc(array->elements, newlength * sizeof(void *));
         if(array->elements == NULL) {
             return -1;
         }
 
-        array->length = index + 1;
+        array->length = newlength;
     }
     return 0;
 }
