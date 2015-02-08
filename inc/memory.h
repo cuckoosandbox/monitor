@@ -40,4 +40,14 @@ int array_set(array_t *array, uintptr_t index, void *value);
 void *array_get(array_t *array, uintptr_t index);
 void array_unset(array_t *array, uintptr_t index);
 
+static inline int array_seti(array_t *array, uinptr_t index, uintptr_t value)
+{
+    return array_set(array, index, (void *) value);
+}
+
+static inline uintptr_t array_geti(array_t *array, uintptr_t index)
+{
+    return (uintptr) array_get(array, index);
+}
+
 #endif
