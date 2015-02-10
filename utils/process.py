@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Cuckoo Sandbox - Automated Malware Analysis
-Copyright (C) 2010-2014 Cuckoo Foundation
+Copyright (C) 2010-2015 Cuckoo Foundation
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
