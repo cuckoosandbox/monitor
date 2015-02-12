@@ -278,13 +278,9 @@ static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
             continue;
         }
 
-        // TODO Do we really need this?
-        if(virtual_protect(mbi.BaseAddress, g_si.dwPageSize,
-                PAGE_EXECUTE_READWRITE) != FALSE) {
-            memset(mbi.BaseAddress, 0xcc, g_si.dwPageSize);
-            last_ptr = mbi.BaseAddress;
-            return _hook_alloc_closeby_ptr(&last_ptr, size);
-        }
+        memset(mbi.BaseAddress, 0xcc, g_si.dwPageSize);
+        last_ptr = mbi.BaseAddress;
+        return _hook_alloc_closeby_ptr(&last_ptr, size);
     }
     return NULL;
 }
