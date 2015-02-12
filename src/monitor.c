@@ -43,6 +43,7 @@ void monitor_init(HMODULE module_handle)
     config_read(&cfg);
 
     // Required to be initialized before any logging starts.
+    mem_init();
     hook_init(module_handle);
     pipe_init(cfg.pipe_name);
     native_init();

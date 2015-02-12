@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "memory.h"
 #include "native.h"
 
+static SYSTEM_INFO g_si;
+
 uintptr_t roundup2(uintptr_t value)
 {
     value--;
@@ -41,11 +43,16 @@ uintptr_t mem_suggested_size(uintptr_t size)
     size = roundup2(size);
 
     // Go for at least one page.
-    if(size < 4096) {
-        size = 4096;
+    if(size < g_si.dwPageSize) {
+        size = g_si.dwPageSize;
     }
 
     return size - sizeof(uintptr_t);
+}
+
+void mem_init()
+{
+    GetSystemInfo(&g_si);
 }
 
 void *mem_alloc(uint32_t length)

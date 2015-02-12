@@ -188,7 +188,7 @@ void log_explain(signature_index_t index)
 {
     bson b; char argidx[4];
 
-    bson_init_size(&b, 0x1000 - sizeof(uint32_t));
+    bson_init_size(&b, mem_suggested_size(1024));
     bson_append_int(&b, "I", index);
     bson_append_string(&b, "name", g_explain_apinames[index]);
     bson_append_string(&b, "type", "info");
@@ -305,7 +305,7 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
 
     bson b;
 
-    bson_init_size(&b, 0x1000 - sizeof(uint32_t));
+    bson_init_size(&b, mem_suggested_size(1024));
     bson_append_int(&b, "I", index);
     bson_append_int(&b, "T", GetCurrentThreadId());
     bson_append_int(&b, "t", GetTickCount() - g_starttick);
