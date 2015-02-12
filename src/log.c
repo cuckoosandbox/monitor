@@ -76,7 +76,14 @@ static void ultostr(int32_t value, char *str)
 static void log_raw(const char *buf, size_t length)
 {
     if(g_sock == INVALID_SOCKET) {
-        FILE *fp = fopen("C:\\monitor.log", "ab");
+        char filepath[MAX_PATH];
+        sprintf(filepath, "%s\\monitor.log", getenv("TEMP"));
+
+        FILE *fp = fopen(filepath, "ab");
+        if(fp == NULL) {
+            MessageBox(NULL, "Error opening debug logfile!", "Error", 0);
+            return;
+        }
         fwrite(buf, 1, length, fp);
         fclose(fp);
         return;
