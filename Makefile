@@ -45,7 +45,6 @@ endif
 
 all: dirs $(LIBCAPSTONE32) $(LIBCAPSTONE64) \
 		$(HOOKSRC) $(DLL32) $(DLL64)
-	+make -C test/
 	+make -C utils/
 
 dirs: | objects/
@@ -100,7 +99,6 @@ $(DLL64): $(SRCOBJ64) $(HOOKOBJ64) $(FLAGOBJ64) $(BSONOBJ64) $(LIBCAPSTONE64)
 
 clean:
 	rm -rf objects/ $(DLL32) $(DLL64)
-	+make -C test/ clean
 	+make -C utils/ clean
 
 clean-capstone:
