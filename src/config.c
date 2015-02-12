@@ -30,7 +30,9 @@ void config_read(config_t *cfg)
 
     FILE *fp = fopen(config_fname, "rb");
     if(fp == NULL) {
-        MessageBox(NULL, "Error", "Error fetching configuration file!", 0);
+        MessageBox(NULL, "Error fetching configuration file! This is a "
+            "serious error. If encountered, please notify the Cuckoo "
+            "Developers as this error prevents analysis.", "Cuckoo Error", 0);
         return;
     }
 
