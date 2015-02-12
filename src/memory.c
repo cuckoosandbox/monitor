@@ -30,13 +30,15 @@ uintptr_t roundup2(uintptr_t value)
     value |= value >> 4;
     value |= value >> 8;
     value |= value >> 16;
+#if __x86_64__
     value |= value >> 32;
+#endif
     return ++value;
 }
 
 uintptr_t mem_suggested_size(uintptr_t size)
 {
-    uintptr_t size = roundup2(size);
+    size = roundup2(size);
 
     // Go for at least one page.
     if(size < 4096) {
