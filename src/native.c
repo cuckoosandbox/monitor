@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define assert(expression, message, return_value) \
     if((expression) == 0) { \
-        MessageBox(NULL, "Error", message, 0); \
+        MessageBox(NULL, message, "Error", 0); \
         return return_value; \
     }
 
