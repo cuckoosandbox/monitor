@@ -81,7 +81,10 @@ static void log_raw(const char *buf, size_t length)
 
         FILE *fp = fopen(filepath, "ab");
         if(fp == NULL) {
-            MessageBox(NULL, "Error opening debug logfile!", "Error", 0);
+            static int count = 0;
+            if(count++ < 3) {
+                MessageBox(NULL, "Error opening debug logfile!", "Error", 0);
+            }
             return;
         }
         fwrite(buf, 1, length, fp);
