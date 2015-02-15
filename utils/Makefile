@@ -7,10 +7,10 @@ UTILEXE = $(UTILSRC:%.c=%-x86.exe) $(UTILSRC:%.c=%-x64.exe)
 
 default: $(UTILEXE)
 
-dllinject-x86.exe: dllinject.c
+inject-x86.exe: inject.c
 	$(CC32) -o $@ $^ $(CFLAGS) $(LDFLAGS) ../src/assembly.c
 
-dllinject-x64.exe: dllinject.c
+inject-x64.exe: inject.c
 	$(CC64) -o $@ $^ $(CFLAGS) $(LDFLAGS) ../src/assembly.c
 
 clean:
