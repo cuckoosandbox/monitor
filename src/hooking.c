@@ -250,7 +250,8 @@ static uint8_t *_hook_alloc_closeby_ptr(uint8_t **last_ptr, uint32_t size)
     *last_ptr += size + (8 - (size & 7));
 
     // We reached the next page - reset the pointer.
-    if(((uintptr_t) ret & ~0xfff) != ((uintptr_t) *last_ptr & ~0xfff)) {
+    if(((uintptr_t) ret & ~0xfff) !=
+            ((uintptr_t)(*last_ptr + size + (8 - (size & 7))) & ~0xfff)) {
         *last_ptr = NULL;
     }
     return ret;
