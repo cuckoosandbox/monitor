@@ -136,6 +136,10 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
     memset(&si, 0, sizeof(si));
     si.cb = sizeof(si);
 
+    // Emulate explorer.exe's startupinfo flags behavior.
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_SHOWNORMAL;
+
     FARPROC create_process_a = resolve_symbol("kernel32", "CreateProcessA");
     FARPROC close_handle = resolve_symbol("kernel32", "CloseHandle");
     FARPROC get_last_error = resolve_symbol("kernel32", "GetLastError");
