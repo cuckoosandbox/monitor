@@ -22,7 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define INJECT_NONE 0
 #define INJECT_CRT  1
-// #define INJECT_APC  2
+#define INJECT_APC  2
+
+#define DPRINT(fmt, ...) if(verbose != 0) fprintf(stderr, fmt, #__VA_ARGS__)
+
+static int verbose = 0;
 
 FARPROC resolve_symbol(const char *library, const char *funcname)
 {
@@ -353,6 +357,11 @@ int main(int argc, char *argv[])
             from = strtoul(argv[++idx], NULL, 10);
             continue;
         }
+
+        if(strcmp(argv[idx], "--verbose") == 0) {
+            verbose = 1;
+            continue;
+        }
     }
 
     kernel32_handle = GetModuleHandle("kernel32");
@@ -372,12 +381,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // If no source process has been specified, then we use our own process.
-    if(from == 0 && app_path != NULL) {
-        fprintf(stderr, "[x] Starting process from our own process\n");
-        from = GetCurrentProcessId();
-    }
-
     OFSTRUCT of; memset(&of, 0, sizeof(of)); of.cBytes = sizeof(of);
     if(OpenFile(dll_path, &of, OF_EXIST) == HFILE_ERROR) {
         fprintf(stderr, "[-] DLL file does not exist!\n");
@@ -387,8 +390,15 @@ int main(int argc, char *argv[])
     grant_debug_privileges(GetCurrentProcessId());
 
     if(app_path != NULL) {
+        // If no source process has been specified, then we use our
+        // own process.
+        if(from == 0) {
+            DPRINTF("[x] Starting process from our own process\n");
+            from = GetCurrentProcessId();
+        }
+
         if(cmd_line == NULL) {
-            fprintf(stderr, "[x] No cmdline provided, using app path.\n");
+            DPRINTF("[x] No cmdline provided, using app path.\n");
             cmd_line = app_path;
         }
 
@@ -409,7 +419,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    fprintf(stderr, "[+] Injected successfully!\n");
+    DPRINTF("[+] Injected successfully!\n");
 
     if(dbg_path != NULL) {
         char buf[1024];
@@ -423,5 +433,8 @@ int main(int argc, char *argv[])
     if(app_path != NULL && tid != 0) {
         resume_thread(tid);
     }
+
+    // Report the process identifier.
+    printf("%d", pid);
     return 0;
 }
