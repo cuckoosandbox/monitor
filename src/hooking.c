@@ -420,15 +420,14 @@ int hook(hook_t *h)
         memset(func_stubs, 0xcc, MONITOR_HOOKCNT * 64);
     }
 
-    // We allocate 64 bytes for the function stub and 64 bytes for padding
-    // in-between (for debugging purposes).
     h->func_stub = func_stubs;
     func_stubs += 64;
 
     *h->orig = (FARPROC) h->func_stub;
 
     // Create the original function stub.
-    h->stub_used = hook_create_stub(h->func_stub, h->addr, 5);
+    h->stub_used =
+        hook_create_stub(h->func_stub, h->addr, ASM_JUMP_32BIT_SIZE);
     if(h->stub_used < 0) {
         pipe("CRITICAL:Error creating function stub for %z!%z.",
             h->library, h->funcname);

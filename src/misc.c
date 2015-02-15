@@ -402,9 +402,9 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
             wcsncmp(pathi, L"\\\\?\\", 4) == 0) {
         memcpy(pathi, L"\\\\?\\", 4 * sizeof(wchar_t));
     }
-    // If the path starts with C: or similar then it's an absolute
+    // If the path starts with "C:\\" or similar then it's an absolute
     // path and we should prepend "\\\\?\\".
-    else if(pathi[1] == ':') {
+    else if(pathi[1] == ':' && pathi[2] == '\\') {
         wcscpy(patho, L"\\\\?\\");
         wcsncat(patho, pathi, MAX_PATH_W+1 - 4);
         swap(&pathi, &patho);
@@ -890,12 +890,7 @@ void *memdup(const void *addr, uint32_t length)
 wchar_t *wcsdup(const wchar_t *s)
 {
     if(s != NULL) {
-        uint32_t length = lstrlenW(s) + 1;
-        wchar_t *ret = mem_alloc(length * sizeof(wchar_t));
-        if(ret != NULL) {
-            memcpy(ret, s, length * sizeof(wchar_t));
-        }
-        return ret;
+        return memdup(s, (lstrlenW(s) + 1) * sizeof(wchar_t));
     }
     return NULL;
 }

@@ -686,11 +686,3 @@ void log_init(uint32_t ip, uint16_t port)
     log_raw("BSON\n", 5);
     log_new_process();
 }
-
-void log_free()
-{
-    DeleteCriticalSection(&g_mutex);
-    if(g_sock != INVALID_SOCKET) {
-        closesocket(g_sock);
-    }
-}

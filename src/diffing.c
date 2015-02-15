@@ -1,4 +1,5 @@
-/* Cuckoo Sandbox - Automated Malware Analysis.
+/*
+Cuckoo Sandbox - Automated Malware Analysis.
 Copyright (C) 2010-2015 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
@@ -31,11 +32,11 @@ typedef struct _module_t {
 } module_t;
 
 #define MAX_MODULE_COUNT 256
-#define INTERESTING_HASH 0
-#define IGNORE_HASH 1
+#define HASH_INTERESTING 0
+#define HASH_IGNORE 1
 #define ENSURE_HASH_NOT_SPECIAL(value) \
-    ((value) == INTERESTING_HASH || (value) == IGNORE_HASH ? \
-        INTERESTING_HASH+2 : (value))
+    ((value) == HASH_INTERESTING || (value) == HASH_IGNORE ? \
+        HASH_INTERESTING+2 : (value))
 
 static uint32_t g_module_count, g_list_length;
 static module_t g_modules[MAX_MODULE_COUNT];
@@ -70,13 +71,13 @@ static uint64_t _address_hash(uintptr_t addr)
     // If there's no module associated with this address then we
     // automatically tag this address as interesting.
     if(module_address == NULL) {
-        return INTERESTING_HASH;
+        return HASH_INTERESTING;
     }
 
     // What else to return?
     if(g_module_count == MAX_MODULE_COUNT) {
         pipe("CRITICAL:Exceeding the maximum amount of supported modules!");
-        return INTERESTING_HASH;
+        return HASH_INTERESTING;
     }
 
     // Add an entry for this module. TODO Spinlock around this code.
@@ -100,8 +101,8 @@ static uint64_t _stacktrace_hash()
 
     for (uint32_t idx = 0; idx < count; idx++) {
         uint64_t hash = _address_hash(return_addresses[idx]);
-        if(hash == INTERESTING_HASH) {
-            return INTERESTING_HASH;
+        if(hash == HASH_INTERESTING) {
+            return HASH_INTERESTING;
         }
 
         hashes[hashcnt++] = hash;
@@ -171,7 +172,7 @@ static uint64_t _parameter_hash(const char *fmt, va_list args)
         case 'h':
             object_handle = va_arg(args, HANDLE);
             if(is_ignored_object_handle(object_handle) != 0) {
-                return IGNORE_HASH;
+                return HASH_IGNORE;
             }
             break;
         }
@@ -183,12 +184,7 @@ static uint64_t _parameter_hash(const char *fmt, va_list args)
 
 static int _value_in_list(uint64_t value, uint64_t *list, uint32_t length)
 {
-    uint32_t low = 0, high = length;
-
-    // No list is available.
-    if(list == NULL || length == 0) {
-        return 1;
-    }
+    uint32_t low = 0, high = length - 1;
 
     while (high - low > 1) {
         uint32_t index = low + (high - low) / 2;
@@ -253,12 +249,12 @@ uint64_t call_hash(const char *fmt, ...)
 
     va_end(args);
 
-    if(hash1 == IGNORE_HASH || hash2 == IGNORE_HASH) {
-        return IGNORE_HASH;
+    if(hash1 == HASH_IGNORE || hash2 == HASH_IGNORE) {
+        return HASH_IGNORE;
     }
 
-    if(hash1 == INTERESTING_HASH || hash2 == INTERESTING_HASH) {
-        return INTERESTING_HASH;
+    if(hash1 == HASH_INTERESTING || hash2 == HASH_INTERESTING) {
+        return HASH_INTERESTING;
     }
 
     return ENSURE_HASH_NOT_SPECIAL(hash1 ^ hash2);
@@ -266,11 +262,16 @@ uint64_t call_hash(const char *fmt, ...)
 
 int is_interesting_hash(uint64_t hash)
 {
-    if(hash == IGNORE_HASH) {
+    if(hash == HASH_IGNORE) {
         return 0;
     }
 
-    if(hash == INTERESTING_HASH) {
+    if(hash == HASH_INTERESTING) {
+        return 1;
+    }
+
+    // No diffing list available - everything is interesting.
+    if(g_list == NULL || g_list_length == 0) {
         return 1;
     }
 
