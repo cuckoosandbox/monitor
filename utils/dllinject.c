@@ -1,225 +1,367 @@
+/*
+Cuckoo Sandbox - Automated Malware Analysis.
+Copyright (C) 2010-2015 Cuckoo Foundation.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <stdio.h>
 #include <windows.h>
+#include "../inc/assembly.h"
+
+#define INJECT_NONE 0
+#define INJECT_CRT  1
+// #define INJECT_APC  2
+
+FARPROC resolve_symbol(const char *library, const char *funcname)
+{
+    return GetProcAddress(LoadLibrary(library), funcname);
+}
+
+HANDLE open_process(uintptr_t pid)
+{
+    HANDLE process_handle = OpenProcess(pid, FALSE, PROCESS_ALL_ACCESS);
+    if(process_handle == NULL) {
+        fprintf(stderr, "[-] Error getting access to process: %ld!\n",
+            GetLastError());
+        exit(1);
+    }
+
+    return process_handle;
+}
+
+HANDLE open_thread(uintptr_t tid)
+{
+    HANDLE thread_handle = OpenThread(tid, FALSE, THREAD_ALL_ACCESS);
+    if(process_handle == NULL) {
+        fprintf(stderr, "[-] Error getting access to thread: %ld!\n",
+            GetLastError());
+        exit(1);
+    }
+
+    return thread_handle;
+}
+
+void read_data(uintptr_t pid, void *addr, void *data, uint32_t length)
+{
+    HANDLE process_handle = open_process(pid);
+
+    DWORD_PTR bytes_read;
+    if(ReadProcessMemory(process_handle, addr, data, length,
+            &bytes_read) == FALSE || bytes_read != length) {
+        fprintf(stderr, "[-] Error reading data from process: %ld\n",
+            GetLastError());
+        exit(1);
+    }
+
+    CloseHandle(process_handle);
+}
+
+void *write_data(uintptr_t pid, const void *data, uint32_t length)
+{
+    HANDLE process_handle = open_process(pid);
+
+    void *addr = VirtualAllocEx(process_handle, NULL, length,
+        MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    if(addr == NULL) {
+        fprintf(stderr, "[-] Error allocating memory in process: %ld!\n",
+            GetLastError());
+        exit(1);
+    }
+
+    DWORD_PTR bytes_written;
+    if(WriteProcessMemory(process_handle, addr, data, length,
+            &bytes_written) == FALSE || bytes_written != length) {
+        fprintf(stderr, "[-] Error writing data to process: %ld\n",
+            GetLastError());
+        exit(1);
+    }
+
+    CloseHandle(process_handle);
+    return addr;
+}
+
+void free_data(uintptr_t pid, void *addr, uint32_t length)
+{
+    HANDLE process_handle = open_process(pid);
+    VirtualFreeEx(process_handle, addr, length, MEM_RELEASE);
+    CloseHandle(process_handle);
+}
+
+uintptr_t create_thread_and_wait(uintptr_t pid, void *addr, void *arg)
+{
+    HANDLE process_handle = open_process(pid);
+
+    HANDLE thread_handle = CreateRemoteThread(process_handle, NULL, 0,
+        (LPTHREAD_START_ROUTINE) addr, arg, 0, NULL);
+    if(thread_handle == NULL) {
+        fprintf(stderr, "[-] Error injecting remote thread in process: %ld\n",
+            GetLastError());
+        exit(1);
+    }
+
+    WaitForSingleObject(thread_handle, INFINITE);
+
+    INT32 exit_code;
+    GetExitCodeThread(thread_handle, &exit_code);
+
+    CloseHandle(thread_handle);
+    CloseHandle(process_handle);
+
+    return exit_code;
+}
+
+uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line, 
+    uintptr_t *tid)
+{
+    STARTUPINFO si; PROCESS_INFORMATION pi;
+    memset(&pi, 0, sizeof(pi));
+    memset(&si, 0, sizeof(si));
+    si.cb = sizeof(si);
+
+    FARPROC create_process_a = resolve_symbol("kernel32", "CreateProcessA");
+    if(create_process_a == NULL) {
+        fprintf(stderr, "[-] Error resolving CreateProcessA?!\n");
+        exit(1);
+    }
+
+    FARPROC close_handle = resolve_symbol("kernel32", "CloseHandle");
+    if(close_handle == NULL) {
+        fprintf(stderr, "[-] Error resolving CloseHandle?!\n");
+        exit(1);
+    }
+
+    FARPROC get_last_error = resolve_symbol("kernel32", "GetLastError");
+    if(get_last_error == NULL) {
+        fprintf(stderr, "[-] Error resolving GetLastError?!\n");
+        exit(1);
+    }
+
+    void *path_addr = write_data(from, path, strlen(path) + 1);
+    void *cmd_addr = write_data(from, cmd_line, strlen(cmd_line) + 1);
+    void *si_addr = write_data(from, &si, sizeof(si));
+    void *pi_addr = write_data(from, &pi, sizeof(pi));
+
+    char shellcode[512]; char *ptr = shellcode;
+
+    ptr += asm_pushv(ptr, pi_addr);
+    ptr += asm_pushv(ptr, si_addr);
+    ptr += asm_pushv(ptr, NULL);
+    ptr += asm_pushv(ptr, NULL);
+    ptr += asm_push(ptr, CREATE_SUSPENDED);
+    ptr += asm_push(ptr, TRUE);
+
+    // TODO In 64-bit mode the first four arguments probably have to go into
+    // rcx, rdx, r8, and r9.
+    ptr += asm_pushv(ptr, NULL);
+    ptr += asm_pushv(ptr, NULL);
+    ptr += asm_pushv(ptr, cmd_addr);
+    ptr += asm_pushv(ptr, path_addr);
+
+    ptr += asm_call(ptr, create_process_a);
+
+    ptr += asm_call(ptr, get_last_error);
+    ptr += asm_return(ptr, 4);
+
+    void *shellcode_addr = write_data(from, shellcode, ptr - shellcode);
+
+    uintptr_t last_error = create_thread_and_wait(from, shellcode_addr, NULL);
+    if(last_error != 0) {
+        fprintf(stderr, "[-] Error launching process: %ld & %ld!\n", 
+            GetLastError(), last_error);
+        exit(1);
+    }
+
+    read_data(from, pi_addr, &pi, sizeof(pi));
+
+    free_data(from, pi_addr, sizeof(pi));
+    free_data(from, si_addr, sizeof(si));
+    free_data(from, cmd_addr, strlen(cmd_line) + 1);
+    free_data(from, path_addr, strlen(path) + 1);
+    free_data(from, shellcode_addr, ptr - shellcode);
+
+    ptr = shellcode;
+    // TODO In 64-bit mode we'll probably have to use rcx instead
+    // of the stack.
+    ptr += asm_pushv(ptr, pi.hThread);
+    ptr += asm_call(ptr, close_handle);
+    ptr += asm_pushv(ptr, pi.hProcess);
+    ptr += asm_call(ptr, close_handle);
+    ptr += asm_return(ptr, 4);
+
+    shellcode_addr = write_data(from, shellcode, ptr - shellcode);
+    create_thread_and_wait(from, shellcode_addr, NULL);
+
+    if(tid != NULL) {
+        *tid = pi.dwThreadId;
+    }
+    return pi.dwProcessId;
+}
+
+void load_dll(uintptr_t pid, const char *dll_path)
+{
+    // Resolve address of LoadLibraryA.
+    FARPROC load_library_a = resolve_symbol("kernel32", "LoadLibraryA");
+    if(load_library_a == NULL) {
+        fprintf(stderr, "[-] Error resolving LoadLibraryA?!\n");
+        exit(1);
+    }
+
+    // Write the DLL path.
+    void *dll_addr = write_data(pid, dll_path, strlen(dll_path) + 1);
+
+    char shellcode[128]; char *ptr = shellcode;
+
+    ptr += asm_pushv(ptr, dll_addr);
+    ptr += asm_call(ptr, load_library_a);
+    ptr += asm_call(ptr, get_last_error);
+    ptr += asm_return(ptr, 4);
+
+    void *shellcode_addr = write_data(pid, shellcode, ptr - shellcode);
+
+    // Run LoadLibraryA(dll_path) in the target process.
+    uintptr_t last_error = create_thread_and_wait(pid, shellcode_addr, NULL);
+    if(last_error != 0) {
+        fprintf(stderr, "[-] Error loading monitor into process: %ld & %ld\n",
+            GetLastError(), last_error);
+        exit(1);
+    }
+
+    free_data(dll_addr);
+}
+
+void resume_thread(uintptr_t tid)
+{
+    HANDLE thread_handle = open_thread(tid);
+    ResumeThread(thread_handle);
+    CloseHandle(thread_handle);
+}
 
 int main(int argc, char *argv[])
 {
     if(argc < 4) {
-        printf("Usage: %s <dll> [dbg] [--crt] [--apc] -- <app> [args..]\n",
-            argv[0]);
+        printf("Usage: %s <options..>\n", argv[0]);
+        printf("Options:\n");
+        printf("  --crt         CreateRemoteThread injection\n");
+        // printf("  --apc         QueueUserAPC injection\n");
+        printf("  --dll <dll>   DLL to inject\n");
+        printf("  --app <app>   Path to application to start\n");
+        printf("  --cmd <cmd>   Cmdline string\n");
+        printf("  --pid <pid>   Process identifier to inject\n");
+        printf("  --tid <tid>   Thread identifier to inject\n");
+        printf("  --from <pid>  Inject from another process\n");
         return 1;
     }
 
-    const char *dll_path = NULL, *app_path = NULL, *dbg_path = NULL;
-    char **args = NULL;
+    const char *dll_path = NULL, *app_path = NULL, *cmd_line = NULL;
+    uintptr_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
 
-    int at_opt = 0, inj_mode = 0;
     for (int idx = 1; idx < argc; idx++) {
-        if(strcmp(argv[idx], "--") == 0) {
-            at_opt = 1;
-            continue;
-        }
-
-        if(dll_path == NULL && at_opt == 0) {
-            dll_path = argv[idx];
-            continue;
-        }
-
         if(strcmp(argv[idx], "--crt") == 0) {
-            inj_mode = 1;
+            inj_mode = INJECT_CRT;
             continue;
         }
 
-        if(strcmp(argv[idx], "--apc") == 0) {
-            inj_mode = 2;
+        // if(strcmp(argv[idx], "--apc") == 0) {
+            // inj_mode = INJECT_APC;
+            // continue;
+        // }
+
+        if(strcmp(argv[idx], "--dll") == 0) {
+            dll_path = argv[++idx];
             continue;
         }
 
-        if(dbg_path == NULL && at_opt == 0) {
-            dbg_path = argv[idx];
+        if(strcmp(argv[idx], "--app") == 0) {
+            app_path = argv[++idx];
             continue;
         }
 
-        app_path = argv[idx];
-        args = &argv[idx];
-        break;
+        if(strcmp(argv[idx], "--cmd") == 0) {
+            cmd_line = argv[++idx];
+            continue;
+        }
+
+        if(strcmp(argv[idx], "--pid") == 0) {
+            pid = strtoul(argv[++idx], NULL, 10);
+            continue;
+        }
+
+        if(strcmp(argv[idx], "--tid") == 0) {
+            tid = strtoul(argv[++idx], NULL, 10);
+            continue;
+        }
+
+        if(strcmp(argv[idx], "--from") == 0) {
+            from = strtoul(argv[++idx], NULL, 10);
+            continue;
+        }
     }
 
-    if(app_path == NULL) {
-        printf("[-] The application path has not been set!\n");
+    kernel32_handle = GetModuleHandle("kernel32");
+
+    if(inj_mode == INJECT_NONE) {
+        fprintf(stderr, "[-] No injection method has been provided!\n");
         return 1;
     }
 
-    if(inj_mode == 0) {
-#if __x86_64__
-        inj_mode = 1;
-        printf("[x] No injection mode specified, using "
-               "create remote thread.\n");
-#else
-        inj_mode = 2;
-        printf("[x] No injection method specified, using "
-               "asynchronous procedure call.\n");
-#endif
+    if(inj_mode == INJECT_CRT && pid == 0 && app_path == NULL) {
+        fprintf(stderr, "[-] No injection target has been provided!\n");
+        return 1;
     }
 
-    FARPROC load_library_a =
-        GetProcAddress(GetModuleHandle("kernel32"), "LoadLibraryA");
-    if(load_library_a == NULL) {
-        fprintf(stderr, "Error resolving LoadLibraryA?!\n");
-        return 1;
+    // if(inj_mode == INJECT_APC && tid == 0 && app_path == NULL) {
+        // fprintf(stderr, "[-] No injection target has been provided!\n");
+        // return 1;
+    // }
+
+    // If no source process has been specified, then we use our own process.
+    if(from == 0 && app_path != NULL) {
+        fprintf(stderr, "[x] Starting process from our own process\n");
+        from = GetCurrentProcessId();
     }
 
     OFSTRUCT of; memset(&of, 0, sizeof(of)); of.cBytes = sizeof(of);
     if(OpenFile(dll_path, &of, OF_EXIST) == HFILE_ERROR) {
-        fprintf(stderr, "DLL file does not exist!\n");
+        fprintf(stderr, "[-] DLL file does not exist!\n");
         return 1;
     }
 
-    SECURITY_ATTRIBUTES sa;
-    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
-    sa.bInheritHandle = TRUE;
-    sa.lpSecurityDescriptor = NULL;
-
-    char fname[MAX_PATH];
-    sprintf(fname, "%ld-out.txt", GetCurrentProcessId());
-
-    printf("[x] Log files at %ld-{out,err}.txt!\n", GetCurrentProcessId());
-
-    HANDLE out_file = CreateFile(fname, GENERIC_WRITE, 0, &sa,
-        CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    if(out_file == INVALID_HANDLE_VALUE) {
-        fprintf(stderr, "Unable to create stdout file: %ld (%s)!\n",
-            GetLastError(), fname);
-        return 1;
-    }
-
-    sprintf(fname, "%ld-err.txt", GetCurrentProcessId());
-    HANDLE err_file = CreateFile(fname, GENERIC_WRITE, 0, &sa,
-        CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    if(err_file == INVALID_HANDLE_VALUE) {
-        fprintf(stderr, "Unable to create stderr file: %ld (%s)!\n",
-            GetLastError(), fname);
-        return 1;
-    }
-
-    STARTUPINFO si; PROCESS_INFORMATION pi;
-    memset(&si, 0, sizeof(si));
-    si.cb = sizeof(si);
-    si.dwFlags = STARTF_USESTDHANDLES;
-    si.hStdOutput = out_file;
-    si.hStdError = err_file;
-
-    printf("[x] DLL: '%s'\n", dll_path);
-    printf("[x] App: '%s'\n", app_path);
-
-    char cmdline[512], *ptr;
-
-    ptr = cmdline;
-    for (int idx = 0; args[idx] != NULL; idx++) {
-        // Only apply quotation marks if a cmdline argument has at least one
-        // space or quotation mark.
-        int quotate = 0;
-        for (const char *p = args[idx]; *p != 0; p++) {
-            if(*p == ' ' || *p == '"') {
-                quotate = 1;
-                break;
-            }
+    if(app_path != NULL) {
+        if(cmd_line == NULL) {
+            fprintf(stderr, "[x] No cmdline provided, using app path.\n");
+            cmd_line = app_path;
         }
 
-        if(quotate != 0) {
-            *ptr++ = '"';
-        }
-
-        printf("[x] Arg[%d]: '%s'\n", idx, args[idx]);
-
-        for (const char *p = args[idx]; *p != 0; p++) {
-            if(*p == '"') {
-                *ptr++ = '\\';
-            }
-
-            *ptr++ = *p;
-        }
-
-        if(quotate != 0) {
-            *ptr++ = '"';
-        }
-
-        *ptr++ = ' ';
-    }
-    *ptr = 0;
-
-    if(CreateProcessA(app_path, cmdline, NULL, NULL, TRUE, CREATE_SUSPENDED,
-            NULL, NULL, &si, &pi) == FALSE) {
-        fprintf(stderr, "Error launching process: %ld!\n", GetLastError());
-        return 1;
+        pid = start_app(from, app_path, cmd_line, &tid);
     }
 
-    void *lib = VirtualAllocEx(pi.hProcess, NULL, strlen(dll_path) + 1,
-        MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    if(lib == NULL) {
-        fprintf(stderr, "Error allocating memory in the process: %ld!\n",
-            GetLastError());
-        goto error;
-    }
+    load_dll(pid, dll_path);
 
-    DWORD_PTR bytes_written;
-    if(WriteProcessMemory(pi.hProcess, lib, dll_path, strlen(dll_path) + 1,
-            &bytes_written) == FALSE ||
-            bytes_written != strlen(dll_path) + 1) {
-        fprintf(stderr, "Error writing lib to the process: %ld\n",
-            GetLastError());
-        goto error;
-    }
-
-    HANDLE thread_handle;
-
-    switch (inj_mode) {
-    case 1:
-        thread_handle = CreateRemoteThread(pi.hProcess, NULL, 0,
-            (LPTHREAD_START_ROUTINE) load_library_a, lib, 0, NULL);
-        if(thread_handle == NULL) {
-            fprintf(stderr, "Error injecting remote thread: %ld\n",
-                GetLastError());
-            goto error;
-        }
-
-        WaitForSingleObject(thread_handle, INFINITE);
-        CloseHandle(thread_handle);
-        break;
-
-    case 2:
-        if(QueueUserAPC((PAPCFUNC) load_library_a, pi.hThread,
-                (ULONG_PTR) lib) == 0) {
-            fprintf(stderr, "Error queueing APC to the process: %ld\n",
-                GetLastError());
-            goto error;
-        }
-        break;
-    }
-
-    printf("[x] Injected successfully!\n");
+    fprintf(stderr, "[+] Injected successfully!\n");
 
     if(dbg_path != NULL) {
-        sprintf(fname, "\"%s\" -p %ld", dbg_path, pi.dwProcessId);
+        char buf[1024];
+        sprintf(buf, "\"%s\" -p %ld", dbg_path, pid);
 
-        STARTUPINFO si2; PROCESS_INFORMATION pi2;
-        memset(&si2, 0, sizeof(si2)); si2.cb = sizeof(si2);
-        CreateProcess(dbg_path, fname, NULL, NULL, FALSE, 0,
-            NULL, NULL, &si2, &pi2);
-
-        CloseHandle(pi2.hThread);
-        CloseHandle(pi2.hProcess);
+        start_app(GetCurrentProcessId(), dbg_path, buf, NULL);
 
         Sleep(5000);
     }
 
-    ResumeThread(pi.hThread);
-    CloseHandle(pi.hThread);
-    CloseHandle(pi.hProcess);
+    if(app_path != NULL && tid != 0) {
+        resume_thread(tid);
+    }
     return 0;
-
-error:
-    TerminateProcess(pi.hProcess, 0);
-    CloseHandle(pi.hThread);
-    CloseHandle(pi.hProcess);
-    return 1;
 }
