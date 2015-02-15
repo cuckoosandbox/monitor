@@ -26,7 +26,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 FARPROC resolve_symbol(const char *library, const char *funcname)
 {
-    return GetProcAddress(LoadLibrary(library), funcname);
+    FARPROC ret = GetProcAddress(LoadLibrary(library), funcname);
+    if(ret == NULL) {
+        fprintf(stderr, "[-] Error resolving %s!%s?!\n", library, funcname);
+        exit(1);
+    }
+
+    return ret;
 }
 
 HANDLE open_process(uintptr_t pid)
@@ -122,7 +128,7 @@ uintptr_t create_thread_and_wait(uintptr_t pid, void *addr, void *arg)
     return exit_code;
 }
 
-uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line, 
+uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
     uintptr_t *tid)
 {
     STARTUPINFO si; PROCESS_INFORMATION pi;
@@ -131,22 +137,8 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
     si.cb = sizeof(si);
 
     FARPROC create_process_a = resolve_symbol("kernel32", "CreateProcessA");
-    if(create_process_a == NULL) {
-        fprintf(stderr, "[-] Error resolving CreateProcessA?!\n");
-        exit(1);
-    }
-
     FARPROC close_handle = resolve_symbol("kernel32", "CloseHandle");
-    if(close_handle == NULL) {
-        fprintf(stderr, "[-] Error resolving CloseHandle?!\n");
-        exit(1);
-    }
-
     FARPROC get_last_error = resolve_symbol("kernel32", "GetLastError");
-    if(get_last_error == NULL) {
-        fprintf(stderr, "[-] Error resolving GetLastError?!\n");
-        exit(1);
-    }
 
     void *path_addr = write_data(from, path, strlen(path) + 1);
     void *cmd_addr = write_data(from, cmd_line, strlen(cmd_line) + 1);
@@ -178,7 +170,7 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
 
     uintptr_t last_error = create_thread_and_wait(from, shellcode_addr, NULL);
     if(last_error != 0) {
-        fprintf(stderr, "[-] Error launching process: %ld & %ld!\n", 
+        fprintf(stderr, "[-] Error launching process: %ld & %ld!\n",
             GetLastError(), last_error);
         exit(1);
     }
@@ -213,10 +205,6 @@ void load_dll(uintptr_t pid, const char *dll_path)
 {
     // Resolve address of LoadLibraryA.
     FARPROC load_library_a = resolve_symbol("kernel32", "LoadLibraryA");
-    if(load_library_a == NULL) {
-        fprintf(stderr, "[-] Error resolving LoadLibraryA?!\n");
-        exit(1);
-    }
 
     // Write the DLL path.
     void *dll_addr = write_data(pid, dll_path, strlen(dll_path) + 1);
