@@ -135,13 +135,13 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
         // Unconditional jump with 32-bit relative offset.
         if(*addr == 0xe9) {
             const uint8_t *target = addr + *(int32_t *)(addr + 1) + 5;
-            tramp += asm_jump_addr(tramp, target);
+            tramp += asm_jump(tramp, target);
             addr += 5;
         }
         // Call with 32-bit relative offset.
         else if(*addr == 0xe8) {
             const uint8_t *target = addr + *(int32_t *)(addr + 1) + 5;
-            tramp += asm_call_addr(tramp, target);
+            tramp += asm_call(tramp, target);
             addr += 5;
         }
         // Conditional jump with 32bit relative offset.
@@ -180,7 +180,7 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
         // Unconditional jump with 8bit relative offset.
         else if(*addr == 0xeb) {
             const uint8_t *target = addr + *(int8_t *)(addr + 1) + 2;
-            tramp += asm_jump_addr(tramp, target);
+            tramp += asm_jump(tramp, target);
             addr += 2;
 
             // TODO Check the remaining length. Also keep in mind that any
@@ -234,7 +234,7 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
     }
 
     // Jump to the original function at the point where our stub ends.
-    tramp += asm_jump_addr(tramp, addr);
+    tramp += asm_jump(tramp, addr);
     return addr - base_addr;
 }
 
@@ -294,7 +294,7 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 
     // As the target is probably not close enough addr for a 32-bit relative
     // jump we allocate a separate page for an intermediate jump.
-    uint8_t *closeby = _hook_alloc_closeby(addr, ASM_JUMP_ADDR_SIZE);
+    uint8_t *closeby = _hook_alloc_closeby(addr, ASM_JUMP_SIZE);
     if(closeby == NULL) {
         pipe("CRITICAL:Unable to find closeby page for hooking!");
         return -1;
@@ -309,7 +309,7 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 
     // Jump from the intermediate jump to the target address. This is a full
     // 64-bit jump.
-    asm_jump_addr(closeby, target);
+    asm_jump(closeby, target);
 
     virtual_protect(addr, stub_used, PAGE_EXECUTE_READ);
     return 0;

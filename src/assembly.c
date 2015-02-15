@@ -22,48 +22,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #if __x86_64__
 
-int asm_push_addr(uint8_t *stub, const uint8_t *addr)
+int asm_push(uint8_t *stub, uintptr_t value)
 {
-    // Push the lower 32-bits of the address onto the stack. The 32-bit
+    // Push the lower 32-bits of the value onto the stack. The 32-bit
     // value will be zero-extended to 64-bits.
     stub[0] = 0x68;
-    *(uint32_t *)(stub + 1) = (uint32_t) (uintptr_t) addr;
+    *(uint32_t *)(stub + 1) = (uint32_t) value;
 
-    // Move higher 32-bits of the address into the stack.
+    // Move higher 32-bits of the value into the stack.
     // mov dword [rsp+4], 32-bit
     stub[5] = 0xc7;
     stub[6] = 0x44;
     stub[7] = 0x24;
     stub[8] = 0x04;
-    *(uint32_t *)(stub + 9) = (uint32_t) ((uintptr_t) addr >> 32);
+    *(uint32_t *)(stub + 9) = (uint32_t)(value >> 32);
     return 13;
 }
 
 #else
 
-int asm_push_addr(uint8_t *stub, const uint8_t *addr)
+int asm_push(uint8_t *stub, uintptr_t value)
 {
-    // Push the address onto the stack.
+    // Push the value onto the stack.
     stub[0] = 0x68;
-    *(const uint8_t **)(stub + 1) = addr;
+    *(const uintptr_t **)(stub + 1) = value;
     return 5;
 }
 
 #endif
 
-int asm_jump_32bit(uint8_t *stub, const uint8_t *addr)
+int asm_jump_32bit(uint8_t *stub, void *addr)
 {
     stub[0] = 0xe9;
-    *(uint32_t *)(stub + 1) = addr - stub - 5;
+    *(uint32_t *)(stub + 1) = (uint8_t *) addr - stub - 5;
     return 5;
 }
 
-int asm_jump_addr(uint8_t *stub, const uint8_t *addr)
+int asm_jump(uint8_t *stub, void *addr)
 {
     uint8_t *base = stub;
 
     // Push the address on the stack.
-    stub += asm_push_addr(stub, addr);
+    stub += asm_pushv(stub, addr);
 
     // Pop the address into the instruction pointer.
     *stub++ = 0xc3;
@@ -71,21 +71,32 @@ int asm_jump_addr(uint8_t *stub, const uint8_t *addr)
     return stub - base;
 }
 
-int asm_call_addr(uint8_t *stub, const uint8_t *addr)
+int asm_call(uint8_t *stub, void *addr)
 {
     uint8_t *base = stub;
 
     // We push the return address onto the stack and then jump into the target
     // address. This way both 32-bit and 64-bit are supported at once. The
     // return address is 8-byte aligned as required in 64-bit mode.
-    uint8_t *return_address = stub + ASM_PUSH_ADDR_SIZE + ASM_JUMP_ADDR_SIZE;
+    uint8_t *return_address = stub + ASM_PUSH_SIZE + ASM_JUMP_ADDR_SIZE;
     return_address += 8 - ((uintptr_t) return_address & 7);
 
-    stub += asm_push_addr(stub, return_address);
-    stub += asm_jump_addr(stub, addr);
+    stub += asm_pushv(stub, return_address);
+    stub += asm_jump(stub, addr);
 
     // Pad with a couple of int3's.
     memset(stub, 0xcc, return_address - stub);
 
     return return_address - base;
+}
+
+int asm_return(uint8_t *stub, uint16_t value)
+{
+    uint8_t *base = stub;
+
+    *stub++ = 0xc2;
+    *stub++ = value & 0xff;
+    *stub++ = value >> 8;
+
+    return stub - base;
 }

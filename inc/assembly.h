@@ -22,18 +22,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 
 #if __x86_64__
-#define ASM_PUSH_ADDR_SIZE 13
-#define ASM_JUMP_ADDR_SIZE 14
+#define ASM_PUSH_SIZE 13
+#define ASM_JUMP_SIZE 14
 #else
-#define ASM_PUSH_ADDR_SIZE 5
-#define ASM_JUMP_ADDR_SIZE 6
+#define ASM_PUSH_SIZE 5
+#define ASM_JUMP_SIZE 6
 #endif
 
 #define ASM_JUMP_32BIT_SIZE 5
+#define ASM_RETURN 1
 
-int asm_push_addr(uint8_t *stub, const uint8_t *addr);
-int asm_jump_32bit(uint8_t *stub, const uint8_t *addr);
-int asm_jump_addr(uint8_t *stub, const uint8_t *addr);
-int asm_call_addr(uint8_t *stub, const uint8_t *addr);
+int asm_push(uint8_t *stub, uintptr_t value);
+int asm_jump_32bit(uint8_t *stub, void *addr);
+int asm_jump(uint8_t *stub, void *addr);
+int asm_call(uint8_t *stub, void *addr);
+int asm_return(uint8_t *stub, uint16_t value);
+
+static inline int asm_pushv(uint8_t *stub, void *value)
+{
+    return asm_push(stub, (uintptr_t) value);
+}
 
 #endif
