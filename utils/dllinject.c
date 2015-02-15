@@ -37,7 +37,7 @@ FARPROC resolve_symbol(const char *library, const char *funcname)
 
 HANDLE open_process(uintptr_t pid)
 {
-    HANDLE process_handle = OpenProcess(pid, FALSE, PROCESS_ALL_ACCESS);
+    HANDLE process_handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
     if(process_handle == NULL) {
         fprintf(stderr, "[-] Error getting access to process: %ld!\n",
             GetLastError());
@@ -49,7 +49,7 @@ HANDLE open_process(uintptr_t pid)
 
 HANDLE open_thread(uintptr_t tid)
 {
-    HANDLE thread_handle = OpenThread(tid, FALSE, THREAD_ALL_ACCESS);
+    HANDLE thread_handle = OpenThread(THREAD_ALL_ACCESS, FALSE, tid);
     if(process_handle == NULL) {
         fprintf(stderr, "[-] Error getting access to thread: %ld!\n",
             GetLastError());
@@ -236,6 +236,43 @@ void resume_thread(uintptr_t tid)
     CloseHandle(thread_handle);
 }
 
+void grant_debug_privileges(uintptr_t pid)
+{
+    HANDLE token_handle, process_handle = open_process(pid);
+
+    if(OpenProcessToken(process_handle, TOKEN_ALL_ACCESS,
+            &token_handle) == 0) {
+        fprintf(stderr, "[-] Error obtaining process token: %ld\n",
+            GetLastError());
+        exit(1);
+    }
+
+    LUID original_luid;
+    if(LookupPrivilegeValue(NULL, "SeDebugPrivilege", &original_luid) == 0) {
+        fprintf(stderr, "[-] Error obtaining original luid: %ld\n",
+            GetLastError());
+        exit(1);
+    }
+
+    LUID_AND_ATTRIBUTES luid_attr;
+    luid_attr.Luid = original_luid;
+    luid_attr.Attributes = SE_PRIVILEGE_ENABLED;
+
+    TOKEN_PRIVILEGES token_privileges;
+    token_privileges.PrivilegeCount = 1;
+    token_privileges.Privileges = &luid_attr;
+
+    if(AdjustTokenPrivileges(token_handle, FALSE, &token_privileges, 0, NULL,
+            NULL) == 0) {
+        fprintf(stderr, "[-] Error adjusting token privileges: %ld\n",
+            GetLastError());
+        exit(1);
+    }
+
+    CloseHandle(token_handle);
+    CloseHandle(process_handle);
+}
+
 int main(int argc, char *argv[])
 {
     if(argc < 4) {
@@ -325,6 +362,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "[-] DLL file does not exist!\n");
         return 1;
     }
+
+    grant_debug_privileges(GetCurrentProcessId());
 
     if(app_path != NULL) {
         if(cmd_line == NULL) {
