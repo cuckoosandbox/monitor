@@ -201,12 +201,10 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
     return pi.dwProcessId;
 }
 
-void load_dll(uintptr_t pid, const char *dll_path)
+void load_dll_crt(uintptr_t pid, const char *dll_path)
 {
-    // Resolve address of LoadLibraryA.
     FARPROC load_library_a = resolve_symbol("kernel32", "LoadLibraryA");
 
-    // Write the DLL path.
     void *dll_addr = write_data(pid, dll_path, strlen(dll_path) + 1);
 
     char shellcode[128]; char *ptr = shellcode;
@@ -227,6 +225,25 @@ void load_dll(uintptr_t pid, const char *dll_path)
     }
 
     free_data(dll_addr);
+}
+
+void load_dll_apc(uintptr_t pid, uintptr_t tid, const char *dll_path)
+{
+    HANDLE thread_handle = open_thread(tid);
+    FARPROC load_library_a = resolve_symbol("kernel32", "LoadLibraryA");
+
+    void *dll_addr = write_data(pid, dll_path, strlen(dll_path) + 1);
+
+    // Add LoadLibraryA(dll_path) to the APC queue.
+    if(QueueUserAPC((PAPCFUNC) load_library_a, thread_handle,
+            (ULONG_PTR) dll_addr) == 0) {
+        fprintf(stderr, "[-] Error adding task to APC queue: %ld\n",
+            GetLastError());
+        exit(1);
+    }
+
+    // TODO Come up with a way to deallocate dll_addr.
+    CloseHandle(thread_handle);
 }
 
 void resume_thread(uintptr_t tid)
@@ -279,7 +296,7 @@ int main(int argc, char *argv[])
         printf("Usage: %s <options..>\n", argv[0]);
         printf("Options:\n");
         printf("  --crt         CreateRemoteThread injection\n");
-        // printf("  --apc         QueueUserAPC injection\n");
+        printf("  --apc         QueueUserAPC injection\n");
         printf("  --dll <dll>   DLL to inject\n");
         printf("  --app <app>   Path to application to start\n");
         printf("  --cmd <cmd>   Cmdline string\n");
@@ -298,10 +315,10 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        // if(strcmp(argv[idx], "--apc") == 0) {
-            // inj_mode = INJECT_APC;
-            // continue;
-        // }
+        if(strcmp(argv[idx], "--apc") == 0) {
+            inj_mode = INJECT_APC;
+            continue;
+        }
 
         if(strcmp(argv[idx], "--dll") == 0) {
             dll_path = argv[++idx];
@@ -346,10 +363,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // if(inj_mode == INJECT_APC && tid == 0 && app_path == NULL) {
-        // fprintf(stderr, "[-] No injection target has been provided!\n");
-        // return 1;
-    // }
+    if(inj_mode == INJECT_APC && tid == 0 && app_path == NULL) {
+        fprintf(stderr, "[-] No injection target has been provided!\n");
+        return 1;
+    }
 
     // If no source process has been specified, then we use our own process.
     if(from == 0 && app_path != NULL) {
@@ -374,7 +391,19 @@ int main(int argc, char *argv[])
         pid = start_app(from, app_path, cmd_line, &tid);
     }
 
-    load_dll(pid, dll_path);
+    switch (inj_mode) {
+    case INJECT_CRT:
+        load_dll_crt(pid, dll_path);
+        break;
+
+    case INJECT_APC:
+        load_dll_apc(pid, tid, dll_path);
+        break;
+
+    default:
+        fprintf(stderr, "[-] Unhandled injection mode: %d\n", inj_mode);
+        return 1;
+    }
 
     fprintf(stderr, "[+] Injected successfully!\n");
 
