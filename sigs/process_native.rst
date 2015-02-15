@@ -138,7 +138,7 @@ Logging::
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        pipe("PROCESS:%d,%d", pid_from_process_handle(*ProcessHandle),
+        pipe("PROCESS2:%d,%d", pid_from_process_handle(*ProcessHandle),
             tid_from_thread_handle(*ThreadHandle));
         sleep_skip_disable();
     }
@@ -178,7 +178,7 @@ Logging::
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        pipe("PROCESS:%d,%d",
+        pipe("PROCESS2:%d,%d",
             pid_from_process_handle(ProcessInformation->ProcessHandle),
             tid_from_thread_handle(ProcessInformation->ThreadHandle));
         sleep_skip_disable();

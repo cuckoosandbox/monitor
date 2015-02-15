@@ -66,7 +66,7 @@ Logging::
 Post::
 
     if(ret != FALSE) {
-        pipe("PROCESS:%d,%d",
+        pipe("PROCESS2:%d,%d",
             lpProcessInformation->dwProcessId,
             lpProcessInformation->dwThreadId);
 
