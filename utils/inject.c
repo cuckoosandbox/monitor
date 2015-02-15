@@ -153,13 +153,18 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
     void *si_addr = write_data(from, &si, sizeof(si));
     void *pi_addr = write_data(from, &pi, sizeof(pi));
 
+    const char *temp_dir = getenv("TEMP"); void *temp_addr = NULL;
+    if(temp_dir != NULL) {
+        temp_addr = write_data(from, temp_dir, strlen(temp_dir) + 1);
+    }
+
     char shellcode[512]; char *ptr = shellcode;
 
     ptr += asm_pushv(ptr, pi_addr);
     ptr += asm_pushv(ptr, si_addr);
+    ptr += asm_pushv(ptr, temp_addr);
     ptr += asm_pushv(ptr, NULL);
-    ptr += asm_pushv(ptr, NULL);
-    ptr += asm_push(ptr, CREATE_SUSPENDED);
+    ptr += asm_push(ptr, CREATE_NEW_CONSOLE | CREATE_SUSPENDED);
     ptr += asm_push(ptr, TRUE);
 
     // TODO In 64-bit mode the first four arguments probably have to go into
