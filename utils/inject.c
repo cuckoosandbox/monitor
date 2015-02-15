@@ -343,7 +343,7 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        if(strcmp(argv[idx], "--cmd") == 0) {
+        if(strcmp(argv[idx], "--cmdline") == 0) {
             cmd_line = argv[++idx];
             continue;
         }
