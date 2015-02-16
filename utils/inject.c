@@ -308,18 +308,21 @@ int main(int argc, char *argv[])
     if(argc < 4) {
         printf("Usage: %s <options..>\n", argv[0]);
         printf("Options:\n");
-        printf("  --crt         CreateRemoteThread injection\n");
-        printf("  --apc         QueueUserAPC injection\n");
-        printf("  --dll <dll>   DLL to inject\n");
-        printf("  --app <app>   Path to application to start\n");
-        printf("  --cmd <cmd>   Cmdline string\n");
-        printf("  --pid <pid>   Process identifier to inject\n");
-        printf("  --tid <tid>   Thread identifier to inject\n");
-        printf("  --from <pid>  Inject from another process\n");
+        printf("  --crt             CreateRemoteThread injection\n");
+        printf("  --apc             QueueUserAPC injection\n");
+        printf("  --dll <dll>       DLL to inject\n");
+        printf("  --app <app>       Path to application to start\n");
+        printf("  --cmdline <cmd>   Cmdline string\n");
+        printf("  --pid <pid>       Process identifier to inject\n");
+        printf("  --tid <tid>       Thread identifier to inject\n");
+        printf("  --from <pid>      Inject from another process\n");
+        printf("  --config <path>   Configuration file for the monitor\n");
+        printf("  --verbose         Verbose switch\n");
         return 1;
     }
 
     const char *dll_path = NULL, *app_path = NULL, *cmd_line = NULL;
+    const char *config_file = NULL;
     uintptr_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
 
     for (int idx = 1; idx < argc; idx++) {
@@ -360,6 +363,11 @@ int main(int argc, char *argv[])
 
         if(strcmp(argv[idx], "--from") == 0) {
             from = strtoul(argv[++idx], NULL, 10);
+            continue;
+        }
+
+        if(strcmp(argv[idx], "--config") == 0) {
+            config_file = argv[++idx];
             continue;
         }
 
@@ -408,6 +416,18 @@ int main(int argc, char *argv[])
         }
 
         pid = start_app(from, app_path, cmd_line, &tid);
+    }
+
+    // Drop the configuration file if available.
+    if(config_file != NULL) {
+        char filepath[MAX_PATH];
+
+        sprintf(filepath, "C:\\cuckoo_%ld.ini", pid);
+        if(MoveFile(config_file, filepath) == FALSE) {
+            fprintf(stderr, "[-] Error dropping configuration file: %ld\n",
+                GetLastError());
+            return 1;
+        }
     }
 
     switch (inj_mode) {
