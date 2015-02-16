@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define INJECT_CRT  1
 #define INJECT_APC  2
 
-#define DPRINTF(fmt, ...) if(verbose != 0) fprintf(stderr, fmt, #__VA_ARGS__)
+#define DPRINTF(fmt, ...) if(verbose != 0) fprintf(stderr, fmt, ##__VA_ARGS__)
 
 static int verbose = 0;
 
@@ -190,8 +190,8 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
 
     uintptr_t last_error = create_thread_and_wait(from, shellcode_addr, NULL);
     if(last_error != 0) {
-        fprintf(stderr, "[-] Error launching process: %ld & %ld!\n",
-            GetLastError(), last_error);
+        fprintf(stderr, "[-] Error launching process: %" PRIuPTR "\n",
+            last_error);
         exit(1);
     }
 
@@ -250,8 +250,8 @@ void load_dll_crt(uintptr_t pid, const char *dll_path)
     // Run LoadLibraryA(dll_path) in the target process.
     uintptr_t last_error = create_thread_and_wait(pid, shellcode_addr, NULL);
     if(last_error != 0) {
-        fprintf(stderr, "[-] Error loading monitor into process: %ld & %ld\n",
-            GetLastError(), last_error);
+        fprintf(stderr, "[-] Error loading monitor into process: %"
+            PRIuPTR "\n", last_error);
         exit(1);
     }
 
@@ -374,7 +374,7 @@ int main(int argc, char *argv[])
 
     const char *dll_path = NULL, *app_path = NULL, *cmd_line = NULL;
     const char *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
-    uintptr_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
+    uintptr_t pid = 0, tid = 0, from = 0; int inj_mode = INJECT_NONE;
 
     for (int idx = 1; idx < argc; idx++) {
         if(strcmp(argv[idx], "--crt") == 0) {
@@ -492,7 +492,7 @@ int main(int argc, char *argv[])
     if(config_file != NULL) {
         char filepath[MAX_PATH];
 
-        sprintf(filepath, "C:\\cuckoo_%ld.ini", pid);
+        sprintf(filepath, "C:\\cuckoo_%" PRIuPTR ".ini", pid);
         if(MoveFile(config_file, filepath) == FALSE) {
             fprintf(stderr, "[-] Error dropping configuration file: %ld\n",
                 GetLastError());
@@ -518,7 +518,7 @@ int main(int argc, char *argv[])
 
     if(dbg_path != NULL) {
         char buf[1024];
-        sprintf(buf, "\"%s\" -p %ld", dbg_path, pid);
+        sprintf(buf, "\"%s\" -p %" PRIuPTR, dbg_path, pid);
 
         start_app(GetCurrentProcessId(), dbg_path, buf, NULL);
 
@@ -530,6 +530,6 @@ int main(int argc, char *argv[])
     }
 
     // Report the process identifier.
-    printf("%d", pid);
+    printf("%" PRIuPTR, pid);
     return 0;
 }
