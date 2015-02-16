@@ -303,26 +303,59 @@ void grant_debug_privileges(uintptr_t pid)
     CloseHandle(process_handle);
 }
 
+uintptr_t pid_from_process_name(const char *process_name)
+{
+    PROCESSENTRY32 row; HANDLE snapshot_handle;
+
+    snapshot_handle = CreateToolhelp32Snapshot(0, 0);
+    if(snapshot_handle == NULL) {
+        fprintf(stderr, "[-] Error obtaining snapshot handle: %ld\n",
+            GetLastError());
+        exit(1);
+    }
+
+    if(Process32First(snapshot_handle, &row) == FALSE) {
+        fprintf(stderr, "[-] Error enumerating the first process: %ld\n",
+            GetLastError());
+        exit(1);
+    }
+
+    do {
+        if(stricmp(row.szExeFile, process_name) == 0) {
+            CloseHandle(snapshot_handle);
+            return row.th32ProcessID;
+        }
+    } while (Process32Next(snapshot_handle, &row) != FALSE);
+
+    CloseHandle(snapshot_handle);
+
+    fprintf(stderr, "[-] Error finding process by name: %s\n", process_name);
+    exit(1);
+}
+
 int main(int argc, char *argv[])
 {
     if(argc < 4) {
         printf("Usage: %s <options..>\n", argv[0]);
         printf("Options:\n");
-        printf("  --crt             CreateRemoteThread injection\n");
-        printf("  --apc             QueueUserAPC injection\n");
-        printf("  --dll <dll>       DLL to inject\n");
-        printf("  --app <app>       Path to application to start\n");
-        printf("  --cmdline <cmd>   Cmdline string\n");
-        printf("  --pid <pid>       Process identifier to inject\n");
-        printf("  --tid <tid>       Thread identifier to inject\n");
-        printf("  --from <pid>      Inject from another process\n");
-        printf("  --config <path>   Configuration file for the monitor\n");
-        printf("  --verbose         Verbose switch\n");
+        printf("  --crt                  CreateRemoteThread injection\n");
+        printf("  --apc                  QueueUserAPC injection\n");
+        printf("  --dll <dll>            DLL to inject\n");
+        printf("  --app <app>            Path to application to start\n");
+        printf("  --cmdline <cmd>        Cmdline string\n");
+        printf("  --pid <pid>            Process identifier to inject\n");
+        printf("  --tid <tid>            Thread identifier to inject\n");
+        printf("  --from <pid>           Inject from another process\n");
+        printf("  --from-process <name>  "
+            "Inject from another process, resolves pid\n");
+        printf("  --config <path>        "
+            "Configuration file for the monitor\n");
+        printf("  --verbose              Verbose switch\n");
         return 1;
     }
 
     const char *dll_path = NULL, *app_path = NULL, *cmd_line = NULL;
-    const char *config_file = NULL;
+    const char *config_file = NULL, *from_process = NULL;
     uintptr_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
 
     for (int idx = 1; idx < argc; idx++) {
@@ -366,6 +399,11 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        if(strcmp(argv[idx], "--from-process") == 0) {
+            from_process = argv[++idx];
+            continue;
+        }
+
         if(strcmp(argv[idx], "--config") == 0) {
             config_file = argv[++idx];
             continue;
@@ -376,8 +414,6 @@ int main(int argc, char *argv[])
             continue;
         }
     }
-
-    kernel32_handle = GetModuleHandle("kernel32");
 
     if(inj_mode == INJECT_NONE) {
         fprintf(stderr, "[-] No injection method has been provided!\n");
@@ -398,6 +434,15 @@ int main(int argc, char *argv[])
     if(OpenFile(dll_path, &of, OF_EXIST) == HFILE_ERROR) {
         fprintf(stderr, "[-] DLL file does not exist!\n");
         return 1;
+    }
+
+    if(from != 0 && from_process != NULL) {
+        fprintf(stderr, "[-] Both --from and --from-process are specified\n");
+        return 1;
+    }
+
+    if(from_process != NULL) {
+        from = pid_from_process_name(from_process);
     }
 
     grant_debug_privileges(GetCurrentProcessId());
