@@ -3,7 +3,7 @@ CC64 = x86_64-w64-mingw32-gcc -m64
 CFLAGS = -Wall -Wextra -O2 -std=c99 -s -static
 
 UTILSRC = $(wildcard *.c)
-UTILEXE = $(UTILSRC:%.c=%-x86.exe) $(UTILSRC:%.c=%-x64.exe)
+UTILEXE = inject-x86.exe inject-x64.exe helloworld-x86.dll helloworld-x64.dll
 
 default: $(UTILEXE)
 
@@ -12,6 +12,12 @@ inject-x86.exe: inject.c
 
 inject-x64.exe: inject.c
 	$(CC64) -o $@ $^ $(CFLAGS) $(LDFLAGS) ../src/assembly.c -I ../inc
+
+helloworld-x86.dll: helloworld.c
+	$(CC32) -o $@ $^ $(CFLAGS) $(LDFLAGS) -shared
+
+helloworld-x64.dll: helloworld.c
+	$(CC64) -o $@ $^ $(CFLAGS) $(LDFLAGS) -shared
 
 clean:
 	rm -f $(UTILEXE)
