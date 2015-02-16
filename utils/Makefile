@@ -8,10 +8,10 @@ UTILEXE = $(UTILSRC:%.c=%-x86.exe) $(UTILSRC:%.c=%-x64.exe)
 default: $(UTILEXE)
 
 inject-x86.exe: inject.c
-	$(CC32) -o $@ $^ $(CFLAGS) $(LDFLAGS) ../src/assembly.c
+	$(CC32) -o $@ $^ $(CFLAGS) $(LDFLAGS) ../src/assembly.c -I ../inc
 
 inject-x64.exe: inject.c
-	$(CC64) -o $@ $^ $(CFLAGS) $(LDFLAGS) ../src/assembly.c
+	$(CC64) -o $@ $^ $(CFLAGS) $(LDFLAGS) ../src/assembly.c -I ../inc
 
 clean:
 	rm -f $(UTILEXE)

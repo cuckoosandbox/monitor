@@ -17,14 +17,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
+#include <inttypes.h>
 #include <windows.h>
+#include <tlhelp32.h>
 #include "../inc/assembly.h"
 
 #define INJECT_NONE 0
 #define INJECT_CRT  1
 #define INJECT_APC  2
 
-#define DPRINT(fmt, ...) if(verbose != 0) fprintf(stderr, fmt, #__VA_ARGS__)
+#define DPRINTF(fmt, ...) if(verbose != 0) fprintf(stderr, fmt, #__VA_ARGS__)
 
 static int verbose = 0;
 
@@ -54,7 +56,7 @@ HANDLE open_process(uintptr_t pid)
 HANDLE open_thread(uintptr_t tid)
 {
     HANDLE thread_handle = OpenThread(THREAD_ALL_ACCESS, FALSE, tid);
-    if(process_handle == NULL) {
+    if(thread_handle == NULL) {
         fprintf(stderr, "[-] Error getting access to thread: %ld!\n",
             GetLastError());
         exit(1);
@@ -123,7 +125,7 @@ uintptr_t create_thread_and_wait(uintptr_t pid, void *addr, void *arg)
 
     WaitForSingleObject(thread_handle, INFINITE);
 
-    INT32 exit_code;
+    DWORD exit_code;
     GetExitCodeThread(thread_handle, &exit_code);
 
     CloseHandle(thread_handle);
@@ -158,7 +160,7 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
         temp_addr = write_data(from, temp_dir, strlen(temp_dir) + 1);
     }
 
-    char shellcode[512]; char *ptr = shellcode;
+    uint8_t shellcode[512]; uint8_t *ptr = shellcode;
 
     ptr += asm_pushv(ptr, pi_addr);
     ptr += asm_pushv(ptr, si_addr);
@@ -232,10 +234,11 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
 void load_dll_crt(uintptr_t pid, const char *dll_path)
 {
     FARPROC load_library_a = resolve_symbol("kernel32", "LoadLibraryA");
+    FARPROC get_last_error = resolve_symbol("kernel32", "GetLastError");
 
     void *dll_addr = write_data(pid, dll_path, strlen(dll_path) + 1);
 
-    char shellcode[128]; char *ptr = shellcode;
+    uint8_t shellcode[128]; uint8_t *ptr = shellcode;
 
     ptr += asm_pushv(ptr, dll_addr);
     ptr += asm_call(ptr, load_library_a);
@@ -252,7 +255,7 @@ void load_dll_crt(uintptr_t pid, const char *dll_path)
         exit(1);
     }
 
-    free_data(dll_addr);
+    free_data(pid, dll_addr, strlen(dll_path) + 1);
 }
 
 void load_dll_apc(uintptr_t pid, uintptr_t tid, const char *dll_path)
@@ -293,19 +296,16 @@ void grant_debug_privileges(uintptr_t pid)
     }
 
     LUID original_luid;
-    if(LookupPrivilegeValue(NULL, "SeDebugPrivilege", &original_luid) == 0) {
+    if(LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &original_luid) == 0) {
         fprintf(stderr, "[-] Error obtaining original luid: %ld\n",
             GetLastError());
         exit(1);
     }
 
-    LUID_AND_ATTRIBUTES luid_attr;
-    luid_attr.Luid = original_luid;
-    luid_attr.Attributes = SE_PRIVILEGE_ENABLED;
-
     TOKEN_PRIVILEGES token_privileges;
     token_privileges.PrivilegeCount = 1;
-    token_privileges.Privileges = &luid_attr;
+    token_privileges.Privileges[0].Luid = original_luid;
+    token_privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
     if(AdjustTokenPrivileges(token_handle, FALSE, &token_privileges, 0, NULL,
             NULL) == 0) {
@@ -322,13 +322,14 @@ uintptr_t pid_from_process_name(const char *process_name)
 {
     PROCESSENTRY32 row; HANDLE snapshot_handle;
 
-    snapshot_handle = CreateToolhelp32Snapshot(0, 0);
-    if(snapshot_handle == NULL) {
+    snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if(snapshot_handle == INVALID_HANDLE_VALUE) {
         fprintf(stderr, "[-] Error obtaining snapshot handle: %ld\n",
             GetLastError());
         exit(1);
     }
 
+    row.dwSize = sizeof(row);
     if(Process32First(snapshot_handle, &row) == FALSE) {
         fprintf(stderr, "[-] Error enumerating the first process: %ld\n",
             GetLastError());
@@ -365,12 +366,14 @@ int main(int argc, char *argv[])
             "Inject from another process, resolves pid\n");
         printf("  --config <path>        "
             "Configuration file for the monitor\n");
+        printf("  --dbg <path>           "
+            "Attach debugger to target process\n");
         printf("  --verbose              Verbose switch\n");
         return 1;
     }
 
     const char *dll_path = NULL, *app_path = NULL, *cmd_line = NULL;
-    const char *config_file = NULL, *from_process = NULL;
+    const char *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
     uintptr_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
 
     for (int idx = 1; idx < argc; idx++) {
@@ -421,6 +424,11 @@ int main(int argc, char *argv[])
 
         if(strcmp(argv[idx], "--config") == 0) {
             config_file = argv[++idx];
+            continue;
+        }
+
+        if(strcmp(argv[idx], "--dbg") == 0) {
+            dbg_path = argv[++idx];
             continue;
         }
 
