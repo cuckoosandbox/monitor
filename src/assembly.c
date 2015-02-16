@@ -100,19 +100,16 @@ int asm_call(uint8_t *stub, const void *addr)
 {
     uint8_t *base = stub;
 
-    // We push the return address onto the stack and then jump into the target
-    // address. This way both 32-bit and 64-bit are supported at once. The
-    // return address is 8-byte aligned as required in 64-bit mode.
-    uint8_t *return_address = stub + ASM_PUSH_SIZE + ASM_JUMP_SIZE;
-    return_address += 8 - ((uintptr_t) return_address & 7);
+#if __x86_64__
+    stub += asm_move_regimmv(stub, R_RAX, addr);
+#else
+    stub += asm_move_regimmv(stub, R_EAX, addr);
+#endif
 
-    stub += asm_pushv(stub, return_address);
-    stub += asm_jump(stub, addr);
+    *stub++ = 0xff;
+    *stub++ = 0xd0;
 
-    // Pad with a couple of int3's.
-    memset(stub, 0xcc, return_address - stub);
-
-    return return_address - base;
+    return stub - base;
 }
 
 int asm_return(uint8_t *stub, uint16_t value)
