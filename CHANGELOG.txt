@@ -1,3 +1,6 @@
+- Rewrite: Completely rewritten inject.c (was dllinject.c) to be used for
+  injection by Cuckoo. Supports process creation from within another process
+  and various other nifty tricks.
 - New: Logic for ignoring function calls referencing ignored object handles.
 - Tweak: Place hook after the "mov eax, imm32" instruction for hooked system
   call wrappers (i.e., functions starting with Nt).

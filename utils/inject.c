@@ -192,6 +192,7 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
 
     free_data(from, pi_addr, sizeof(pi));
     free_data(from, si_addr, sizeof(si));
+    free_data(from, temp_addr, strlen(temp_dir) + 1);
     free_data(from, cmd_addr, strlen(cmd_line) + 1);
     free_data(from, path_addr, strlen(path) + 1);
     free_data(from, shellcode_addr, ptr - shellcode);
