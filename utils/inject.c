@@ -167,12 +167,17 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
     ptr += asm_push(ptr, CREATE_NEW_CONSOLE | CREATE_SUSPENDED);
     ptr += asm_push(ptr, TRUE);
 
-    // TODO In 64-bit mode the first four arguments probably have to go into
-    // rcx, rdx, r8, and r9.
+#if __x86_64__
+    ptr += asm_move_regimmv(ptr, R_R9, NULL);
+    ptr += asm_move_regimmv(ptr, R_R8, NULL);
+    ptr += asm_move_regimmv(ptr, R_RDX, cmd_addr);
+    ptr += asm_move_regimmv(ptr, R_RCX, path_addr);
+#else
     ptr += asm_pushv(ptr, NULL);
     ptr += asm_pushv(ptr, NULL);
     ptr += asm_pushv(ptr, cmd_addr);
     ptr += asm_pushv(ptr, path_addr);
+#endif
 
     ptr += asm_call(ptr, create_process_a);
 
@@ -198,11 +203,20 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
     free_data(from, shellcode_addr, ptr - shellcode);
 
     ptr = shellcode;
-    // TODO In 64-bit mode we'll probably have to use rcx instead
-    // of the stack.
+
+#if __x86_64__
+    ptr += asm_move_regimmv(ptr, R_RCX, pi.hThread);
+#else
     ptr += asm_pushv(ptr, pi.hThread);
+#endif
     ptr += asm_call(ptr, close_handle);
+
+#if __x86_64__
+    ptr += asm_move_regimmv(ptr, R_RCX, pi.hProcess);
+#else
     ptr += asm_pushv(ptr, pi.hProcess);
+#endif
+
     ptr += asm_call(ptr, close_handle);
     ptr += asm_return(ptr, 4);
 

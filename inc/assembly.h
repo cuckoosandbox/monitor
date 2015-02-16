@@ -22,21 +22,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 
 #if __x86_64__
+
+#define ASM_MOVE_REGIMM_SIZE (ASM_PUSH_SIZE+2)
 #define ASM_PUSH_SIZE 13
 #define ASM_JUMP_SIZE 14
+
+typedef enum _register_t {
+    R_RAX, R_RCX, R_RDX, R_RBX, R_ESP, R_EBP, R_RSI, R_RDI,
+    R_R8,  R_R9,  R_R10, R_R11, R_R12, R_R13, R_R14, R_R15,
+} register_t;
+
 #else
+
+#define ASM_MOVE_REGIMM_SIZE 5
 #define ASM_PUSH_SIZE 5
 #define ASM_JUMP_SIZE 6
+
+typedef enum _register_t {
+    R_EAX, R_ECX, R_EDX, R_EBX, R_ESP, R_EBP, R_ESI, R_EDI,
+} register_t;
+
 #endif
 
 #define ASM_JUMP_32BIT_SIZE 5
 #define ASM_RETURN 1
 
+int asm_move_regimm(uint8_t *stub, register_t reg, uintptr_t value);
 int asm_push(uint8_t *stub, uintptr_t value);
 int asm_jump_32bit(uint8_t *stub, void *addr);
 int asm_jump(uint8_t *stub, void *addr);
 int asm_call(uint8_t *stub, void *addr);
 int asm_return(uint8_t *stub, uint16_t value);
+
+static inline int asm_move_regimmv(uint8_t *stub, register_t reg, void *value)
+{
+    return asm_move_regimm(stub, reg, (uintptr_t) value);
+}
 
 static inline int asm_pushv(uint8_t *stub, void *value)
 {

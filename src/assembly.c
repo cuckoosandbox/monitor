@@ -22,6 +22,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #if __x86_64__
 
+int asm_move_regimm(uint8_t *stub, register_t reg, uintptr_t value)
+{
+    uint8_t *base = stub;
+
+    stub += asm_push(stub, value);
+
+    if(reg >= R_R8) {
+        *stub++ = 0x41;
+        *stub++ = 0x58 + (reg - R_R8);
+    }
+    else {
+        *stub++ = 0x58 + reg;
+        *stub++ = 0x90;
+    }
+
+    return stub - base;
+}
+
 int asm_push(uint8_t *stub, uintptr_t value)
 {
     // Push the lower 32-bits of the value onto the stack. The 32-bit
@@ -40,6 +58,15 @@ int asm_push(uint8_t *stub, uintptr_t value)
 }
 
 #else
+
+int asm_move_regimm(uint8_t *stub, register_t reg, uintptr_t value)
+{
+    uint8_t *base = stub;
+
+    *stub = 0xb8 + reg;
+    *(uintptr_t *)(stub + 1) = value;
+    return 5;
+}
 
 int asm_push(uint8_t *stub, uintptr_t value)
 {
