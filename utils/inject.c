@@ -464,13 +464,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if(from_process != NULL) {
-        from = pid_from_process_name(from_process);
-    }
-
     grant_debug_privileges(GetCurrentProcessId());
 
     if(app_path != NULL) {
+        // If a process name has been provided as source process, then find
+        // its process identifier (or first, if multiple).
+        if(from_process != NULL) {
+            from = pid_from_process_name(from_process);
+        }
+
         // If no source process has been specified, then we use our
         // own process.
         if(from == 0) {
