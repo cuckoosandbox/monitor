@@ -455,7 +455,13 @@ int main(int argc, char *argv[])
 
     OFSTRUCT of; memset(&of, 0, sizeof(of)); of.cBytes = sizeof(of);
     if(OpenFile(dll_path, &of, OF_EXIST) == HFILE_ERROR) {
-        fprintf(stderr, "[-] DLL file does not exist!\n");
+        fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
+        return 1;
+    }
+
+    char dllpath[MAX_PATH];
+    if(GetFullPathName(dll_path, MAX_PATH, dllpath, NULL) == 0) {
+        fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
         return 1;
     }
 
@@ -480,12 +486,25 @@ int main(int argc, char *argv[])
             from = GetCurrentProcessId();
         }
 
-        if(cmd_line == NULL) {
-            DPRINTF("[x] No cmdline provided, using app path.\n");
-            cmd_line = app_path;
+        if(OpenFile(app_path, &of, OF_EXIST) == HFILE_ERROR) {
+            fprintf(stderr, "[-] Invalid app filepath has been provided\n");
+            return 1;
         }
 
-        pid = start_app(from, app_path, cmd_line, &tid);
+        // Get the full path as the other process probably doesn't have the same
+        // working directory.
+        char filepath[MAX_PATH];
+        if(GetFullPathName(app_path, MAX_PATH, filepath, NULL) == 0) {
+            fprintf(stderr, "[-] Invalid app filepath has been provided\n");
+            return 1;
+        }
+
+        if(cmd_line == NULL) {
+            DPRINTF("[x] No cmdline provided, using app path.\n");
+            cmd_line = filepath;
+        }
+
+        pid = start_app(from, filepath, cmd_line, &tid);
     }
 
     // Drop the configuration file if available.
@@ -502,11 +521,11 @@ int main(int argc, char *argv[])
 
     switch (inj_mode) {
     case INJECT_CRT:
-        load_dll_crt(pid, dll_path);
+        load_dll_crt(pid, dllpath);
         break;
 
     case INJECT_APC:
-        load_dll_apc(pid, tid, dll_path);
+        load_dll_apc(pid, tid, dllpath);
         break;
 
     default:
