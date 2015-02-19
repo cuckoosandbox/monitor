@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define INJECT_NONE 0
 #define INJECT_CRT  1
 #define INJECT_APC  2
+#define INJECT_FREE 3
 
 #define DPRINTF(fmt, ...) if(verbose != 0) fprintf(stderr, fmt, ##__VA_ARGS__)
 
@@ -387,6 +388,11 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        if(strcmp(argv[idx], "--free") == 0) {
+            inj_mode = INJECT_FREE;
+            continue;
+        }
+
         if(strcmp(argv[idx], "--dll") == 0) {
             dll_path = argv[++idx];
             continue;
@@ -436,6 +442,9 @@ int main(int argc, char *argv[])
             verbose = 1;
             continue;
         }
+
+        fprintf(stderr, "[-] Found unsupported argument: %s\n", argv[idx]);
+        return 1;
     }
 
     if(inj_mode == INJECT_NONE) {
@@ -453,16 +462,32 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    OFSTRUCT of; memset(&of, 0, sizeof(of)); of.cBytes = sizeof(of);
-    if(OpenFile(dll_path, &of, OF_EXIST) == HFILE_ERROR) {
-        fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
+    if(inj_mode == INJECT_FREE && app_path == NULL) {
+        fprintf(stderr, "[-] An app path is required when not injecting!\n");
         return 1;
     }
 
+    OFSTRUCT of; memset(&of, 0, sizeof(of)); of.cBytes = sizeof(of);
     char dllpath[MAX_PATH];
-    if(GetFullPathName(dll_path, MAX_PATH, dllpath, NULL) == 0) {
-        fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
-        return 1;
+
+    if(inj_mode == INJECT_FREE) {
+        if(dll_path != NULL || tid != 0 || pid != 0) {
+            fprintf(stderr,
+                "[-] Unused --tid/--pid/--dll provided in --free mode!\n");
+            return 1;
+        }
+    }
+
+    if(inj_mode != INJECT_FREE) {
+        if(OpenFile(dll_path, &of, OF_EXIST) == HFILE_ERROR) {
+            fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
+            return 1;
+        }
+
+        if(GetFullPathName(dll_path, MAX_PATH, dllpath, NULL) == 0) {
+            fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
+            return 1;
+        }
     }
 
     if(from != 0 && from_process != NULL) {
@@ -526,6 +551,9 @@ int main(int argc, char *argv[])
 
     case INJECT_APC:
         load_dll_apc(pid, tid, dllpath);
+        break;
+
+    case INJECT_FREE:
         break;
 
     default:
