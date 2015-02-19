@@ -387,8 +387,8 @@ Ensure::
 
 Middle::
 
-    uint8_t *buf = wsabuf_get_buffer(dwBufferCount, lpBuffers,
-        *lpNumberOfBytesRecvd);
+    uint8_t *buf = wsabuf_get_buffer(dwBufferCount,
+        lpBuffers, *lpNumberOfBytesRecvd);
 
 Logging::
 
@@ -428,8 +428,8 @@ Middle::
     const char *ip = NULL; int port = 0;
     get_ip_port(lpFrom, &ip, &port);
 
-    uint8_t *buf = wsabuf_get_buffer(dwBufferCount, lpBuffers,
-        *lpNumberOfBytesRecvd);
+    uint8_t *buf = wsabuf_get_buffer(dwBufferCount,
+        lpBuffers, *lpNumberOfBytesRecvd);
 
 Logging::
 
@@ -466,8 +466,8 @@ Ensure::
 
 Middle::
 
-    uint8_t *buf = wsabuf_get_buffer(dwBufferCount, lpBuffers,
-        *lpNumberOfBytesSent);
+    uint8_t *buf = wsabuf_get_buffer(dwBufferCount,
+        lpBuffers, *lpNumberOfBytesSent);
 
 Logging::
 
@@ -509,8 +509,8 @@ Pre::
 
 Middle::
 
-    uint8_t *buf = wsabuf_get_buffer(dwBufferCount, lpBuffers,
-        *lpNumberOfBytesSent);
+    uint8_t *buf = wsabuf_get_buffer(dwBufferCount,
+        lpBuffers, *lpNumberOfBytesSent);
 
 Logging::
 
