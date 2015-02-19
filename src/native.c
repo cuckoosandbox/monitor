@@ -34,8 +34,8 @@ static HANDLE g_current_process;
 static uintptr_t g_current_process_id;
 static HANDLE g_current_thread;
 
-static uint32_t g_win32_error_offset;
-static uint32_t g_nt_status_offset;
+static int32_t g_win32_error_offset;
+static int32_t g_nt_status_offset;
 
 static NTSTATUS (WINAPI *pNtQueryVirtualMemory)(HANDLE ProcessHandle,
     CONST VOID *BaseAddress, ULONG MemoryInformationClass,
@@ -174,11 +174,19 @@ int native_init()
 
     g_win32_error_offset = _native_fetch_mov_eax_imm_offset(
         (const uint8_t *) pRtlGetLastWin32Error);
+    if(g_win32_error_offset < 0) {
+        pipe("CRITICAL:Unknown offset for Win32 Error!");
+        return -1;
+    }
 
     dpipe("INFO:Win32Error offset: 0x%x", g_win32_error_offset);
 
     g_nt_status_offset = _native_fetch_mov_eax_imm_offset(
         (const uint8_t *) pRtlGetLastNtStatus);
+    if(g_nt_status_offset < 0) {
+        pipe("CRITICAL:Unknown offset for NtStatus!");
+        return -1;
+    }
 
     dpipe("INFO:NtStatus   offset: 0x%x", g_nt_status_offset);
 

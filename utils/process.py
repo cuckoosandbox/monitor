@@ -506,11 +506,11 @@ class FlagsProcessor(object):
             return
 
         # Fetch all available flags.
-        for flag_file in os.listdir(self.flags_dirpath):
+        for flag_file in os.listdir(dirpath):
             if not flag_file.endswith('.rst'):
                 continue
 
-            flag_path = os.path.join(self.flags_dirpath, flag_file)
+            flag_path = os.path.join(dirpath, flag_file)
             for flag in self.normalize(dp.read_document(flag_path)):
                 self.flags[flag['name']] = flag
 
