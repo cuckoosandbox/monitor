@@ -339,3 +339,45 @@ Parameters::
 Flags::
 
     mode
+
+
+NtLoadDriver
+============
+
+Signature::
+
+    * Library: ntdll
+    * Return value: NTSTATUS
+
+Parameters::
+
+    *  PUNICODE_STRING DriverServiceName
+
+Pre::
+
+    wchar_t *driver_service_name = extract_unicode_string(DriverServiceName);
+
+Logging::
+
+    u driver_service_name driver_service_name
+
+
+NtUnloadDriver
+==============
+
+Signature::
+
+    * Library: ntdll
+    * Return value: NTSTATUS
+
+Parameters::
+
+    *  PUNICODE_STRING DriverServiceName
+
+Pre::
+
+    wchar_t *driver_service_name = extract_unicode_string(DriverServiceName);
+
+Logging::
+
+    u driver_service_name driver_service_name

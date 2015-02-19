@@ -268,7 +268,7 @@ wchar_t *extract_unicode_string(const UNICODE_STRING *unistr)
     wchar_t *ret = get_unicode_buffer();
 
     if(unistr != NULL && unistr->Buffer != NULL) {
-        memcpy(ret, unistr->Buffer, unistr->Length * sizeof(wchar_t));
+        memcpy(ret, unistr->Buffer, unistr->Length);
         ret[unistr->Length / sizeof(wchar_t)] = 0;
         return ret;
     }
