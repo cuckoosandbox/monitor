@@ -42,7 +42,7 @@ FARPROC resolve_symbol(const char *library, const char *funcname)
     return ret;
 }
 
-HANDLE open_process(uintptr_t pid)
+HANDLE open_process(uint32_t pid)
 {
     HANDLE process_handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
     if(process_handle == NULL) {
@@ -54,7 +54,7 @@ HANDLE open_process(uintptr_t pid)
     return process_handle;
 }
 
-HANDLE open_thread(uintptr_t tid)
+HANDLE open_thread(uint32_t tid)
 {
     HANDLE thread_handle = OpenThread(THREAD_ALL_ACCESS, FALSE, tid);
     if(thread_handle == NULL) {
@@ -66,7 +66,7 @@ HANDLE open_thread(uintptr_t tid)
     return thread_handle;
 }
 
-void read_data(uintptr_t pid, void *addr, void *data, uint32_t length)
+void read_data(uint32_t pid, void *addr, void *data, uint32_t length)
 {
     HANDLE process_handle = open_process(pid);
 
@@ -81,7 +81,7 @@ void read_data(uintptr_t pid, void *addr, void *data, uint32_t length)
     CloseHandle(process_handle);
 }
 
-void *write_data(uintptr_t pid, const void *data, uint32_t length)
+void *write_data(uint32_t pid, const void *data, uint32_t length)
 {
     HANDLE process_handle = open_process(pid);
 
@@ -105,14 +105,14 @@ void *write_data(uintptr_t pid, const void *data, uint32_t length)
     return addr;
 }
 
-void free_data(uintptr_t pid, void *addr, uint32_t length)
+void free_data(uint32_t pid, void *addr, uint32_t length)
 {
     HANDLE process_handle = open_process(pid);
     VirtualFreeEx(process_handle, addr, length, MEM_RELEASE);
     CloseHandle(process_handle);
 }
 
-uintptr_t create_thread_and_wait(uintptr_t pid, void *addr, void *arg)
+uint32_t create_thread_and_wait(uint32_t pid, void *addr, void *arg)
 {
     HANDLE process_handle = open_process(pid);
 
@@ -135,8 +135,8 @@ uintptr_t create_thread_and_wait(uintptr_t pid, void *addr, void *arg)
     return exit_code;
 }
 
-uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
-    uintptr_t *tid)
+uint32_t start_app(uint32_t from, const char *path, const char *cmd_line,
+    uint32_t *tid)
 {
     STARTUPINFO si; PROCESS_INFORMATION pi;
     memset(&pi, 0, sizeof(pi));
@@ -189,10 +189,9 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
 
     void *shellcode_addr = write_data(from, shellcode, ptr - shellcode);
 
-    uintptr_t last_error = create_thread_and_wait(from, shellcode_addr, NULL);
+    uint32_t last_error = create_thread_and_wait(from, shellcode_addr, NULL);
     if(last_error != 0) {
-        fprintf(stderr, "[-] Error launching process: %" PRIuPTR "\n",
-            last_error);
+        fprintf(stderr, "[-] Error launching process: %d\n", last_error);
         exit(1);
     }
 
@@ -232,7 +231,7 @@ uintptr_t start_app(uintptr_t from, const char *path, const char *cmd_line,
     return pi.dwProcessId;
 }
 
-void load_dll_crt(uintptr_t pid, const char *dll_path)
+void load_dll_crt(uint32_t pid, const char *dll_path)
 {
     FARPROC load_library_a = resolve_symbol("kernel32", "LoadLibraryA");
     FARPROC get_last_error = resolve_symbol("kernel32", "GetLastError");
@@ -249,17 +248,17 @@ void load_dll_crt(uintptr_t pid, const char *dll_path)
     void *shellcode_addr = write_data(pid, shellcode, ptr - shellcode);
 
     // Run LoadLibraryA(dll_path) in the target process.
-    uintptr_t last_error = create_thread_and_wait(pid, shellcode_addr, NULL);
+    uint32_t last_error = create_thread_and_wait(pid, shellcode_addr, NULL);
     if(last_error != 0) {
-        fprintf(stderr, "[-] Error loading monitor into process: %"
-            PRIuPTR "\n", last_error);
+        fprintf(stderr, "[-] Error loading monitor into process: %d\n",
+            last_error);
         exit(1);
     }
 
     free_data(pid, dll_addr, strlen(dll_path) + 1);
 }
 
-void load_dll_apc(uintptr_t pid, uintptr_t tid, const char *dll_path)
+void load_dll_apc(uint32_t pid, uint32_t tid, const char *dll_path)
 {
     HANDLE thread_handle = open_thread(tid);
     FARPROC load_library_a = resolve_symbol("kernel32", "LoadLibraryA");
@@ -278,14 +277,14 @@ void load_dll_apc(uintptr_t pid, uintptr_t tid, const char *dll_path)
     CloseHandle(thread_handle);
 }
 
-void resume_thread(uintptr_t tid)
+void resume_thread(uint32_t tid)
 {
     HANDLE thread_handle = open_thread(tid);
     ResumeThread(thread_handle);
     CloseHandle(thread_handle);
 }
 
-void grant_debug_privileges(uintptr_t pid)
+void grant_debug_privileges(uint32_t pid)
 {
     HANDLE token_handle, process_handle = open_process(pid);
 
@@ -319,7 +318,7 @@ void grant_debug_privileges(uintptr_t pid)
     CloseHandle(process_handle);
 }
 
-uintptr_t pid_from_process_name(const char *process_name)
+uint32_t pid_from_process_name(const char *process_name)
 {
     PROCESSENTRY32 row; HANDLE snapshot_handle;
 
@@ -375,7 +374,7 @@ int main(int argc, char *argv[])
 
     const char *dll_path = NULL, *app_path = NULL, *cmd_line = NULL;
     const char *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
-    uintptr_t pid = 0, tid = 0, from = 0; int inj_mode = INJECT_NONE;
+    uint32_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
 
     for (int idx = 1; idx < argc; idx++) {
         if(strcmp(argv[idx], "--crt") == 0) {
@@ -536,7 +535,7 @@ int main(int argc, char *argv[])
     if(config_file != NULL) {
         char filepath[MAX_PATH];
 
-        sprintf(filepath, "C:\\cuckoo_%" PRIuPTR ".ini", pid);
+        sprintf(filepath, "C:\\cuckoo_%d.ini", pid);
         if(MoveFile(config_file, filepath) == FALSE) {
             fprintf(stderr, "[-] Error dropping configuration file: %ld\n",
                 GetLastError());
@@ -565,7 +564,7 @@ int main(int argc, char *argv[])
 
     if(dbg_path != NULL) {
         char buf[1024];
-        sprintf(buf, "\"%s\" -p %" PRIuPTR, dbg_path, pid);
+        sprintf(buf, "\"%s\" -p %d", dbg_path, pid);
 
         start_app(GetCurrentProcessId(), dbg_path, buf, NULL);
 
@@ -577,6 +576,6 @@ int main(int argc, char *argv[])
     }
 
     // Report the process identifier.
-    printf("%" PRIuPTR, pid);
+    printf("%d", pid);
     return 0;
 }
