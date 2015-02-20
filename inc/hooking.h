@@ -40,7 +40,7 @@ typedef struct _hook_t {
     int32_t stub_used;
 } hook_t;
 
-void hook_init(HMODULE module_handle);
+void hook_init(HMODULE module_handle, int custom_allocator);
 
 int lde(const void *addr);
 

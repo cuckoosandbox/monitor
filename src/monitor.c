@@ -45,9 +45,17 @@ void monitor_init(HMODULE module_handle)
 
     // Required to be initialized before any logging starts.
     mem_init();
-    hook_init(module_handle);
+
+    // Initialize capstone without our custom allocator as it is
+    // not available yet.
+    hook_init(module_handle, 0);
+
     pipe_init(cfg.pipe_name);
     native_init();
+
+    // Re-initialize capstone with our custom allocator which is now
+    // accessible after native_init().
+    hook_init(module_handle, 1);
 
     misc_init(cfg.shutdown_mutex);
     dropped_init();
