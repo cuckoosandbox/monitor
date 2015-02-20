@@ -381,3 +381,63 @@ Pre::
 Logging::
 
     u driver_service_name driver_service_name
+
+
+GetAsyncKeyState
+================
+
+Signature::
+
+    * Is success: 1
+    * Library: user32
+    * Return value: SHORT
+
+Parameters::
+
+    ** int vKey key_code
+
+
+SendNotifyMessageA
+==================
+
+Signature::
+
+    * Library: user32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HWND hWnd window_handle
+    ** UINT uMsg message
+    *  WPARAM wParam
+    *  LPARAM lParam
+
+Pre::
+
+    uint32_t pid, tid;
+
+    tid = GetWindowThreadProcessId(hWnd, &pid);
+    pipe("PROCESS2:%d,%d", pid, tid);
+
+
+SendNotifyMessageW
+==================
+
+Signature::
+
+    * Library: user32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HWND hWnd window_handle
+    ** UINT uMsg message
+    *  WPARAM wParam
+    *  LPARAM lParam
+
+Pre::
+
+    uint32_t pid, tid;
+
+    tid = GetWindowThreadProcessId(hWnd, &pid);
+    pipe("PROCESS2:%d,%d", pid, tid);
