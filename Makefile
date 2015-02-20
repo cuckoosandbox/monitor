@@ -54,16 +54,22 @@ objects/:
 	mkdir -p objects/x86/code/ objects/x64/code/
 	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
 
-# If there's a way to do this while only calling Python once, let me know!
-$(HOOKSRC) $(FLAGSRC): $(SIGS) $(JINJA2) $(HOOKREQ)
+$(HOOKSRC): $(SIGS) $(JINJA2) $(HOOKREQ)
 	python utils/process.py data/ objects/code/ sigs/ flags/
 
-$(LIBCAPSTONE32) $(LIBCAPSTONE64):
+$(FLAGSRC): $(HOOKSRC)
+
+src/capstone/config.mk:
 	git submodule update --init
 	cp data/capstone-config.mk src/capstone/config.mk
+
+$(LIBCAPSTONE32): src/capstone/config.mk
 	cd src/capstone/ && \
 	BUILDDIR=../../objects/x86/capstone/ ./make.sh cross-win32 && \
-	cp ../../objects/x86/capstone/capstone.lib capstone-x86.lib && \
+	cp ../../objects/x86/capstone/capstone.lib capstone-x86.lib
+
+$(LIBCAPSTONE64): src/capstone/config.mk
+	cd src/capstone/ && \
 	BUILDDIR=../../objects/x64/capstone/ ./make.sh cross-win64 && \
 	cp ../../objects/x64/capstone/capstone.lib capstone-x64.lib
 
