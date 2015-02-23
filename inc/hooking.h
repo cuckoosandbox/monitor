@@ -26,18 +26,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RETADDRCNT 64
 
 typedef struct _hook_t {
+    // Library and function name.
     const char *library;
     const char *funcname;
+
+    // Hook handler.
     FARPROC handler;
+
+    // Callback to the original function.
     FARPROC *orig;
+
+    // Is this a "special" hook?
     int special;
+
+    // Minimum required OS version for this function to exist.
     os_version_t minimum_os;
 
+    // Address of the hooked function.
     uint8_t *addr;
+
+    // Amount of bytes to skip before placing the hook. I.e., hook
+    // at addr+skip instead of addr.
+    uint32_t skip;
+
+    // Total size used to create our stub off.
+    int32_t stub_used;
+
+    // Is this function already hooked?
     uint32_t is_hooked;
 
+    // Stub for calling the original function.
     uint8_t *func_stub;
-    int32_t stub_used;
 } hook_t;
 
 void hook_init(HMODULE module_handle, int custom_allocator);

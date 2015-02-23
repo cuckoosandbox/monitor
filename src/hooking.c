@@ -370,7 +370,7 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 
 #define MAXRESOLVECNT 50
 
-static uint8_t *_hook_determine_start(const char *funcname, uint8_t *addr)
+static int _hook_determine_start(hook_t *h, uint8_t *addr)
 {
     // Under Windows 7 some functions have been replaced by a function stub
     // which in turn calls the original function. E.g., a lot of functions
@@ -383,14 +383,14 @@ static uint8_t *_hook_determine_start(const char *funcname, uint8_t *addr)
     for (count = 0; count < MAXRESOLVECNT; count++) {
         // jmp short imm8
         if(*addr == 0xeb) {
-            unhook_detect_add_region(funcname, addr, addr, addr, 2);
-            addr = addr + 2 + *(signed char *)(addr + 1);
+            unhook_detect_add_region(h->funcname, addr, addr, addr, 2);
+            addr = addr + 2 + *(int8_t *)(addr + 1);
             continue;
         }
 
         // jmp dword [addr]
         if(*addr == 0xff && addr[1] == 0x25) {
-            unhook_detect_add_region(funcname, addr, addr, addr, 6);
+            unhook_detect_add_region(h->funcname, addr, addr, addr, 6);
 
 #if __x86_64__
             addr += *(uint32_t *)(addr + 2) + 6;
@@ -398,15 +398,15 @@ static uint8_t *_hook_determine_start(const char *funcname, uint8_t *addr)
             addr = *(uint8_t **)(addr + 2);
 #endif
 
-            unhook_detect_add_region(funcname, addr, addr, addr, 4);
+            unhook_detect_add_region(h->funcname, addr, addr, addr, 4);
             addr = *(uint8_t **) addr;
             continue;
         }
 
         // mov edi, edi ; push ebp ; mov ebp, esp ; pop ebp ; jmp short imm8
         if(memcmp(addr, "\x8b\xff\x55\x8b\xec\x5d\xeb", 7) == 0) {
-            unhook_detect_add_region(funcname, addr, addr, addr, 8);
-            addr = addr + 8 + *(signed char *)(addr + 7);
+            unhook_detect_add_region(h->funcname, addr, addr, addr, 8);
+            addr = addr + 8 + *(int8_t *)(addr + 7);
             continue;
         }
 
@@ -418,14 +418,16 @@ static uint8_t *_hook_determine_start(const char *funcname, uint8_t *addr)
         return -1;
     }
 
+    h->addr = addr;
+
     // If this function is a system call wrapper (and thus its first
     // instruction resembles "mov eax, imm32"), then skip the first
     // instruction.
-    if(memcmp(funcname, "Nt", 2) == 0 && *addr == 0xb8) {
-        addr += 5;
+    if(memcmp(h->funcname, "Nt", 2) == 0 && *addr == 0xb8) {
+        h->skip += 5;
     }
 
-    return addr;
+    return 0;
 }
 
 int hook(hook_t *h)
@@ -444,7 +446,11 @@ int hook(hook_t *h)
         return -1;
     }
 
-    h->addr = _hook_determine_start(h->funcname, (uint8_t *) addr);
+    if(_hook_determine_start(h, (uint8_t *) addr) < 0) {
+        pipe("CRITICAL:Error determining start of function %z!%z.",
+            h->library, h->funcname);
+        return -1;
+    }
 
     static uint8_t *func_stubs = NULL;
 
@@ -467,8 +473,8 @@ int hook(hook_t *h)
     *h->orig = (FARPROC) h->func_stub;
 
     // Create the original function stub.
-    h->stub_used =
-        hook_create_stub(h->func_stub, h->addr, ASM_JUMP_32BIT_SIZE);
+    h->stub_used = hook_create_stub(h->func_stub,
+        h->addr, ASM_JUMP_32BIT_SIZE + h->skip);
     if(h->stub_used < 0) {
         pipe("CRITICAL:Error creating function stub for %z!%z.",
             h->library, h->funcname);
@@ -479,8 +485,8 @@ int hook(hook_t *h)
     memcpy(region_original, h->addr, h->stub_used);
 
     // Patch the original function.
-    if(hook_create_jump(h->addr, (const uint8_t *) h->handler,
-            h->stub_used) < 0) {
+    if(hook_create_jump(h->addr + h->skip, (const uint8_t *) h->handler,
+            h->stub_used - h->skip) < 0) {
         pipe("CRITICAL:Error creating function jump for %z!%z.",
             h->library, h->funcname);
         return -1;
