@@ -160,6 +160,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endif %}
 
     {%- if hook.prelog: %}
+
     uint32_t prelen = {{ hook.prelog.length }};
     uint8_t *prebuf = memdup({{ hook.prelog.buffer }}, prelen);
     {%- endif %}

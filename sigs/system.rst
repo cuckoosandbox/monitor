@@ -414,8 +414,9 @@ Parameters::
 
 Pre::
 
-    uint32_t pid, tid;
+    unsigned long pid, tid;
 
+    // TODO Will this still happen before the notify message is executed?
     tid = GetWindowThreadProcessId(hWnd, &pid);
     pipe("PROCESS2:%d,%d", pid, tid);
 
@@ -437,7 +438,8 @@ Parameters::
 
 Pre::
 
-    uint32_t pid, tid;
+    unsigned long pid, tid;
 
+    // TODO Will this still happen before the notify message is executed?
     tid = GetWindowThreadProcessId(hWnd, &pid);
     pipe("PROCESS2:%d,%d", pid, tid);
