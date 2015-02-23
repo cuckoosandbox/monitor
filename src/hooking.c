@@ -368,6 +368,8 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 
 #endif
 
+#define MAXRESOLVECNT 50
+
 static uint8_t *_hook_determine_start(const char *funcname, uint8_t *addr)
 {
     // Under Windows 7 some functions have been replaced by a function stub
@@ -376,8 +378,9 @@ static uint8_t *_hook_determine_start(const char *funcname, uint8_t *addr)
     // kernelbase.dll before reaching kernel32.dll.
     // We follow these jumps and add the regions to the list for unhook
     // detection.
+    uint32_t count;
 
-    while (1) {
+    for (count = 0; count < MAXRESOLVECNT; count++) {
         // jmp short imm8
         if(*addr == 0xeb) {
             unhook_detect_add_region(funcname, addr, addr, addr, 2);
@@ -408,6 +411,11 @@ static uint8_t *_hook_determine_start(const char *funcname, uint8_t *addr)
         }
 
         break;
+    }
+
+    // To make sure we don't enter an infinite loop.
+    if(count == MAXRESOLVECNT) {
+        return -1;
     }
 
     // If this function is a system call wrapper (and thus its first
