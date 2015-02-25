@@ -527,6 +527,7 @@ static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
 
 #define ProcessBasicInformation 0
 #define ThreadBasicInformation 0
+#define UNW_FLAG_NHANDLER 0
 
 #define MAX_PATH_W 0x7fff
 

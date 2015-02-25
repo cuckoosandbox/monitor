@@ -94,20 +94,14 @@ void hook_init(HMODULE module_handle, int custom_allocator)
 
 int hook_in_monitor()
 {
-    uintptr_t return_addresses[RETADDRCNT], return_address_count;
+    uintptr_t addrs[RETADDRCNT], count;
 
-#if __x86_64__
-    return_address_count = 0;
-#else
-    return_address_count =
-        stacktrace(get_ebp(), return_addresses, RETADDRCNT);
-#endif
+    count = stacktrace(NULL, addrs, RETADDRCNT, 0);
 
     // If an address that lies within the monitor DLL is found in the
     // stacktrace then we consider this call not interesting.
-    for (uint32_t idx = 2; idx < return_address_count; idx++) {
-        if(return_addresses[idx] >= g_monitor_start &&
-                return_addresses[idx] < g_monitor_end) {
+    for (uint32_t idx = 3; idx < count; idx++) {
+        if(addrs[idx] >= g_monitor_start && addrs[idx] < g_monitor_end) {
             return 1;
         }
     }

@@ -23,7 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "flags.h"
 #include "ntapi.h"
 
-void misc_init(const char *shutdown_mutex);
+// Ignore the first entries which lay within the monitor address space.
+#define STACKTRACE_NOSTARTINMONITOR 1
+
+void misc_init(HMODULE module_handle, const char *shutdown_mutex);
 
 wchar_t *get_unicode_buffer();
 
@@ -77,7 +80,8 @@ int is_shutting_down();
 void library_from_unicode_string(const UNICODE_STRING *us,
     char *library, int32_t length);
 
-int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length);
+int stacktrace(CONTEXT *ctx, uintptr_t *addrs,
+    uint32_t length, uint32_t flags);
 
 void *memdup(const void *addr, uint32_t length);
 wchar_t *wcsdup(const wchar_t *s);

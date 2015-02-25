@@ -36,6 +36,9 @@ static char g_shutdown_mutex[MAX_PATH];
 static uint32_t g_tls_unicode_buffers;
 static uint32_t g_tls_unicode_buffer_index;
 
+static uintptr_t g_monitor_start;
+static uintptr_t g_monitor_end;
+
 #define HKCU_PREFIX L"\\REGISTRY\\USER\\S-1-5-"
 #define HKLM_PREFIX L"\\REGISTRY\\MACHINE"
 
@@ -59,8 +62,12 @@ static uint32_t g_alias_index;
     wcscpy(g_aliases[g_alias_index][1], after); \
     g_alias_index++;
 
-void misc_init(const char *shutdown_mutex)
+void misc_init(HMODULE module_handle, const char *shutdown_mutex)
 {
+    g_monitor_start = (uintptr_t) module_handle;
+    g_monitor_end = g_monitor_start +
+        module_image_size((const uint8_t *) module_handle);
+
     HMODULE mod = GetModuleHandle("ntdll");
 
     *(FARPROC *) &pRtlAddVectoredExceptionHandler =
@@ -836,16 +843,74 @@ void library_from_unicode_string(const UNICODE_STRING *us,
     }
 }
 
-#if !__x86_64__
+#if __x86_64__
 
-int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length)
+int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length,
+    uint32_t flags)
+{
+    uint32_t count = 0; uintptr_t image_base, establisher_frame;
+    RUNTIME_FUNCTION *runtime_function; void *handler_data; CONTEXT _ctx;
+
+    if(ctx == NULL) {
+        ctx = &_ctx;
+        RtlCaptureContext(&_ctx);
+    }
+
+    while (count < length && ctx->Rip != 0) {
+        uintptr_t addr = ctx->Rip;
+
+        if(addr >= g_monitor_start && addr < g_monitor_end) {
+            if((flags & STACKTRACE_NOSTARTINMONITOR) == 0) {
+                addrs[count++] = addr;
+            }
+        }
+        else {
+            flags &= ~STACKTRACE_NOSTARTINMONITOR;
+            addrs[count++] = addr;
+        }
+
+        runtime_function =
+            RtlLookupFunctionEntry(ctx->Rip, &image_base, NULL);
+        if(runtime_function == NULL) {
+            ctx->Rip = *(uintptr_t *) ctx->Rsp;
+            ctx->Rsp += 8;
+        }
+        else {
+            RtlVirtualUnwind(UNW_FLAG_NHANDLER, image_base, ctx->Rip,
+                runtime_function, ctx, &handler_data, &establisher_frame,
+                NULL);
+        }
+    }
+
+    return count;
+}
+
+#else
+
+int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length,
+    uint32_t flags)
 {
     uint32_t top = readtls(0x04) - 2 * sizeof(uint32_t);
     uint32_t bottom = readtls(0x08);
+    uint32_t count = 0, ebp = get_ebp();
 
-    int count = 0;
-    for (; ebp >= bottom && ebp < top && length != 0; count++, length--) {
-        addrs[count] = *(uint32_t *)(ebp + 4);
+    if(ctx != NULL) {
+        ebp = ctx->Ebp;
+    }
+
+    while (count < length && ebp >= bottom && ebp < top) {
+        uintptr_t addr = *(uint32_t *)(ebp + 4);
+
+        if(addr >= g_monitor_start && addr < g_monitor_end) {
+            if((flags & STACKTRACE_NOSTARTINMONITOR) == 0) {
+                addrs[count++] = addr;
+            }
+        }
+        else {
+            flags &= ~STACKTRACE_NOSTARTINMONITOR;
+            addrs[count++] = addr;
+        }
+
         ebp = *(uint32_t *) ebp;
 
         // No need to track any further.
@@ -861,16 +926,13 @@ int stacktrace(uint32_t ebp, uint32_t *addrs, uint32_t length)
 static LONG CALLBACK _exception_handler(
     EXCEPTION_POINTERS *exception_pointers)
 {
-    uintptr_t return_addresses[32]; uint32_t count = 0;
-    memset(return_addresses, 0, sizeof(return_addresses));
+    uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
 
-#if !__x86_64__
-    count = stacktrace(exception_pointers->ContextRecord->Ebp,
-        return_addresses, sizeof(return_addresses) / sizeof(uint32_t));
-#endif
+    count = stacktrace(exception_pointers->ContextRecord,
+        addrs, RETADDRCNT, 0);
 
     log_exception(exception_pointers->ContextRecord,
-        exception_pointers->ExceptionRecord, return_addresses, count);
+        exception_pointers->ExceptionRecord, addrs, count);
 
     return EXCEPTION_CONTINUE_SEARCH;
 }

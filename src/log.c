@@ -263,15 +263,14 @@ void log_explain(signature_index_t index)
 
 static void _log_stacktrace(bson *b)
 {
-    uintptr_t addrs[32]; uint32_t count = 0; char number[20], sym[512];
+    uintptr_t addrs[RETADDRCNT], count;
+    char number[20], sym[512];
 
     bson_append_start_array(b, "s");
 
-#if !__x86_64__
-    count = stacktrace(get_ebp(), addrs, sizeof(addrs) / sizeof(uintptr_t));
-#endif
+    count = stacktrace(NULL, addrs, RETADDRCNT, STACKTRACE_NOSTARTINMONITOR);
 
-    for (uint32_t idx = 3; idx < count; idx++) {
+    for (uint32_t idx = 0; idx < count; idx++) {
         ultostr(idx-3, number);
 
 #if __x86_64__

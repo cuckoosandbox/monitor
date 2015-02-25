@@ -57,7 +57,7 @@ void monitor_init(HMODULE module_handle)
     // accessible after native_init().
     hook_init(module_handle, 1);
 
-    misc_init(cfg.shutdown_mutex);
+    misc_init(module_handle, cfg.shutdown_mutex);
     dropped_init();
     diffing_init(cfg.hashes_path);
 

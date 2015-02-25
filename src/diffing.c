@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
+#include "hooking.h"
 #include "ignore.h"
 #include "misc.h"
 #include "pipe.h"
@@ -91,16 +92,12 @@ static uint64_t _address_hash(uintptr_t addr)
 
 static uint64_t _stacktrace_hash()
 {
-    uintptr_t return_addresses[32], count = 0, hashcnt = 0;
-    uint64_t hashes[64];
+    uintptr_t addrs[RETADDRCNT], count = 0, hashcnt = 0; uint64_t hashes[64];
 
-#if !__x86_64__
-    count = stacktrace(get_ebp(), return_addresses,
-        sizeof(return_addresses) / sizeof(uintptr_t));
-#endif
+    count = stacktrace(NULL, addrs, RETADDRCNT, 0);
 
     for (uint32_t idx = 0; idx < count; idx++) {
-        uint64_t hash = _address_hash(return_addresses[idx]);
+        uint64_t hash = _address_hash(addrs[idx]);
         if(hash == HASH_INTERESTING) {
             return HASH_INTERESTING;
         }
