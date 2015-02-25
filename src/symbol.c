@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "misc.h"
 #include "native.h"
 #include "pipe.h"
+#include "symbol.h"
 
 static const uint8_t *g_monitor_base_address;
 static uint32_t *g_monitor_function_addresses;
@@ -61,8 +62,8 @@ uint32_t module_image_size(const uint8_t *addr)
         return 0;
     }
 
-    IMAGE_NT_HEADERS *image_nt_headers =
-        (IMAGE_NT_HEADERS *)(addr + image_dos_header->e_lfanew);
+    IMAGE_NT_HEADERS_CROSS *image_nt_headers =
+        (IMAGE_NT_HEADERS_CROSS *)(addr + image_dos_header->e_lfanew);
     if(image_nt_headers->Signature != IMAGE_NT_SIGNATURE) {
         return 0;
     }
@@ -75,8 +76,8 @@ static int _eat_pointers_for_module(const uint8_t *mod,
     uint16_t **ordinals, uint32_t *number_of_names)
 {
     IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) mod;
-    IMAGE_NT_HEADERS *image_nt_headers =
-        (IMAGE_NT_HEADERS *)(mod + image_dos_header->e_lfanew);
+    IMAGE_NT_HEADERS_CROSS *image_nt_headers =
+        (IMAGE_NT_HEADERS_CROSS *)(mod + image_dos_header->e_lfanew);
 
     // Check whether this module is the Monitor DLL. As the monitor destroys
     // its own PE header we cache the related pointers. Fetch them now.

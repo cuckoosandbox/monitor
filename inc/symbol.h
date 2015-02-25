@@ -22,6 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <windows.h>
 
+#if __x86_64__
+#define IMAGE_NT_HEADERS_CROSS IMAGE_NT_HEADERS64
+#else
+#define IMAGE_NT_HEADERS_CROSS IMAGE_NT_HEADERS
+#endif
+
 void symbol_init(HMODULE module_handle);
 int symbol(const uint8_t *addr, char *sym, uint32_t length);
 
