@@ -286,7 +286,7 @@ static uint8_t *_hook_alloc_closeby_ptr(uint8_t **last_ptr, uint32_t size)
 
 static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
 {
-    static uint8_t *last_ptr = NULL; MEMORY_BASIC_INFORMATION mbi;
+    static uint8_t *last_ptr = NULL; MEMORY_BASIC_INFORMATION_CROSS mbi;
 
     if(last_ptr != NULL && last_ptr >= target - CLOSEBY_RANGE &&
             last_ptr < target + CLOSEBY_RANGE) {
@@ -301,13 +301,13 @@ static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
             continue;
         }
 
-        if(virtual_alloc(mbi.BaseAddress, g_si.dwPageSize,
+        if(virtual_alloc((void *) mbi.BaseAddress, g_si.dwPageSize,
                 MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE) == NULL) {
             continue;
         }
 
-        memset(mbi.BaseAddress, 0xcc, g_si.dwPageSize);
-        last_ptr = mbi.BaseAddress;
+        memset((void *) mbi.BaseAddress, 0xcc, g_si.dwPageSize);
+        last_ptr = (uint8_t *) mbi.BaseAddress;
         return _hook_alloc_closeby_ptr(&last_ptr, size);
     }
     return NULL;

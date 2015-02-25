@@ -27,12 +27,18 @@ typedef struct _last_error_t {
     uint32_t lasterror;
 } last_error_t;
 
+#if __x86_64__
+#define MEMORY_BASIC_INFORMATION_CROSS MEMORY_BASIC_INFORMATION64
+#else
+#define MEMORY_BASIC_INFORMATION_CROSS MEMORY_BASIC_INFORMATION
+#endif
+
 int native_init();
 
 int virtual_query_ex(HANDLE process_handle, const void *addr,
-    MEMORY_BASIC_INFORMATION *mbi);
+    MEMORY_BASIC_INFORMATION_CROSS *mbi);
 
-int virtual_query(const void *addr, MEMORY_BASIC_INFORMATION *mbi);
+int virtual_query(const void *addr, MEMORY_BASIC_INFORMATION_CROSS *mbi);
 
 void *virtual_alloc_ex(HANDLE process_handle, void *addr,
     uintptr_t size, uint32_t allocation_type, uint32_t protection);

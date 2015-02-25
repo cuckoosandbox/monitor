@@ -115,7 +115,7 @@ Parameters::
 
 Pre::
 
-    MEMORY_BASIC_INFORMATION mbi;
+    MEMORY_BASIC_INFORMATION_CROSS mbi;
 
     memset(&mbi, 0, sizeof(mbi));
     virtual_query(ModuleHandle, &mbi);
@@ -127,7 +127,7 @@ Middle::
     // If the module address is not readable anymore then the module got
     // unhooked and thus we have to notify the unhook detection monitoring.
     if(NT_SUCCESS(ret) != FALSE &&
-            page_is_readable(mbi.AllocationBase) == 0) {
+            page_is_readable((const uint8_t *) mbi.AllocationBase) == 0) {
         unhook_detect_remove_dead_regions();
     }
 

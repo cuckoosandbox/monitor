@@ -301,7 +301,7 @@ Parameters::
 
 Pre::
 
-    MEMORY_BASIC_INFORMATION mbi; uintptr_t region_size = 0;
+    MEMORY_BASIC_INFORMATION_CROSS mbi; uintptr_t region_size = 0;
     if(virtual_query_ex(ProcessHandle, BaseAddress, &mbi) != FALSE) {
         region_size = mbi.RegionSize;
     }

@@ -273,11 +273,7 @@ static void _log_stacktrace(bson *b)
     for (uint32_t idx = 0; idx < count; idx++) {
         ultostr(idx-3, number);
 
-#if __x86_64__
-        sym[0] = 0;
-#else
         symbol((const uint8_t *) addrs[idx], sym, sizeof(sym)-32);
-#endif
         if(sym[0] != 0) {
             strcat(sym, " @ ");
         }
@@ -589,11 +585,7 @@ static void _log_exception_perform()
         bson_append_string(&e, "instruction", insn);
     }
 
-#if __x86_64__
-    sym[0] = 0;
-#else
     symbol(exception_address, sym, sizeof(sym));
-#endif
     bson_append_string(&e, "symbol", sym);
 
     sprintf(buf, "0x%08x", (uint32_t) g_exception_record.ExceptionCode);
@@ -604,12 +596,8 @@ static void _log_exception_perform()
 
         ultostr(idx, number);
 
-#if __x86_64__
-        sym[0] = 0;
-#else
         symbol((const uint8_t *) g_exception_return_addresses[idx],
             sym, sizeof(sym)-32);
-#endif
 
         if(sym[0] != 0) {
             strcat(sym, " @ ");

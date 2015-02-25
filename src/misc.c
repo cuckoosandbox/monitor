@@ -959,7 +959,7 @@ wchar_t *wcsdup(const wchar_t *s)
 
 int page_is_readable(const uint8_t *addr)
 {
-    MEMORY_BASIC_INFORMATION mbi;
+    MEMORY_BASIC_INFORMATION_CROSS mbi;
     return virtual_query(addr, &mbi) != FALSE &&
         mbi.State & MEM_COMMIT && mbi.Protect & PAGE_READABLE;
 }

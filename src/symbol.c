@@ -32,14 +32,14 @@ static uint32_t g_monitor_image_size;
 
 const uint8_t *module_from_address(const uint8_t *addr)
 {
-    MEMORY_BASIC_INFORMATION mbi;
+    MEMORY_BASIC_INFORMATION_CROSS mbi;
 
     if(virtual_query(addr, &mbi) == FALSE ||
-            page_is_readable(mbi.AllocationBase) == 0) {
+            page_is_readable((const uint8_t *) mbi.AllocationBase) == 0) {
         return NULL;
     }
 
-    addr = mbi.AllocationBase;
+    addr = (const uint8_t *) mbi.AllocationBase;
 
     // We're looking for either an MZ header or the image base address
     // of our monitor.

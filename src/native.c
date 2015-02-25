@@ -189,25 +189,25 @@ int native_init()
     }
 
     dpipe("INFO:NtStatus   offset: 0x%x", g_nt_status_offset);
-
     return 0;
 }
 
 int virtual_query_ex(HANDLE process_handle, const void *addr,
-    MEMORY_BASIC_INFORMATION *mbi)
+    MEMORY_BASIC_INFORMATION_CROSS *mbi)
 {
     assert(pNtQueryVirtualMemory != NULL,
         "pNtQueryVirtualMemory is NULL!", 0);
     SIZE_T return_length;
     if(NT_SUCCESS(pNtQueryVirtualMemory(process_handle, addr, 0, mbi,
-            sizeof(MEMORY_BASIC_INFORMATION), &return_length)) != FALSE &&
-            return_length == sizeof(MEMORY_BASIC_INFORMATION)) {
+            sizeof(MEMORY_BASIC_INFORMATION_CROSS),
+            &return_length)) != FALSE &&
+            return_length == sizeof(MEMORY_BASIC_INFORMATION_CROSS)) {
         return 1;
     }
     return 0;
 }
 
-int virtual_query(const void *addr, MEMORY_BASIC_INFORMATION *mbi)
+int virtual_query(const void *addr, MEMORY_BASIC_INFORMATION_CROSS *mbi)
 {
     return virtual_query_ex(get_current_process(), addr, mbi);
 }
