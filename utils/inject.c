@@ -175,6 +175,11 @@ uint32_t start_app(uint32_t from, const char *path, const char *cmd_line,
     ptr += asm_move_regimmv(ptr, R_R8, NULL);
     ptr += asm_move_regimmv(ptr, R_RDX, cmd_addr);
     ptr += asm_move_regimmv(ptr, R_RCX, path_addr);
+
+    ptr += asm_pushv(ptr, NULL);
+    ptr += asm_pushv(ptr, NULL);
+    ptr += asm_pushv(ptr, NULL);
+    ptr += asm_pushv(ptr, NULL);
 #else
     ptr += asm_pushv(ptr, NULL);
     ptr += asm_pushv(ptr, NULL);
@@ -184,8 +189,17 @@ uint32_t start_app(uint32_t from, const char *path, const char *cmd_line,
 
     ptr += asm_call(ptr, create_process_a);
 
+#if __x86_64__
+    ptr += asm_add_regimm(ptr, R_RSP, 10 * sizeof(uintptr_t));
+#endif
+
     ptr += asm_call(ptr, get_last_error);
+
+#if __x86_64__
+    ptr += asm_return(ptr, 0);
+#else
     ptr += asm_return(ptr, 4);
+#endif
 
     void *shellcode_addr = write_data(from, shellcode, ptr - shellcode);
 
@@ -240,7 +254,12 @@ void load_dll_crt(uint32_t pid, const char *dll_path)
 
     uint8_t shellcode[128]; uint8_t *ptr = shellcode;
 
+#if __x86_64__
+    ptr += asm_move_regimmv(ptr, R_RCX, dll_addr);
+#else
     ptr += asm_pushv(ptr, dll_addr);
+#endif
+
     ptr += asm_call(ptr, load_library_a);
     ptr += asm_call(ptr, get_last_error);
     ptr += asm_return(ptr, 4);
@@ -356,6 +375,7 @@ int main(int argc, char *argv[])
         printf("Options:\n");
         printf("  --crt                  CreateRemoteThread injection\n");
         printf("  --apc                  QueueUserAPC injection\n");
+        printf("  --free                 Do not inject our monitor\n");
         printf("  --dll <dll>            DLL to inject\n");
         printf("  --app <app>            Path to application to start\n");
         printf("  --cmdline <cmd>        Cmdline string\n");

@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define ASM_JUMP_SIZE 14
 
 typedef enum _register_t {
-    R_RAX, R_RCX, R_RDX, R_RBX, R_ESP, R_EBP, R_RSI, R_RDI,
+    R_RAX, R_RCX, R_RDX, R_RBX, R_RSP, R_RBP, R_RSI, R_RDI,
     R_R8,  R_R9,  R_R10, R_R11, R_R12, R_R13, R_R14, R_R15,
 } register_t;
 
@@ -44,6 +44,7 @@ typedef enum _register_t {
 
 #endif
 
+#define ASM_ADD_REGIMM 7
 #define ASM_JUMP_32BIT_SIZE 5
 #define ASM_CALL_SIZE (ASM_MOVE_REGIMM_SIZE+2)
 #define ASM_RETURN_SIZE 3
@@ -51,6 +52,7 @@ typedef enum _register_t {
 int asm_move_regimm(uint8_t *stub, register_t reg, uintptr_t value);
 int asm_push(uint8_t *stub, uintptr_t value);
 int asm_jump_32bit(uint8_t *stub, const void *addr);
+int asm_add_regimm(uint8_t *stub, register_t reg, uint32_t value);
 int asm_jump(uint8_t *stub, const void *addr);
 int asm_call(uint8_t *stub, const void *addr);
 int asm_return(uint8_t *stub, uint16_t value);

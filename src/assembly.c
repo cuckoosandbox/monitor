@@ -76,6 +76,26 @@ int asm_push(uint8_t *stub, uintptr_t value)
 
 #endif
 
+int asm_add_regimm(uint8_t *stub, register_t reg, uint32_t value)
+{
+#if __x86_64__
+    if(reg >= R_R8) {
+        stub[0] = 0x49;
+        reg -= R_R8;
+    }
+    else {
+        stub[0] = 0x90;
+    }
+#else
+    stub[0] = 0x90;
+#endif
+
+    stub[1] = 0x81;
+    stub[2] = 0xc0 + reg;
+    *(uint32_t *)(stub + 3) = value;
+    return 7;
+}
+
 int asm_jump_32bit(uint8_t *stub, const void *addr)
 {
     stub[0] = 0xe9;
