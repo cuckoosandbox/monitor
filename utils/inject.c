@@ -107,9 +107,11 @@ void *write_data(uint32_t pid, const void *data, uint32_t length)
 
 void free_data(uint32_t pid, void *addr, uint32_t length)
 {
-    HANDLE process_handle = open_process(pid);
-    VirtualFreeEx(process_handle, addr, length, MEM_RELEASE);
-    CloseHandle(process_handle);
+    if(addr != NULL && length != 0) {
+        HANDLE process_handle = open_process(pid);
+        VirtualFreeEx(process_handle, addr, length, MEM_RELEASE);
+        CloseHandle(process_handle);
+    }
 }
 
 uint32_t create_thread_and_wait(uint32_t pid, void *addr, void *arg)
@@ -234,10 +236,16 @@ uint32_t start_app(uint32_t from, const char *path, const char *cmd_line,
 #endif
 
     ptr += asm_call(ptr, close_handle);
+#if __x86_64__
+    ptr += asm_return(ptr, 0);
+#else
     ptr += asm_return(ptr, 4);
+#endif
 
     shellcode_addr = write_data(from, shellcode, ptr - shellcode);
     create_thread_and_wait(from, shellcode_addr, NULL);
+
+    free_data(from, shellcode_addr, ptr - shellcode);
 
     if(tid != NULL) {
         *tid = pi.dwThreadId;
@@ -262,7 +270,12 @@ void load_dll_crt(uint32_t pid, const char *dll_path)
 
     ptr += asm_call(ptr, load_library_a);
     ptr += asm_call(ptr, get_last_error);
+
+#if __x86_64__
+    ptr += asm_return(ptr, 0);
+#else
     ptr += asm_return(ptr, 4);
+#endif
 
     void *shellcode_addr = write_data(pid, shellcode, ptr - shellcode);
 
@@ -275,6 +288,7 @@ void load_dll_crt(uint32_t pid, const char *dll_path)
     }
 
     free_data(pid, dll_addr, strlen(dll_path) + 1);
+    free_data(pid, shellcode_addr, ptr - shellcode);
 }
 
 void load_dll_apc(uint32_t pid, uint32_t tid, const char *dll_path)
