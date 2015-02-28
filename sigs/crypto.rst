@@ -53,7 +53,7 @@ Parameters::
     *  DATA_BLOB *pOptionalEntropy
     *  PVOID pvReserved
     *  CRYPTPROTECT_PROMPTSTRUCT *pPromptStruct
-    *  DWORD dwFlags
+    ** DWORD dwFlags flags
     *  DATA_BLOB *pDataOut
 
 Ensure::
@@ -80,7 +80,7 @@ Parameters::
     *  DATA_BLOB *pOptionalEntropy
     *  PVOID pvReserved
     *  CRYPTPROTECT_PROMPTSTRUCT *pPromptStruct
-    *  DWORD dwFlags
+    ** DWORD dwFlags flags
     *  DATA_BLOB *pDataOut
 
 Ensure::
