@@ -443,3 +443,85 @@ Pre::
     // TODO Will this still happen before the notify message is executed?
     tid = GetWindowThreadProcessId(hWnd, &pid);
     pipe("PROCESS2:%d,%d", pid, tid);
+
+
+RtlCompressBuffer
+=================
+
+Signature::
+
+    * Library: ntdll
+    * Return value: NTSTATUS
+
+Parameters::
+
+    ** USHORT CompressionFormatAndEngine format
+    *  PUCHAR UncompressedBuffer
+    ** ULONG UncompressedBufferSize input_size
+    *  PUCHAR CompressedBuffer
+    *  ULONG CompressedBufferSize
+    *  ULONG UncompressedChunkSize
+    ** PULONG FinalCompressedSize output_size
+    *  PVOID WorkSpace
+
+Prelog::
+
+    b uncompressed UncompressedBufferSize, UncompressedBuffer
+
+Logging::
+
+    B compressed FinalCompressedSize, CompressedBuffer
+
+
+RtlDecompressBuffer
+===================
+
+Signature::
+
+    * Library: ntdll
+    * Return value: NTSTATUS
+
+Parameters::
+
+    ** USHORT CompressionFormat format
+    *  PUCHAR UncompressedBuffer
+    *  ULONG UncompressedBufferSize
+    *  PUCHAR CompressedBuffer
+    ** ULONG CompressedBufferSize input_size
+    ** PULONG FinalUncompressedSize output_size
+
+Prelog::
+
+    b compressed CompressedBufferSize, CompressedBuffer
+
+Logging::
+
+    B uncompressed FinalUncompressedSize, UncompressedBuffer
+
+
+RtlDecompressFragment
+=====================
+
+Signature::
+
+    * Library: ntdll
+    * Return value: NTSTATUS
+
+Parameters::
+
+    ** USHORT CompressionFormat format
+    *  PUCHAR UncompressedFragment
+    *  ULONG UncompressedFragmentSize
+    *  PUCHAR CompressedBuffer
+    ** ULONG CompressedBufferSize input_size
+    ** ULONG FragmentOffset offset
+    ** PULONG FinalUncompressedSize output_size
+    *  PVOID WorkSpace
+
+Prelog::
+
+    b compressed CompressedBufferSize, CompressedBuffer
+
+Logging::
+
+    B uncompressed FinalUncompressedSize, UncompressedFragment
