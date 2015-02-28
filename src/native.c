@@ -199,9 +199,8 @@ int virtual_query_ex(HANDLE process_handle, const void *addr,
         "pNtQueryVirtualMemory is NULL!", 0);
     SIZE_T return_length;
     if(NT_SUCCESS(pNtQueryVirtualMemory(process_handle, addr, 0, mbi,
-            sizeof(MEMORY_BASIC_INFORMATION_CROSS),
-            &return_length)) != FALSE &&
-            return_length == sizeof(MEMORY_BASIC_INFORMATION_CROSS)) {
+            sizeof(MEMORY_BASIC_INFORMATION_CROSS), &return_length)) != FALSE
+            && return_length == sizeof(MEMORY_BASIC_INFORMATION_CROSS)) {
         return 1;
     }
     return 0;
