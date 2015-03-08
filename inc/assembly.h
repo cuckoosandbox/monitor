@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define ASM_MOVE_REGIMM_SIZE (ASM_PUSH_SIZE+2)
 #define ASM_PUSH_SIZE 13
+#define ASM_JREGZ 5
 #define ASM_JUMP_SIZE 14
 
 typedef enum _register_t {
@@ -36,6 +37,7 @@ typedef enum _register_t {
 
 #define ASM_MOVE_REGIMM_SIZE 5
 #define ASM_PUSH_SIZE 5
+#define ASM_JREGZ 4
 #define ASM_JUMP_SIZE 6
 
 typedef enum _register_t {
@@ -51,6 +53,7 @@ typedef enum _register_t {
 
 int asm_move_regimm(uint8_t *stub, register_t reg, uintptr_t value);
 int asm_push(uint8_t *stub, uintptr_t value);
+int asm_jregz(uint8_t *stub, register_t reg, int8_t offset);
 int asm_jump_32bit(uint8_t *stub, const void *addr);
 int asm_add_regimm(uint8_t *stub, register_t reg, uint32_t value);
 int asm_jump(uint8_t *stub, const void *addr);

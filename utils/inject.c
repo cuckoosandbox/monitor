@@ -195,6 +195,18 @@ uint32_t start_app(uint32_t from, const char *path, const char *cmd_line,
     ptr += asm_add_regimm(ptr, R_RSP, 10 * sizeof(uintptr_t));
 #endif
 
+    // If the return value of CreateProcessA was FALSE, then we return the
+    // GetLastError(), otherwise we return zero.
+#if __x86_64__
+    ptr += asm_jregz(ptr, R_RAX, ASM_MOVE_REGIMM_SIZE + ASM_RETURN_SIZE);
+    ptr += asm_move_regimm(ptr, R_RAX, 0);
+    ptr += asm_return(ptr, 0);
+#else
+    ptr += asm_jregz(ptr, R_EAX, ASM_MOVE_REGIMM_SIZE + ASM_RETURN_SIZE);
+    ptr += asm_move_regimm(ptr, R_EAX, 0);
+    ptr += asm_return(ptr, 4);
+#endif
+
     ptr += asm_call(ptr, get_last_error);
 
 #if __x86_64__

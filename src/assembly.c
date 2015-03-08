@@ -57,6 +57,22 @@ int asm_push(uint8_t *stub, uintptr_t value)
     return 13;
 }
 
+int asm_jregz(uint8_t *stub, register_t reg, int8_t offset)
+{
+    if(reg < R_R8) {
+        *stub++ = 0x48;
+    }
+    else {
+        *stub++ = 0x4d;
+        reg -= R_R8;
+    }
+    *stub++ = 0x85;
+    *stub++ = 0xc0 + reg + reg * 8;
+    *stub++ = 0x74;
+    *stub++ = offset;
+    return 5;
+}
+
 #else
 
 int asm_move_regimm(uint8_t *stub, register_t reg, uintptr_t value)
@@ -72,6 +88,15 @@ int asm_push(uint8_t *stub, uintptr_t value)
     stub[0] = 0x68;
     *(uintptr_t *)(stub + 1) = value;
     return 5;
+}
+
+int asm_jregz(uint8_t *stub, register_t reg, int8_t offset)
+{
+    *stub++ = 0x85;
+    *stub++ = 0xc0 + reg + reg * 8;
+    *stub++ = 0x74;
+    *stub++ = offset;
+    return 4;
 }
 
 #endif
