@@ -60,30 +60,31 @@ static void _cs_free(void *ptr)
     mem_free(ptr);
 }
 
-void hook_init(HMODULE module_handle, int custom_allocator)
+void hook_init(HMODULE module_handle)
 {
     g_monitor_start = (uintptr_t) module_handle;
     g_monitor_end = g_monitor_start +
         module_image_size((const uint8_t *) module_handle);
 
     GetSystemInfo(&g_si);
+}
 
+void hook_init2()
+{
     if(g_capstone != 0) {
         cs_close(&g_capstone);
     }
 
-    if(custom_allocator != 0) {
-        cs_opt_mem cs_mem;
-        cs_mem.malloc = &_cs_malloc;
-        cs_mem.calloc = &_cs_calloc;
-        cs_mem.realloc = &_cs_realloc;
-        cs_mem.free = &_cs_free;
+    cs_opt_mem cs_mem;
+    cs_mem.malloc = &_cs_malloc;
+    cs_mem.calloc = &_cs_calloc;
+    cs_mem.realloc = &_cs_realloc;
+    cs_mem.free = &_cs_free;
 
-        // TODO Is there an alternative besides doing your own implementation?
-        cs_mem.vsnprintf = &vsnprintf;
+    // TODO Is there an alternative besides doing your own implementation?
+    cs_mem.vsnprintf = &vsnprintf;
 
-        cs_option(0, CS_OPT_MEM, (size_t) (uintptr_t) &cs_mem);
-    }
+    cs_option(0, CS_OPT_MEM, (size_t) (uintptr_t) &cs_mem);
 
 #if __x86_64__
     cs_open(CS_ARCH_X86, CS_MODE_64, &g_capstone);

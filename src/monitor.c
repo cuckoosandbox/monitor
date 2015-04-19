@@ -48,14 +48,14 @@ void monitor_init(HMODULE module_handle)
 
     // Initialize capstone without our custom allocator as it is
     // not available yet.
-    hook_init(module_handle, 0);
+    hook_init(module_handle);
 
     pipe_init(cfg.pipe_name);
     native_init();
 
     // Re-initialize capstone with our custom allocator which is now
     // accessible after native_init().
-    hook_init(module_handle, 1);
+    hook_init2();
 
     misc_init(module_handle, cfg.shutdown_mutex);
     dropped_init();

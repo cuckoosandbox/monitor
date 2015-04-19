@@ -59,7 +59,10 @@ typedef struct _hook_t {
     uint8_t *func_stub;
 } hook_t;
 
-void hook_init(HMODULE module_handle, int custom_allocator);
+// Hook initialization part one and two. One should be called before having
+// initialized the native functionality for memory allocation, two afterwards.
+void hook_init(HMODULE module_handle);
+void hook_init2();
 
 int lde(const void *addr);
 
