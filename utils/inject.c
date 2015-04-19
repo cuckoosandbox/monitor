@@ -138,7 +138,7 @@ uint32_t create_thread_and_wait(uint32_t pid, void *addr, void *arg)
 }
 
 uint32_t start_app(uint32_t from, const char *path, const char *cmd_line,
-    uint32_t *tid)
+    const char *curdir, uint32_t *tid)
 {
     STARTUPINFO si; PROCESS_INFORMATION pi;
     memset(&pi, 0, sizeof(pi));
@@ -158,16 +158,18 @@ uint32_t start_app(uint32_t from, const char *path, const char *cmd_line,
     void *si_addr = write_data(from, &si, sizeof(si));
     void *pi_addr = write_data(from, &pi, sizeof(pi));
 
-    const char *temp_dir = getenv("TEMP"); void *temp_addr = NULL;
-    if(temp_dir != NULL) {
-        temp_addr = write_data(from, temp_dir, strlen(temp_dir) + 1);
+    // If not provided, default to $TEMP.
+    if(curdir == NULL) {
+        curdir = getenv("TEMP");
     }
+
+    void *curdir_addr = write_data(from, curdir, strlen(curdir) + 1);
 
     uint8_t shellcode[512]; uint8_t *ptr = shellcode;
 
     ptr += asm_pushv(ptr, pi_addr);
     ptr += asm_pushv(ptr, si_addr);
-    ptr += asm_pushv(ptr, temp_addr);
+    ptr += asm_pushv(ptr, curdir_addr);
     ptr += asm_pushv(ptr, NULL);
     ptr += asm_push(ptr, CREATE_NEW_CONSOLE | CREATE_SUSPENDED);
     ptr += asm_push(ptr, TRUE);
@@ -227,7 +229,7 @@ uint32_t start_app(uint32_t from, const char *path, const char *cmd_line,
 
     free_data(from, pi_addr, sizeof(pi));
     free_data(from, si_addr, sizeof(si));
-    free_data(from, temp_addr, strlen(temp_dir) + 1);
+    free_data(from, curdir_addr, strlen(curdir) + 1);
     free_data(from, cmd_addr, strlen(cmd_line) + 1);
     free_data(from, path_addr, strlen(path) + 1);
     free_data(from, shellcode_addr, ptr - shellcode);
@@ -405,6 +407,7 @@ int main(int argc, char *argv[])
         printf("  --dll <dll>            DLL to inject\n");
         printf("  --app <app>            Path to application to start\n");
         printf("  --cmdline <cmd>        Cmdline string\n");
+        printf("  --curdir <dirpath>     Current working directory\n");
         printf("  --pid <pid>            Process identifier to inject\n");
         printf("  --tid <tid>            Thread identifier to inject\n");
         printf("  --from <pid>           Inject from another process\n");
@@ -420,6 +423,7 @@ int main(int argc, char *argv[])
 
     const char *dll_path = NULL, *app_path = NULL, *cmd_line = NULL;
     const char *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
+    const char *curdir = NULL;
     uint32_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
 
     for (int idx = 1; idx < argc; idx++) {
@@ -445,6 +449,11 @@ int main(int argc, char *argv[])
 
         if(strcmp(argv[idx], "--app") == 0) {
             app_path = argv[++idx];
+            continue;
+        }
+
+        if(strcmp(argv[idx], "--curdir") == 0) {
+            curdir = argv[++idx];
             continue;
         }
 
@@ -574,7 +583,7 @@ int main(int argc, char *argv[])
             cmd_line = filepath;
         }
 
-        pid = start_app(from, filepath, cmd_line, &tid);
+        pid = start_app(from, filepath, cmd_line, curdir, &tid);
     }
 
     // Drop the configuration file if available.
@@ -612,7 +621,7 @@ int main(int argc, char *argv[])
         char buf[1024];
         sprintf(buf, "\"%s\" -p %d", dbg_path, pid);
 
-        start_app(GetCurrentProcessId(), dbg_path, buf, NULL);
+        start_app(GetCurrentProcessId(), dbg_path, buf, NULL, NULL);
 
         Sleep(5000);
     }
