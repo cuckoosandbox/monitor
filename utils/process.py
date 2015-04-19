@@ -441,7 +441,7 @@ class SignatureProcessor(object):
 
         self.sigs = sigs
 
-    def render(self, exclude_category=[], exclude_api=[]):
+    def render(self, exclude_category=[], exclude_api=[], debug=False):
         # Exclude categories.
         for sig in self.sigs:
             if sig['signature']['category'] in exclude_category:
@@ -458,7 +458,7 @@ class SignatureProcessor(object):
 
         self.dp.render('hook-header', self.hooks_h, sigs=self.sigs)
         self.dp.render('hook-source', self.hooks_c,
-                       sigs=self.sigs, types=self.types)
+                       sigs=self.sigs, types=self.types, debug=debug)
         self.dp.render('hook-info-header', self.hook_info_h,
                        sigs=self.sigs, first_hook=len(self.base_sigs))
 
@@ -604,6 +604,9 @@ if __name__ == '__main__':
 
     if args.action == 'release':
         dp.render(exclude_category=exclude_category, exclude_api=exclude_api)
+    elif args.action == 'debug':
+        dp.render(exclude_category=exclude_category, exclude_api=exclude_api,
+                  debug=True)
     elif args.action == 'list-categories':
         dp.list_categories()
     elif args.action == 'list-apis':

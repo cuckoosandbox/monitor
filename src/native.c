@@ -73,6 +73,11 @@ static NTSTATUS (WINAPI *pNtDuplicateObject)(HANDLE SourceProcessHandle,
     HANDLE SourceHandle, HANDLE TargetProcessHandle, HANDLE *TargetHandle,
     ACCESS_MASK DesiredAccess, ULONG HandleAttributes, ULONG Options);
 
+static NTSTATUS (WINAPI *pNtWriteFile)(HANDLE FileHandle, HANDLE Event,
+    PIO_APC_ROUTINE ApcRoutine, PVOID ApcContext,
+    PIO_STATUS_BLOCK IoStatusBlock, const void *Buffer, ULONG Length,
+    PLARGE_INTEGER ByteOffset, PULONG Key);
+
 static NTSTATUS (WINAPI *pNtClose)(HANDLE Handle);
 
 static const char *g_funcnames[] = {
@@ -85,6 +90,7 @@ static const char *g_funcnames[] = {
     "NtQueryObject",
     "NtQueryKey",
     "NtDuplicateObject",
+    "NtWriteFile",
     "NtClose",
     NULL,
 };
@@ -99,6 +105,7 @@ static void **g_pointers[] = {
     (void **) &pNtQueryObject,
     (void **) &pNtQueryKey,
     (void **) &pNtDuplicateObject,
+    (void **) &pNtWriteFile,
     (void **) &pNtClose,
 };
 
@@ -325,6 +332,17 @@ int duplicate_handle(HANDLE source_process_handle, HANDLE source_handle,
     if(NT_SUCCESS(pNtDuplicateObject(source_process_handle, source_handle,
             target_process_handle, target_handle, desired_access,
             handle_attributes, options)) != FALSE) {
+        return 1;
+    }
+    return 0;
+}
+
+int write_file(HANDLE file_handle, const void *buffer, uint32_t length)
+{
+    assert(pNtWriteFile != NULL, "pNtWriteFile is NULL!", 0);
+    IO_STATUS_BLOCK status_block;
+    if(NT_SUCCESS(pNtWriteFile(file_handle, NULL, NULL, NULL, &status_block,
+            buffer, length, NULL, NULL)) != FALSE) {
         return 1;
     }
     return 0;

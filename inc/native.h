@@ -72,6 +72,8 @@ int duplicate_handle(HANDLE source_process_handle, HANDLE source_handle,
     HANDLE target_process_handle, HANDLE *target_handle,
     uint32_t desired_access, int inherit_handle, uint32_t options);
 
+int write_file(HANDLE file_handle, const void *buffer, uint32_t length);
+
 int close_handle(HANDLE object_handle);
 
 void get_last_error(last_error_t *error);

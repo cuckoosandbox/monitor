@@ -46,6 +46,8 @@ static unsigned int g_starttick;
 static uint8_t g_api_init[MONITOR_HOOKCNT];
 static int g_log_exception;
 
+static HANDLE g_debug_handle;
+
 static void _log_exception_perform();
 
 // http://stackoverflow.com/questions/9655202/how-to-convert-integer-to-string-in-c
@@ -634,6 +636,11 @@ static void _bson_free(void *ptr)
     mem_free(ptr);
 }
 
+void log_debug(const char *message)
+{
+    write_file(g_debug_handle, message, strlen(message));
+}
+
 void log_init(uint32_t ip, uint16_t port)
 {
     InitializeCriticalSection(&g_mutex);
@@ -672,4 +679,12 @@ void log_init(uint32_t ip, uint16_t port)
 
     log_raw("BSON\n", 5);
     log_new_process();
+
+#if DEBUG
+    g_debug_handle = CreateFile("C:\\monitor-debug.txt",
+        GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+        NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    pipe("FILE_NEW:C:\\monitor-debug.txt");
+#endif
 }
