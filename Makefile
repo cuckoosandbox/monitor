@@ -55,7 +55,7 @@ objects/:
 	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
 
 $(HOOKSRC): $(SIGS) $(JINJA2) $(HOOKREQ)
-	python utils/process.py data/ objects/code/ sigs/ flags/
+	python utils/process.py release data/ objects/code/ sigs/ flags/
 
 $(FLAGSRC): $(HOOKSRC)
 
