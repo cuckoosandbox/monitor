@@ -39,8 +39,10 @@ DLL64 = monitor-x64.dll
 
 ifdef DEBUG
 	CFLAGS += -DDEBUG=1
+	RELMODE = debug
 else
 	CFLAGS += -DDEBUG=0
+	RELMODE = release
 endif
 
 all: dirs $(LIBCAPSTONE32) $(LIBCAPSTONE64) \
@@ -55,7 +57,7 @@ objects/:
 	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
 
 $(HOOKSRC): $(SIGS) $(JINJA2) $(HOOKREQ)
-	python utils/process.py release data/ objects/code/ sigs/ flags/
+	python utils/process.py $(RELMODE) data/ objects/code/ sigs/ flags/
 
 $(FLAGSRC): $(HOOKSRC)
 
