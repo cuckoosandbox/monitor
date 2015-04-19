@@ -60,6 +60,15 @@ static void _cs_free(void *ptr)
     mem_free(ptr);
 }
 
+static void _capstone_init()
+{
+#if __x86_64__
+    cs_open(CS_ARCH_X86, CS_MODE_64, &g_capstone);
+#else
+    cs_open(CS_ARCH_X86, CS_MODE_32, &g_capstone);
+#endif
+}
+
 void hook_init(HMODULE module_handle)
 {
     g_monitor_start = (uintptr_t) module_handle;
@@ -67,6 +76,7 @@ void hook_init(HMODULE module_handle)
         module_image_size((const uint8_t *) module_handle);
 
     GetSystemInfo(&g_si);
+    _capstone_init();
 }
 
 void hook_init2()
@@ -85,12 +95,7 @@ void hook_init2()
     cs_mem.vsnprintf = &vsnprintf;
 
     cs_option(0, CS_OPT_MEM, (size_t) (uintptr_t) &cs_mem);
-
-#if __x86_64__
-    cs_open(CS_ARCH_X86, CS_MODE_64, &g_capstone);
-#else
-    cs_open(CS_ARCH_X86, CS_MODE_32, &g_capstone);
-#endif
+    _capstone_init();
 }
 
 int hook_in_monitor()
