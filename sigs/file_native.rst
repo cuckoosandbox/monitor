@@ -56,7 +56,7 @@ Post::
         if(hook_in_monitor() != 0) {
             ignored_object_add(*FileHandle);
         }
-        else if((DesiredAccess & DUMP_FILE_MASK) != 0) {
+        else {
             dropped_add(*FileHandle, filepath);
         }
     }
@@ -133,7 +133,7 @@ Post::
         if(hook_in_monitor() != 0) {
             ignored_object_add(*FileHandle);
         }
-        else if((DesiredAccess & DUMP_FILE_MASK) != 0) {
+        else {
             dropped_add(*FileHandle, filepath);
         }
     }
