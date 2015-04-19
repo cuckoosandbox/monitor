@@ -25,6 +25,7 @@ import docutils.parsers.rst
 import jinja2
 import json
 import os.path
+import sys
 
 
 class DefinitionProcessor(object):
@@ -290,7 +291,8 @@ class SignatureProcessor(object):
             children = entry.children
 
             if apiname.startswith('_'):
-                print 'Skipping ignored API Signature:', apiname[1:]
+                print>>sys.stderr, \
+                    'Skipping ignored API Signature:', apiname[1:]
                 continue
 
             row = copy.deepcopy(global_values)
@@ -406,7 +408,7 @@ class SignatureProcessor(object):
             yield row
 
     def process(self):
-        dp = DefinitionProcessor(self.data_dir)
+        self.dp = DefinitionProcessor(self.data_dir)
 
         # Fetch all available signatures.
         sigs = []
@@ -415,7 +417,7 @@ class SignatureProcessor(object):
                 continue
 
             sig_path = os.path.join(self.sig_dirpath, sig_file)
-            for sig in self.normalize(dp.read_document(sig_path)):
+            for sig in self.normalize(self.dp.read_document(sig_path)):
                 sig['is_hook'] = True
                 sigs.append(sig)
 
@@ -437,11 +439,40 @@ class SignatureProcessor(object):
         for idx, sig in enumerate(sigs):
             sig['index'] = idx
 
-        dp.render('hook-header', self.hooks_h, sigs=sigs)
-        dp.render('hook-source', self.hooks_c, sigs=sigs, types=self.types)
-        dp.render('hook-info-header', self.hook_info_h,
-                  sigs=sigs, first_hook=len(self.base_sigs))
+        self.sigs = sigs
 
+    def render(self, exclude_category=[], exclude_api=[]):
+        # Exclude categories.
+        for sig in self.sigs:
+            if sig['signature']['category'] in exclude_category:
+                print 'Ignoring Category %s (api %s)' % (
+                    sig['signature']['category'], sig['apiname'])
+                sig['ignore'] = True
+
+        # Exclude apis.
+        for sig in self.sigs:
+            if sig['apiname'] in exclude_api:
+                print 'Ignoring API %s (category %s)' % (
+                    sig['apiname'], sig['signature']['category'])
+                sig['ignore'] = True
+
+        self.dp.render('hook-header', self.hooks_h, sigs=self.sigs)
+        self.dp.render('hook-source', self.hooks_c,
+                       sigs=self.sigs, types=self.types)
+        self.dp.render('hook-info-header', self.hook_info_h,
+                       sigs=self.sigs, first_hook=len(self.base_sigs))
+
+    def list_categories(self):
+        categories = {}
+        for sig in self.sigs:
+            category = sig['signature']['category']
+            if category not in categories:
+                categories[category] = None
+                print category
+
+    def list_apis(self):
+        for sig in self.sigs:
+            print sig['signature']['category'], sig['apiname']
 
 class FlagsProcessor(object):
     def __init__(self, data_dir, output_directory):
@@ -542,10 +573,13 @@ class FlagsProcessor(object):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('action', type=str, help='Action to perform.')
     parser.add_argument('data_directory', type=str, help='Path to data directory.')
     parser.add_argument('output_directory', type=str, help='Output directory.')
     parser.add_argument('signatures_directory', type=str, help='Signature directory.')
     parser.add_argument('flags_directory', type=str, nargs='?', help='Flags directory.')
+    parser.add_argument('--exclude-category', type=str, help='Exclude one or more categories.')
+    parser.add_argument('--exclude-api', type=str, help='Exclude one or more apis.')
     args = parser.parse_args()
 
     fp = FlagsProcessor(args.data_directory, args.output_directory)
@@ -555,3 +589,24 @@ if __name__ == '__main__':
     dp = SignatureProcessor(args.data_directory, args.output_directory,
                             args.signatures_directory, fp.flags.keys())
     dp.process()
+
+    exclude_category = []
+    if args.exclude_category:
+        for category in args.exclude_category.split(','):
+            if category.strip():
+                exclude_category.append(category.strip())
+
+    exclude_api = []
+    if args.exclude_api:
+        for api in args.exclude_api.split(','):
+            if api.strip():
+                exclude_api.append(api.strip())
+
+    if args.action == 'release':
+        dp.render(exclude_category=exclude_category, exclude_api=exclude_api)
+    elif args.action == 'list-categories':
+        dp.list_categories()
+    elif args.action == 'list-apis':
+        dp.list_apis()
+    else:
+        sys.exit('Invalid action: %r' % args.action)

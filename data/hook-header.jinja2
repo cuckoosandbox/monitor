@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "hook-info.h"
 #include "ntapi.h"
 
-{%- for hook in sigs if hook.is_hook: %}
+{%- for hook in sigs if hook.is_hook and not hook.ignore: %}
 
 
 extern {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }} *Old_{{ hook.apiname }})(

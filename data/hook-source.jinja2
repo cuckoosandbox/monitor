@@ -84,7 +84,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endif %}
 {%- endmacro %}
 
-{%- for hook in sigs if hook.is_hook: %}
+{%- for hook in sigs if hook.is_hook and not hook.ignore: %}
 
 
 {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }} *Old_{{ hook.apiname }})(
@@ -207,21 +207,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {%- endfor %}
 
 const char *g_explain_apinames[] = {
-{%- for hook in sigs: %}
+{%- for hook in sigs if not hook.ignore: %}
     "{{ hook.apiname }}",
 {%- endfor %}
     NULL,
 };
 
 const char *g_explain_categories[] = {
-{%- for hook in sigs: %}
+{%- for hook in sigs if not hook.ignore: %}
     // {{ hook.apiname }}
     "{{ hook.signature.category }}",
 {%- endfor %}
 };
 
 const char *g_explain_paramtypes[] = {
-{%- for hook in sigs: %}
+{%- for hook in sigs if not hook.ignore: %}
     // {{ hook.apiname }}
     "
     {%- if hook.prelog: -%}
@@ -238,7 +238,7 @@ const char *g_explain_paramtypes[] = {
 };
 
 const char *g_explain_paramnames[][16] = {
-{%- for hook in sigs: %}
+{%- for hook in sigs if not hook.ignore: %}
     // {{ hook.apiname }}
     {
     {%- if hook.prelog: %}
@@ -255,7 +255,7 @@ const char *g_explain_paramnames[][16] = {
 };
 
 hook_t g_hooks[] = {
-{%- for hook in sigs: %}
+{%- for hook in sigs if not hook.ignore: %}
     {%- if hook.is_hook: %}
     {"{{ hook.signature.library }}", "{{ hook.apiname }}", (FARPROC) New_{{ hook.apiname }}, (FARPROC *) &Old_{{ hook.apiname }}, {{ hook.signature.special.__int__() }}, {{ hook.signature.minimum }}},
     {%- endif %}
@@ -264,9 +264,9 @@ hook_t g_hooks[] = {
 };
 
 const flag_t g_api_flags[MONITOR_HOOKCNT][8] = {
-{%- for sig in sigs: %}
-    [SIG_{{ sig.apiname }}] = {
-        {%- for flag in sig.flags: %}
+{%- for hook in sigs if not hook.ignore: %}
+    [SIG_{{ hook.apiname }}] = {
+        {%- for flag in hook.flags: %}
         FLAG_{{ flag.flagname }},
         {%- endfor %}
         FLAG_NONE,
@@ -275,9 +275,9 @@ const flag_t g_api_flags[MONITOR_HOOKCNT][8] = {
 };
 
 const char *g_api_flagnames[MONITOR_HOOKCNT][8] = {
-{%- for sig in sigs: %}
-    [SIG_{{ sig.apiname }}] = {
-        {%- for flag in sig.flags: %}
+{%- for hook in sigs if not hook.ignore: %}
+    [SIG_{{ hook.apiname }}] = {
+        {%- for flag in hook.flags: %}
         "{{ flag.name }}",
         {%- endfor %}
         NULL,
