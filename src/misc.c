@@ -393,7 +393,7 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
     wcscpy(buf1, in);
     pathi = buf1, patho = buf2;
 
-    // Globalroot is an option prefix that can be skipped.
+    // Globalroot is an optional prefix that can be skipped.
     if(wcsnicmp(pathi, L"\\??\\Globalroot\\", 15) == 0) {
         wcscpy(patho, pathi + 15);
         swap(&pathi, &patho);
@@ -875,6 +875,10 @@ int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length,
             addrs[count++] = addr;
         }
 
+        // This function calls NtQueryVirtualMemory() under the hood. If any
+        // stack overflows occur due to recursion issues, this is probably
+        // the issue. Can be solved, if required, by returning early from
+        // the NtQueryVirtualMemory() hook handler.
         runtime_function =
             RtlLookupFunctionEntry(ctx->Rip, &image_base, NULL);
         if(runtime_function == NULL) {

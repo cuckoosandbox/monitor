@@ -1,3 +1,5 @@
 .gitignore
 docs/_build/
 objects/
+*.exe
+*.dll
