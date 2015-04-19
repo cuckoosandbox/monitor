@@ -137,7 +137,7 @@ uint32_t create_thread_and_wait(uint32_t pid, void *addr, void *arg)
     return exit_code;
 }
 
-uint32_t start_app(uint32_t from, const char *path, const char *cmd_line,
+uint32_t start_app(uint32_t from, const char *path, const char *arguments,
     const char *curdir, uint32_t *tid)
 {
     STARTUPINFO si; PROCESS_INFORMATION pi;
@@ -152,6 +152,9 @@ uint32_t start_app(uint32_t from, const char *path, const char *cmd_line,
     FARPROC create_process_a = resolve_symbol("kernel32", "CreateProcessA");
     FARPROC close_handle = resolve_symbol("kernel32", "CloseHandle");
     FARPROC get_last_error = resolve_symbol("kernel32", "GetLastError");
+
+    char *cmd_line = malloc(strlen(path) + strlen(arguments) + 4);
+    sprintf(cmd_line, "\"%s\" %s", path, arguments);
 
     void *path_addr = write_data(from, path, strlen(path) + 1);
     void *cmd_addr = write_data(from, cmd_line, strlen(cmd_line) + 1);
@@ -233,6 +236,7 @@ uint32_t start_app(uint32_t from, const char *path, const char *cmd_line,
     free_data(from, cmd_addr, strlen(cmd_line) + 1);
     free_data(from, path_addr, strlen(path) + 1);
     free_data(from, shellcode_addr, ptr - shellcode);
+    free(cmd_line);
 
     ptr = shellcode;
 
@@ -406,7 +410,8 @@ int main(int argc, char *argv[])
         printf("  --free                 Do not inject our monitor\n");
         printf("  --dll <dll>            DLL to inject\n");
         printf("  --app <app>            Path to application to start\n");
-        printf("  --cmdline <cmd>        Cmdline string\n");
+        printf("  --args <args>          Command-line arguments\n");
+        printf("                         Excluding the application path!\n");
         printf("  --curdir <dirpath>     Current working directory\n");
         printf("  --pid <pid>            Process identifier to inject\n");
         printf("  --tid <tid>            Thread identifier to inject\n");
@@ -421,7 +426,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    const char *dll_path = NULL, *app_path = NULL, *cmd_line = NULL;
+    const char *dll_path = NULL, *app_path = NULL, *arguments = "";
     const char *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
     const char *curdir = NULL;
     uint32_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
@@ -452,13 +457,13 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        if(strcmp(argv[idx], "--curdir") == 0) {
-            curdir = argv[++idx];
+        if(strcmp(argv[idx], "--args") == 0) {
+            arguments = argv[++idx];
             continue;
         }
 
-        if(strcmp(argv[idx], "--cmdline") == 0) {
-            cmd_line = argv[++idx];
+        if(strcmp(argv[idx], "--curdir") == 0) {
+            curdir = argv[++idx];
             continue;
         }
 
@@ -578,12 +583,7 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        if(cmd_line == NULL) {
-            DPRINTF("[x] No cmdline provided, using app path.\n");
-            cmd_line = filepath;
-        }
-
-        pid = start_app(from, filepath, cmd_line, curdir, &tid);
+        pid = start_app(from, filepath, arguments, curdir, &tid);
     }
 
     // Drop the configuration file if available.
