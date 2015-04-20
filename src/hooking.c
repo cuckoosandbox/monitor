@@ -100,9 +100,9 @@ void hook_init2()
 
 int hook_in_monitor()
 {
-    uintptr_t addrs[RETADDRCNT], count;
+    uintptr_t addrs[RETADDRCNT]; uint32_t count;
 
-    count = stacktrace(NULL, addrs, RETADDRCNT, 0);
+    count = stacktrace(NULL, addrs, RETADDRCNT);
 
     // If an address that lies within the monitor DLL is found in the
     // stacktrace then we consider this call not interesting.

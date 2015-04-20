@@ -851,8 +851,7 @@ void library_from_unicode_string(const UNICODE_STRING *us,
 
 #if __x86_64__
 
-int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length,
-    uint32_t flags)
+int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length)
 {
     uint32_t count = 0; uintptr_t image_base, establisher_frame;
     RUNTIME_FUNCTION *runtime_function; void *handler_data; CONTEXT _ctx;
@@ -863,17 +862,7 @@ int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length,
     }
 
     while (count < length && ctx->Rip != 0) {
-        uintptr_t addr = ctx->Rip;
-
-        if(addr >= g_monitor_start && addr < g_monitor_end) {
-            if((flags & STACKTRACE_NOSTARTINMONITOR) == 0) {
-                addrs[count++] = addr;
-            }
-        }
-        else {
-            flags &= ~STACKTRACE_NOSTARTINMONITOR;
-            addrs[count++] = addr;
-        }
+        addrs[count++] = ctx->Rip;
 
         // This function calls NtQueryVirtualMemory() under the hood. If any
         // stack overflows occur due to recursion issues, this is probably
@@ -897,8 +886,7 @@ int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length,
 
 #else
 
-int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length,
-    uint32_t flags)
+int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length)
 {
     uint32_t top = readtls(0x04) - 2 * sizeof(uint32_t);
     uint32_t bottom = readtls(0x08);
@@ -908,20 +896,11 @@ int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length,
         ebp = ctx->Ebp;
     }
 
-    while (count < length && ebp >= bottom && ebp < top) {
+    for (; count < length && ebp >= bottom && ebp < top; count++) {
         uintptr_t addr = *(uint32_t *)(ebp + 4);
-
-        if(addr >= g_monitor_start && addr < g_monitor_end) {
-            if((flags & STACKTRACE_NOSTARTINMONITOR) == 0) {
-                addrs[count++] = addr;
-            }
-        }
-        else {
-            flags &= ~STACKTRACE_NOSTARTINMONITOR;
-            addrs[count++] = addr;
-        }
-
         ebp = *(uint32_t *) ebp;
+
+        addrs[count] = addr;
 
         // No need to track any further.
         if(addrs[count] == 0) {
@@ -938,8 +917,7 @@ static LONG CALLBACK _exception_handler(
 {
     uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
 
-    count = stacktrace(exception_pointers->ContextRecord,
-        addrs, RETADDRCNT, 0);
+    count = stacktrace(exception_pointers->ContextRecord, addrs, RETADDRCNT);
 
     log_exception(exception_pointers->ContextRecord,
         exception_pointers->ExceptionRecord, addrs, count);

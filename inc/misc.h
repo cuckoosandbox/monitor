@@ -80,8 +80,7 @@ int is_shutting_down();
 void library_from_unicode_string(const UNICODE_STRING *us,
     char *library, int32_t length);
 
-int stacktrace(CONTEXT *ctx, uintptr_t *addrs,
-    uint32_t length, uint32_t flags);
+int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length);
 
 void *memdup(const void *addr, uint32_t length);
 wchar_t *wcsdup(const wchar_t *s);

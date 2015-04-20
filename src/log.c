@@ -270,9 +270,9 @@ static void _log_stacktrace(bson *b)
 
     bson_append_start_array(b, "s");
 
-    count = stacktrace(NULL, addrs, RETADDRCNT, STACKTRACE_NOSTARTINMONITOR);
+    count = stacktrace(NULL, addrs, RETADDRCNT);
 
-    for (uint32_t idx = 0; idx < count; idx++) {
+    for (uint32_t idx = 3; idx < count; idx++) {
         ultostr(idx-3, number);
 
         symbol((const uint8_t *) addrs[idx], sym, sizeof(sym)-32);

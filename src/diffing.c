@@ -94,7 +94,7 @@ static uint64_t _stacktrace_hash()
 {
     uintptr_t addrs[RETADDRCNT], count = 0, hashcnt = 0; uint64_t hashes[64];
 
-    count = stacktrace(NULL, addrs, RETADDRCNT, 0);
+    count = stacktrace(NULL, addrs, RETADDRCNT);
 
     for (uint32_t idx = 0; idx < count; idx++) {
         uint64_t hash = _address_hash(addrs[idx]);
