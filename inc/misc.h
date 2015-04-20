@@ -28,6 +28,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 void misc_init(HMODULE module_handle, const char *shutdown_mutex);
 
+// Call functions from monitor.c indirectly so that we don't have to include
+// it by default when doing unittests.
+void misc_set_hook_library(void (*monitor_hook)(const char *library));
+void hook_library(const char *library);
+
 wchar_t *get_unicode_buffer();
 
 uintptr_t pid_from_process_handle(HANDLE process_handle);

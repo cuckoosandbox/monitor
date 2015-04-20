@@ -58,6 +58,7 @@ void monitor_init(HMODULE module_handle)
     hook_init2();
 
     misc_init(module_handle, cfg.shutdown_mutex);
+    misc_set_hook_library(&monitor_hook);
     dropped_init();
     diffing_init(cfg.hashes_path);
 

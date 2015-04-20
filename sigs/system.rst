@@ -96,7 +96,7 @@ Logging::
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        monitor_hook(library);
+        hook_library(library);
     }
 
 

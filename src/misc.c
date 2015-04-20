@@ -39,6 +39,8 @@ static uint32_t g_tls_unicode_buffer_index;
 static uintptr_t g_monitor_start;
 static uintptr_t g_monitor_end;
 
+void (*g_hook_library)(const char *library);
+
 #define HKCU_PREFIX L"\\REGISTRY\\USER\\S-1-5-"
 #define HKLM_PREFIX L"\\REGISTRY\\MACHINE"
 
@@ -96,6 +98,16 @@ void misc_init(HMODULE module_handle, const char *shutdown_mutex)
             ADD_ALIAS(target_path, device_name);
         }
     }
+}
+
+void misc_set_hook_library(void (*monitor_hook)(const char *library))
+{
+    g_hook_library = monitor_hook;
+}
+
+void hook_library(const char *library)
+{
+    g_hook_library(library);
 }
 
 #define UNICODE_BUFFER_COUNT 32
