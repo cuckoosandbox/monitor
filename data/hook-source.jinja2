@@ -114,11 +114,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- if not hook.signature.special: %}
 
     if(hook_in_monitor() != 0) {
-        {{ call_old(hook, replace_args=False, lasterr=False)|indent }}
-
         {%- if debug %}
         log_debug("Early leave of {{ hook.apiname }}\n");
         {%- endif %}
+
+        {{ call_old(hook, replace_args=False, lasterr=False)|indent }}
 
         {%- if hook.signature.return_value != 'void' %}
         return ret;
@@ -156,11 +156,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endif %}
     {%- if hook.interesting or hook.signature.interesting %}
     if(is_interesting_hash(hash) == 0) {
-        {{ call_old(hook, lasterr=False)|indent }}
-
         {%- if debug %}
         log_debug("Uninteresting {{ hook.apiname }}\n");
         {%- endif %}
+
+        {{ call_old(hook, lasterr=False)|indent }}
 
         {%- if hook.signature.return_value != 'void' %}
         return ret;
@@ -207,14 +207,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endfor %}
     {%- endif %}
 
+    {%- if debug %}
+    log_debug("Leaving {{ hook.apiname }}\n");
+    {%- endif %}
+
     set_last_error(&lasterror);
 
     {%- if hook.prelog: %}
     mem_free(prebuf);
-    {%- endif %}
-
-    {%- if debug %}
-    log_debug("Leaving {{ hook.apiname }}\n");
     {%- endif %}
 
     {%- if hook.signature.return_value != 'void' %}
