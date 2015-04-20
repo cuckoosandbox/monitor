@@ -1079,3 +1079,73 @@ uint64_t hash_uint64(uint64_t value)
 {
     return hash_buffer(&value, sizeof(value));
 }
+
+// http://stackoverflow.com/questions/9655202/how-to-convert-integer-to-string-in-c
+int ultostr(intptr_t value, char *str, int base)
+{
+    const char charset[] = "0123456789abcdef";
+
+    // Negative values.
+    if(value < 0 && base == 10) {
+        *str++ = '-';
+        value = -value;
+    }
+
+    // Calculate the amount of numbers required.
+    intptr_t shifter = value, length = 0;
+    do {
+        str++, length++, shifter /= base;
+    } while (shifter);
+
+    // Populate the string.
+    *str = 0;
+    do {
+        *--str = charset[value % base];
+        value /= base;
+    } while (value);
+    return length;
+}
+
+int our_vsnprintf(char *buf, int length, const char *fmt, va_list args)
+{
+    const char *base = buf;
+    for (; *fmt != 0 && length > 1; fmt++) {
+        if(*fmt != '%') {
+            *buf++ = *fmt, length--;
+            continue;
+        }
+
+        const char *s; uintptr_t p;
+
+        switch (*++fmt) {
+        case 's':
+            s = va_arg(args, const char *);
+            strncat(buf, s, length);
+            length -= strlen(s);
+            break;
+
+        case 'p':
+            p = va_arg(args, uintptr_t);
+            if(length > 9) {
+                *buf++ = '0', *buf++ = 'x';
+                length -= 2 + ultostr(p, buf, 16);
+            }
+            break;
+
+        default:
+            dpipe("CRITICAL:Unhandled vsnprintf modifier: %s", 4, fmt);
+        }
+    }
+    return buf - base;
+}
+
+int our_snprintf(char *buf, int length, const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    int ret = our_vsnprintf(buf, length, fmt, args);
+
+    va_end(args);
+    return ret;
+}

@@ -108,14 +108,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     get_last_error(&lasterror);
 
     {%- if debug %}
-    log_debug("Entered {{ hook.apiname }}\n");
+    log_debug("Entered %s\n", "{{ hook.apiname }}");
     {%- endif %}
 
     {%- if not hook.signature.special: %}
 
     if(hook_in_monitor() != 0) {
         {%- if debug %}
-        log_debug("Early leave of {{ hook.apiname }}\n");
+        log_debug("Early leave of %s\n", "{{ hook.apiname }}");
         {%- endif %}
 
         {{ call_old(hook, replace_args=False, lasterr=False)|indent }}
@@ -157,7 +157,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- if hook.interesting or hook.signature.interesting %}
     if(is_interesting_hash(hash) == 0) {
         {%- if debug %}
-        log_debug("Uninteresting {{ hook.apiname }}\n");
+        log_debug("Uninteresting %s\n", "{{ hook.apiname }}");
         {%- endif %}
 
         {{ call_old(hook, lasterr=False)|indent }}
@@ -208,7 +208,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endif %}
 
     {%- if debug %}
-    log_debug("Leaving {{ hook.apiname }}\n");
+    log_debug("Leaving %s\n", "{{ hook.apiname }}");
     {%- endif %}
 
     set_last_error(&lasterror);
