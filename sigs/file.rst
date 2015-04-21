@@ -472,3 +472,39 @@ Prelog::
 Logging::
 
     B output_buffer lpBytesReturned, lpOutBuffer
+
+
+GetSystemDirectoryA
+===================
+
+Signature::
+
+    * Is success: ret > 0
+    * Return value: UINT
+
+Parameters::
+
+    *  LPTSTR lpBuffer
+    *  UINT uSize
+
+Logging::
+
+    S dirpath ret, lpBuffer
+
+
+GetSystemDirectoryW
+===================
+
+Signature::
+
+    * Is success: ret > 0
+    * Return value: UINT
+
+Parameters::
+
+    *  LPWSTR lpBuffer
+    *  UINT uSize
+
+Logging::
+
+    U dirpath ret, lpBuffer
