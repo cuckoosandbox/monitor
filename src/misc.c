@@ -259,7 +259,7 @@ void destroy_pe_header(HANDLE module_handle)
 
 void wcsncpyA(wchar_t *dst, const char *src, uint32_t length)
 {
-    while (*src != 0 && length != 0) {
+    while (*src != 0 && length > 1) {
         *dst++ = *src++, length--;
     }
     *dst = 0;
