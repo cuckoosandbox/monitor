@@ -56,8 +56,9 @@ int main()
     assert(ultostr(0xffffffff, buf, 16) == 8  && strcmp(buf, "ffffffff") == 0);
 #endif
 
-    assert(our_snprintf(buf, 2, "hoi") == 2 && memcmp(buf, "ho", 2) == 0);
-    assert(our_snprintf(buf, 4, "hoi") == 3 && memcmp(buf, "hoi", 3) == 0);
+    assert(our_snprintf(buf, 3, "hoi") == 2 && strcmp(buf, "ho") == 0);
+    assert(our_snprintf(buf, 4, "hoi") == 3 && strcmp(buf, "hoi") == 0);
+    assert(our_snprintf(buf, 4, "hello") == 3 && strcmp(buf, "hel") == 0);
     assert(our_snprintf(buf, 64, "%s %s", "a", "b") == 3 && memcmp(buf, "a b", 3) == 0);
     assert(our_snprintf(buf, 64, "%s %s ccc", "a", "bb") == 8 && memcmp(buf, "a bb ccc", 8) == 0);
     assert(our_snprintf(buf, 64, "%p", 0x4141) == 6 && memcmp(buf, "0x4141", 6) == 0);

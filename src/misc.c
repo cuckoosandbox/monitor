@@ -1106,10 +1106,15 @@ int ultostr(intptr_t value, char *str, int base)
     return length;
 }
 
+static uintptr_t _min(uintptr_t a, uintptr_t b)
+{
+    return a < b ? a : b;
+}
+
 int our_vsnprintf(char *buf, int length, const char *fmt, va_list args)
 {
     const char *base = buf;
-    for (; *fmt != 0 && length > 0; fmt++) {
+    for (; *fmt != 0 && length > 1; fmt++) {
         if(*fmt != '%') {
             *buf++ = *fmt, length--;
             continue;
@@ -1120,14 +1125,14 @@ int our_vsnprintf(char *buf, int length, const char *fmt, va_list args)
         switch (*++fmt) {
         case 's':
             s = va_arg(args, const char *);
-            strncpy(buf, s, length);
-            buf += strlen(s);
-            length -= strlen(s);
+            strncpy(buf, s, length-1);
+            l = _min(length-1, strlen(s));
+            buf += l, length -= l;
             break;
 
         case 'p':
             p = va_arg(args, uintptr_t);
-            if(length > 9) {
+            if(length > 10) {
                 *buf++ = '0', *buf++ = 'x';
                 l = ultostr(p, buf, 16);
                 length -= 2 + l, buf += l;
@@ -1138,6 +1143,7 @@ int our_vsnprintf(char *buf, int length, const char *fmt, va_list args)
             dpipe("CRITICAL:Unhandled vsnprintf modifier: %s", 4, fmt);
         }
     }
+    *buf = 0;
     return buf - base;
 }
 
