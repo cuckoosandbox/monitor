@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "pipe.h"
 #include "utf8.h"
 
+static CRITICAL_SECTION g_cs;
 static char g_pipe_name[MAX_PATH];
 
 static int _pipe_utf8x(char **out, unsigned short x)
@@ -125,6 +126,7 @@ static int _pipe_sprintf(char *out, const char *fmt, va_list args)
 
 void pipe_init(const char *pipe_name)
 {
+    InitializeCriticalSection(&g_cs);
     strncpy(g_pipe_name, pipe_name, sizeof(g_pipe_name));
 }
 
@@ -135,20 +137,21 @@ int pipe(const char *fmt, ...)
         return -1;
     }
 
-    va_list args;
-    va_start(args, fmt);
-    int len = _pipe_sprintf(NULL, fmt, args);
-    if(len > 0) {
-        char buf[len + 1];
-        _pipe_sprintf(buf, fmt, args);
-        va_end(args);
+    static char buf[0x10000]; va_list args; int ret = -1, len;
 
-        if(CallNamedPipe(g_pipe_name, buf, len, buf, len,
-                (unsigned long *) &len, PIPE_MAX_TIMEOUT) == FALSE) {
-            return 0;
-        }
+    EnterCriticalSection(&g_cs);
+
+    va_start(args, fmt);
+    len = _pipe_sprintf(buf, fmt, args);
+    va_end(args);
+
+    if(len > 0 && CallNamedPipe(g_pipe_name, buf, len, buf, len,
+            (unsigned long *) &len, PIPE_MAX_TIMEOUT) != FALSE) {
+        ret = 0;
     }
-    return -1;
+
+    LeaveCriticalSection(&g_cs);
+    return ret;
 }
 
 int pipe2(void *out, int *outlen, const char *fmt, ...)
@@ -158,18 +161,19 @@ int pipe2(void *out, int *outlen, const char *fmt, ...)
         return -1;
     }
 
-    va_list args;
-    va_start(args, fmt);
-    int len = _pipe_sprintf(NULL, fmt, args);
-    if(len > 0) {
-        char buf[len + 1];
-        _pipe_sprintf(buf, fmt, args);
-        va_end(args);
+    static char buf[0x10000]; va_list args; int ret = -1, len;
 
-        if(CallNamedPipe(g_pipe_name, buf, len, out, *outlen,
-                (unsigned long *) outlen, PIPE_MAX_TIMEOUT) == FALSE) {
-            return 0;
-        }
+    EnterCriticalSection(&g_cs);
+
+    va_start(args, fmt);
+    len = _pipe_sprintf(buf, fmt, args);
+    va_end(args);
+
+    if(len > 0 && CallNamedPipe(g_pipe_name, buf, len, out, *outlen,
+            (unsigned long *) outlen, PIPE_MAX_TIMEOUT) != FALSE) {
+        ret = 0;
     }
-    return -1;
+
+    LeaveCriticalSection(&g_cs);
+    return ret;
 }
