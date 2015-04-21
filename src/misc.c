@@ -380,8 +380,7 @@ uint32_t path_get_full_pathA(const char *in, wchar_t *out)
         return 0;
     }
 
-    wcsncpyA(input, in, MAX_PATH);
-
+    wcsncpyA(input, in, MAX_PATH+1);
     return path_get_full_pathW(input, out);
 }
 
@@ -692,11 +691,10 @@ uint32_t reg_get_key_ascii(HANDLE key_handle,
         length = strlen(subkey);
     }
 
-    length = MIN(length, MAX_PATH_W - offset);
-
     regkey[offset++] = '\\';
+
+    length = MIN(length+1, MAX_PATH_W+1 - offset);
     wcsncpyA(&regkey[offset], subkey, length);
-    regkey[offset + length] = 0;
     return _reg_key_normalize(regkey);
 }
 
@@ -991,14 +989,14 @@ wchar_t *flag_to_string(flag_t which, uint32_t flag)
                     wcscat(ret, L"|");
                 }
                 wcsncpyA(ret + lstrlenW(ret), f->repr,
-                    MAX_PATH_W - lstrlenW(ret));
+                    MAX_PATH_W+1 - lstrlenW(ret));
                 flag &= ~f->value;
             }
             break;
 
         case FLAGTYP_VALUE:
             if(f->value == flag) {
-                wcsncpyA(ret, f->repr, MAX_PATH_W);
+                wcsncpyA(ret, f->repr, MAX_PATH_W+1);
                 return ret;
             }
             break;
