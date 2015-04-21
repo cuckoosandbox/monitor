@@ -42,4 +42,9 @@ extern const char *g_explain_categories[];
 extern const char *g_explain_paramtypes[];
 extern const char *g_explain_paramnames[][16];
 
+// Remove log_debug() in release mode altogether.
+#if DEBUG == 0
+#define log_debug(fmt, ...) (void)0
+#endif
+
 #endif

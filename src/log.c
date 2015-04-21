@@ -611,6 +611,8 @@ static void _bson_free(void *ptr)
     mem_free(ptr);
 }
 
+#undef log_debug
+
 void log_debug(const char *fmt, ...)
 {
     EnterCriticalSection(&g_mutex);
