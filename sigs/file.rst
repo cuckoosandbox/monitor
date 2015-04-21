@@ -508,3 +508,65 @@ Parameters::
 Logging::
 
     U dirpath ret, lpBuffer
+
+
+GetSystemWindowsDirectoryA
+==========================
+
+Signature::
+
+    * Is success: ret > 0
+    * Return value: UINT
+
+Parameters::
+
+    *  LPTSTR lpBuffer
+    *  UINT uSize
+
+Logging::
+
+    S dirpath ret, lpBuffer
+
+
+GetSystemWindowsDirectoryW
+==========================
+
+Signature::
+
+    * Is success: ret > 0
+    * Return value: UINT
+
+Parameters::
+
+    *  LPWSTR lpBuffer
+    *  UINT uSize
+
+Logging::
+
+    U dirpath ret, lpBuffer
+
+
+SetFileAttributesW
+==================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    *  LPCWSTR lpFileName
+    ** DWORD dwFileAttributes file_attributes
+
+Flags::
+
+    file_attributes
+
+Pre::
+
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathW(lpFileName, filepath);
+
+Logging::
+
+    u filepath filepath

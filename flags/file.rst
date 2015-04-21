@@ -219,3 +219,18 @@ NtOpenFile_OpenOptions
 Inherits::
 
     FileOptions
+
+
+SetFileAttributesW_dwFileAttributes
+===================================
+
+Enum::
+
+    FILE_ATTRIBUTE_ARCHIVE
+    FILE_ATTRIBUTE_HIDDEN
+    FILE_ATTRIBUTE_NORMAL
+    FILE_ATTRIBUTE_NOT_CONTENT_INDEXED
+    FILE_ATTRIBUTE_OFFLINE
+    FILE_ATTRIBUTE_READONLY
+    FILE_ATTRIBUTE_SYSTEM
+    FILE_ATTRIBUTE_TEMPORARY
