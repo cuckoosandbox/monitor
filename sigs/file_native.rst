@@ -9,10 +9,6 @@ Signature::
 NtCreateFile
 ============
 
-Signature::
-
-    * Special: true
-
 Parameters::
 
     ** PHANDLE FileHandle file_handle
@@ -92,10 +88,6 @@ Logging::
 
 NtOpenFile
 ==========
-
-Signature::
-
-    * Special: true
 
 Parameters::
 
