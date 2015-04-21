@@ -1,8 +1,8 @@
 CC32 = i686-w64-mingw32-gcc -m32
 CC64 = x86_64-w64-mingw32-gcc -m64
 AR = ar
-CFLAGS = -Wall -O2 -Wextra -std=c99 -static \
-		 -Wno-missing-field-initializers -I inc/ -I objects/code/
+CFLAGS = -Wall -Wextra -std=c99 -static -Wno-missing-field-initializers \
+		 -I inc/ -I objects/code/
 LDFLAGS = -lws2_32 -lshlwapi -lole32
 MAKEFLAGS = -j8
 
@@ -38,10 +38,10 @@ DLL32 = monitor-x86.dll
 DLL64 = monitor-x64.dll
 
 ifdef DEBUG
-	CFLAGS += -DDEBUG=1
+	CFLAGS += -DDEBUG=1 -O0 -ggdb
 	RELMODE = debug
 else
-	CFLAGS += -DDEBUG=0
+	CFLAGS += -DDEBUG=0 -O2 -s
 	RELMODE = release
 endif
 
