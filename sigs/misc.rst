@@ -277,3 +277,33 @@ Ensure::
 Logging::
 
     U buffer *lpNumberOfCharsWritten, lpBuffer
+
+
+SHGetFolderPathW
+================
+
+Signature::
+
+    * Library: shell32
+    * Return value: HRESULT
+
+Parameters::
+
+    ** HWND hwndOwner owner_handle
+    ** int nFolder folder
+    ** HANDLE hToken token_handle
+    ** DWORD dwFlags flags
+    *  LPWSTR pszPath
+
+Flags::
+
+    folder
+
+Middle::
+
+    wchar_t *dirpath = get_unicode_buffer();
+    path_get_full_pathW(pszPath, dirpath);
+
+Logging::
+
+    u dirpath dirpath

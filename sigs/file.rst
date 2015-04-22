@@ -570,3 +570,26 @@ Pre::
 Logging::
 
     u filepath filepath
+
+
+GetFileAttributesW
+==================
+
+Signature::
+
+    * Is success: ret != INVALID_FILE_ATTRIBUTES
+    * Return value: DWORD
+
+Parameters::
+
+    *  LPCWSTR lpFileName
+
+Pre::
+
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathW(lpFileName, filepath);
+
+Logging::
+
+    u filepath filepath
+    d file_attributes ret
