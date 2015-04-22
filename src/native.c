@@ -238,6 +238,12 @@ void *virtual_alloc(void *addr, uintptr_t size,
         allocation_type, protection);
 }
 
+void *virtual_alloc_rw(void *addr, uintptr_t size)
+{
+    return virtual_alloc(addr, size,
+        MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+}
+
 int virtual_free_ex(HANDLE process_handle, const void *addr, uintptr_t size,
     uint32_t free_type)
 {

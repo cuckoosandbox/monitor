@@ -33,8 +33,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "symbol.h"
 
 static char g_shutdown_mutex[MAX_PATH];
-static uint32_t g_tls_unicode_buffers;
-static uint32_t g_tls_unicode_buffer_index;
+static array_t g_unicode_buffer_ptr_array;
+static array_t g_unicode_buffer_use_array;
 
 static uintptr_t g_monitor_start;
 static uintptr_t g_monitor_end;
@@ -79,8 +79,8 @@ void misc_init(HMODULE module_handle, const char *shutdown_mutex)
 
     strncpy(g_shutdown_mutex, shutdown_mutex, sizeof(g_shutdown_mutex));
 
-    g_tls_unicode_buffers = TlsAlloc();
-    g_tls_unicode_buffer_index = TlsAlloc();
+    array_init(&g_unicode_buffer_ptr_array);
+    array_init(&g_unicode_buffer_use_array);
 
     ADD_ALIAS(L"\\SystemRoot\\", L"C:\\Windows\\");
 
@@ -110,27 +110,74 @@ void hook_library(const char *library)
     g_hook_library(library);
 }
 
-#define UNICODE_BUFFER_COUNT 32
+// Maximum number of buffers that we reuse.
+#define UNICODE_BUFFER_COUNT (0x1000/sizeof(void *))
 
 wchar_t *get_unicode_buffer()
 {
-    uintptr_t index = (uintptr_t) TlsGetValue(g_tls_unicode_buffer_index);
-    wchar_t *buffers = (wchar_t *) TlsGetValue(g_tls_unicode_buffers);
+    uint8_t *used = (uint8_t *)
+        array_get(&g_unicode_buffer_use_array, get_current_thread_id());
 
-    // If the buffers have not been allocated already then do so now.
-    if(buffers == NULL) {
-        // It's only 2MB per thread! What could possibly go wrong?
-        buffers = (wchar_t *) virtual_alloc(NULL,
-            UNICODE_BUFFER_COUNT * (MAX_PATH_W+1) * sizeof(wchar_t),
-            MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-        TlsSetValue(g_tls_unicode_buffers, buffers);
+    wchar_t **ptrs = (wchar_t **)
+        array_get(&g_unicode_buffer_ptr_array, get_current_thread_id());
+
+    // If not done yet, allocate initial memory management data.
+    if(used == NULL && ptrs == NULL) {
+        used = (uint8_t *)
+            virtual_alloc_rw(NULL, UNICODE_BUFFER_COUNT * sizeof(uint8_t));
+
+        ptrs = (wchar_t **)
+            virtual_alloc_rw(NULL, UNICODE_BUFFER_COUNT * sizeof(wchar_t **));
+
+        array_set(&g_unicode_buffer_use_array, get_current_thread_id(), used);
+        array_set(&g_unicode_buffer_ptr_array, get_current_thread_id(), ptrs);
     }
 
-    TlsSetValue(g_tls_unicode_buffer_index, (void *)(index + 1));
+    for (uint32_t idx = 0; idx < UNICODE_BUFFER_COUNT; idx++) {
+        if(ptrs[idx] == NULL) {
+            ptrs[idx] =
+                virtual_alloc_rw(NULL, (MAX_PATH_W+1) * sizeof(wchar_t));
+            if(ptrs[idx] == NULL) {
+                pipe("CRITICAL:Error allocating memory for unicode buffer");
+            }
+        }
 
-    // Zero-terminate the string just in case.
-    wchar_t *ret = &buffers[(index % UNICODE_BUFFER_COUNT) * (MAX_PATH_W+1)];
-    return *ret = 0, ret;
+        // Return this pointer if it has not been used yet. Zero-terminate it
+        // just in case.
+        if(used[idx] == 0) {
+            used[idx] = 1, *ptrs[idx] = 0;
+            return ptrs[idx];
+        }
+    }
+
+    // If we get here there is probably a memory leak going on somewhere.
+    pipe("CRITICAL:We probably encountered a memory leak with regards to "
+        "unicode buffers somewhere");
+
+    // However, just in case, return some memory in order not to crash.
+    return virtual_alloc_rw(NULL, (MAX_PATH_W+1) * sizeof(wchar_t));
+}
+
+void free_unicode_buffer(wchar_t *ptr)
+{
+    uint8_t *used = (uint8_t *)
+        array_get(&g_unicode_buffer_use_array, get_current_thread_id());
+
+    wchar_t **ptrs = (wchar_t **)
+        array_get(&g_unicode_buffer_ptr_array, get_current_thread_id());
+
+    // Cross-reference the pointer against the list of pointers. If found,
+    // set used to zero.
+    for (uint32_t idx = 0; idx < UNICODE_BUFFER_COUNT; idx++) {
+        if(ptrs[idx] == ptr) {
+            used[idx] = 0;
+            return;
+        }
+    }
+
+    // If we reach here, then this buffer is not maintained by the list of
+    // available buffers, and we have to deallocate it manually.
+    virtual_free(ptr, (MAX_PATH_W+1) * sizeof(wchar_t), MEM_RELEASE);
 }
 
 uintptr_t pid_from_process_handle(HANDLE process_handle)

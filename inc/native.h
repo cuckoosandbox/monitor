@@ -46,6 +46,8 @@ void *virtual_alloc_ex(HANDLE process_handle, void *addr,
 void *virtual_alloc(void *addr, uintptr_t size,
     uint32_t allocation_type, uint32_t protection);
 
+void *virtual_alloc_rw(void *addr, uintptr_t size);
+
 int virtual_free_ex(HANDLE process_handle, const void *addr, uintptr_t size,
     uint32_t free_type);
 

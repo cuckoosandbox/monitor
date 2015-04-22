@@ -34,6 +34,7 @@ void misc_set_hook_library(void (*monitor_hook)(const char *library));
 void hook_library(const char *library);
 
 wchar_t *get_unicode_buffer();
+void free_unicode_buffer(wchar_t *ptr);
 
 uintptr_t pid_from_process_handle(HANDLE process_handle);
 uintptr_t pid_from_thread_handle(HANDLE thread_handle);
