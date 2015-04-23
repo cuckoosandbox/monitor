@@ -79,6 +79,8 @@ Post::
         sleep_skip_disable();
     }
 
+    free_unicode_buffer(filepath);
+
 
 ExitProcess
 ===========
@@ -145,6 +147,10 @@ Logging::
     u filepath filepath
     u parameters pExecInfo->lpParameters
     l show_type pExecInfo->nShow
+
+Post::
+
+    free_unicode_buffer(filepath);
 
 
 ReadProcessMemory

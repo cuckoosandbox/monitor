@@ -440,13 +440,13 @@ static inline void swap(wchar_t **a, wchar_t **b)
 
 uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
 {
-    wchar_t *buf1 = get_unicode_buffer(), *buf2 = get_unicode_buffer();
-    wchar_t *pathi, *patho, *last_ptr = NULL;
-
     if(in == NULL) {
         out[0] = 0;
         return 0;
     }
+
+    wchar_t *buf1 = get_unicode_buffer(), *buf2 = get_unicode_buffer();
+    wchar_t *pathi, *patho, *last_ptr = NULL;
 
     wcscpy(buf1, in);
     pathi = buf1, patho = buf2;
@@ -484,6 +484,8 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
     // We don't further modify ignored filepaths.
     if(is_ignored_filepath(pathi) != 0) {
         wcscpy(out, pathi);
+        free_unicode_buffer(buf1);
+        free_unicode_buffer(buf2);
         return lstrlenW(out);
     }
 
@@ -497,6 +499,8 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
         else {
             wcscpy(out, pathi);
         }
+        free_unicode_buffer(buf1);
+        free_unicode_buffer(buf2);
         return lstrlenW(out);
     }
 
@@ -519,6 +523,8 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
             }
 
             wcscpy(out, baseptr);
+            free_unicode_buffer(buf1);
+            free_unicode_buffer(buf2);
             return lstrlenW(out);
         }
 
@@ -543,6 +549,8 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
                 *ptr = '\\';
                 wcscat(out, ptr);
             }
+            free_unicode_buffer(buf1);
+            free_unicode_buffer(buf2);
             return lstrlenW(out);
         }
 
@@ -552,40 +560,49 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
 
 uint32_t path_get_full_path_handle(HANDLE file_handle, wchar_t *out)
 {
-    wchar_t *input = get_unicode_buffer();
+    wchar_t *input = get_unicode_buffer(); uint32_t ret = 0;
 
     if(_path_from_handle(file_handle, input) != 0) {
-        return path_get_full_pathW(input, out);
+        ret = path_get_full_pathW(input, out);
+    }
+    else {
+        out[0] = 0;
     }
 
-    out[0] = 0;
-    return 0;
+    free_unicode_buffer(input);
+    return ret;
 }
 
 uint32_t path_get_full_path_unistr(const UNICODE_STRING *in, wchar_t *out)
 {
-    wchar_t *input = get_unicode_buffer();
+    wchar_t *input = get_unicode_buffer(); uint32_t ret = 0;
 
     if(in != NULL && in->Buffer != NULL) {
         memcpy(input, in->Buffer, in->Length);
         input[in->Length / sizeof(wchar_t)] = 0;
-        return path_get_full_pathW(input, out);
+        ret = path_get_full_pathW(input, out);
+    }
+    else {
+        out[0] = 0;
     }
 
-    out[0] = 0;
-    return 0;
+    free_unicode_buffer(input);
+    return ret;
 }
 
 uint32_t path_get_full_path_objattr(const OBJECT_ATTRIBUTES *in, wchar_t *out)
 {
-    wchar_t *input = get_unicode_buffer();
+    wchar_t *input = get_unicode_buffer(); uint32_t ret = 0;
 
     if(_path_from_object_attributes(in, input) != 0) {
-        return path_get_full_pathW(input, out);
+        ret = path_get_full_pathW(input, out);
+    }
+    else {
+        out[0] = 0;
     }
 
-    out[0] = 0;
-    return 0;
+    free_unicode_buffer(input);
+    return ret;
 }
 
 static uint32_t _reg_root_handle(HANDLE key_handle, wchar_t *regkey)
@@ -845,6 +862,7 @@ void reg_get_info_from_keyvalue(const void *buf, uint32_t length,
         KEY_VALUE_PARTIAL_INFORMATION *partial =
             (KEY_VALUE_PARTIAL_INFORMATION *) buf;
 
+        *reg_name = NULL;
         *reg_type = partial->Type;
         *data_length = partial->DataLength;
         *data = partial->Data;

@@ -307,3 +307,7 @@ Middle::
 Logging::
 
     u dirpath dirpath
+
+Post::
+
+    free_unicode_buffer(dirpath);

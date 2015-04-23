@@ -89,6 +89,10 @@ Logging::
 
     u filepath filepath
 
+Post::
+
+    free_unicode_buffer(filepath);
+
 
 CreateServiceW
 ==============
@@ -133,6 +137,10 @@ Interesting::
 Logging::
 
     u filepath filepath
+
+Post::
+
+    free_unicode_buffer(filepath);
 
 
 OpenServiceA

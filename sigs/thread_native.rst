@@ -37,6 +37,8 @@ Post::
         sleep_skip_disable();
     }
 
+    free_unicode_buffer(thread_name);
+
 
 NtCreateThreadEx
 ================
@@ -89,6 +91,10 @@ Logging::
 
     u thread_name thread_name
     i process_identifier pid_from_thread_handle(ThreadHandle)
+
+Post::
+
+    free_unicode_buffer(thread_name);
 
 
 NtGetContextThread

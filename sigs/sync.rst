@@ -34,3 +34,9 @@ Pre::
 Logging::
 
     u mutant_name mutant_name
+
+Post::
+
+    if(mutant_name != NULL) {
+        free_unicode_buffer(mutant_name);
+    }

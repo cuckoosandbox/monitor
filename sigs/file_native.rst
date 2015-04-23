@@ -57,6 +57,8 @@ Post::
         }
     }
 
+    free_unicode_buffer(filepath);
+
 
 NtDeleteFile
 ============
@@ -84,6 +86,11 @@ Replace::
 Logging::
 
     u filepath filepath
+
+Post::
+
+    free_unicode_buffer(filepath);
+    free_unicode_buffer(objattr_buffer);
 
 
 NtOpenFile
@@ -129,6 +136,8 @@ Post::
             dropped_add(*FileHandle, filepath);
         }
     }
+
+    free_unicode_buffer(filepath);
 
 
 NtReadFile
@@ -278,6 +287,10 @@ Logging::
     b file_information IoStatusBlock->Information, FileInformation
     u dirpath dirpath
 
+Post::
+
+    free_unicode_buffer(dirpath);
+
 
 NtQueryInformationFile
 ======================
@@ -334,6 +347,7 @@ Pre::
         wchar_t *filepath = get_unicode_buffer();
         path_get_full_path_handle(FileHandle, filepath);
         pipe("FILE_DEL:%Z", filepath);
+        free_unicode_buffer(filepath);
     }
 
 Interesting::
@@ -372,6 +386,10 @@ Logging::
 
     u dirpath dirpath
 
+Post::
+
+    free_unicode_buffer(dirpath);
+
 
 NtCreateDirectoryObject
 =======================
@@ -400,6 +418,10 @@ Logging::
 
     u dirpath dirpath
 
+Post::
+
+    free_unicode_buffer(dirpath);
+
 
 NtQueryAttributesFile
 =====================
@@ -418,6 +440,10 @@ Logging::
 
     u filepath filepath
 
+Post::
+
+    free_unicode_buffer(filepath);
+
 
 NtQueryFullAttributesFile
 =========================
@@ -435,3 +461,7 @@ Pre::
 Logging::
 
     u filepath filepath
+
+Post::
+
+    free_unicode_buffer(filepath);

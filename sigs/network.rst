@@ -16,7 +16,7 @@ Parameters::
 
     *  LPUNKNOWN pCaller
     ** LPWSTR szURL url
-    ** LPWSTR szFileName filepath
+    *  LPWSTR szFileName
     *  DWORD dwReserved
     *  LPVOID lpfnCB
 
@@ -25,11 +25,22 @@ Interesting::
     u url
     u filepath
 
+Pre::
+
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathW(szFileName, filepath);
+
+Logging::
+
+    u filepath filepath
+
 Post::
 
     if(ret == S_OK) {
-        pipe("FILE_NEW:%Z", szFileName);
+        pipe("FILE_NEW:%Z", filepath);
     }
+
+    free_unicode_buffer(filepath);
 
 
 InternetCrackUrlA

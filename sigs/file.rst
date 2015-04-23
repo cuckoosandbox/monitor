@@ -30,6 +30,10 @@ Logging::
 
     u dirpath dirpath
 
+Post::
+
+    free_unicode_buffer(dirpath);
+
 
 CreateDirectoryExW
 ==================
@@ -57,6 +61,10 @@ Logging::
 
     u dirpath dirpath
 
+Post::
+
+    free_unicode_buffer(dirpath);
+
 
 RemoveDirectoryA
 ================
@@ -82,6 +90,10 @@ Logging::
 
     u dirpath dirpath
 
+Post::
+
+    free_unicode_buffer(dirpath);
+
 
 RemoveDirectoryW
 ================
@@ -106,6 +118,10 @@ Interesting::
 Logging::
 
     u dirpath dirpath
+
+Post::
+
+    free_unicode_buffer(dirpath);
 
 
 MoveFileWithProgressW
@@ -154,6 +170,9 @@ Post::
         }
     }
 
+    free_unicode_buffer(oldfilepath);
+    free_unicode_buffer(newfilepath);
+
 
 FindFirstFileExA
 ================
@@ -180,6 +199,10 @@ Logging::
 
     u filepath filepath
 
+Post::
+
+    free_unicode_buffer(filepath);
+
 
 FindFirstFileExW
 ================
@@ -205,6 +228,10 @@ Pre::
 Logging::
 
     u filepath filepath
+
+Post::
+
+    free_unicode_buffer(filepath);
 
 
 CopyFileA
@@ -238,6 +265,11 @@ Logging::
     u oldfilepath oldfilepath
     u newfilepath newfilepath
 
+Post::
+
+    free_unicode_buffer(oldfilepath);
+    free_unicode_buffer(newfilepath);
+
 
 CopyFileW
 =========
@@ -269,6 +301,11 @@ Logging::
 
     u oldfilepath oldfilepath
     u newfilepath newfilepath
+
+Post::
+
+    free_unicode_buffer(oldfilepath);
+    free_unicode_buffer(newfilepath);
 
 
 CopyFileExW
@@ -305,6 +342,11 @@ Logging::
     u oldfilepath oldfilepath
     u newfilepath newfilepath
 
+Post::
+
+    free_unicode_buffer(oldfilepath);
+    free_unicode_buffer(newfilepath);
+
 
 DeleteFileA
 ===========
@@ -331,6 +373,10 @@ Logging::
 
     u filepath filepath
 
+Post::
+
+    free_unicode_buffer(filepath);
+
 
 DeleteFileW
 ===========
@@ -356,6 +402,10 @@ Interesting::
 Logging::
 
     u filepath filepath
+
+Post::
+
+    free_unicode_buffer(filepath);
 
 
 GetFileType
@@ -571,6 +621,10 @@ Logging::
 
     u filepath filepath
 
+Post::
+
+    free_unicode_buffer(filepath);
+
 
 GetFileAttributesW
 ==================
@@ -593,3 +647,7 @@ Logging::
 
     u filepath filepath
     d file_attributes ret
+
+Post::
+
+    free_unicode_buffer(filepath);

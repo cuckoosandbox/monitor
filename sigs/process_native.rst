@@ -46,6 +46,8 @@ Post::
         sleep_skip_disable();
     }
 
+    free_unicode_buffer(filepath);
+
 
 NtCreateProcessEx
 =================
@@ -87,6 +89,8 @@ Post::
         pipe("PROCESS:%d", pid_from_process_handle(*ProcessHandle));
         sleep_skip_disable();
     }
+
+    free_unicode_buffer(filepath);
 
 
 NtCreateUserProcess
@@ -143,6 +147,11 @@ Post::
         sleep_skip_disable();
     }
 
+    free_unicode_buffer(process_name);
+    free_unicode_buffer(thread_name);
+    free_unicode_buffer(filepath);
+    free_unicode_buffer(command_line);
+
 
 RtlCreateUserProcess
 ====================
@@ -183,6 +192,8 @@ Post::
             tid_from_thread_handle(ProcessInformation->ThreadHandle));
         sleep_skip_disable();
     }
+
+    free_unicode_buffer(filepath);
 
 
 NtOpenProcess
@@ -249,6 +260,12 @@ Logging::
 
     u section_name section_name
 
+Post::
+
+    if(section_name != NULL) {
+        free_unicode_buffer(section_name);
+    }
+
 
 NtMakeTemporaryObject
 =====================
@@ -289,6 +306,12 @@ Pre::
 Logging::
 
     u section_name section_name
+
+Post::
+
+    if(section_name != NULL) {
+        free_unicode_buffer(section_name);
+    }
 
 
 NtUnmapViewOfSection

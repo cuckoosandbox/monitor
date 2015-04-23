@@ -478,6 +478,8 @@ void log_new_process()
     log_api(SIG___process__, 1, 0, 0, st.dwLowDateTime,
         st.dwHighDateTime, get_current_process_id(),
         parent_process_id(), module_path);
+
+    free_unicode_buffer(module_path);
 }
 
 void log_anomaly(const char *subcategory, int success,

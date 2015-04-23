@@ -43,6 +43,11 @@ Logging::
     u regkey regkey
     u class class
 
+Post::
+
+    free_unicode_buffer(class);
+    free_unicode_buffer(regkey);
+
 
 NtOpenKey
 =========
@@ -70,6 +75,10 @@ Interesting::
 Logging::
 
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 NtOpenKeyEx
@@ -104,6 +113,10 @@ Logging::
 
     u regkey regkey
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 NtRenameKey
 ===========
@@ -124,6 +137,11 @@ Logging::
 
     u new_name new_name
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(new_name);
+    free_unicode_buffer(regkey);
 
 
 NtReplaceKey
@@ -151,6 +169,12 @@ Logging::
     u newfilepath newfilepath
     u backupfilepath backupfilepath
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(newfilepath);
+    free_unicode_buffer(backupfilepath);
+    free_unicode_buffer(regkey);
 
 
 NtEnumerateKey
@@ -183,6 +207,10 @@ Logging::
 
     B buffer ResultLength, KeyInformation
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 NtEnumerateValueKey
@@ -235,6 +263,13 @@ Logging::
     i reg_type reg_type
     R value &reg_type, &data_length, data
 
+Post::
+
+    free_unicode_buffer(regkey);
+    if(key_name != NULL) {
+        free_unicode_buffer(key_name);
+    }
+
 
 NtSetValueKey
 =============
@@ -269,6 +304,10 @@ Logging::
     i reg_type Type
     R value &Type, &DataSize, Data
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 NtQueryValueKey
@@ -321,6 +360,13 @@ Logging::
     i reg_type reg_type
     R value &reg_type, &data_length, data
 
+Post::
+
+    free_unicode_buffer(regkey);
+    if(key_name != NULL) {
+        free_unicode_buffer(key_name);
+    }
+
 
 NtQueryMultipleValueKey
 =======================
@@ -348,6 +394,10 @@ Logging::
     B buffer BufferLength, ValueBuffer
     u regkey regkey
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 NtDeleteKey
 ===========
@@ -368,6 +418,10 @@ Interesting::
 Logging::
 
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 NtDeleteValueKey
@@ -390,6 +444,10 @@ Interesting::
 Logging::
 
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 NtLoadKey
@@ -417,6 +475,11 @@ Logging::
 
     u filepath source_file
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(source_file);
+    free_unicode_buffer(regkey);
 
 
 NtLoadKey2

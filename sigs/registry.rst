@@ -33,6 +33,10 @@ Logging::
 
     u regkey regkey
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegOpenKeyExW
 =============
@@ -59,6 +63,10 @@ Interesting::
 Logging::
 
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 RegCreateKeyExA
@@ -93,6 +101,10 @@ Logging::
 
     u regkey regkey
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegCreateKeyExW
 ===============
@@ -126,6 +138,10 @@ Logging::
 
     u regkey regkey
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegDeleteKeyA
 =============
@@ -148,6 +164,10 @@ Logging::
 
     u regkey regkey
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegDeleteKeyW
 =============
@@ -169,6 +189,10 @@ Interesting::
 Logging::
 
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 RegEnumKeyW
@@ -194,6 +218,10 @@ Interesting::
 Logging::
 
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 RegEnumKeyExA
@@ -224,6 +252,10 @@ Logging::
 
     u regkey regkey
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegEnumKeyExW
 =============
@@ -252,6 +284,10 @@ Interesting::
 Logging::
 
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 RegEnumValueA
@@ -289,6 +325,10 @@ Logging::
     u regkey regkey
     r value lpType, lpcbData, lpData
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegEnumValueW
 =============
@@ -325,6 +365,10 @@ Logging::
     u regkey regkey
     R value lpType, lpcbData, lpData
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegSetValueExA
 ==============
@@ -358,6 +402,10 @@ Logging::
     u regkey regkey
     r value &dwType, &cbData, lpData
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegSetValueExW
 ==============
@@ -390,6 +438,10 @@ Logging::
 
     u regkey regkey
     R value &dwType, &cbData, lpData
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 RegQueryValueExA
@@ -429,6 +481,10 @@ Logging::
     u regkey regkey
     r value lpType, lpcbData, lpData
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegQueryValueExW
 ================
@@ -467,6 +523,10 @@ Logging::
     u regkey regkey
     R value lpType, lpcbData, lpData
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegDeleteValueA
 ===============
@@ -489,6 +549,10 @@ Logging::
 
     u regkey regkey
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegDeleteValueW
 ===============
@@ -510,6 +574,10 @@ Interesting::
 Logging::
 
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 RegQueryInfoKeyA

@@ -99,6 +99,8 @@ Post::
         hook_library(library);
     }
 
+    free_unicode_buffer(module_name);
+
 
 LdrUnloadDll
 ============
@@ -156,6 +158,10 @@ Pre::
 Logging::
 
     u module_name module_name
+
+Post::
+
+    free_unicode_buffer(module_name);
 
 
 LdrGetProcedureAddress
@@ -361,6 +367,10 @@ Logging::
 
     u driver_service_name driver_service_name
 
+Post::
+
+    free_unicode_buffer(driver_service_name);
+
 
 NtUnloadDriver
 ==============
@@ -381,6 +391,10 @@ Pre::
 Logging::
 
     u driver_service_name driver_service_name
+
+Post::
+
+    free_unicode_buffer(driver_service_name);
 
 
 GetAsyncKeyState
