@@ -23,9 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "flags.h"
 #include "ntapi.h"
 
-// Ignore the first entries which lay within the monitor address space.
-#define STACKTRACE_NOSTARTINMONITOR 1
-
 void misc_init(HMODULE module_handle, const char *shutdown_mutex);
 
 // Call functions from monitor.c indirectly so that we don't have to include
@@ -107,12 +104,6 @@ int our_snprintf(char *buf, int length, const char *fmt, ...);
 
 const uint8_t *module_from_address(const uint8_t *addr);
 uint32_t module_image_size(const uint8_t *addr);
-
-#define COPY_UNICODE_STRING(local_name, param_name) \
-    UNICODE_STRING local_name; \
-    wchar_t *local_name##_buffer = get_unicode_buffer(); \
-    copy_unicode_string(param_name, &local_name, \
-        local_name##_buffer, sizeof(local_name##_buffer));
 
 #define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
     OBJECT_ATTRIBUTES local_name; UNICODE_STRING local_name##_unistr; \

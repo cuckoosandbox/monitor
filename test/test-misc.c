@@ -43,6 +43,7 @@ int main()
 
     hook_init(GetModuleHandle(NULL));
     assert(native_init() == 0);
+    misc_init(GetModuleHandle(NULL), "hoi");
 
     assert(ultostr(42, buf, 10) == 2 && strcmp(buf, "42") == 0);
     assert(ultostr(1337, buf, 10) == 4 && strcmp(buf, "1337") == 0);
