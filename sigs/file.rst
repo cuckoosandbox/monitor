@@ -348,36 +348,6 @@ Post::
     free_unicode_buffer(newfilepath);
 
 
-DeleteFileA
-===========
-
-Signature::
-
-    * Return value: BOOL
-
-Parameters::
-
-    *  LPCSTR lpFileName
-
-Pre::
-
-    wchar_t *filepath = get_unicode_buffer();
-    path_get_full_pathA(lpFileName, filepath);
-    pipe("FILE_DEL:%Z", filepath);
-
-Interesting::
-
-    u filepath
-
-Logging::
-
-    u filepath filepath
-
-Post::
-
-    free_unicode_buffer(filepath);
-
-
 DeleteFileW
 ===========
 
