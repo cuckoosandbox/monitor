@@ -22,11 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "flags.h"
 
 #define MONITOR_FIRSTHOOKIDX {{ first_hook }}
-#define MONITOR_HOOKCNT {{ sigs|length }}
+#define MONITOR_HOOKCNT {{ sigs|rejectattr('ignore')|list|length }}
 
 typedef enum _signature_index_t {
-{%- for sig in sigs: %}
-    SIG_{{ sig.apiname }},
+{%- for hook in sigs if not hook.ignore: %}
+    SIG_{{ hook.apiname }},
 {%- endfor %}
 } signature_index_t;
 
