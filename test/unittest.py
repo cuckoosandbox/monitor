@@ -10,6 +10,8 @@ MULTIPLE = {
     'CFLAGS': True,
     'INC': True,
     'OBJECTS': True,
+    'SUBMIT': False,
+    'OPTIONS': True,
 }
 
 DEFAULTS = {
@@ -22,6 +24,8 @@ DEFAULTS = {
         bson/bson.o bson/numbers.o bson/encoding.o
         ../src/capstone/capstone-x86.lib""".split(),
     'LDFLAGS': ['-lws2_32', '-lshlwapi', '-lole32'],
+    'SUBMIT': '../../cuckoo/utils/submit.py',
+    'OPTIONS': [],
 }
 
 class Dict(dict):
@@ -63,6 +67,12 @@ def process_file(fname):
 
     args = [kw.CC, '-o', output_exe, fname] + kw.CFLAGS + kw.INC + \
         kw.OBJECTS + kw.LDFLAGS
+    subprocess.check_call(args)
+
+    args = [kw.SUBMIT, output_exe]
+    for row in kw.OPTIONS:
+        args += ['--options', row]
+
     subprocess.check_call(args)
 
 if __name__ == '__main__':
