@@ -616,7 +616,7 @@ Pre::
 Logging::
 
     u filepath filepath
-    d file_attributes ret
+    i file_attributes ret
 
 Post::
 
