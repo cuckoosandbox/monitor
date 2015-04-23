@@ -71,17 +71,11 @@ Pre::
 
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
-
-    COPY_OBJECT_ATTRIBUTES(objattr, ObjectAttributes);
     pipe("FILE_DEL:%Z", filepath);
 
 Interesting::
 
     u filepath
-
-Replace::
-
-    ObjectAttributes &objattr
 
 Logging::
 
@@ -90,7 +84,6 @@ Logging::
 Post::
 
     free_unicode_buffer(filepath);
-    free_unicode_buffer(objattr_buffer);
 
 
 NtOpenFile
