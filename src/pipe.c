@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utf8.h"
 
 static CRITICAL_SECTION g_cs;
-static char g_pipe_name[MAX_PATH];
+static wchar_t g_pipe_name[MAX_PATH];
 
 static int _pipe_utf8x(char **out, unsigned short x)
 {
@@ -127,7 +127,7 @@ static int _pipe_sprintf(char *out, const char *fmt, va_list args)
 void pipe_init(const char *pipe_name)
 {
     InitializeCriticalSection(&g_cs);
-    strncpy(g_pipe_name, pipe_name, sizeof(g_pipe_name));
+    wcsncpyA(g_pipe_name, pipe_name, sizeof(g_pipe_name)/sizeof(wchar_t));
 }
 
 int pipe(const char *fmt, ...)
@@ -145,7 +145,7 @@ int pipe(const char *fmt, ...)
     len = _pipe_sprintf(buf, fmt, args);
     va_end(args);
 
-    if(len > 0 && CallNamedPipe(g_pipe_name, buf, len, buf, len,
+    if(len > 0 && CallNamedPipeW(g_pipe_name, buf, len, buf, len,
             (unsigned long *) &len, PIPE_MAX_TIMEOUT) != FALSE) {
         ret = 0;
     }
@@ -169,7 +169,7 @@ int pipe2(void *out, int *outlen, const char *fmt, ...)
     len = _pipe_sprintf(buf, fmt, args);
     va_end(args);
 
-    if(len > 0 && CallNamedPipe(g_pipe_name, buf, len, out, *outlen,
+    if(len > 0 && CallNamedPipeW(g_pipe_name, buf, len, out, *outlen,
             (unsigned long *) outlen, PIPE_MAX_TIMEOUT) != FALSE) {
         ret = 0;
     }
