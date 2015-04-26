@@ -278,15 +278,33 @@ void load_dll_crt(uint32_t pid, const char *dll_path)
 
     void *dll_addr = write_data(pid, dll_path, strlen(dll_path) + 1);
 
-    uint8_t shellcode[128]; uint8_t *ptr = shellcode;
+    uint8_t shellcode[512]; uint8_t *ptr = shellcode;
 
 #if __x86_64__
     ptr += asm_move_regimmv(ptr, R_RCX, dll_addr);
+    ptr += asm_pushv(ptr, NULL);
 #else
     ptr += asm_pushv(ptr, dll_addr);
 #endif
 
     ptr += asm_call(ptr, load_library_a);
+
+#if __x86_64__
+    ptr += asm_add_regimm(ptr, R_RSP, sizeof(uintptr_t));
+#endif
+
+    // If the return value of LoadLibrary was NULL, then we return the
+    // GetLastError(), otherwise we return zero.
+#if __x86_64__
+    ptr += asm_jregz(ptr, R_RAX, ASM_MOVE_REGIMM_SIZE + ASM_RETURN_SIZE);
+    ptr += asm_move_regimm(ptr, R_RAX, 0);
+    ptr += asm_return(ptr, 0);
+#else
+    ptr += asm_jregz(ptr, R_EAX, ASM_MOVE_REGIMM_SIZE + ASM_RETURN_SIZE);
+    ptr += asm_move_regimm(ptr, R_EAX, 0);
+    ptr += asm_return(ptr, 4);
+#endif
+
     ptr += asm_call(ptr, get_last_error);
 
 #if __x86_64__
