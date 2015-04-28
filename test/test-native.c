@@ -50,5 +50,6 @@ int main()
 
     last_error_t err;
     assert((SetLastError(42), get_last_error(&err), err.lasterror == 42));
+    assert((SetLastError(0), set_last_error(&err), GetLastError() == 42));
     return 0;
 }
