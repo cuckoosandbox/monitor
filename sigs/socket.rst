@@ -64,6 +64,31 @@ Logging::
     i socket ret
 
 
+getsockname
+===========
+
+Signature::
+
+    * Is success: ret != SOCKET_ERROR
+    * Return value: int
+
+Parameters::
+
+    ** SOCKET s
+    *  struct sockaddr *name
+    *  int *namelen
+
+Middle::
+
+    const char *ip = NULL; int port = 0;
+    get_ip_port(name, &ip, &port);
+
+Logging::
+
+    s ip_address ip
+    i port port
+
+
 connect
 =======
 
