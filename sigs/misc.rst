@@ -106,7 +106,7 @@ Ensure::
 
 Logging::
 
-    S user_name *lpnSize, lpBuffer
+    S user_name *lpnSize-1, lpBuffer
 
 
 GetUserNameW
@@ -129,7 +129,7 @@ Ensure::
 
 Logging::
 
-    U user_name *lpnSize / sizeof(wchar_t), lpBuffer
+    U user_name *lpnSize-1, lpBuffer
 
 
 GetUserNameExA
