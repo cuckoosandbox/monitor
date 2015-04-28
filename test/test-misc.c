@@ -66,6 +66,7 @@ int main()
     assert(our_snprintf(buf, 64, "%s %s ccc", "a", "bb") == 8 && memcmp(buf, "a bb ccc", 8) == 0);
     assert(our_snprintf(buf, 64, "%p", 0x4141) == 6 && memcmp(buf, "0x4141", 6) == 0);
     assert(our_snprintf(buf, 64, "%p %p", 0x4141, 0x4242) == 13 && memcmp(buf, "0x4141 0x4242", 13) == 0);
+    assert(our_snprintf(buf, 64, "%d %d", 9001, -42) == 8 && strcmp(buf, "9001 -42") == 0);
 
     assert((wcsncpyA(bufW, "hello", 4), wcscmp(bufW, L"hel") == 0));
     assert((wcsncpyA(bufW, "hello", 5), wcscmp(bufW, L"hell") == 0));

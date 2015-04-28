@@ -1183,7 +1183,7 @@ int our_vsnprintf(char *buf, int length, const char *fmt, va_list args)
             continue;
         }
 
-        const char *s; uintptr_t p; int l;
+        const char *s; char tmp[32]; uintptr_t p; intptr_t v, l;
 
         switch (*++fmt) {
         case 's':
@@ -1199,6 +1199,18 @@ int our_vsnprintf(char *buf, int length, const char *fmt, va_list args)
                 *buf++ = '0', *buf++ = 'x';
                 l = ultostr(p, buf, 16);
                 length -= 2 + l, buf += l;
+            }
+            break;
+
+        case 'd':
+            v = va_arg(args, intptr_t);
+            l = ultostr(v >= 0 ? v : -v, tmp, 10);
+            if(length > l + (v < 0)) {
+                if(v < 0) {
+                    v = -v, *buf++ = '-', length--;
+                }
+                l = ultostr(v, buf, 10);
+                length -= l, buf += l;
             }
             break;
 
