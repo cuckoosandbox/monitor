@@ -670,10 +670,14 @@ void log_init(uint32_t ip, uint16_t port)
     log_new_process();
 
 #if DEBUG
-    g_debug_handle = CreateFile("C:\\monitor-debug.txt",
+    char filepath[MAX_PATH];
+    our_snprintf(filepath, MAX_PATH, "C:\\monitor-debug-%d.txt",
+        GetCurrentProcessId());
+
+    g_debug_handle = CreateFile(filepath,
         GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
         NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
-    pipe("FILE_NEW:C:\\monitor-debug.txt");
+    pipe("FILE_NEW:%z", filepath);
 #endif
 }
