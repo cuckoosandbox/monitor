@@ -118,18 +118,6 @@ void monitor_hook(const char *library)
     }
 }
 
-void monitor_notify()
-{
-    // Notify Cuckoo that we're good to go.
-    char name[64];
-    sprintf(name, "CuckooEvent%ld", GetCurrentProcessId());
-    HANDLE event_handle = OpenEvent(EVENT_ALL_ACCESS, FALSE, name);
-    if(event_handle != NULL) {
-        SetEvent(event_handle);
-        CloseHandle(event_handle);
-    }
-}
-
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
 {
     (void) hModule; (void) lpReserved;
@@ -139,7 +127,6 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
         if(is_ignored_process() == 0) {
             monitor_init(hModule);
             monitor_hook(NULL);
-            monitor_notify();
         }
         break;
     }
