@@ -12,6 +12,7 @@ MULTIPLE = {
     'OBJECTS': True,
     'SUBMIT': False,
     'OPTIONS': True,
+    'MODES': True,
 }
 
 DEFAULTS = {
@@ -27,6 +28,7 @@ DEFAULTS = {
     'LDFLAGS': ['-lws2_32', '-lshlwapi', '-lole32'],
     'SUBMIT': '../../cuckoo/utils/submit.py',
     'OPTIONS': [],
+    'MODES': ['winxp', 'win7', 'win7x64'],
 }
 
 class Dict(dict):
@@ -71,7 +73,7 @@ def compile_file(fname, arch):
     args = [compiler, '-o', output_exe, fname] + kw.CFLAGS + kw.INC + \
             kw.OBJECTS + kw.LDFLAGS
     subprocess.check_call(args)
-    return output_exe
+    return kw, output_exe
 
 def submit_file(fname, tags=None):
     args = [kw.SUBMIT, fname]
@@ -85,12 +87,17 @@ def submit_file(fname, tags=None):
     subprocess.check_call(args)
 
 def process_file(fname):
-    outfile = compile_file(fname, 'x86')
-    submit_file(outfile, tags='winxp')
-    submit_file(outfile, tags='win7')
+    kw, outfile = compile_file(fname, 'x86')
 
-    outfile = compile_file(fname, 'x64')
-    submit_file(outfile, tags='win7')
+    if 'winxp' in kw.MODES:
+        submit_file(outfile, tags='winxp')
+
+    if 'win7' in kw.MODES:
+        submit_file(outfile, tags='win7')
+
+    if 'win7x64' in kw.MODES:
+        kw, outfile = compile_file(fname, 'x64')
+        submit_file(outfile, tags='win7')
 
 if __name__ == '__main__':
     curdir = os.path.abspath(os.path.dirname(__file__))
