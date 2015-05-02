@@ -15,14 +15,15 @@ MULTIPLE = {
 }
 
 DEFAULTS = {
-    'CC': 'i686-w64-mingw32-gcc',
+    'CC86': 'i686-w64-mingw32-gcc',
+    'CC64': 'x86_64-w64-mingw32-gcc',
     'CFLAGS': ['-std=c99', '-Wall', '-Werror', '-s'],
     'INC': ['-I', '../inc', '-I', '../objects/code'],
     'OBJECTS': """pipe.o misc.o native.o memory.o utf8.o symbol.o ignore.o
         hooking.o unhook.o assembly.o log.o diffing.o sleep.o dropped.o
         flags.o hooks.o config.o
         bson/bson.o bson/numbers.o bson/encoding.o
-        ../src/capstone/capstone-x86.lib""".split(),
+        ../src/capstone/capstone-%(arch)s.lib""".split(),
     'LDFLAGS': ['-lws2_32', '-lshlwapi', '-lole32'],
     'SUBMIT': '../../cuckoo/utils/submit.py',
     'OPTIONS': [],
@@ -35,8 +36,8 @@ class Dict(dict):
     def __getattr__(self, name):
         return dict.__getitem__(self, name)
 
-def process_file(fname):
-    output_exe = fname.replace('.c', '.exe')
+def compile_file(fname, arch):
+    output_exe = fname.replace('.c', '-%s.exe' % arch)
 
     kw = Dict(DEFAULTS)
     for line in open(fname, 'rb'):
@@ -52,28 +53,44 @@ def process_file(fname):
             kw[key.strip()] = value.strip()
 
     for idx, value in enumerate(kw.OBJECTS):
+        kw.OBJECTS[idx] = value = value % dict(arch=arch)
         if os.path.exists(value):
             continue
 
-        path = os.path.join('..', 'objects', 'x86', 'src', value)
+        path = os.path.join('..', 'objects', arch, 'src', value)
         if os.path.exists(path):
             kw.OBJECTS[idx] = path
             continue
 
-        path = os.path.join('..', 'objects', 'x86', 'code', value)
+        path = os.path.join('..', 'objects', arch, 'code', value)
         if os.path.exists(path):
             kw.OBJECTS[idx] = path
             continue
 
-    args = [kw.CC, '-o', output_exe, fname] + kw.CFLAGS + kw.INC + \
-        kw.OBJECTS + kw.LDFLAGS
+    compiler = kw.CC86 if arch == 'x86' else kw.CC64
+    args = [compiler, '-o', output_exe, fname] + kw.CFLAGS + kw.INC + \
+            kw.OBJECTS + kw.LDFLAGS
     subprocess.check_call(args)
+    return output_exe
 
-    args = [kw.SUBMIT, output_exe]
+def submit_file(fname, tags=None):
+    args = [kw.SUBMIT, fname]
+
     for row in kw.OPTIONS:
         args += ['--options', row]
 
+    if tags:
+        args += ['--tags', tags]
+
     subprocess.check_call(args)
+
+def process_file(fname):
+    outfile = compile_file(fname, 'x86')
+    submit_file(outfile, tags='winxp')
+    submit_file(outfile, tags='win7')
+
+    outfile = compile_file(fname, 'x64')
+    submit_file(outfile, tags='win7')
 
 if __name__ == '__main__':
     curdir = os.path.abspath(os.path.dirname(__file__))
