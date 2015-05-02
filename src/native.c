@@ -164,7 +164,7 @@ int native_init()
             continue;
         }
 
-        dpipe("INFO:Native function %z (0x%x) -> 0x%x",
+        dpipe("DEBUG:Native function %z (0x%x) -> 0x%x",
             g_funcnames[idx], fp, *g_pointers[idx]);
 
         _native_copy_function(*g_pointers[idx], fp);
@@ -186,7 +186,7 @@ int native_init()
         return -1;
     }
 
-    dpipe("INFO:Win32Error offset: 0x%x", g_win32_error_offset);
+    dpipe("DEBUG:Win32Error offset: 0x%x", g_win32_error_offset);
 
     g_nt_status_offset = _native_fetch_mov_eax_imm_offset(
         (const uint8_t *) pRtlGetLastNtStatus);
@@ -195,7 +195,7 @@ int native_init()
         return -1;
     }
 
-    dpipe("INFO:NtStatus   offset: 0x%x", g_nt_status_offset);
+    dpipe("DEBUG:NtStatus   offset: 0x%x", g_nt_status_offset);
     return 0;
 }
 

@@ -274,7 +274,7 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
 
     // If there is an exception available for processing, then process it now.
     if(g_log_exception != 0) {
-        dpipe("INFO:Found exception - reporting it!");
+        dpipe("DEBUG:Found exception - reporting it!");
         _log_exception_perform();
     }
 
