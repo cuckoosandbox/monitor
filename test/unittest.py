@@ -75,7 +75,7 @@ def compile_file(fname, arch):
     subprocess.check_call(args)
     return kw, output_exe
 
-def submit_file(fname, tags=None):
+def submit_file(kw, fname, tags=None):
     args = [kw.SUBMIT, fname]
 
     for row in kw.OPTIONS:
@@ -88,16 +88,23 @@ def submit_file(fname, tags=None):
 
 def process_file(fname):
     kw, outfile = compile_file(fname, 'x86')
+    modes = kw.MODES
 
-    if 'winxp' in kw.MODES:
-        submit_file(outfile, tags='winxp')
+    if 'winxp' in modes:
+        submit_file(kw, outfile, tags='winxp')
+        modes.remove('winxp')
 
-    if 'win7' in kw.MODES:
-        submit_file(outfile, tags='win7')
+    if 'win7' in modes:
+        submit_file(kw, outfile, tags='win7')
+        modes.remove('win7')
 
-    if 'win7x64' in kw.MODES:
+    if 'win7x64' in modes:
         kw, outfile = compile_file(fname, 'x64')
-        submit_file(outfile, tags='win7')
+        submit_file(kw, outfile, tags='win7')
+        modes.remove('win7x64')
+
+    if modes:
+        raise Exception('Incorrect mode(s): %s' % modes)
 
 if __name__ == '__main__':
     curdir = os.path.abspath(os.path.dirname(__file__))
