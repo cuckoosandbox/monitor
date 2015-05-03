@@ -41,8 +41,9 @@ static uintptr_t g_monitor_end;
 
 void (*g_hook_library)(const char *library);
 
-#define HKCU_PREFIX L"\\REGISTRY\\USER\\S-1-5-"
-#define HKLM_PREFIX L"\\REGISTRY\\MACHINE"
+#define HKCU_PREFIX  L"\\REGISTRY\\USER\\S-1-5-"
+#define HKCU_PREFIX2 L"HKEY_USERS\\S-1-5-"
+#define HKLM_PREFIX  L"\\REGISTRY\\MACHINE"
 
 static PVOID (WINAPI *pRtlAddVectoredExceptionHandler)(
     ULONG FirstHandler,
@@ -663,11 +664,31 @@ static uint32_t _reg_key_normalize(wchar_t *regkey)
 
     regkey[length] = 0;
 
-    // HKEY_CURRENT_USER is expanded into this ugly
-    // \\REGISTRY\\USER\\S-1-5-<bunch of numbers> thing which is not
-    // relevant to the monitor and thus we normalize it.
+    // \\REGISTRY\\USER\\S-1-5-<SID of user> is just another way of writing
+    // HKEY_CURRENT_USER, so we normalize it.
     if(wcsnicmp(regkey, HKCU_PREFIX, lstrlenW(HKCU_PREFIX)) == 0) {
         const wchar_t *subkey = wcschr(regkey + lstrlenW(HKCU_PREFIX), '\\');
+        uint32_t offset = _reg_root_handle(HKEY_CURRENT_USER, regkey);
+
+        // Shouldn't be a null pointer but let's just make sure.
+        if(subkey != NULL && length != 0) {
+            // Subtract the part of the key from the length that
+            // we're skipping.
+            length -= subkey - regkey;
+
+            memmove(&regkey[offset], subkey, length * sizeof(wchar_t));
+            regkey[offset + length] = 0;
+            return offset + length;
+        }
+
+        regkey[offset] = 0;
+        return offset;
+    }
+
+    // HKEY_USERS\\S-1-5-<SID of user> is just another way of writing
+    // HKEY_CURRENT_USER, so we normalize it.
+    if(wcsnicmp(regkey, HKCU_PREFIX2, lstrlenW(HKCU_PREFIX2)) == 0) {
+        const wchar_t *subkey = wcschr(regkey + lstrlenW(HKCU_PREFIX2), '\\');
         uint32_t offset = _reg_root_handle(HKEY_CURRENT_USER, regkey);
 
         // Shouldn't be a null pointer but let's just make sure.
