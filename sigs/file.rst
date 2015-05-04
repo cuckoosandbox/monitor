@@ -621,3 +621,46 @@ Logging::
 Post::
 
     free_unicode_buffer(filepath);
+
+
+GetVolumeNameForVolumeMountPointW
+=================================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPCWSTR lpszVolumeMountPoint volume_mount_point
+    ** LPWSTR lpszVolumeName volume_name
+    *  DWORD cchBufferLength
+
+
+GetVolumePathNamesForVolumeNameW
+================================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPCWSTR lpszVolumeName volume_name
+    ** LPWSTR lpszVolumePathNames volume_path_name
+    *  DWORD cchBufferLength
+    *  PDWORD lpcchReturnLength
+
+
+SHGetSpecialFolderLocation
+==========================
+
+Signature::
+
+    * Return value: HRESULT
+
+Parameters::
+
+    ** HWND hwndOwner window_handle
+    ** int nFolder folder_index
+    *  PIDLIST_ABSOLUTE *ppidl

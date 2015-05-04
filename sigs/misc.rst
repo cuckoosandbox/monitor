@@ -311,3 +311,36 @@ Logging::
 Post::
 
     free_unicode_buffer(dirpath);
+
+
+LookupAccountSidW
+=================
+
+Signature::
+
+    * Library: advapi32
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPCWSTR lpSystemName system_name
+    *  PSID lpSid
+    ** LPWSTR lpName account_name
+    *  LPDWORD cchName
+    ** LPWSTR lpReferencedDomainName domain_name
+    *  LPDWORD cchReferencedDomainName
+    *  PSID_NAME_USE peUse
+
+
+ReadCabinetState
+================
+
+Signature::
+
+    * Library: shell32
+    * Return value: BOOL
+
+Parameters::
+
+    *  CABINETSTATE *pcs
+    *  int cLength

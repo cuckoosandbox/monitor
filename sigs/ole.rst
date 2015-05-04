@@ -25,3 +25,15 @@ Interesting::
     b sizeof(CLSID), rclsid
     i class_context
     b sizeof(IID), riid
+
+
+OleInitialize
+=============
+
+Signature::
+
+    * Return value: HRESULT
+
+Parameters::
+
+    *  LPVOID pvReserved

@@ -642,3 +642,73 @@ Interesting::
 
     u hostname
     u service_name
+
+
+GetInterfaceInfo
+================
+
+Signature::
+
+    * Is success: ret == NO_ERROR
+    * Library: iphlpapi
+    * Return value: DWORD
+
+Parameters::
+
+    *  PIP_INTERFACE_INFO pIfTable
+    *  PULONG dwOutBufLen
+
+
+GetAdaptersInfo
+===============
+
+Signature::
+
+    * Is success: ret == NO_ERROR
+    * Library: iphlpapi
+    * Return value: DWORD
+
+Parameters::
+
+    *  PIP_ADAPTER_INFO pAdapterInfo
+    *  PULONG pOutBufLen
+
+
+HttpQueryInfoA
+==============
+
+Signature::
+
+    * Library: wininet
+    * Return value: BOOL
+
+Parameters::
+
+    ** HINTERNET hRequest request_handle
+    ** DWORD dwInfoLevel info_level
+    *  LPVOID lpvBuffer
+    *  LPDWORD lpdwBufferLength
+    ** LPDWORD lpdwIndex index
+
+Logging::
+
+    B buffer lpdwBufferLength, lpvBuffer
+
+
+ObtainUserAgentString
+=====================
+
+Signature::
+
+    * Library: urlmon
+    * Return value: HRESULT
+
+Parameters::
+
+    ** DWORD dwOption option
+    *  LPCSTR *pcszUAOut
+    *  DWORD *cbSize
+
+Logging::
+
+    b user_agent pcszUAOut != NULL ? *pcszUAOut : NULL
