@@ -33,8 +33,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "symbol.h"
 #include "unhook.h"
 
-static os_version_t g_os_version = WINDOWS_XP;
-
 void monitor_init(HMODULE module_handle)
 {
     // Sends crashes to the process rather than showing error popup boxes etc.
@@ -76,23 +74,6 @@ void monitor_init(HMODULE module_handle)
     // Should be the last as some of the other initialization routines extract
     // the image size, EAT pointers, etc while the PE header is still intact.
     destroy_pe_header(module_handle);
-
-    OSVERSIONINFOEX version;
-    version.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-    if(GetVersionEx((OSVERSIONINFO *) &version) != FALSE) {
-        // Windows 2000, Windows XP, or Windows 2003.
-        if(version.dwMajorVersion == 5) {
-            g_os_version = WINDOWS_XP;
-        }
-        // Windows Vista or Windows 7.
-        else if(version.dwMajorVersion == 6 && version.dwMinorVersion < 2) {
-            g_os_version = WINDOWS_7;
-        }
-        // Windows 8 or Windows 8.1.
-        else if(version.dwMajorVersion == 6 && version.dwMinorVersion < 4) {
-            g_os_version = WINDOWS_8;
-        }
-    }
 }
 
 void monitor_hook(const char *library)
@@ -102,15 +83,6 @@ void monitor_hook(const char *library)
         // If a specific library has been specified then we skip all other
         // libraries. This feature is used in the special hook for LdrLoadDll.
         if(library != NULL && stricmp(h->library, library) != 0) {
-            continue;
-        }
-
-        // Check whether the OS version matches.
-        if(h->minimum_os > g_os_version) {
-#if DEBUG
-            pipe("DEBUG:Not hooking %z due to OS version mismatch!",
-                h->funcname);
-#endif
             continue;
         }
 

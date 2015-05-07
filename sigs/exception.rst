@@ -49,7 +49,6 @@ Signature::
 
     * Is success: 1
     * Library: ntdll
-    * Minimum: Windows 7
     * Return value: PVOID
 
 Parameters::
@@ -87,7 +86,6 @@ Signature::
 
     * Is success: 1
     * Library: ntdll
-    * Minimum: Windows 7
     * Return value: ULONG
 
 Parameters::

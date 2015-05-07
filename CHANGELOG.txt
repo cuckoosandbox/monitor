@@ -1,3 +1,4 @@
+- Remove: Removed minimum OS logic - just hook everything that can be hooked.
 - Rewrite: Completely rewritten inject.c (was dllinject.c) to be used for
   injection by Cuckoo. Supports process creation from within another process
   and various other nifty tricks.

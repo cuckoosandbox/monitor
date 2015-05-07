@@ -96,10 +96,6 @@ Post::
 NtCreateUserProcess
 ===================
 
-Signature::
-
-    * Minimum: Windows 7
-
 Parameters::
 
     ** PHANDLE ProcessHandle process_handle

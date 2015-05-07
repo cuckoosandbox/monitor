@@ -54,12 +54,6 @@ class DefinitionProcessor(object):
 
 
 class SignatureProcessor(object):
-    OSVERSIONS = {
-        'Windows XP': 'WINDOWS_XP',
-        'Windows Vista': 'WINDOWS_7',
-        'Windows 7': 'WINDOWS_7',
-    }
-
     def __init__(self, data_dir, out_dir, sig_dirpath, flags):
         self.data_dir = data_dir
         self.flags = flags
@@ -339,15 +333,6 @@ class SignatureProcessor(object):
             if row['signature'].get('calling_convention') != 'WINAPI':
                 raise Exception('Calling convention of %r must be WINAPI.' %
                                 row['apiname'])
-
-            # Check the minimum supported Windows OS version. By default we
-            # assume that all signatures are supported by Windows XP and
-            # upwards.
-            minimum = row['signature'].get('minimum', 'Windows XP')
-            if minimum not in self.OSVERSIONS:
-                raise Exception('Invalid OS Version: %r' % minimum)
-
-            row['signature']['minimum'] = self.OSVERSIONS.get(minimum)
 
             # Check the types of each parameter.
             ensure = {}

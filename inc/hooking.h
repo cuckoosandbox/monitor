@@ -39,9 +39,6 @@ typedef struct _hook_t {
     // Is this a "special" hook?
     int special;
 
-    // Minimum required OS version for this function to exist.
-    os_version_t minimum_os;
-
     // Address of the hooked function.
     uint8_t *addr;
 

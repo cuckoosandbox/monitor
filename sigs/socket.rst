@@ -640,7 +640,6 @@ ConnectEx
 
 Signature::
 
-    * Minimum: Windows 7
     * Return value: BOOL
 
 Parameters::
@@ -670,7 +669,6 @@ TransmitFile
 
 Signature::
 
-    * Minimum: Windows 7
     * Return value: BOOL
 
 Parameters::

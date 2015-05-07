@@ -84,10 +84,6 @@ Post::
 NtOpenKeyEx
 ===========
 
-Signature::
-
-    * Minimum: Windows 7
-
 Parameters::
 
     ** PHANDLE KeyHandle key_handle
@@ -513,10 +509,6 @@ Logging::
 
 NtLoadKeyEx
 ===========
-
-Signature::
-
-    * Minimum: Windows 7
 
 Parameters::
 

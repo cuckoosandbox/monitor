@@ -267,7 +267,7 @@ const char *g_explain_paramnames[][16] = {
 hook_t g_hooks[] = {
 {%- for hook in sigs if not hook.ignore: %}
     {%- if hook.is_hook: %}
-    {"{{ hook.signature.library }}", "{{ hook.apiname }}", (FARPROC) New_{{ hook.apiname }}, (FARPROC *) &Old_{{ hook.apiname }}, {{ hook.signature.special.__int__() }}, {{ hook.signature.minimum }}},
+    {"{{ hook.signature.library }}", "{{ hook.apiname }}", (FARPROC) New_{{ hook.apiname }}, (FARPROC *) &Old_{{ hook.apiname }}, {{ hook.signature.special.__int__() }}},
     {%- endif %}
 {%- endfor %}
     {NULL},

@@ -441,7 +441,7 @@ int hook(hook_t *h)
 
     FARPROC addr = GetProcAddress(module_handle, h->funcname);
     if(addr == NULL) {
-        pipe("CRITICAL:Error resolving function %z!%z.",
+        pipe("DEBUG:Error resolving function %z!%z.",
             h->library, h->funcname);
         return -1;
     }
