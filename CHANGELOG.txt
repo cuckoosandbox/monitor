@@ -1,4 +1,17 @@
 - Remove: Removed minimum OS logic - just hook everything that can be hooked.
+- New: Various function signatures that eliminate unnecessary log entries.
+- Tweak: Change from iterating through unicode buffers to basic memory
+  management where each allocated buffer has to be freed.
+- New: Start on unittests of monitor functionality.
+- Tweak: Provide our own implementation of more general purpose functionality.
+- Feature: Allow the current working directory to be set when creating a new
+  process.
+- New: Introduce is32bit.exe to inject the 32-bit or 64-bit monitor based on
+  the original executable of the process to be injected.
+- Feature: Fixup compiler warnings, introduce stacktrace() in 64-bit mode, and
+  fixup 64-bit calling convention in order to allow 64-bit analysis.
+- Feature: Create process from another injected process - select by process
+  name.
 - Rewrite: Completely rewritten inject.c (was dllinject.c) to be used for
   injection by Cuckoo. Supports process creation from within another process
   and various other nifty tricks.
