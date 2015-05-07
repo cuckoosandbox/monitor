@@ -344,3 +344,26 @@ Parameters::
 
     *  CABINETSTATE *pcs
     *  int cLength
+
+
+NetGetJoinInformation
+=====================
+
+Signature::
+
+    * Library: netapi32
+    * Return value: NET_API_STATUS
+
+Parameters::
+
+    ** LPCWSTR lpServer server
+    *  LPWSTR *lpNameBuffer
+    *  PNETSETUP_JOIN_STATUS BufferType
+
+Ensure::
+
+    lpNameBuffer
+
+Logging::
+
+    u name *lpNameBuffer
