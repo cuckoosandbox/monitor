@@ -1,3 +1,4 @@
+- Remove: ExitThread and ExitProcess signatures (thanks Accuvant).
 - Tweak: Improve compilation so that helper code does not depend on
   automatically generated code, therefore improving compilation time when
   working on signatures.

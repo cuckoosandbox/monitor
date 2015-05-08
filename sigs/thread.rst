@@ -56,19 +56,6 @@ Post::
     }
 
 
-ExitThread
-==========
-
-Signature::
-
-    * Prelog: instant
-    * Return value: void
-
-Parameters::
-
-    ** DWORD dwExitCode status_code
-
-
 Thread32First
 =============
 

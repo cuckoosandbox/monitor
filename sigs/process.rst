@@ -82,24 +82,6 @@ Post::
     free_unicode_buffer(filepath);
 
 
-ExitProcess
-===========
-
-Signature::
-
-    * Library: kernel32
-    * Return value: void
-    * Prelog: instant
-
-Parameters::
-
-    ** UINT uExitCode status_code
-
-Interesting::
-
-    i status_code
-
-
 ShellExecuteExW
 ===============
 
