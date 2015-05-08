@@ -1058,44 +1058,6 @@ void clsid_to_string(REFCLSID rclsid, wchar_t *buf)
     }
 }
 
-wchar_t *flag_to_string(flag_t which, uint32_t flag)
-{
-    if(which >= FLAGCNT) {
-        pipe("CRITICAL:Unknown flag to represent!");
-        return NULL;
-    }
-
-    wchar_t *ret = get_unicode_buffer();
-    for (const flag_repr_t *f = g_flags[which]; f->type != FLAGTYP_NONE;
-            f++) {
-        switch (f->type) {
-        case FLAGTYP_ENUM:
-            if((flag & f->value) == f->value) {
-                if(*ret != 0) {
-                    wcscat(ret, L"|");
-                }
-                wcsncpyA(ret + lstrlenW(ret), f->repr,
-                    MAX_PATH_W+1 - lstrlenW(ret));
-                flag &= ~f->value;
-            }
-            break;
-
-        case FLAGTYP_VALUE:
-            if(f->value == flag) {
-                wcsncpyA(ret, f->repr, MAX_PATH_W+1);
-                return ret;
-            }
-            break;
-        }
-    }
-
-    if(flag != 0) {
-        const wchar_t *fmt = *ret != 0 ? L"|0x%08x" : L"0x%08x";
-        wsprintfW(ret + lstrlenW(ret), fmt, flag);
-    }
-    return ret;
-}
-
 void *wsabuf_get_buffer(uint32_t buffer_count, WSABUF *buffers,
     uint32_t length)
 {
