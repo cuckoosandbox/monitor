@@ -1,3 +1,6 @@
+- Tweak: Improve compilation so that helper code does not depend on
+  automatically generated code, therefore improving compilation time when
+  working on signatures.
 - Remove: Removed minimum OS logic - just hook everything that can be hooked.
 - New: Various function signatures that eliminate unnecessary log entries.
 - Tweak: Change from iterating through unicode buffers to basic memory
