@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <winioctl.h>
 #include <shlobj.h>
 #include "flags.h"
+#include "log.h"
 #include "ntapi.h"
 
 {% for flag in flags.values(): %}
@@ -39,3 +40,8 @@ const flag_repr_t *g_flags[FLAGCNT] = {
     _{{ name }},
 {%- endfor %}
 };
+
+const flag_repr_t *flag_value(uint32_t flagidx)
+{
+    return g_flags[flagidx];
+}

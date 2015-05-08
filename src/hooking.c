@@ -26,7 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "capstone/include/capstone.h"
 #include "capstone/include/x86.h"
 #include "hooking.h"
-#include "hook-info.h"
 #include "memory.h"
 #include "misc.h"
 #include "native.h"
@@ -455,7 +454,7 @@ int hook(hook_t *h)
     static uint8_t *func_stubs = NULL;
 
     if(func_stubs == NULL) {
-        func_stubs = virtual_alloc(NULL, MONITOR_HOOKCNT * 64 + 8,
+        func_stubs = virtual_alloc(NULL, sig_hook_count() * 64 + 8,
             MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
         if(func_stubs == NULL) {
             pipe("CRITICAL:Error allocating memory for hooks!");
@@ -464,7 +463,7 @@ int hook(hook_t *h)
 
         // 8-byte align.
         func_stubs += 8 - ((uintptr_t) func_stubs & 7);
-        memset(func_stubs, 0xcc, MONITOR_HOOKCNT * 64);
+        memset(func_stubs, 0xcc, sig_hook_count() * 64);
     }
 
     h->func_stub = func_stubs;

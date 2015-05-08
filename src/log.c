@@ -24,9 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include <winsock.h>
 #include "bson/bson.h"
-#include "flags.h"
 #include "hooking.h"
-#include "hook-info.h"
 #include "memory.h"
 #include "misc.h"
 #include "native.h"
@@ -43,7 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static CRITICAL_SECTION g_mutex;
 static SOCKET g_sock = INVALID_SOCKET;
 static unsigned int g_starttick;
-static uint8_t g_api_init[MONITOR_HOOKCNT];
+static uint8_t *g_api_init;
 static int g_log_exception;
 
 static HANDLE g_debug_handle;
@@ -171,26 +169,26 @@ static void log_buffer(bson *b, const char *idx,
         (const char *) buf, trunclength);
 }
 
-void log_explain(signature_index_t index)
+void log_explain(uint32_t index)
 {
     bson b; char argidx[4];
 
     bson_init_size(&b, mem_suggested_size(1024));
     bson_append_int(&b, "I", index);
-    bson_append_string(&b, "name", g_explain_apinames[index]);
+    bson_append_string(&b, "name", sig_apiname(index));
     bson_append_string(&b, "type", "info");
-    bson_append_string(&b, "category", g_explain_categories[index]);
+    bson_append_string(&b, "category", sig_category(index));
 
     bson_append_start_array(&b, "args");
     bson_append_string(&b, "0", "is_success");
     bson_append_string(&b, "1", "retval");
 
-    const char *fmt = g_explain_paramtypes[index];
+    const char *fmt = sig_paramtypes(index);
 
     for (uint32_t argnum = 2; *fmt != 0; argnum++, fmt++) {
         ultostr(argnum, argidx, 10);
 
-        const char *argname = g_explain_paramnames[index][argnum-2];
+        const char *argname = sig_param_name(index, argnum-2);
 
         // On certain formats, we need to tell cuckoo about them for
         // nicer display / matching.
@@ -214,9 +212,9 @@ void log_explain(signature_index_t index)
         [FLAGTYP_VALUE] = "value",
     };
 
-    for (uint32_t idx = 0; g_api_flags[index][idx] != FLAG_NONE; idx++) {
-        const flag_repr_t *f = g_flags[g_api_flags[index][idx]];
-        bson_append_start_array(&b, g_api_flagnames[index][idx]);
+    for (uint32_t idx = 0; sig_flag_value(index, idx) != FLAG_NONE; idx++) {
+        const flag_repr_t *f = flag_value(sig_flag_value(index, idx));
+        bson_append_start_array(&b, sig_flag_name(index, idx));
 
         for (uint32_t idx2 = 0; f->type != FLAGTYP_NONE; idx2++, f++) {
             ultostr(idx, argidx, 10);
@@ -264,7 +262,7 @@ static void _log_stacktrace(bson *b)
 
 #endif
 
-void log_api(signature_index_t index, int is_success, uintptr_t return_value,
+void log_api(uint32_t index, int is_success, uintptr_t return_value,
     uint64_t hash, ...)
 {
     va_list args; char idx[4];
@@ -303,7 +301,7 @@ void log_api(signature_index_t index, int is_success, uintptr_t return_value,
 
     int argnum = 2;
 
-    for (const char *fmt = g_explain_paramtypes[index]; *fmt != 0; fmt++) {
+    for (const char *fmt = sig_paramtypes(index); *fmt != 0; fmt++) {
         ultostr(argnum++, idx, 10);
 
         if(*fmt == 's') {
@@ -475,7 +473,7 @@ void log_new_process()
     FILETIME st;
     GetSystemTimeAsFileTime(&st);
 
-    log_api(SIG___process__, 1, 0, 0, st.dwLowDateTime,
+    log_api(sig_index_process(), 1, 0, 0, st.dwLowDateTime,
         st.dwHighDateTime, get_current_process_id(),
         parent_process_id(), module_path);
 
@@ -485,7 +483,7 @@ void log_new_process()
 void log_anomaly(const char *subcategory, int success,
     const char *funcname, const char *msg)
 {
-    log_api(SIG___anomaly__, success, 0, 0,
+    log_api(sig_index_anomaly(), success, 0, 0,
         GetCurrentThreadId(), subcategory, funcname, msg);
 }
 
@@ -591,7 +589,7 @@ static void _log_exception_perform()
     bson_finish(&s);
     bson_finish(&b);
 
-    log_api(SIG___exception__, 1, 0, 0, &e, &b, &s);
+    log_api(sig_index_exception(), 1, 0, 0, &e, &b, &s);
 
     bson_destroy(&e);
     bson_destroy(&s);
@@ -635,6 +633,7 @@ void log_init(uint32_t ip, uint16_t port)
     InitializeCriticalSection(&g_mutex);
 
     bson_set_heap_stuff(&_bson_malloc, &_bson_realloc, &_bson_free);
+    g_api_init = virtual_alloc_rw(NULL, sig_count() * sizeof(uint8_t));
 
     WSADATA wsa;
     WSAStartup(MAKEWORD(2, 2), &wsa);

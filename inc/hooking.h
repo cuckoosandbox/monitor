@@ -71,6 +71,7 @@ int hook(hook_t *h);
 
 int disasm(const void *addr, char *str);
 
-extern hook_t g_hooks[];
+hook_t *sig_hooks();
+uint32_t sig_hook_count();
 
 #endif

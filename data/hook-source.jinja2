@@ -87,7 +87,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {%- for hook in sigs if hook.is_hook and not hook.ignore: %}
 
 
-{{ hook.signature.return_value }} ({{ hook.signature.calling_convention }} *Old_{{ hook.apiname }})(
+static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }} *Old_{{ hook.apiname }})(
 {%- for param in hook.parameters: %}
     {{ param.argtype }}
     {%- if not param.argtype.endswith('*') %} {% endif -%}
@@ -96,7 +96,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {%- endfor %}
 );
 
-{{ hook.signature.return_value }} {{ hook.signature.calling_convention }} New_{{ hook.apiname }}(
+static {{ hook.signature.return_value }} {{ hook.signature.calling_convention }} New_{{ hook.apiname }}(
 {%- for param in hook.parameters: %}
     {{ param.argtype }}
     {%- if not param.argtype.endswith('*') %} {% endif -%}
@@ -216,21 +216,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 {%- endfor %}
 
-const char *g_explain_apinames[] = {
+static const char *g_explain_apinames[] = {
 {%- for hook in sigs if not hook.ignore: %}
     "{{ hook.apiname }}",
 {%- endfor %}
     NULL,
 };
 
-const char *g_explain_categories[] = {
+static const char *g_explain_categories[] = {
 {%- for hook in sigs if not hook.ignore: %}
     // {{ hook.apiname }}
     "{{ hook.signature.category }}",
 {%- endfor %}
 };
 
-const char *g_explain_paramtypes[] = {
+static const char *g_explain_paramtypes[] = {
 {%- for hook in sigs if not hook.ignore: %}
     // {{ hook.apiname }}
     "
@@ -247,7 +247,7 @@ const char *g_explain_paramtypes[] = {
 {%- endfor %}
 };
 
-const char *g_explain_paramnames[][16] = {
+static const char *g_explain_paramnames[][16] = {
 {%- for hook in sigs if not hook.ignore: %}
     // {{ hook.apiname }}
     {
@@ -264,7 +264,7 @@ const char *g_explain_paramnames[][16] = {
 {%- endfor %}
 };
 
-hook_t g_hooks[] = {
+static hook_t g_hooks[] = {
 {%- for hook in sigs if not hook.ignore: %}
     {%- if hook.is_hook: %}
     {"{{ hook.signature.library }}", "{{ hook.apiname }}", (FARPROC) New_{{ hook.apiname }}, (FARPROC *) &Old_{{ hook.apiname }}, {{ hook.signature.special.__int__() }}},
@@ -273,7 +273,7 @@ hook_t g_hooks[] = {
     {NULL},
 };
 
-const flag_t g_api_flags[MONITOR_HOOKCNT][8] = {
+static const flag_t g_api_flags[MONITOR_HOOKCNT][8] = {
 {%- for hook in sigs if not hook.ignore: %}
     [SIG_{{ hook.apiname }}] = {
         {%- for flag in hook.flags: %}
@@ -284,7 +284,7 @@ const flag_t g_api_flags[MONITOR_HOOKCNT][8] = {
 {%- endfor %}
 };
 
-const char *g_api_flagnames[MONITOR_HOOKCNT][8] = {
+static const char *g_api_flagnames[MONITOR_HOOKCNT][8] = {
 {%- for hook in sigs if not hook.ignore: %}
     [SIG_{{ hook.apiname }}] = {
         {%- for flag in hook.flags: %}
@@ -294,3 +294,63 @@ const char *g_api_flagnames[MONITOR_HOOKCNT][8] = {
     },
 {%- endfor %}
 };
+
+const char *sig_flag_name(uint32_t sigidx, uint32_t flagidx)
+{
+    return g_api_flagnames[sigidx][flagidx];
+}
+
+uint32_t sig_flag_value(uint32_t sigidx, uint32_t flagidx)
+{
+    return g_api_flags[sigidx][flagidx];
+}
+
+const char *sig_apiname(uint32_t sigidx)
+{
+    return g_explain_apinames[sigidx];
+}
+
+const char *sig_category(uint32_t sigidx)
+{
+    return g_explain_categories[sigidx];
+}
+
+const char *sig_paramtypes(uint32_t sigidx)
+{
+    return g_explain_paramtypes[sigidx];
+}
+
+const char *sig_param_name(uint32_t sigidx, uint32_t argidx)
+{
+    return g_explain_paramnames[sigidx][argidx];
+}
+
+uint32_t sig_count()
+{
+    return MONITOR_HOOKCNT;
+}
+
+uint32_t sig_index_process()
+{
+    return SIG___process__;
+}
+
+uint32_t sig_index_anomaly()
+{
+    return SIG___anomaly__;
+}
+
+uint32_t sig_index_exception()
+{
+    return SIG___exception__;
+}
+
+hook_t *sig_hooks()
+{
+    return g_hooks;
+}
+
+uint32_t sig_hook_count()
+{
+    return MONITOR_HOOKCNT;
+}

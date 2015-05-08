@@ -75,13 +75,13 @@ $(LIBCAPSTONE64): src/capstone/config.mk
 	BUILDDIR=../../objects/x64/capstone/ ./make.sh cross-win64 && \
 	cp ../../objects/x64/capstone/capstone.lib capstone-x64.lib
 
-objects/x86/%.o: %.c $(HEADER) $(HOOKSRC) Makefile
+objects/x86/%.o: %.c $(HEADER) Makefile
 	$(CC32) -c -o $@ $< $(CFLAGS)
 
 objects/x86/%.o: objects/x86/%.c $(HEADER) $(HOOKSRC) Makefile
 	$(CC32) -c -o $@ $< $(CFLAGS)
 
-objects/x64/%.o: %.c $(HEADER) $(HOOKSRC) Makefile
+objects/x64/%.o: %.c $(HEADER) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS)
 
 objects/x64/%.o: objects/x64/%.c $(HEADER) $(HOOKSRC) Makefile

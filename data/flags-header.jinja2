@@ -22,16 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <windows.h>
 
-#define FLAGTYP_NONE  0
-#define FLAGTYP_ENUM  1
-#define FLAGTYP_VALUE 2
-
-typedef struct _flag_repr_t {
-    uint32_t type;
-    uint32_t value;
-    const char *repr;
-} flag_repr_t;
-
 typedef enum _flag_t {
     FLAG_NONE,
 {%- for name in flags: %}
@@ -39,7 +29,5 @@ typedef enum _flag_t {
 {%- endfor %}
     FLAGCNT,
 } flag_t;
-
-const flag_repr_t *g_flags[FLAGCNT];
 
 #endif

@@ -79,7 +79,7 @@ void monitor_init(HMODULE module_handle)
 void monitor_hook(const char *library)
 {
     // Initialize data about each hook.
-    for (hook_t *h = g_hooks; h->funcname != NULL; h++) {
+    for (hook_t *h = sig_hooks(); h->funcname != NULL; h++) {
         // If a specific library has been specified then we skip all other
         // libraries. This feature is used in the special hook for LdrLoadDll.
         if(library != NULL && stricmp(h->library, library) != 0) {
