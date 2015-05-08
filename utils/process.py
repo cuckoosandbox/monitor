@@ -426,19 +426,11 @@ class SignatureProcessor(object):
 
         self.sigs = sigs
 
-    def render(self, exclude_category=[], exclude_api=[], debug=False):
-        # Exclude categories.
+    def render(self, apis=[], debug=False):
+        # If set, only hook the specified functions.
         for sig in self.sigs:
-            if sig['signature']['category'] in exclude_category:
-                print 'Ignoring Category %s (api %s)' % (
-                    sig['signature']['category'], sig['apiname'])
-                sig['ignore'] = True
-
-        # Exclude apis.
-        for sig in self.sigs:
-            if sig['apiname'] in exclude_api:
-                print 'Ignoring API %s (category %s)' % (
-                    sig['apiname'], sig['signature']['category'])
+            if apis and sig['apiname'] not in apis and \
+                    not sig['apiname'].startswith('__'):
                 sig['ignore'] = True
 
         self.dp.render('hook-header', self.hooks_h, sigs=self.sigs)
@@ -563,35 +555,28 @@ if __name__ == '__main__':
     parser.add_argument('output_directory', type=str, help='Output directory.')
     parser.add_argument('signatures_directory', type=str, help='Signature directory.')
     parser.add_argument('flags_directory', type=str, nargs='?', help='Flags directory.')
-    parser.add_argument('--exclude-category', type=str, help='Exclude one or more categories.')
-    parser.add_argument('--exclude-api', type=str, help='Exclude one or more apis.')
+    parser.add_argument('--apis', type=str, help='If set, only hook these functions.')
     args = parser.parse_args()
 
     fp = FlagsProcessor(args.data_directory, args.output_directory)
     fp.process(args.flags_directory)
-    fp.write()
 
     dp = SignatureProcessor(args.data_directory, args.output_directory,
                             args.signatures_directory, fp.flags.keys())
     dp.process()
 
-    exclude_category = []
-    if args.exclude_category:
-        for category in args.exclude_category.split(','):
-            if category.strip():
-                exclude_category.append(category.strip())
-
-    exclude_api = []
-    if args.exclude_api:
-        for api in args.exclude_api.split(','):
+    apis = []
+    if args.apis:
+        for api in args.apis.split(','):
             if api.strip():
-                exclude_api.append(api.strip())
+                apis.append(api.strip())
 
     if args.action == 'release':
-        dp.render(exclude_category=exclude_category, exclude_api=exclude_api)
+        fp.write()
+        dp.render(apis=apis)
     elif args.action == 'debug':
-        dp.render(exclude_category=exclude_category, exclude_api=exclude_api,
-                  debug=True)
+        fp.write()
+        dp.render(apis=apis, debug=True)
     elif args.action == 'list-categories':
         dp.list_categories()
     elif args.action == 'list-apis':
