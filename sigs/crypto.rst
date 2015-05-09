@@ -377,3 +377,45 @@ Parameters::
 Flags::
 
     algorithm_identifier
+
+
+CryptDecodeObjectEx
+===================
+
+Signature::
+
+    * Library: crypt32
+    * Return value: BOOL
+
+Parameters::
+
+    ** DWORD dwCertEncodingType encoding_type
+    *  LPCSTR lpszStructType
+    *  const BYTE *pbEncoded
+    *  DWORD cbEncoded
+    ** DWORD dwFlags flags
+    *  PCRYPT_DECODE_PARA pDecodePara
+    *  void *pvStructInfo
+    *  DWORD *pcbStructInfo
+
+Pre::
+
+    char number[32]; const char *struct_type = lpszStructType;
+    if((((uintptr_t) lpszStructType) & 0xffff) ==
+            (uintptr_t) lpszStructType) {
+        sprintf(number, "#%d", (uint16_t) (uintptr_t) lpszStructType);
+        struct_type = number;
+    }
+
+Middle::
+
+    void *buf = pvStructInfo;
+
+    if((dwFlags & CRYPT_ENCODE_ALLOC_FLAG) != 0) {
+        buf = *(void **) pvStructInfo;
+    }
+
+Logging::
+
+    s struct_type struct_type
+    B buffer pcbStructInfo, buf

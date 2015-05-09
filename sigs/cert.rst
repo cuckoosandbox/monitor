@@ -4,6 +4,36 @@ Signature::
     * Category: certificate
 
 
+CertOpenStore
+=============
+
+Signature::
+
+    * Library: crypt32
+    * Return value: HCERTSTORE
+
+Parameters::
+
+    *  LPCSTR lpszStoreProvider
+    ** DWORD dwMsgAndCertEncodingType encoding_type
+    *  HCRYPTPROV hCryptProv
+    ** DWORD dwFlags flags
+    *  const void *pvPara
+
+Pre::
+
+    char number[32]; const char *store_provider = lpszStoreProvider;
+    if((((uintptr_t) lpszStoreProvider) & 0xffff) ==
+            (uintptr_t) lpszStoreProvider) {
+        sprintf(number, "#%d", (uint16_t) (uintptr_t) lpszStoreProvider);
+        store_provider = number;
+    }
+
+Logging::
+
+    s store_provider store_provider
+
+
 CertOpenSystemStoreA
 ====================
 
