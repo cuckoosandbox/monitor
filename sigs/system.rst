@@ -434,6 +434,10 @@ Pre::
     tid = GetWindowThreadProcessId(hWnd, &pid);
     pipe("PROCESS2:%d,%d", pid, tid);
 
+Logging::
+
+    l process_identifier (uintptr_t) pid
+
 
 SendNotifyMessageW
 ==================
@@ -457,6 +461,10 @@ Pre::
     // TODO Will this still happen before the notify message is executed?
     tid = GetWindowThreadProcessId(hWnd, &pid);
     pipe("PROCESS2:%d,%d", pid, tid);
+
+Logging::
+
+    l process_identifier (uintptr_t) pid
 
 
 RtlCompressBuffer
