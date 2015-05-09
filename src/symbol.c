@@ -135,7 +135,6 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
 
     const uint8_t *mod = module_from_address(addr);
     if(mod == NULL) {
-        pipe("DEBUG:Unable to find module for address 0x%x.", addr);
         return -1;
     }
 

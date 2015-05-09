@@ -164,9 +164,6 @@ int native_init()
             continue;
         }
 
-        dpipe("DEBUG:Native function %z (0x%x) -> 0x%x",
-            g_funcnames[idx], fp, *g_pointers[idx]);
-
         _native_copy_function(*g_pointers[idx], fp);
     }
 
@@ -186,16 +183,12 @@ int native_init()
         return -1;
     }
 
-    dpipe("DEBUG:Win32Error offset: 0x%x", g_win32_error_offset);
-
     g_nt_status_offset = _native_fetch_mov_eax_imm_offset(
         (const uint8_t *) pRtlGetLastNtStatus);
     if(g_nt_status_offset < 0) {
         pipe("CRITICAL:Unknown offset for NtStatus!");
         return -1;
     }
-
-    dpipe("DEBUG:NtStatus   offset: 0x%x", g_nt_status_offset);
     return 0;
 }
 
