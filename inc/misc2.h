@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <winsock2.h>
 
-void *wsabuf_get_buffer(uint32_t buffer_count, WSABUF *buffers,
-    uint32_t length);
+void wsabuf_get_buffer(uint32_t buffer_count, const WSABUF *buffers,
+    uint8_t **ptr, uint32_t *length);
 
 #endif

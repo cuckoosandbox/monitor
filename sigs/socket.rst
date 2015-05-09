@@ -406,22 +406,20 @@ Parameters::
     *  LPWSAOVERLAPPED lpOverlapped
     *  LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
 
-Ensure::
-
-    lpNumberOfBytesRecvd
-
 Middle::
 
-    uint8_t *buf = wsabuf_get_buffer(dwBufferCount,
-        lpBuffers, *lpNumberOfBytesRecvd);
+    uint8_t *buf = NULL; uint32_t length = 0;
+    wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
 Logging::
 
-    B buffer lpNumberOfBytesRecvd, buf
+    B buffer length, buf
 
 Post::
 
-    mem_free(buf);
+    if(buf != NULL) {
+        mem_free(buf);
+    }
 
 
 WSARecvFrom
@@ -444,17 +442,13 @@ Parameters::
     *  LPWSAOVERLAPPED lpOverlapped
     *  LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
 
-Ensure::
-
-    lpNumberOfBytesRecvd
-
 Middle::
 
     const char *ip = NULL; int port = 0;
     get_ip_port(lpFrom, &ip, &port);
 
-    uint8_t *buf = wsabuf_get_buffer(dwBufferCount,
-        lpBuffers, *lpNumberOfBytesRecvd);
+    uint8_t *buf = NULL; uint32_t length = 0;
+    wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
 Logging::
 
@@ -464,7 +458,9 @@ Logging::
 
 Post::
 
-    mem_free(buf);
+    if(buf != NULL) {
+        mem_free(buf);
+    }
 
 
 WSASend
@@ -485,14 +481,10 @@ Parameters::
     *  LPWSAOVERLAPPED lpOverlapped
     *  LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
 
-Ensure::
-
-    lpNumberOfBytesSent
-
 Middle::
 
-    uint8_t *buf = wsabuf_get_buffer(dwBufferCount,
-        lpBuffers, *lpNumberOfBytesSent);
+    uint8_t *buf = NULL; uint32_t length = 0;
+    wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
 Logging::
 
@@ -500,7 +492,9 @@ Logging::
 
 Post::
 
-    mem_free(buf);
+    if(buf != NULL) {
+        mem_free(buf);
+    }
 
 
 WSASendTo
@@ -523,10 +517,6 @@ Parameters::
     *  LPWSAOVERLAPPED lpOverlapped
     *  LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
 
-Ensure::
-
-    lpNumberOfBytesSent
-
 Pre::
 
     const char *ip = NULL; int port = 0;
@@ -534,8 +524,8 @@ Pre::
 
 Middle::
 
-    uint8_t *buf = wsabuf_get_buffer(dwBufferCount,
-        lpBuffers, *lpNumberOfBytesSent);
+    uint8_t *buf = NULL; uint32_t length = 0;
+    wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
 Logging::
 
@@ -545,7 +535,9 @@ Logging::
 
 Post::
 
-    mem_free(buf);
+    if(buf != NULL) {
+        mem_free(buf);
+    }
 
 
 WSASocketA

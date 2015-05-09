@@ -1058,19 +1058,23 @@ void clsid_to_string(REFCLSID rclsid, wchar_t *buf)
     }
 }
 
-void *wsabuf_get_buffer(uint32_t buffer_count, WSABUF *buffers,
-    uint32_t length)
+void wsabuf_get_buffer(uint32_t buffer_count, const WSABUF *buffers,
+    uint8_t **ptr, uint32_t *length)
 {
-    uint8_t *ret = (uint8_t *) mem_alloc(length);
-    if(ret != NULL) {
+    *length = 0;
+    for (uint32_t idx = 0; idx < buffer_count; idx++) {
+        *length += buffers[idx].len;
+    }
+
+    *ptr = (uint8_t *) mem_alloc(*length);
+    if(*ptr != NULL) {
         for (uint32_t idx = 0, offset = 0; idx < buffer_count; idx++) {
             if(buffers[idx].buf != NULL && buffers[idx].len != 0) {
-                memcpy(&ret[offset], buffers[idx].buf, buffers[idx].len);
+                memcpy(&(*ptr)[offset], buffers[idx].buf, buffers[idx].len);
                 offset += buffers[idx].len;
             }
         }
     }
-    return ret;
 }
 
 uint64_t hash_buffer(const void *buf, uint32_t length)
