@@ -263,10 +263,10 @@ static void _log_stacktrace(bson *b)
 #endif
 
 void log_api(uint32_t index, int is_success, uintptr_t return_value,
-    uint64_t hash, ...)
+    uint64_t hash, last_error_t *lasterr, ...)
 {
     va_list args; char idx[4];
-    va_start(args, hash);
+    va_start(args, lasterr);
 
     EnterCriticalSection(&g_mutex);
 
@@ -290,6 +290,12 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
     bson_append_int(&b, "T", GetCurrentThreadId());
     bson_append_int(&b, "t", GetTickCount() - g_starttick);
     bson_append_long(&b, "h", hash);
+
+    // If failure has been determined, then log the last error as well.
+    if(is_success == 0) {
+        bson_append_int(&b, "e", lasterr->lasterror);
+        bson_append_int(&b, "E", lasterr->nt_status);
+    }
 
 #if DEBUG
     _log_stacktrace(&b);
@@ -473,7 +479,7 @@ void log_new_process()
     FILETIME st;
     GetSystemTimeAsFileTime(&st);
 
-    log_api(sig_index_process(), 1, 0, 0, st.dwLowDateTime,
+    log_api(sig_index_process(), 1, 0, 0, NULL, st.dwLowDateTime,
         st.dwHighDateTime, get_current_process_id(),
         parent_process_id(), module_path);
 
@@ -483,7 +489,7 @@ void log_new_process()
 void log_anomaly(const char *subcategory, int success,
     const char *funcname, const char *msg)
 {
-    log_api(sig_index_anomaly(), success, 0, 0,
+    log_api(sig_index_anomaly(), success, 0, 0, NULL,
         GetCurrentThreadId(), subcategory, funcname, msg);
 }
 
@@ -589,7 +595,7 @@ static void _log_exception_perform()
     bson_finish(&s);
     bson_finish(&b);
 
-    log_api(sig_index_exception(), 1, 0, 0, &e, &b, &s);
+    log_api(sig_index_exception(), 1, 0, 0, NULL, &e, &b, &s);
 
     bson_destroy(&e);
     bson_destroy(&s);

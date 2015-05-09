@@ -41,11 +41,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         {{ ret or hook.signature.is_success }},
         {%- if hook.signature.return_value != 'void' %}
         {% if ret %}{{ ret }}{% else %}(uintptr_t) ret{% endif %},
-        hash
+        hash,
         {%- else %}
         0,
-        hash
+        hash,
         {%- endif %}
+        &lasterror
     {%- if hook.prelog: -%}
         ,
         prelen, prebuf
