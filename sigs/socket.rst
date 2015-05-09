@@ -411,9 +411,13 @@ Middle::
     uint8_t *buf = NULL; uint32_t length = 0;
     wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
+    if(lpNumberOfBytesRecvd != NULL && *lpNumberOfBytesRecvd < length) {
+        length = *lpNumberOfBytesRecvd;
+    }
+
 Logging::
 
-    B buffer length, buf
+    b buffer length, buf
 
 Post::
 
@@ -450,11 +454,15 @@ Middle::
     uint8_t *buf = NULL; uint32_t length = 0;
     wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
+    if(lpNumberOfBytesRecvd != NULL && *lpNumberOfBytesRecvd < length) {
+        length = *lpNumberOfBytesRecvd;
+    }
+
 Logging::
 
     s ip_address ip
     i port port
-    B buffer lpNumberOfBytesRecvd, buf
+    b buffer length, buf
 
 Post::
 
@@ -486,9 +494,13 @@ Middle::
     uint8_t *buf = NULL; uint32_t length = 0;
     wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
+    if(lpNumberOfBytesSent != NULL && *lpNumberOfBytesSent < length) {
+        length = *lpNumberOfBytesSent;
+    }
+
 Logging::
 
-    B buffer lpNumberOfBytesSent, buf
+    b buffer length, buf
 
 Post::
 
@@ -527,11 +539,15 @@ Middle::
     uint8_t *buf = NULL; uint32_t length = 0;
     wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
+    if(lpNumberOfBytesSent != NULL && *lpNumberOfBytesSent < length) {
+        length = *lpNumberOfBytesSent;
+    }
+
 Logging::
 
     s ip_address ip
     i port port
-    B buffer lpNumberOfBytesSent, buf
+    b buffer length, buf
 
 Post::
 
