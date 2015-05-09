@@ -454,6 +454,33 @@ Flags::
     information_class
 
 
+SetFilePointer
+==============
+
+Signature::
+
+    * Is success: ret != INVALID_SET_FILE_POINTER
+    * Return value: DWORD
+
+Parameters::
+
+    ** HANDLE hFile file_handle
+    *  LONG lDistanceToMove
+    *  PLONG lpDistanceToMoveHigh
+    ** DWORD dwMoveMethod move_method
+
+Pre::
+
+    uint64_t offset = lDistanceToMove;
+    if(lpDistanceToMoveHigh != NULL) {
+        offset += (uint64_t) *lpDistanceToMoveHigh << 32;
+    }
+
+Logging::
+
+    q offset offset
+
+
 DeviceIoControl
 ===============
 
