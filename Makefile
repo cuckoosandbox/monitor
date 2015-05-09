@@ -41,7 +41,7 @@ ifdef DEBUG
 	CFLAGS += -DDEBUG=1 -O0 -ggdb
 	RELMODE = debug
 else
-	CFLAGS += -DDEBUG=0 -O2 -s
+	CFLAGS += -DDEBUG=0 -O0 -s
 	RELMODE = release
 endif
 
