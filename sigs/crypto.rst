@@ -152,7 +152,7 @@ Parameters::
 
 Logging::
 
-    B buffer *pdwDataLen, pbData
+    B buffer pdwDataLen, pbData
 
 
 CryptEncrypt
