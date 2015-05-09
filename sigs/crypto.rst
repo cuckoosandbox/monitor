@@ -316,25 +316,6 @@ Post::
     mem_free(buf);
 
 
-CertCreateCertificateContext
-============================
-
-Signature::
-
-    * Library: crypt32
-    * Return value: PCCERT_CONTEXT
-
-Parameters::
-
-    ** DWORD dwCertEncodingType encoding
-    *  const BYTE *pbCertEncoded
-    *  DWORD cbCertEncoded
-
-Logging::
-
-    b certificate cbCertEncoded, pbCertEncoded
-
-
 CryptExportKey
 ==============
 
