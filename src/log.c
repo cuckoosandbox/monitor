@@ -44,7 +44,9 @@ static unsigned int g_starttick;
 static uint8_t *g_api_init;
 static int g_log_exception;
 
+#if DEBUG
 static HANDLE g_debug_handle;
+#endif
 
 static void _log_exception_perform();
 
@@ -617,7 +619,7 @@ static void _bson_free(void *ptr)
     mem_free(ptr);
 }
 
-#undef log_debug
+#if DEBUG
 
 void log_debug(const char *fmt, ...)
 {
@@ -633,6 +635,8 @@ void log_debug(const char *fmt, ...)
 
     LeaveCriticalSection(&g_mutex);
 }
+
+#endif
 
 void log_init(uint32_t ip, uint16_t port)
 {
