@@ -347,12 +347,12 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             log_int32(&b, idx, value);
         }
         else if(*fmt == 'l' || *fmt == 'p') {
-            long value = va_arg(args, long);
-            log_int32(&b, idx, value);
+            uintptr_t value = va_arg(args, uintptr_t);
+            log_int64(&b, idx, value);
         }
         else if(*fmt == 'L' || *fmt == 'P') {
-            long *ptr = va_arg(args, long *);
-            log_int32(&b, idx, ptr != NULL ? *ptr : 0);
+            uintptr_t *ptr = va_arg(args, uintptr_t *);
+            log_int64(&b, idx, ptr != NULL ? *ptr : 0);
         }
         else if(*fmt == 'o') {
             ANSI_STRING *str = va_arg(args, ANSI_STRING *);
