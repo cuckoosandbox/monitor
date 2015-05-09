@@ -162,7 +162,7 @@ Interesting::
 
 Logging::
 
-    * b buffer IoStatusBlock->Information, Buffer
+    b buffer IoStatusBlock->Information, Buffer
 
 
 NtWriteFile
