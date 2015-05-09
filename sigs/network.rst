@@ -706,9 +706,5 @@ Signature::
 Parameters::
 
     ** DWORD dwOption option
-    *  LPCSTR *pcszUAOut
+    ** LPSTR pcszUAOut user_agent
     *  DWORD *cbSize
-
-Logging::
-
-    b user_agent pcszUAOut != NULL ? *pcszUAOut : NULL
