@@ -28,7 +28,7 @@ void log_init(uint32_t ip, uint16_t port);
 void log_api(uint32_t index, int is_success, uintptr_t return_value,
     uint64_t hash, last_error_t *lasterr, ...);
 
-void log_anomaly(const char *subcategory, int success,
+void log_anomaly(const char *subcategory,
     const char *funcname, const char *msg);
 
 void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,

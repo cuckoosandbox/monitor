@@ -486,10 +486,10 @@ void log_new_process()
     free_unicode_buffer(module_path);
 }
 
-void log_anomaly(const char *subcategory, int success,
+void log_anomaly(const char *subcategory,
     const char *funcname, const char *msg)
 {
-    log_api(sig_index_anomaly(), success, 0, 0, NULL,
+    log_api(sig_index_anomaly(), 1, 0, 0, NULL,
         GetCurrentThreadId(), subcategory, funcname, msg);
 }
 
@@ -522,7 +522,7 @@ static void _log_exception_perform()
 
     if(exception_count++ == EXCEPTION_MAXCOUNT) {
         sprintf(buf, "Encountered %d exceptions, quitting.", exception_count);
-        log_anomaly("exception", 1, NULL, buf);
+        log_anomaly("exception", NULL, buf);
         ExitProcess(1);
     }
 

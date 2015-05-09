@@ -93,7 +93,7 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
                 500) != WAIT_TIMEOUT) {
             if(watcher_first != 0) {
                 if(is_shutting_down() == 0) {
-                    log_anomaly("unhook", 1, NULL,
+                    log_anomaly("unhook", NULL,
                         "Unhook watcher thread has been corrupted!");
                 }
                 watcher_first = 0;
@@ -124,7 +124,7 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
 
             if(r->region_reported == 0) {
                 if(is_shutting_down() == 0) {
-                    log_anomaly("unhook", 1, r->funcname, msg);
+                    log_anomaly("unhook", r->funcname, msg);
                 }
                 r->region_reported = 1;
             }
@@ -142,7 +142,7 @@ static DWORD WINAPI _unhook_watch_thread(LPVOID param)
     while (WaitForSingleObject(g_unhook_thread_handle, 1000) == WAIT_TIMEOUT);
 
     if(g_unhook_exited == 0 && is_shutting_down() == 0) {
-        log_anomaly("unhook", 1, NULL,
+        log_anomaly("unhook", NULL,
             "Unhook detection thread has been corrupted!");
     }
     return 0;
