@@ -96,7 +96,7 @@ static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }
 {%- endfor %}
 );
 
-static {{ hook.signature.return_value }} {{ hook.signature.calling_convention }} New_{{ hook.apiname }}(
+{{ hook.signature.return_value }} {{ hook.signature.calling_convention }} New_{{ hook.apiname }}(
 {%- for param in hook.parameters: %}
     {{ param.argtype }}
     {%- if not param.argtype.endswith('*') %} {% endif -%}
