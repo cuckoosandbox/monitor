@@ -45,8 +45,7 @@ else
 	RELMODE = release
 endif
 
-all: dirs $(LIBCAPSTONE32) $(LIBCAPSTONE64) \
-		$(HOOKSRC) $(DLL32) $(DLL64)
+all: dirs $(DLL32) $(DLL64)
 	+make -C utils/
 
 dirs: | objects/
