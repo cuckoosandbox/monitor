@@ -99,6 +99,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
         if(is_ignored_process() == 0) {
             monitor_init(hModule);
             monitor_hook(NULL);
+            pipe("LOADED:%d", get_current_process_id());
         }
         break;
     }

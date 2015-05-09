@@ -23,6 +23,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 void monitor_init(HMODULE module_handle);
 void monitor_hook(const char *library);
-void monitor_notify();
 
 #endif
