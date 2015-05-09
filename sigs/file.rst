@@ -649,6 +649,41 @@ Post::
     free_unicode_buffer(filepath);
 
 
+GetFileAttributesExW
+====================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    *  LPCWSTR lpFileName
+    ** GET_FILEEX_INFO_LEVELS fInfoLevelId info_level
+    *  LPVOID lpFileInformation
+
+Pre::
+
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathW(lpFileName, filepath);
+
+Logging::
+
+    u filepath filepath
+
+
+SetEndOfFile
+============
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hFile file_handle
+
+
 GetVolumeNameForVolumeMountPointW
 =================================
 
