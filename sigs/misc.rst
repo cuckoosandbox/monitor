@@ -279,6 +279,21 @@ Logging::
     U buffer *lpNumberOfCharsWritten, lpBuffer
 
 
+SHGetSpecialFolderLocation
+==========================
+
+Signature::
+
+    * Library: shell32
+    * Return value: HRESULT
+
+Parameters::
+
+    ** HWND hwndOwner window_handle
+    ** int nFolder folder_index
+    *  PIDLIST_ABSOLUTE *ppidl
+
+
 SHGetFolderPathW
 ================
 

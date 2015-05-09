@@ -649,17 +649,3 @@ Parameters::
     ** LPWSTR lpszVolumePathNames volume_path_name
     *  DWORD cchBufferLength
     *  PDWORD lpcchReturnLength
-
-
-SHGetSpecialFolderLocation
-==========================
-
-Signature::
-
-    * Return value: HRESULT
-
-Parameters::
-
-    ** HWND hwndOwner window_handle
-    ** int nFolder folder_index
-    *  PIDLIST_ABSOLUTE *ppidl
