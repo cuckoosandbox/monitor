@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <inttypes.h>
 #include <windows.h>
 #include <tlhelp32.h>
+#include <shlwapi.h>
 #include "../inc/assembly.h"
 
 #define INJECT_NONE 0
@@ -30,6 +31,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DPRINTF(fmt, ...) if(verbose != 0) fprintf(stderr, fmt, ##__VA_ARGS__)
 
 static int verbose = 0;
+
+uint32_t strsizeW(const wchar_t *s)
+{
+    return (lstrlenW(s) + 1) * sizeof(wchar_t);
+}
 
 FARPROC resolve_symbol(const char *library, const char *funcname)
 {
@@ -137,8 +143,8 @@ uint32_t create_thread_and_wait(uint32_t pid, void *addr, void *arg)
     return exit_code;
 }
 
-uint32_t start_app(uint32_t from, const char *path, const char *arguments,
-    const char *curdir, uint32_t *tid)
+uint32_t start_app(uint32_t from, const wchar_t *path,
+    const wchar_t *arguments, const wchar_t *curdir, uint32_t *tid)
 {
     STARTUPINFO si; PROCESS_INFORMATION pi;
     memset(&pi, 0, sizeof(pi));
@@ -149,24 +155,24 @@ uint32_t start_app(uint32_t from, const char *path, const char *arguments,
     si.dwFlags = STARTF_USESHOWWINDOW;
     si.wShowWindow = SW_SHOWNORMAL;
 
-    FARPROC create_process_a = resolve_symbol("kernel32", "CreateProcessA");
+    FARPROC create_process_w = resolve_symbol("kernel32", "CreateProcessW");
     FARPROC close_handle = resolve_symbol("kernel32", "CloseHandle");
     FARPROC get_last_error = resolve_symbol("kernel32", "GetLastError");
 
-    char *cmd_line = malloc(strlen(path) + strlen(arguments) + 4);
-    sprintf(cmd_line, "\"%s\" %s", path, arguments);
+    wchar_t *cmd_line = malloc(strsizeW(path) + strsizeW(arguments) + 2);
+    wsprintfW(cmd_line, L"\"%s\" %s", path, arguments);
 
-    void *path_addr = write_data(from, path, strlen(path) + 1);
-    void *cmd_addr = write_data(from, cmd_line, strlen(cmd_line) + 1);
+    void *path_addr = write_data(from, path, strsizeW(path));
+    void *cmd_addr = write_data(from, cmd_line, strsizeW(cmd_line));
     void *si_addr = write_data(from, &si, sizeof(si));
     void *pi_addr = write_data(from, &pi, sizeof(pi));
 
     // If not provided, default to $TEMP.
     if(curdir == NULL) {
-        curdir = getenv("TEMP");
+        curdir = _wgetenv(L"TEMP");
     }
 
-    void *curdir_addr = write_data(from, curdir, strlen(curdir) + 1);
+    void *curdir_addr = write_data(from, curdir, strsizeW(curdir));
 
     uint8_t shellcode[512]; uint8_t *ptr = shellcode;
 
@@ -194,13 +200,13 @@ uint32_t start_app(uint32_t from, const char *path, const char *arguments,
     ptr += asm_pushv(ptr, path_addr);
 #endif
 
-    ptr += asm_call(ptr, create_process_a);
+    ptr += asm_call(ptr, create_process_w);
 
 #if __x86_64__
     ptr += asm_add_regimm(ptr, R_RSP, 10 * sizeof(uintptr_t));
 #endif
 
-    // If the return value of CreateProcessA was FALSE, then we return the
+    // If the return value of CreateProcessW was FALSE, then we return the
     // GetLastError(), otherwise we return zero.
 #if __x86_64__
     ptr += asm_jregz(ptr, R_RAX, ASM_MOVE_REGIMM_SIZE + ASM_RETURN_SIZE);
@@ -232,9 +238,9 @@ uint32_t start_app(uint32_t from, const char *path, const char *arguments,
 
     free_data(from, pi_addr, sizeof(pi));
     free_data(from, si_addr, sizeof(si));
-    free_data(from, curdir_addr, strlen(curdir) + 1);
-    free_data(from, cmd_addr, strlen(cmd_line) + 1);
-    free_data(from, path_addr, strlen(path) + 1);
+    free_data(from, curdir_addr, strsizeW(curdir));
+    free_data(from, cmd_addr, strsizeW(cmd_line));
+    free_data(from, path_addr, strsizeW(path));
     free_data(from, shellcode_addr, ptr - shellcode);
     free(cmd_line);
 
@@ -271,12 +277,12 @@ uint32_t start_app(uint32_t from, const char *path, const char *arguments,
     return pi.dwProcessId;
 }
 
-void load_dll_crt(uint32_t pid, const char *dll_path)
+void load_dll_crt(uint32_t pid, const wchar_t *dll_path)
 {
-    FARPROC load_library_a = resolve_symbol("kernel32", "LoadLibraryA");
+    FARPROC load_library_w = resolve_symbol("kernel32", "LoadLibraryW");
     FARPROC get_last_error = resolve_symbol("kernel32", "GetLastError");
 
-    void *dll_addr = write_data(pid, dll_path, strlen(dll_path) + 1);
+    void *dll_addr = write_data(pid, dll_path, strsizeW(dll_path));
 
     uint8_t shellcode[512]; uint8_t *ptr = shellcode;
 
@@ -287,7 +293,7 @@ void load_dll_crt(uint32_t pid, const char *dll_path)
     ptr += asm_pushv(ptr, dll_addr);
 #endif
 
-    ptr += asm_call(ptr, load_library_a);
+    ptr += asm_call(ptr, load_library_w);
 
 #if __x86_64__
     ptr += asm_add_regimm(ptr, R_RSP, sizeof(uintptr_t));
@@ -315,7 +321,7 @@ void load_dll_crt(uint32_t pid, const char *dll_path)
 
     void *shellcode_addr = write_data(pid, shellcode, ptr - shellcode);
 
-    // Run LoadLibraryA(dll_path) in the target process.
+    // Run LoadLibraryW(dll_path) in the target process.
     uint32_t last_error = create_thread_and_wait(pid, shellcode_addr, NULL);
     if(last_error != 0) {
         fprintf(stderr, "[-] Error loading monitor into process: %d\n",
@@ -323,19 +329,19 @@ void load_dll_crt(uint32_t pid, const char *dll_path)
         exit(1);
     }
 
-    free_data(pid, dll_addr, strlen(dll_path) + 1);
+    free_data(pid, dll_addr, strsizeW(dll_path));
     free_data(pid, shellcode_addr, ptr - shellcode);
 }
 
-void load_dll_apc(uint32_t pid, uint32_t tid, const char *dll_path)
+void load_dll_apc(uint32_t pid, uint32_t tid, const wchar_t *dll_path)
 {
     HANDLE thread_handle = open_thread(tid);
-    FARPROC load_library_a = resolve_symbol("kernel32", "LoadLibraryA");
+    FARPROC load_library_w = resolve_symbol("kernel32", "LoadLibraryW");
 
-    void *dll_addr = write_data(pid, dll_path, strlen(dll_path) + 1);
+    void *dll_addr = write_data(pid, dll_path, strsizeW(dll_path));
 
-    // Add LoadLibraryA(dll_path) to the APC queue.
-    if(QueueUserAPC((PAPCFUNC) load_library_a, thread_handle,
+    // Add LoadLibraryW(dll_path) to the APC queue.
+    if(QueueUserAPC((PAPCFUNC) load_library_w, thread_handle,
             (ULONG_PTR) dll_addr) == 0) {
         fprintf(stderr, "[-] Error adding task to APC queue: %ld\n",
             GetLastError());
@@ -387,9 +393,9 @@ void grant_debug_privileges(uint32_t pid)
     CloseHandle(process_handle);
 }
 
-uint32_t pid_from_process_name(const char *process_name)
+uint32_t pid_from_process_name(const wchar_t *process_name)
 {
-    PROCESSENTRY32 row; HANDLE snapshot_handle;
+    PROCESSENTRY32W row; HANDLE snapshot_handle;
 
     snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if(snapshot_handle == INVALID_HANDLE_VALUE) {
@@ -399,29 +405,37 @@ uint32_t pid_from_process_name(const char *process_name)
     }
 
     row.dwSize = sizeof(row);
-    if(Process32First(snapshot_handle, &row) == FALSE) {
+    if(Process32FirstW(snapshot_handle, &row) == FALSE) {
         fprintf(stderr, "[-] Error enumerating the first process: %ld\n",
             GetLastError());
         exit(1);
     }
 
     do {
-        if(stricmp(row.szExeFile, process_name) == 0) {
+        if(wcsicmp(row.szExeFile, process_name) == 0) {
             CloseHandle(snapshot_handle);
             return row.th32ProcessID;
         }
-    } while (Process32Next(snapshot_handle, &row) != FALSE);
+    } while (Process32NextW(snapshot_handle, &row) != FALSE);
 
     CloseHandle(snapshot_handle);
 
-    fprintf(stderr, "[-] Error finding process by name: %s\n", process_name);
+    fprintf(stderr, "[-] Error finding process by name: %S\n", process_name);
     exit(1);
 }
 
-int main(int argc, char *argv[])
+int main()
 {
+    LPWSTR *argv; int argc;
+
+    argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    if(argv == NULL) {
+        printf("Error parsing commandline options!\n");
+        return 1;
+    }
+
     if(argc < 4) {
-        printf("Usage: %s <options..>\n", argv[0]);
+        printf("Usage: %S <options..>\n", argv[0]);
         printf("Options:\n");
         printf("  --crt                  CreateRemoteThread injection\n");
         printf("  --apc                  QueueUserAPC injection\n");
@@ -444,83 +458,83 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    const char *dll_path = NULL, *app_path = NULL, *arguments = "";
-    const char *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
-    const char *curdir = NULL;
+    const wchar_t *dll_path = NULL, *app_path = NULL, *arguments = L"";
+    const wchar_t *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
+    const wchar_t *curdir = NULL;
     uint32_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
 
     for (int idx = 1; idx < argc; idx++) {
-        if(strcmp(argv[idx], "--crt") == 0) {
+        if(wcscmp(argv[idx], L"--crt") == 0) {
             inj_mode = INJECT_CRT;
             continue;
         }
 
-        if(strcmp(argv[idx], "--apc") == 0) {
+        if(wcscmp(argv[idx], L"--apc") == 0) {
             inj_mode = INJECT_APC;
             continue;
         }
 
-        if(strcmp(argv[idx], "--free") == 0) {
+        if(wcscmp(argv[idx], L"--free") == 0) {
             inj_mode = INJECT_FREE;
             continue;
         }
 
-        if(strcmp(argv[idx], "--dll") == 0) {
+        if(wcscmp(argv[idx], L"--dll") == 0) {
             dll_path = argv[++idx];
             continue;
         }
 
-        if(strcmp(argv[idx], "--app") == 0) {
+        if(wcscmp(argv[idx], L"--app") == 0) {
             app_path = argv[++idx];
             continue;
         }
 
-        if(strcmp(argv[idx], "--args") == 0) {
+        if(wcscmp(argv[idx], L"--args") == 0) {
             arguments = argv[++idx];
             continue;
         }
 
-        if(strcmp(argv[idx], "--curdir") == 0) {
+        if(wcscmp(argv[idx], L"--curdir") == 0) {
             curdir = argv[++idx];
             continue;
         }
 
-        if(strcmp(argv[idx], "--pid") == 0) {
-            pid = strtoul(argv[++idx], NULL, 10);
+        if(wcscmp(argv[idx], L"--pid") == 0) {
+            pid = wcstol(argv[++idx], NULL, 10);
             continue;
         }
 
-        if(strcmp(argv[idx], "--tid") == 0) {
-            tid = strtoul(argv[++idx], NULL, 10);
+        if(wcscmp(argv[idx], L"--tid") == 0) {
+            tid = wcstol(argv[++idx], NULL, 10);
             continue;
         }
 
-        if(strcmp(argv[idx], "--from") == 0) {
-            from = strtoul(argv[++idx], NULL, 10);
+        if(wcscmp(argv[idx], L"--from") == 0) {
+            from = wcstol(argv[++idx], NULL, 10);
             continue;
         }
 
-        if(strcmp(argv[idx], "--from-process") == 0) {
+        if(wcscmp(argv[idx], L"--from-process") == 0) {
             from_process = argv[++idx];
             continue;
         }
 
-        if(strcmp(argv[idx], "--config") == 0) {
+        if(wcscmp(argv[idx], L"--config") == 0) {
             config_file = argv[++idx];
             continue;
         }
 
-        if(strcmp(argv[idx], "--dbg") == 0) {
+        if(wcscmp(argv[idx], L"--dbg") == 0) {
             dbg_path = argv[++idx];
             continue;
         }
 
-        if(strcmp(argv[idx], "--verbose") == 0) {
+        if(wcscmp(argv[idx], L"--verbose") == 0) {
             verbose = 1;
             continue;
         }
 
-        fprintf(stderr, "[-] Found unsupported argument: %s\n", argv[idx]);
+        fprintf(stderr, "[-] Found unsupported argument: %S\n", argv[idx]);
         return 1;
     }
 
@@ -544,8 +558,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    OFSTRUCT of; memset(&of, 0, sizeof(of)); of.cBytes = sizeof(of);
-    char dllpath[MAX_PATH];
+    wchar_t dllpath[MAX_PATH];
 
     if(inj_mode == INJECT_FREE) {
         if(dll_path != NULL || tid != 0 || pid != 0) {
@@ -556,12 +569,12 @@ int main(int argc, char *argv[])
     }
 
     if(inj_mode != INJECT_FREE) {
-        if(OpenFile(dll_path, &of, OF_EXIST) == HFILE_ERROR) {
+        if(PathFileExistsW(dll_path) == FALSE) {
             fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
             return 1;
         }
 
-        if(GetFullPathName(dll_path, MAX_PATH, dllpath, NULL) == 0) {
+        if(GetFullPathNameW(dll_path, MAX_PATH, dllpath, NULL) == 0) {
             fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
             return 1;
         }
@@ -588,15 +601,15 @@ int main(int argc, char *argv[])
             from = GetCurrentProcessId();
         }
 
-        if(OpenFile(app_path, &of, OF_EXIST) == HFILE_ERROR) {
+        if(PathFileExistsW(app_path) == FALSE) {
             fprintf(stderr, "[-] Invalid app filepath has been provided\n");
             return 1;
         }
 
         // Get the full path as the other process probably doesn't have the same
         // working directory.
-        char filepath[MAX_PATH];
-        if(GetFullPathName(app_path, MAX_PATH, filepath, NULL) == 0) {
+        wchar_t filepath[MAX_PATH];
+        if(GetFullPathNameW(app_path, MAX_PATH, filepath, NULL) == 0) {
             fprintf(stderr, "[-] Invalid app filepath has been provided\n");
             return 1;
         }
@@ -606,10 +619,10 @@ int main(int argc, char *argv[])
 
     // Drop the configuration file if available.
     if(config_file != NULL) {
-        char filepath[MAX_PATH];
+        wchar_t filepath[MAX_PATH];
 
-        sprintf(filepath, "C:\\cuckoo_%d.ini", pid);
-        if(MoveFile(config_file, filepath) == FALSE) {
+        wsprintfW(filepath, L"C:\\cuckoo_%d.ini", pid);
+        if(MoveFileW(config_file, filepath) == FALSE) {
             fprintf(stderr, "[-] Error dropping configuration file: %ld\n",
                 GetLastError());
             return 1;
@@ -636,8 +649,8 @@ int main(int argc, char *argv[])
     DPRINTF("[+] Injected successfully!\n");
 
     if(dbg_path != NULL) {
-        char buf[1024];
-        sprintf(buf, "\"%s\" -p %d", dbg_path, pid);
+        wchar_t buf[1024];
+        wsprintfW(buf, L"\"%s\" -p %d", dbg_path, pid);
 
         start_app(GetCurrentProcessId(), dbg_path, buf, NULL, NULL);
 

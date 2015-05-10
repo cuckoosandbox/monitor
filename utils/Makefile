@@ -1,6 +1,7 @@
 CC32 = i686-w64-mingw32-gcc -m32
 CC64 = x86_64-w64-mingw32-gcc -m64
 CFLAGS = -Wall -Wextra -O2 -std=c99 -s -static
+LDFLAGS = -lshlwapi
 
 UTILSRC = $(wildcard *.c)
 UTILEXE = inject-x86.exe inject-x64.exe \
