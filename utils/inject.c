@@ -606,44 +606,30 @@ int main()
             return 1;
         }
 
-        wchar_t dirpath[MAX_PATH], filepath[MAX_PATH], filepath2[MAX_PATH];
+        wchar_t dirpath[MAX_PATH], filepath[MAX_PATH];
 
-        // If a current working directory has been set then we move the target
-        // executable there and use that current working directory. Otherwise
-        // we just set the current working directory to $TEMP.
+        // If a current working directory has been set then we use that
+        // current working directory. Otherwise default to $TEMP.
         if(curdir != NULL) {
-            // Allow the current working directory to be specified as,
-            // e.g., %TEMP%.
+            // Allow the current working directory to be
+            // specified as, e.g., %TEMP%.
             if(ExpandEnvironmentStringsW(curdir, dirpath, MAX_PATH) == 0) {
                 fprintf(stderr, "[-] Error expanding environment variables\n");
                 return 1;
             }
 
-            const wchar_t *filename = wcsrchr(app_path, '\\');
-            if(filename == NULL) {
-                filename = app_path;
-            }
-            else {
-                filename++;
-            }
-
-            // Move the target executable.
-            wsprintfW(filepath, L"%s\\%s", dirpath, filename);
-            MoveFileW(app_path, filepath);
-
             curdir = dirpath;
         }
         else {
             curdir = _wgetenv(L"TEMP");
-            wcscpy(filepath, app_path);
         }
 
-        if(GetFullPathNameW(filepath, MAX_PATH, filepath2, NULL) == 0) {
+        if(GetFullPathNameW(app_path, MAX_PATH, filepath, NULL) == 0) {
             fprintf(stderr, "[-] Invalid app filepath has been provided\n");
             return 1;
         }
 
-        if(GetLongPathNameW(filepath2, filepath2, MAX_PATH) == 0) {
+        if(GetLongPathNameW(filepath, filepath, MAX_PATH) == 0) {
             fprintf(stderr, "[-] Error obtaining the app long path name\n");
             return 1;
         }
