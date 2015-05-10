@@ -674,6 +674,24 @@ Parameters::
     *  PULONG pOutBufLen
 
 
+GetAdaptersAddresses
+====================
+
+Signature::
+
+    * Is success: ret == ERROR_SUCCESS
+    * Library: iphlpapi
+    * Return value: ULONG
+
+Parameters::
+
+    ** ULONG Family family
+    ** ULONG Flags flags
+    *  PVOID Reserved
+    *  PIP_ADAPTER_ADDRESSES AdapterAddresses
+    *  PULONG SizePointer
+
+
 HttpQueryInfoA
 ==============
 

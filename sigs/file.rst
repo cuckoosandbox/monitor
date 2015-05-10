@@ -481,6 +481,21 @@ Logging::
     q offset offset
 
 
+SetFilePointerEx
+================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hFile file_handle
+    *  LARGE_INTEGER liDistanceToMove
+    ** PLARGE_INTEGER lpNewFilePointer offset
+    ** DWORD dwMoveMethod move_method
+
+
 DeviceIoControl
 ===============
 
@@ -586,6 +601,24 @@ Parameters::
 
     *  LPWSTR lpBuffer
     *  UINT uSize
+
+Logging::
+
+    U dirpath ret, lpBuffer
+
+
+GetTempPathW
+============
+
+Signature::
+
+    * Is success: ret != 0
+    * Return value: DWORD
+
+Parameters::
+
+    *  DWORD nBufferLength
+    *  LPWSTR lpBuffer
 
 Logging::
 
@@ -711,3 +744,54 @@ Parameters::
     ** LPWSTR lpszVolumePathNames volume_path_name
     *  DWORD cchBufferLength
     *  PDWORD lpcchReturnLength
+
+
+GetVolumePathNameW
+==================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPCWSTR lpszFileName filepath
+    ** LPWSTR lpszVolumePathName volume_path_name
+    *  DWORD cchBufferLength
+
+
+GetShortPathNameW
+=================
+
+Signature::
+
+    * Is success: ret != 0
+    * Return value: DWORD
+
+Parameters::
+
+    ** LPCWSTR lpszLongPath filepath
+    ** LPWSTR lpszShortPath shortpath
+    *  DWORD cchBuffer
+
+
+SearchPathW
+===========
+
+Signature::
+
+    * Is success: ret != 0
+    * Return value: DWORD
+
+Parameters::
+
+    ** LPCWSTR lpPath searchpath
+    ** LPCWSTR lpFileName filename
+    ** LPCWSTR lpExtension extension
+    *  DWORD nBufferLength
+    *  LPWSTR lpBuffer
+    *  LPWSTR *lpFilePart
+
+Logging::
+
+    u filepath lpBuffer

@@ -382,3 +382,47 @@ Ensure::
 Logging::
 
     u name *lpNameBuffer
+
+
+CoInitializeSecurity
+====================
+
+Signature::
+
+    * Library: ole32
+    * Return value: HRESULT
+
+Parameters::
+
+    *  PSECURITY_DESCRIPTOR pSecDesc
+    *  LONG cAuthSvc
+    *  SOLE_AUTHENTICATION_SERVICE *asAuthSvc
+    *  void *pReserved1
+    *  DWORD dwAuthnLevel
+    *  DWORD dwImpLevel
+    *  void *pAuthList
+    *  DWORD dwCapabilities
+    *  void *pReserved3
+
+
+UuidCreate
+==========
+
+Signature::
+
+    * Is success: 1
+    * Library: rpcrt4
+    * Return value: RPC_STATUS
+
+Parameters::
+
+    *  UUID *Uuid
+
+Middle::
+
+    wchar_t uuid[128];
+    clsid_to_string(Uuid, uuid);
+
+Logging::
+
+    u uuid uuid
