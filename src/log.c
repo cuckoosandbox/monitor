@@ -247,8 +247,8 @@ static void _log_stacktrace(bson *b)
 
     count = stacktrace(NULL, addrs, RETADDRCNT);
 
-    for (uint32_t idx = 0; idx < count; idx++) {
-        ultostr(idx, number, 10);
+    for (uint32_t idx = 4; idx < count; idx++) {
+        ultostr(idx-4, number, 10);
 
         symbol((const uint8_t *) addrs[idx], sym, sizeof(sym)-32);
         if(sym[0] != 0) {
