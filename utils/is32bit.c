@@ -68,9 +68,9 @@ static int determine_process_identifier(uint32_t pid)
     return 0;
 }
 
-static int determine_pe_file(const char *filepath)
+static int determine_pe_file(const wchar_t *filepath)
 {
-    FILE *fp = fopen(filepath, "rb");
+    FILE *fp = _wfopen(filepath, L"rb");
     if(fp == NULL) {
         fprintf(stderr, "Error opening filepath\n");
         return 1;
@@ -109,29 +109,37 @@ static int determine_pe_file(const char *filepath)
     }
 }
 
-int main(int argc, char *argv[])
+int main()
 {
+    LPWSTR *argv; int argc;
+
+    argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    if(argv == NULL) {
+        printf("Error parsing commandline options!\n");
+        return 1;
+    }
+
     if(argc != 3) {
-        printf("Usage: %s <option..>\n", argv[0]);
+        printf("Usage: %S <option..>\n", argv[0]);
         printf("Options:\n");
         printf("  -p --pid  <pid>\n");
         printf("  -f --file <path>\n");
         printf("\n");
         printf("Examples:\n");
-        printf("%s -p 1234\n", argv[0]);
-        printf("%s -f %s\n", argv[0], argv[0]);
+        printf("%S -p 1234\n", argv[0]);
+        printf("%S -f %S\n", argv[0], argv[0]);
         return 1;
     }
 
     *(FARPROC *) &pIsWow64Process =
         GetProcAddress(GetModuleHandle("kernel32"), "IsWow64Process");
 
-    if(strcmp(argv[1], "-p") == 0 || strcmp(argv[1], "--pid") == 0) {
-        uint32_t pid = strtoul(argv[2], NULL, 10);
+    if(wcscmp(argv[1], L"-p") == 0 || wcscmp(argv[1], L"--pid") == 0) {
+        uint32_t pid = wcstoul(argv[2], NULL, 10);
         return determine_process_identifier(pid);
     }
 
-    if(strcmp(argv[1], "-f") == 0 || strcmp(argv[1], "--file") == 0) {
+    if(wcscmp(argv[1], L"-f") == 0 || wcscmp(argv[1], L"--file") == 0) {
         return determine_pe_file(argv[2]);
     }
 
