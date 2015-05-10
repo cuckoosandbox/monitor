@@ -578,6 +578,11 @@ int main()
             fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
             return 1;
         }
+
+        if(GetLongPathNameW(dllpath, dllpath, MAX_PATH) == 0) {
+            fprintf(stderr, "[-] Error obtaining the dll long path name\n");
+            return 1;
+        }
     }
 
     if(from != 0 && from_process != NULL) {
@@ -611,6 +616,11 @@ int main()
         wchar_t filepath[MAX_PATH];
         if(GetFullPathNameW(app_path, MAX_PATH, filepath, NULL) == 0) {
             fprintf(stderr, "[-] Invalid app filepath has been provided\n");
+            return 1;
+        }
+
+        if(GetLongPathNameW(filepath, filepath, MAX_PATH) == 0) {
+            fprintf(stderr, "[-] Error obtaining the app long path name\n");
             return 1;
         }
 
