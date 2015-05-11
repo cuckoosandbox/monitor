@@ -37,3 +37,16 @@ Signature::
 Parameters::
 
     *  LPVOID pvReserved
+
+
+CoInitializeEx
+==============
+
+Signature::
+
+    * Return value: HRESULT
+
+Parameters::
+
+    *  LPVOID pvReserved
+    ** DWORD dwCoInit options
