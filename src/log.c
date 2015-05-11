@@ -45,13 +45,14 @@ static wchar_t g_log_pipename[MAX_PATH];
 static HANDLE g_log_handle;
 
 #if DEBUG
+static wchar_t g_debug_filepath[MAX_PATH];
 static HANDLE g_debug_handle;
 #endif
 
 static void _log_exception_perform();
 static void log_raw(const char *buf, size_t length);
 
-static void open_pipe_handle()
+static void open_handles()
 {
     g_log_handle = CreateFileW(g_log_pipename, GENERIC_WRITE,
         FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_WRITE_THROUGH, NULL);
@@ -59,6 +60,12 @@ static void open_pipe_handle()
     // The process identifier.
     uint32_t process_identifier = get_current_process_id();
     log_raw((const char *) &process_identifier, sizeof(process_identifier));
+
+#if DEBUG
+    g_debug_handle = CreateFileW(g_debug_filepath,
+        GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+        NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+#endif
 }
 
 static void log_raw(const char *buf, size_t length)
@@ -66,12 +73,21 @@ static void log_raw(const char *buf, size_t length)
     EnterCriticalSection(&g_mutex);
 
     while (length != 0) {
-        uint32_t written = 0; NTSTATUS status;
+        uint32_t written = 0; uint32_t status;
 
         status = write_file(g_log_handle, buf, length, &written);
         if(NT_SUCCESS(status) == FALSE) {
-            pipe("CRITICAL:Handle case where the log handle is closed");
-            break;
+            // It is possible that malware closes our pipe handle. In that
+            // case we'll get an invalid handle error. Let's just open a new
+            // pipe handle.
+            if(status == STATUS_INVALID_HANDLE) {
+                open_handles();
+            }
+            else {
+                pipe("CRITICAL:Handle case where the log handle is closed "
+                    "(last error 0x%x).", status);
+                break;
+            }
         }
 
         length -= written, buf += written;
@@ -641,21 +657,17 @@ void log_init(const char *pipe_name)
     bson_set_heap_stuff(&_bson_malloc, &_bson_realloc, &_bson_free);
     g_api_init = virtual_alloc_rw(NULL, sig_count() * sizeof(uint8_t));
 
-    wcsncpyA(g_log_pipename, pipe_name, MAX_PATH);
-    open_pipe_handle();
-
-    log_raw("BSON\n", 5);
-    log_new_process();
-
 #if DEBUG
     char filepath[MAX_PATH];
     our_snprintf(filepath, MAX_PATH, "C:\\monitor-debug-%d.txt",
         GetCurrentProcessId());
-
-    g_debug_handle = CreateFile(filepath,
-        GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-        NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
     pipe("FILE_NEW:%z", filepath);
+    wcsncpyA(g_debug_filepath, filepath, MAX_PATH);
 #endif
+
+    wcsncpyA(g_log_pipename, pipe_name, MAX_PATH);
+    open_handles();
+
+    log_raw("BSON\n", 5);
+    log_new_process();
 }
