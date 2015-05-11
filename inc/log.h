@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "native.h"
 
-void log_init(uint32_t ip, uint16_t port);
+void log_init(const char *pipe_name);
 
 void log_api(uint32_t index, int is_success, uintptr_t return_value,
     uint64_t hash, last_error_t *lasterr, ...);

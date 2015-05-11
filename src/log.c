@@ -20,9 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
-#include <winsock2.h>
 #include <windows.h>
-#include <winsock.h>
 #include "bson/bson.h"
 #include "hooking.h"
 #include "memory.h"
@@ -39,46 +37,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define EXCEPTION_MAXCOUNT 1024
 
 static CRITICAL_SECTION g_mutex;
-static SOCKET g_sock = INVALID_SOCKET;
 static unsigned int g_starttick;
 static uint8_t *g_api_init;
 static int g_log_exception;
+
+static wchar_t g_log_pipename[MAX_PATH];
+static HANDLE g_log_handle;
 
 #if DEBUG
 static HANDLE g_debug_handle;
 #endif
 
 static void _log_exception_perform();
+static void log_raw(const char *buf, size_t length);
+
+static void open_pipe_handle()
+{
+    g_log_handle = CreateFileW(g_log_pipename, GENERIC_WRITE,
+        FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_WRITE_THROUGH, NULL);
+
+    // The process identifier.
+    uint32_t process_identifier = get_current_process_id();
+    log_raw((const char *) &process_identifier, sizeof(process_identifier));
+}
 
 static void log_raw(const char *buf, size_t length)
 {
-    if(g_sock == INVALID_SOCKET) {
-        char filepath[MAX_PATH];
-        sprintf(filepath, "%s\\monitor.log", getenv("TEMP"));
-
-        FILE *fp = fopen(filepath, "ab");
-        if(fp == NULL) {
-            static int count = 0;
-            if(count++ < 3) {
-                MessageBox(NULL, "Error opening debug logfile!", "Error", 0);
-            }
-            return;
-        }
-        fwrite(buf, 1, length, fp);
-        fclose(fp);
-        return;
-    }
-
     EnterCriticalSection(&g_mutex);
 
-    size_t sent = 0; int ret;
-    while (sent < length) {
-        ret = send(g_sock, buf + sent, length - sent, 0);
-        if(ret < 1) {
-            pipe("CRITICAL:Error sending logs, send() returned %d.", ret);
-            return;
+    while (length != 0) {
+        uint32_t written = 0; NTSTATUS status;
+
+        status = write_file(g_log_handle, buf, length, &written);
+        if(NT_SUCCESS(status) == FALSE) {
+            pipe("CRITICAL:Handle case where the log handle is closed");
+            break;
         }
-        sent += ret;
+
+        length -= written, buf += written;
     }
 
     LeaveCriticalSection(&g_mutex);
@@ -631,49 +627,22 @@ void log_debug(const char *fmt, ...)
     length = our_vsnprintf(message, sizeof(message), fmt, args);
     va_end(args);
 
-    write_file(g_debug_handle, message, length);
+    write_file(g_debug_handle, message, length, NULL);
 
     LeaveCriticalSection(&g_mutex);
 }
 
 #endif
 
-void log_init(uint32_t ip, uint16_t port)
+void log_init(const char *pipe_name)
 {
     InitializeCriticalSection(&g_mutex);
 
     bson_set_heap_stuff(&_bson_malloc, &_bson_realloc, &_bson_free);
     g_api_init = virtual_alloc_rw(NULL, sig_count() * sizeof(uint8_t));
 
-    WSADATA wsa;
-    WSAStartup(MAKEWORD(2, 2), &wsa);
-
-    // Might be the case when debugging manually, but should never happen
-    // during an actual analysis.
-    if(ip == 0 || port == 0) {
-        pipe("CRITICAL:No connection information found, logging to file!");
-        g_sock = INVALID_SOCKET;
-        return;
-    }
-
-    g_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(g_sock == INVALID_SOCKET) {
-        pipe("CRITICAL:Error creating logging socket.");
-        return;
-    }
-
-    struct sockaddr_in addr = {
-        .sin_family         = AF_INET,
-        .sin_addr.s_addr    = ip,
-        .sin_port           = htons(port),
-    };
-
-    if(connect(g_sock, (struct sockaddr *) &addr,
-            sizeof(addr)) == SOCKET_ERROR) {
-        pipe("CRITICAL:Error connecting to the host.");
-        g_sock = INVALID_SOCKET;
-        return;
-    }
+    wcsncpyA(g_log_pipename, pipe_name, MAX_PATH);
+    open_pipe_handle();
 
     log_raw("BSON\n", 5);
     log_new_process();

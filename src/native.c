@@ -336,15 +336,19 @@ int duplicate_handle(HANDLE source_process_handle, HANDLE source_handle,
     return 0;
 }
 
-int write_file(HANDLE file_handle, const void *buffer, uint32_t length)
+NTSTATUS write_file(HANDLE file_handle, const void *buffer, uint32_t length,
+    uint32_t *bytes_written)
 {
     assert(pNtWriteFile != NULL, "pNtWriteFile is NULL!", 0);
     IO_STATUS_BLOCK status_block;
-    if(NT_SUCCESS(pNtWriteFile(file_handle, NULL, NULL, NULL, &status_block,
-            buffer, length, NULL, NULL)) != FALSE) {
-        return 1;
+
+    NTSTATUS ret = pNtWriteFile(file_handle, NULL, NULL, NULL,
+        &status_block, buffer, length, NULL, NULL);
+
+    if(NT_SUCCESS(ret) != FALSE && bytes_written != NULL) {
+        *bytes_written = status_block.Information;
     }
-    return 0;
+    return ret;
 }
 
 int close_handle(HANDLE object_handle)

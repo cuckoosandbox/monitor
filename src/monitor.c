@@ -60,7 +60,7 @@ void monitor_init(HMODULE module_handle)
     dropped_init();
     diffing_init(cfg.hashes_path);
 
-    log_init(cfg.host_ip, cfg.host_port);
+    log_init(cfg.logpipe);
     ignore_init();
 
     sleep_init(cfg.first_process, cfg.force_sleep_skip, cfg.startup_time);

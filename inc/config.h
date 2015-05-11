@@ -26,6 +26,9 @@ typedef struct _config_t {
     // Pipe name to communicate with Cuckoo.
     char pipe_name[MAX_PATH];
 
+    // Log pipe name to write bson logs to.
+    char logpipe[MAX_PATH];
+
     // If this mutex exists then the Virtual Machine is shutting down.
     char shutdown_mutex[MAX_PATH];
 
@@ -35,10 +38,6 @@ typedef struct _config_t {
     // Randomized amount of milliseconds since startup.
     uint32_t startup_time;
     uint32_t force_sleep_skip;
-
-    // Server ip and port.
-    uint32_t host_ip;
-    uint16_t host_port;
 
     // Path to non-interesting hashes.
     char hashes_path[MAX_PATH];
