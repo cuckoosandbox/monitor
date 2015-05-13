@@ -176,7 +176,7 @@ uint32_t start_app(uint32_t from, const wchar_t *path,
     ptr += asm_pushv(ptr, curdir_addr);
     ptr += asm_pushv(ptr, NULL);
     ptr += asm_push(ptr, CREATE_NEW_CONSOLE | CREATE_SUSPENDED);
-    ptr += asm_push(ptr, TRUE);
+    ptr += asm_push(ptr, FALSE);
 
 #if __x86_64__
     ptr += asm_move_regimmv(ptr, R_R9, NULL);
