@@ -267,7 +267,8 @@ static void _log_stacktrace(bson *b)
             strcat(sym, " @ ");
         }
 
-        sprintf(sym + strlen(sym), "0x%p", (const uint8_t *) addrs[idx]);
+        our_snprintf(sym + strlen(sym), sizeof(sym) - strlen(sym),
+            "0x%p", (const uint8_t *) addrs[idx]);
         bson_append_string(b, number, sym);
     }
 
@@ -541,7 +542,8 @@ static void _log_exception_perform()
     bson_init(&e);
 
     if(exception_count++ == EXCEPTION_MAXCOUNT) {
-        sprintf(buf, "Encountered %d exceptions, quitting.", exception_count);
+        our_snprintf(buf, sizeof(buf), "Encountered %d exceptions, quitting.",
+            exception_count);
         log_anomaly("exception", NULL, buf);
         ExitProcess(1);
     }
@@ -580,7 +582,7 @@ static void _log_exception_perform()
     const uint8_t *exception_address = (const uint8_t *)
         g_exception_record.ExceptionAddress;
 
-    sprintf(buf, "0x%p", exception_address);
+    our_snprintf(buf, sizeof(buf), "0x%p", exception_address);
     bson_append_string(&e, "address", buf);
 
     char insn[DISASM_BUFSIZ];
@@ -591,7 +593,8 @@ static void _log_exception_perform()
     symbol(exception_address, sym, sizeof(sym));
     bson_append_string(&e, "symbol", sym);
 
-    sprintf(buf, "0x%08x", (uint32_t) g_exception_record.ExceptionCode);
+    our_snprintf(buf, sizeof(buf), "0x%p",
+        (uintptr_t) g_exception_record.ExceptionCode);
     bson_append_string(&e, "exception_code", buf);
 
     for (uint32_t idx = 0; idx < g_exception_return_address_count; idx++) {
@@ -606,8 +609,8 @@ static void _log_exception_perform()
             strcat(sym, " @ ");
         }
 
-        sprintf(sym + strlen(sym), "0x%p",
-            (void *) g_exception_return_addresses[idx]);
+        our_snprintf(sym + strlen(sym), sizeof(sym) - strlen(sym),
+            "0x%p", (void *) g_exception_return_addresses[idx]);
         bson_append_string(&s, number, sym);
     }
 

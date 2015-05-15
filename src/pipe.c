@@ -104,19 +104,19 @@ static int _pipe_sprintf(char *out, const char *fmt, va_list args)
                 obj->ObjectName->Length / sizeof(wchar_t));
         }
         else if(*fmt == 'd') {
-            char s[32];
-            sprintf(s, "%d", va_arg(args, int));
+            char s[32]; uint32_t value = va_arg(args, uint32_t);
+            ultostr(value, s, 10);
             ret += _pipe_ascii(&out, s, strlen(s));
         }
         else if(*fmt == 'x') {
-            char s[16];
-            sprintf(s, "%x", va_arg(args, int));
+            char s[16]; uint32_t value = va_arg(args, uint32_t);
+            ultostr(value, s, 16);
             ret += _pipe_ascii(&out, s, strlen(s));
         }
         else if(*fmt == 'X') {
-            char s[32];
-            uint64_t value = va_arg(args, uint64_t);
-            sprintf(s, "%08x%08x", (uint32_t)(value >> 32), (uint32_t) value);
+            char s[32]; uint64_t value = va_arg(args, uint64_t);
+            ultostr((uint32_t)(value >> 32), s, 16);
+            ultostr((uint32_t) value, s + strlen(s), 16);
             ret += _pipe_ascii(&out, s, strlen(s));
         }
         fmt++;

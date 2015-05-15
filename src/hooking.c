@@ -147,7 +147,7 @@ int disasm(const void *addr, char *str)
         cs_disasm_ex(g_capstone, addr, 16, (uintptr_t) addr, 1, &insn);
     if(count == 0) return -1;
 
-    sprintf(str, "%s %s", insn->mnemonic, insn->op_str);
+    our_snprintf(str, DISASM_BUFSIZ, "%s %s", insn->mnemonic, insn->op_str);
 
     cs_free(insn, count);
     return 0;
