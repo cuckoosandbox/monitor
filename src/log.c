@@ -37,7 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define EXCEPTION_MAXCOUNT 1024
 
 static CRITICAL_SECTION g_mutex;
-static unsigned int g_starttick;
+static uint32_t g_starttick;
 static uint8_t *g_api_init;
 static int g_log_exception;
 
@@ -405,11 +405,17 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
                 log_string(&b, idx, NULL, 0);
             }
             else if(*type == REG_DWORD || *type == REG_DWORD_LITTLE_ENDIAN) {
-                unsigned int value = *(unsigned int *) data;
+                uint32_t value = 0;
+                if(data != NULL) {
+                    value = *(uint32_t *) data;
+                }
                 log_int32(&b, idx, value);
             }
             else if(*type == REG_DWORD_BIG_ENDIAN) {
-                unsigned int value = *(unsigned int *) data;
+                uint32_t value = 0;
+                if(data != NULL) {
+                    value = *(uint32_t *) data;
+                }
                 log_int32(&b, idx, htonl(value));
             }
             else if(*type == REG_EXPAND_SZ || *type == REG_SZ ||
