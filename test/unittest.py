@@ -1,5 +1,23 @@
 #!/usr/bin/env python
+"""
+Cuckoo Sandbox - Automated Malware Analysis
+Copyright (C) 2010-2015 Cuckoo Foundation
 
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
+import argparse
 import copy
 import os
 import shlex
@@ -86,28 +104,30 @@ def submit_file(kw, fname, tags=None):
 
     subprocess.check_call(args)
 
-def process_file(fname):
+def process_file(fname, modes):
     kw, outfile = compile_file(fname, 'x86')
-    modes = kw.MODES
 
-    if 'winxp' in modes:
+    if 'winxp' in modes and 'winxp' in kw.MODES:
         submit_file(kw, outfile, tags='winxp')
-        modes.remove('winxp')
 
-    if 'win7' in modes:
+    if 'win7' in modes and 'win7' in kw.MODES:
         submit_file(kw, outfile, tags='win7')
-        modes.remove('win7')
 
-    if 'win7x64' in modes:
+    if 'win7x64' in modes and 'win7x64' in kw.MODES:
         kw, outfile = compile_file(fname, 'x64')
-        submit_file(kw, outfile, tags='win7')
-        modes.remove('win7x64')
-
-    if modes:
-        raise Exception('Incorrect mode(s): %s' % modes)
+        submit_file(kw, outfile, tags='win7x64')
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m', '--modes', type=str, default='winxp,win7,win7x64', help='Modes to process.')
+    args = parser.parse_args()
+
+    modes = []
+    for mode in args.modes.split(','):
+        if mode.strip():
+            modes.append(mode.strip())
+
     curdir = os.path.abspath(os.path.dirname(__file__))
     for fname in os.listdir(curdir):
         if fname.startswith('test-') and fname.endswith('.c'):
-            process_file(fname)
+            process_file(fname, modes=modes)
