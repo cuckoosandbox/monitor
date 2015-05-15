@@ -136,9 +136,8 @@ int lde(const void *addr)
 int disasm(const void *addr, char *str)
 {
     if(g_capstone == 0) {
-        MessageBox(NULL, "Capstone has not been initialized yet!",
-            "Error", 0);
-        return 0;
+        pipe("CRITICAL:Capstone has not been initialized yet!");
+        return *str = 0, 0;
     }
 
     cs_insn *insn;
