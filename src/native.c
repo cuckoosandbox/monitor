@@ -50,7 +50,7 @@ static NTSTATUS (WINAPI *pNtFreeVirtualMemory)(HANDLE ProcessHandle,
     CONST VOID **BaseAddress, SIZE_T *RegionSize, ULONG FreeType);
 
 static NTSTATUS (WINAPI *pNtProtectVirtualMemory)(HANDLE ProcessHandle,
-    CONST VOID **BaseAddress, ULONG *NumberOfBytesToProtect,
+    CONST VOID **BaseAddress, SIZE_T *NumberOfBytesToProtect,
     ULONG NewAccessProtection, ULONG *OldAccessProtection);
 
 static NTSTATUS (WINAPI *pNtQueryInformationProcess)(HANDLE ProcessHandle,
@@ -259,12 +259,13 @@ NTSTATUS virtual_protect_ex(HANDLE process_handle, const void *addr,
 {
     assert(pNtProtectVirtualMemory != NULL,
         "pNtQueryVirtualMemory is NULL!", 0);
-    DWORD real_size = size; unsigned long old_protect;
+    SIZE_T real_size = size; ULONG old_protect;
     return pNtProtectVirtualMemory(process_handle, &addr, &real_size,
         protection, &old_protect);
 }
 
-NTSTATUS virtual_protect(const void *addr, uintptr_t size, uint32_t protection)
+NTSTATUS virtual_protect(const void *addr, uintptr_t size,
+    uint32_t protection)
 {
     return virtual_protect_ex(get_current_process(), addr, size, protection);
 }
