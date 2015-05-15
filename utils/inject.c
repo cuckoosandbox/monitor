@@ -621,7 +621,9 @@ int main()
             curdir = dirpath;
         }
         else {
-            curdir = _wgetenv(L"TEMP");
+            // We don't want to be expanding the environment variable buffer
+            // as that will probably corrupt the heap or so.
+            curdir = wcscpy(dirpath, _wgetenv(L"TEMP"));
         }
 
         if(GetFullPathNameW(app_path, MAX_PATH, filepath, NULL) == 0) {
