@@ -53,10 +53,11 @@ int virtual_free_ex(HANDLE process_handle, const void *addr, uintptr_t size,
 
 int virtual_free(const void *addr, uintptr_t size, uint32_t free_type);
 
-int virtual_protect_ex(HANDLE process_handle, const void *addr,
+NTSTATUS virtual_protect_ex(HANDLE process_handle, const void *addr,
     uintptr_t size, uint32_t protection);
 
-int virtual_protect(const void *addr, uintptr_t size, uint32_t protection);
+NTSTATUS virtual_protect(const void *addr, uintptr_t size,
+    uint32_t protection);
 
 uint32_t query_information_process(HANDLE process_handle,
     uint32_t information_class, void *buf, uint32_t length);

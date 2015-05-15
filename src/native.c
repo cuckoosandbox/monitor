@@ -254,20 +254,17 @@ int virtual_free(const void *addr, uintptr_t size, uint32_t free_type)
     return virtual_free_ex(get_current_process(), addr, size, free_type);
 }
 
-int virtual_protect_ex(HANDLE process_handle, const void *addr,
+NTSTATUS virtual_protect_ex(HANDLE process_handle, const void *addr,
     uintptr_t size, uint32_t protection)
 {
     assert(pNtProtectVirtualMemory != NULL,
         "pNtQueryVirtualMemory is NULL!", 0);
     DWORD real_size = size; unsigned long old_protect;
-    if(NT_SUCCESS(pNtProtectVirtualMemory(process_handle, &addr, &real_size,
-            protection, &old_protect)) != FALSE) {
-        return 1;
-    }
-    return 0;
+    return pNtProtectVirtualMemory(process_handle, &addr, &real_size,
+        protection, &old_protect);
 }
 
-int virtual_protect(const void *addr, uintptr_t size, uint32_t protection)
+NTSTATUS virtual_protect(const void *addr, uintptr_t size, uint32_t protection)
 {
     return virtual_protect_ex(get_current_process(), addr, size, protection);
 }

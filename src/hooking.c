@@ -318,9 +318,18 @@ static uint8_t *_hook_alloc_closeby(uint8_t *target, uint32_t size)
     return NULL;
 }
 
-int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
+int hook_create_jump(hook_t *h)
 {
-    if(virtual_protect(addr, stub_used, PAGE_EXECUTE_READWRITE) == FALSE) {
+    uint8_t *addr = h->addr + h->skip;
+    const uint8_t *target = (const uint8_t *) h->handler;
+    int stub_used = h->stub_used - h->skip;
+
+    NTSTATUS status =
+        virtual_protect(addr, stub_used, PAGE_EXECUTE_READWRITE);
+    if(NT_SUCCESS(status) == FALSE) {
+        pipe("CRITICAL:Unable to change memory protection of %z!%z at "
+            "0x%X %d to RWX (error code 0x%x)!",
+            h->library, h->funcname, addr, stub_used, status);
         return -1;
     }
 
@@ -349,9 +358,18 @@ int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
 
 #else
 
-int hook_create_jump(uint8_t *addr, const uint8_t *target, int stub_used)
+int hook_create_jump(hook_t *h)
 {
-    if(virtual_protect(addr, stub_used, PAGE_EXECUTE_READWRITE) == FALSE) {
+    uint8_t *addr = h->addr + h->skip;
+    const uint8_t *target = (const uint8_t *) h->handler;
+    int stub_used = h->stub_used - h->skip;
+
+    NTSTATUS status =
+        virtual_protect(addr, stub_used, PAGE_EXECUTE_READWRITE);
+    if(NT_SUCCESS(status) == FALSE) {
+        pipe("CRITICAL:Unable to change memory protection of %z!%z at "
+            "0x%X %d to RWX (error code 0x%x)!",
+            h->library, h->funcname, addr, stub_used, status);
         return -1;
     }
 
@@ -484,10 +502,7 @@ int hook(hook_t *h)
     memcpy(region_original, h->addr, h->stub_used);
 
     // Patch the original function.
-    if(hook_create_jump(h->addr + h->skip, (const uint8_t *) h->handler,
-            h->stub_used - h->skip) < 0) {
-        pipe("CRITICAL:Error creating function jump for %z!%z.",
-            h->library, h->funcname);
+    if(hook_create_jump(h) < 0) {
         return -1;
     }
 
