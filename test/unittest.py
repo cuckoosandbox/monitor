@@ -88,8 +88,8 @@ def compile_file(fname, arch):
             continue
 
     compiler = kw.CC86 if arch == 'x86' else kw.CC64
-    args = [compiler, '-o', output_exe, fname] + kw.CFLAGS + kw.INC + \
-            kw.OBJECTS + kw.LDFLAGS
+    args = [compiler, '-o', output_exe, fname]
+    args += kw.CFLAGS + kw.INC + kw.OBJECTS + kw.LDFLAGS
     subprocess.check_call(args)
     return kw, output_exe
 
