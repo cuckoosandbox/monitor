@@ -250,7 +250,6 @@ Post::
     if(NT_SUCCESS(ret) != FALSE &&
             source_pid == get_current_process_id() &&
             target_pid == get_current_process_id()) {
-        // TODO Also handle dropped files.
         if(is_ignored_object_handle(SourceHandle) != 0) {
             ignored_object_add(*TargetHandle);
         }
@@ -273,7 +272,6 @@ Parameters::
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        dropped_close(Handle);
         ignored_object_remove(Handle);
     }
 

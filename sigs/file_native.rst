@@ -52,9 +52,6 @@ Post::
         if(hook_in_monitor() != 0) {
             ignored_object_add(*FileHandle);
         }
-        else {
-            dropped_add(*FileHandle, filepath);
-        }
     }
 
     free_unicode_buffer(filepath);
@@ -125,9 +122,6 @@ Post::
         if(hook_in_monitor() != 0) {
             ignored_object_add(*FileHandle);
         }
-        else {
-            dropped_add(*FileHandle, filepath);
-        }
     }
 
     free_unicode_buffer(filepath);
@@ -190,9 +184,14 @@ Interesting::
 
 Post::
 
-    if(NT_SUCCESS(ret) != FALSE) {
-        dropped_wrote(FileHandle);
+    wchar_t *filepath = get_unicode_buffer();
+
+    if(NT_SUCCESS(ret) != FALSE &&
+            path_get_full_path_handle(FileHandle, filepath) != 0) {
+        pipe("FILE_NEW:%Z", filepath);
     }
+
+    free_unicode_buffer(filepath);
 
 
 NtDeviceIoControlFile

@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "config.h"
 #include "diffing.h"
-#include "dropped.h"
 #include "hooking.h"
 #include "ignore.h"
 #include "log.h"
@@ -57,7 +56,6 @@ void monitor_init(HMODULE module_handle)
 
     misc_init(module_handle, cfg.shutdown_mutex);
     misc_set_hook_library(&monitor_hook);
-    dropped_init();
     diffing_init(cfg.hashes_path);
 
     log_init(cfg.logpipe);
