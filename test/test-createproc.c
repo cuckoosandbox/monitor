@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Tests very basic process following logic.
 
+/// OPTIONS= pipe=cuckoo
+
 #define assert(expr) \
     if((expr) == 0) { \
         pipe("CRITICAL:Test didn't pass: %z", #expr); \

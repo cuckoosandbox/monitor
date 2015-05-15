@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // This program tests unicode filename support for the initial process.
 // See also: https://github.com/cuckoobox/cuckoo/issues/502
 
-/// OPTIONS= free=yes
+/// OPTIONS= free=yes,pipe=cuckoo
 
 #include <stdio.h>
 #include <string.h>

@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // This program tests some functionality of our array implementation.
 
-/// OPTIONS= free=yes
+/// OPTIONS= free=yes,pipe=cuckoo
 
 #include <stdio.h>
 #include <stdint.h>

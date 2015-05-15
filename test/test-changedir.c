@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // See also: https://github.com/cuckoobox/cuckoo/issues/413
 // Code based on sunlikr's https://gist.github.com/sunilkr/dec259379b9496b4b63a
 
-/// OPTIONS= free=yes,curdir=C:\\Windows
+/// OPTIONS= free=yes,pipe=cuckoo,curdir=C:\\Windows
 
 #include <stdio.h>
 #include <stdint.h>

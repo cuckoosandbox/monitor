@@ -37,6 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // This bug has been fixed by using a unicode string filename together with
 // CallNamedPipeW().
 
+/// OPTIONS= pipe=cuckoo
+
 #include <stdio.h>
 #include <winsock2.h>
 #include "pipe.h"
