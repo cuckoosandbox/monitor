@@ -28,6 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define INJECT_APC  2
 #define INJECT_FREE 3
 
+#define MAX_PATH_W 0x7fff
+
 #define DPRINTF(fmt, ...) if(verbose != 0) fprintf(stderr, fmt, ##__VA_ARGS__)
 
 static int verbose = 0;
@@ -553,7 +555,7 @@ int main()
         return 1;
     }
 
-    wchar_t dllpath[MAX_PATH];
+    static wchar_t dllpath[MAX_PATH_W];
 
     if(inj_mode == INJECT_FREE) {
         if(dll_path != NULL || tid != 0 || pid != 0) {
@@ -569,12 +571,12 @@ int main()
             return 1;
         }
 
-        if(GetFullPathNameW(dll_path, MAX_PATH, dllpath, NULL) == 0) {
+        if(GetFullPathNameW(dll_path, MAX_PATH_W, dllpath, NULL) == 0) {
             fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
             return 1;
         }
 
-        if(GetLongPathNameW(dllpath, dllpath, MAX_PATH) == 0) {
+        if(GetLongPathNameW(dllpath, dllpath, MAX_PATH_W) == 0) {
             fprintf(stderr, "[-] Error obtaining the dll long path name\n");
             return 1;
         }
@@ -606,14 +608,14 @@ int main()
             return 1;
         }
 
-        wchar_t dirpath[MAX_PATH], filepath[MAX_PATH];
+        static wchar_t dirpath[MAX_PATH_W], filepath[MAX_PATH_W];
 
         // If a current working directory has been set then we use that
         // current working directory. Otherwise default to $TEMP.
         if(curdir != NULL) {
             // Allow the current working directory to be
             // specified as, e.g., %TEMP%.
-            if(ExpandEnvironmentStringsW(curdir, dirpath, MAX_PATH) == 0) {
+            if(ExpandEnvironmentStringsW(curdir, dirpath, MAX_PATH_W) == 0) {
                 fprintf(stderr, "[-] Error expanding environment variables\n");
                 return 1;
             }
@@ -626,12 +628,17 @@ int main()
             curdir = wcscpy(dirpath, _wgetenv(L"TEMP"));
         }
 
-        if(GetFullPathNameW(app_path, MAX_PATH, filepath, NULL) == 0) {
+        if(GetLongPathNameW(dirpath, dirpath, MAX_PATH_W) == 0) {
+            fprintf(stderr, "[-] Error obtaining the curdir long path name\n");
+            return 1;
+        }
+
+        if(GetFullPathNameW(app_path, MAX_PATH_W, filepath, NULL) == 0) {
             fprintf(stderr, "[-] Invalid app filepath has been provided\n");
             return 1;
         }
 
-        if(GetLongPathNameW(filepath, filepath, MAX_PATH) == 0) {
+        if(GetLongPathNameW(filepath, filepath, MAX_PATH_W) == 0) {
             fprintf(stderr, "[-] Error obtaining the app long path name\n");
             return 1;
         }
@@ -641,7 +648,7 @@ int main()
 
     // Drop the configuration file if available.
     if(config_file != NULL) {
-        wchar_t filepath[MAX_PATH];
+        static wchar_t filepath[MAX_PATH_W];
 
         wsprintfW(filepath, L"C:\\cuckoo_%d.ini", pid);
         if(MoveFileW(config_file, filepath) == FALSE) {
