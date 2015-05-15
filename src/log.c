@@ -266,7 +266,7 @@ static void _log_stacktrace(bson *b)
         }
 
         our_snprintf(sym + strlen(sym), sizeof(sym) - strlen(sym),
-            "0x%p", (const uint8_t *) addrs[idx]);
+            "%p", (const uint8_t *) addrs[idx]);
         bson_append_string(b, number, sym);
     }
 
@@ -557,7 +557,7 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
     const uint8_t *exception_address = (const uint8_t *)
         rec->ExceptionAddress;
 
-    our_snprintf(buf, sizeof(buf), "0x%p", exception_address);
+    our_snprintf(buf, sizeof(buf), "%p", exception_address);
     bson_append_string(&e, "address", buf);
 
     char insn[DISASM_BUFSIZ];
@@ -568,7 +568,7 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
     symbol(exception_address, sym, sizeof(sym));
     bson_append_string(&e, "symbol", sym);
 
-    our_snprintf(buf, sizeof(buf), "0x%p", (uintptr_t) rec->ExceptionCode);
+    our_snprintf(buf, sizeof(buf), "%p", (uintptr_t) rec->ExceptionCode);
     bson_append_string(&e, "exception_code", buf);
 
     for (uint32_t idx = 0; idx < count; idx++) {
@@ -583,7 +583,7 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
         }
 
         our_snprintf(sym + strlen(sym), sizeof(sym) - strlen(sym),
-            "0x%p", (void *) return_addresses[idx]);
+            "%p", (void *) return_addresses[idx]);
         bson_append_string(&s, number, sym);
     }
 
