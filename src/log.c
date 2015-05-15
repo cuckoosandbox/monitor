@@ -39,7 +39,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static CRITICAL_SECTION g_mutex;
 static uint32_t g_starttick;
 static uint8_t *g_api_init;
-static int g_log_exception;
 
 static wchar_t g_log_pipename[MAX_PATH];
 static HANDLE g_log_handle;
@@ -49,7 +48,6 @@ static wchar_t g_debug_filepath[MAX_PATH];
 static HANDLE g_debug_handle;
 #endif
 
-static void _log_exception_perform();
 static void log_raw(const char *buf, size_t length);
 
 static void open_handles()
@@ -285,12 +283,6 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
 
     EnterCriticalSection(&g_mutex);
 
-    // If there is an exception available for processing, then process it now.
-    if(g_log_exception != 0) {
-        dpipe("DEBUG:Found exception - reporting it!");
-        _log_exception_perform();
-    }
-
     if(g_api_init[index] == 0) {
         log_explain(index);
         g_api_init[index] = 1;
@@ -514,28 +506,11 @@ void log_anomaly(const char *subcategory,
         GetCurrentThreadId(), subcategory, funcname, msg);
 }
 
-static uintptr_t g_exception_return_addresses[32];
-static uint32_t g_exception_return_address_count;
-static CONTEXT g_exception_context;
-static EXCEPTION_RECORD g_exception_record;
-
 void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
     uintptr_t *return_addresses, uint32_t count)
 {
-    g_exception_return_address_count = count;
-    memcpy(g_exception_return_addresses,
-        return_addresses, count * sizeof(uintptr_t));
-    memcpy(&g_exception_context, ctx, sizeof(CONTEXT));
-    memcpy(&g_exception_record, rec, sizeof(EXCEPTION_RECORD));
-    g_log_exception = 1;
-}
-
-static void _log_exception_perform()
-{
-    char buf[128]; bson b, s, e; CONTEXT *ctx = &g_exception_context;
+    char buf[128]; bson b, s, e;
     static int exception_count;
-
-    g_log_exception = 0;
 
     bson_init(&b);
     bson_init(&s);
@@ -580,7 +555,7 @@ static void _log_exception_perform()
     char sym[512], number[20];
 
     const uint8_t *exception_address = (const uint8_t *)
-        g_exception_record.ExceptionAddress;
+        rec->ExceptionAddress;
 
     our_snprintf(buf, sizeof(buf), "0x%p", exception_address);
     bson_append_string(&e, "address", buf);
@@ -593,24 +568,22 @@ static void _log_exception_perform()
     symbol(exception_address, sym, sizeof(sym));
     bson_append_string(&e, "symbol", sym);
 
-    our_snprintf(buf, sizeof(buf), "0x%p",
-        (uintptr_t) g_exception_record.ExceptionCode);
+    our_snprintf(buf, sizeof(buf), "0x%p", (uintptr_t) rec->ExceptionCode);
     bson_append_string(&e, "exception_code", buf);
 
-    for (uint32_t idx = 0; idx < g_exception_return_address_count; idx++) {
-        if(g_exception_return_addresses[idx] == 0) break;
+    for (uint32_t idx = 0; idx < count; idx++) {
+        if(return_addresses[idx] == 0) break;
 
         ultostr(idx, number, 10);
 
-        symbol((const uint8_t *) g_exception_return_addresses[idx],
-            sym, sizeof(sym)-32);
+        symbol((const uint8_t *) return_addresses[idx], sym, sizeof(sym)-32);
 
         if(sym[0] != 0) {
             strcat(sym, " @ ");
         }
 
         our_snprintf(sym + strlen(sym), sizeof(sym) - strlen(sym),
-            "0x%p", (void *) g_exception_return_addresses[idx]);
+            "0x%p", (void *) return_addresses[idx]);
         bson_append_string(&s, number, sym);
     }
 
