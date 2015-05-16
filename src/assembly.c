@@ -123,9 +123,16 @@ int asm_add_regimm(uint8_t *stub, register_t reg, uint32_t value)
 
 int asm_jump_32bit(uint8_t *stub, const void *addr)
 {
+#if DEBUG
+    stub[0] = 0x68;
+    stub[5] = 0xc3;
+    *(uint32_t *)(stub + 1) = (uint32_t) (uintptr_t) addr;
+    return 6;
+#else
     stub[0] = 0xe9;
     *(uint32_t *)(stub + 1) = (uint8_t *) addr - stub - 5;
     return 5;
+#endif
 }
 
 int asm_jump(uint8_t *stub, const void *addr)

@@ -47,9 +47,14 @@ typedef enum _register_t {
 #endif
 
 #define ASM_ADD_REGIMM_SIZE 7
-#define ASM_JUMP_32BIT_SIZE 5
 #define ASM_CALL_SIZE (ASM_MOVE_REGIMM_SIZE+2)
 #define ASM_RETURN_SIZE 3
+
+#if DEBUG
+#define ASM_JUMP_32BIT_SIZE 6
+#else
+#define ASM_JUMP_32BIT_SIZE 5
+#endif
 
 int asm_move_regimm(uint8_t *stub, register_t reg, uintptr_t value);
 int asm_push(uint8_t *stub, uintptr_t value);
