@@ -161,7 +161,8 @@ uint32_t start_app(uint32_t from, const wchar_t *path,
     FARPROC close_handle = resolve_symbol("kernel32", "CloseHandle");
     FARPROC get_last_error = resolve_symbol("kernel32", "GetLastError");
 
-    wchar_t *cmd_line = malloc(strsizeW(path) + strsizeW(arguments) + 2);
+    wchar_t *cmd_line =
+        malloc(strsizeW(path) + strsizeW(arguments) + 4 * sizeof(wchar_t));
     wsprintfW(cmd_line, L"\"%s\" %s", path, arguments);
 
     void *path_addr = write_data(from, path, strsizeW(path));
