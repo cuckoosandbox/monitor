@@ -169,9 +169,9 @@ static void log_wargv(bson *b, const char *idx,
 }
 
 static void log_buffer(bson *b, const char *idx,
-    const uint8_t *buf, size_t length)
+    const uint8_t *buf, uintptr_t length)
 {
-    size_t trunclength = min(length, BUFFER_LOG_MAX);
+    uintptr_t trunclength = length < BUFFER_LOG_MAX ? length : BUFFER_LOG_MAX;
 
     if(buf == NULL) {
         trunclength = 0;
@@ -294,7 +294,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
 
     bson_init_size(&b, mem_suggested_size(1024));
     bson_append_int(&b, "I", index);
-    bson_append_int(&b, "T", GetCurrentThreadId());
+    bson_append_int(&b, "T", get_current_thread_id());
     bson_append_int(&b, "t", GetTickCount() - g_starttick);
     bson_append_long(&b, "h", hash);
 
@@ -340,12 +340,12 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             log_wstring(&b, idx, s, len);
         }
         else if(*fmt == 'b') {
-            size_t len = va_arg(args, size_t);
+            uintptr_t len = va_arg(args, uintptr_t);
             const uint8_t *s = va_arg(args, const uint8_t *);
             log_buffer(&b, idx, s, len);
         }
         else if(*fmt == 'B') {
-            size_t *len = va_arg(args, size_t *);
+            uintptr_t *len = va_arg(args, uintptr_t *);
             const uint8_t *s = va_arg(args, const uint8_t *);
             log_buffer(&b, idx, s, len == NULL ? 0 : *len);
         }
@@ -503,7 +503,7 @@ void log_anomaly(const char *subcategory,
     const char *funcname, const char *msg)
 {
     log_api(sig_index_anomaly(), 1, 0, 0, NULL,
-        GetCurrentThreadId(), subcategory, funcname, msg);
+        get_current_thread_id(), subcategory, funcname, msg);
 }
 
 void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,

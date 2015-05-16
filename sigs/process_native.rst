@@ -212,7 +212,7 @@ Ensure::
 
 Logging::
 
-    l process_identifier (uintptr_t) ClientId->UniqueProcess
+    i process_identifier (uint32_t) (uintptr_t) ClientId->UniqueProcess
 
 
 NtTerminateProcess
@@ -327,7 +327,7 @@ Pre::
 
 Logging::
 
-    i region_size region_size
+    l region_size region_size
 
 
 NtAllocateVirtualMemory
@@ -351,8 +351,8 @@ Parameters::
     ** HANDLE ProcessHandle process_handle
     ** LPCVOID BaseAddress base_address
     *  LPVOID Buffer
-    *  ULONG NumberOfBytesToRead
-    *  PULONG NumberOfBytesReaded
+    *  SIZE_T NumberOfBytesToRead
+    *  PSIZE_T NumberOfBytesReaded
 
 Ensure::
 
@@ -371,8 +371,8 @@ Parameters::
     ** HANDLE ProcessHandle process_handle
     ** LPVOID BaseAddress base_address
     *  LPCVOID Buffer
-    *  ULONG NumberOfBytesToWrite
-    *  ULONG *NumberOfBytesWritten
+    *  SIZE_T NumberOfBytesToWrite
+    *  PSIZE_T NumberOfBytesWritten
 
 Ensure::
 
@@ -390,7 +390,7 @@ Parameters::
 
     ** HANDLE ProcessHandle process_handle
     ** PVOID *BaseAddress base_address
-    *  PULONG NumberOfBytesToProtect
+    *  PSIZE_T NumberOfBytesToProtect
     ** ULONG NewAccessProtection protection
     *  PULONG OldAccessProtection
 
@@ -406,7 +406,7 @@ Parameters::
 
     ** HANDLE ProcessHandle process_handle
     ** PVOID *BaseAddress base_address
-    ** PULONG RegionSize size
+    ** PSIZE_T RegionSize size
     ** ULONG FreeType free_type
 
 

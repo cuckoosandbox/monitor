@@ -57,7 +57,7 @@ Interesting::
 Logging::
 
     u filepath filepath
-    l creation_flags creation_flags
+    i creation_flags creation_flags
     i process_identifier lpProcessInformation->dwProcessId
     i thread_identifier lpProcessInformation->dwThreadId
     i process_handle lpProcessInformation->hProcess
