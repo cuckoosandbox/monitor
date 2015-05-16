@@ -895,6 +895,29 @@ void reg_get_info_from_keyvalue(const void *buf, uint32_t length,
     }
 }
 
+const char *our_inet_ntoa(struct in_addr ipaddr)
+{
+    static char ip[32];
+    our_snprintf(ip, sizeof(ip), "%d.%d.%d.%d",
+        ipaddr.s_addr & 0xff, (ipaddr.s_addr >> 8) & 0xff,
+        (ipaddr.s_addr >> 16) & 0xff, (ipaddr.s_addr >> 24) & 0xff);
+    return ip;
+}
+
+uint16_t our_htons(uint16_t value)
+{
+    return ((value & 0xff) << 8) | ((value >> 8) & 0xff);
+}
+
+uint32_t our_htonl(uint32_t value)
+{
+    return
+        (((value >>  0) & 0xff) << 24) |
+        (((value >>  8) & 0xff) << 16) |
+        (((value >> 16) & 0xff) <<  8) |
+        (((value >> 24) & 0xff) <<  0);
+}
+
 void get_ip_port(const struct sockaddr *addr, const char **ip, int *port)
 {
     if(addr == NULL) return;
@@ -902,8 +925,8 @@ void get_ip_port(const struct sockaddr *addr, const char **ip, int *port)
     // TODO IPv6 support.
     if(addr->sa_family == AF_INET) {
         const struct sockaddr_in *addr4 = (const struct sockaddr_in *) addr;
-        *ip = inet_ntoa(addr4->sin_addr);
-        *port = htons(addr4->sin_port);
+        *ip = our_inet_ntoa(addr4->sin_addr);
+        *port = our_htons(addr4->sin_port);
     }
 }
 

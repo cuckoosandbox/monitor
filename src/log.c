@@ -409,7 +409,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
                 if(data != NULL) {
                     value = *(uint32_t *) data;
                 }
-                log_int32(&b, idx, htonl(value));
+                log_int32(&b, idx, our_htonl(value));
             }
             else if(*type == REG_EXPAND_SZ || *type == REG_SZ ||
                     *type == REG_MULTI_SZ) {

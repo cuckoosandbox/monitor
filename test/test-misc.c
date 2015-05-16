@@ -67,6 +67,7 @@ int main()
     assert(our_snprintf(buf, 64, "%p", 0x4141) == 6 && memcmp(buf, "0x4141", 6) == 0);
     assert(our_snprintf(buf, 64, "%p %p", 0x4141, 0x4242) == 13 && memcmp(buf, "0x4141 0x4242", 13) == 0);
     assert(our_snprintf(buf, 64, "%d %d", 9001, -42) == 8 && strcmp(buf, "9001 -42") == 0);
+    assert(our_snprintf(buf, 64, "%p", 0xffffffff) == 10 && strcmp(buf, "0xffffffff") == 0);
 
     assert((wcsncpyA(bufW, "hello", 4), wcscmp(bufW, L"hel") == 0));
     assert((wcsncpyA(bufW, "hello", 5), wcscmp(bufW, L"hell") == 0));
@@ -85,5 +86,14 @@ int main()
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     addr.sin_port = htons(80);
     assert((get_ip_port((struct sockaddr *) &addr, &ip, &port), strcmp(ip, "127.0.0.1") == 0 && port == 80));
+
+    assert(our_htons(1337) == htons(1337));
+    assert(our_htons(0x4141) == htons(0x4141));
+    assert(our_htonl(0x11223344) == htonl(0x11223344));
+    assert(our_htonl(0x22446688) == 0x88664422);
+
+    assert(strcmp(our_inet_ntoa(addr.sin_addr), "127.0.0.1") == 0);
+    addr.sin_addr.s_addr = inet_addr("1.2.3.4");
+    assert(strcmp(inet_ntoa(addr.sin_addr), our_inet_ntoa(addr.sin_addr)) == 0);
     return 0;
 }

@@ -75,6 +75,10 @@ void reg_get_info_from_keyvalue(const void *buf, uint32_t length,
     KEY_VALUE_INFORMATION_CLASS information_class, wchar_t **reg_name,
     uint32_t *reg_type, uint32_t *data_length, uint8_t **data);
 
+const char *our_inet_ntoa(struct in_addr ipaddr);
+uint16_t our_htons(uint16_t value);
+uint32_t our_htonl(uint32_t value);
+
 void get_ip_port(const struct sockaddr *addr, const char **ip, int *port);
 
 int is_shutting_down();
