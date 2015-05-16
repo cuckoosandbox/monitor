@@ -162,17 +162,17 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
     }
 
     if(lower != -1) {
-        len = snprintf(sym, length, "%s+0x%x",
+        len = our_snprintf(sym, length, "%s+%p",
             (const char *) mod + names_addresses[lower],
             (uint32_t)(addr - mod - function_addresses[ordinals[lower]]));
         sym += len, length -= len;
     }
     if(higher != -1) {
         if(lower != -1) {
-            len = snprintf(sym, length, " / ");
+            len = our_snprintf(sym, length, " / ");
             sym += len, length -= len;
         }
-        snprintf(sym, length, "%s-0x%x",
+        our_snprintf(sym, length, "%s-%p",
             (const char *) mod + names_addresses[higher],
             (uint32_t)(mod + function_addresses[ordinals[higher]] - addr));
     }

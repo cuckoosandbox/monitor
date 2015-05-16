@@ -25,7 +25,8 @@ Pre::
     char number[32]; const char *store_provider = lpszStoreProvider;
     if((((uintptr_t) lpszStoreProvider) & 0xffff) ==
             (uintptr_t) lpszStoreProvider) {
-        sprintf(number, "#%d", (uint16_t) (uintptr_t) lpszStoreProvider);
+        our_snprintf(number, sizeof(number),
+            "#%d", (uint16_t) (uintptr_t) lpszStoreProvider);
         store_provider = number;
     }
 

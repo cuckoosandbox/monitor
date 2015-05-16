@@ -18,7 +18,8 @@ Pre::
 
     char value[10]; const char *class_name = lpClassName;
     if(((uintptr_t) lpClassName & 0xffff) == (uintptr_t) lpClassName) {
-        sprintf(value, "#%d", (uint16_t) (uintptr_t) lpClassName);
+        our_snprintf(value, sizeof(value),
+            "#%d", (uint16_t) (uintptr_t) lpClassName);
         class_name = value;
     }
 
@@ -42,9 +43,11 @@ Parameters::
 
 Pre::
 
-    wchar_t value[10]; const wchar_t *class_name = lpClassName;
+    char temp[10]; wchar_t value[10]; const wchar_t *class_name = lpClassName;
     if(((uintptr_t) lpClassName & 0xffff) == (uintptr_t) lpClassName) {
-        wsprintfW(value, L"#%d", (uint16_t) (uintptr_t) lpClassName);
+        our_snprintf(temp, sizeof(temp),
+            "#%d", (uint16_t) (uintptr_t) lpClassName);
+        wcsncpyA(value, temp, sizeof(temp));
         class_name = value;
     }
 
@@ -72,7 +75,8 @@ Pre::
 
     char value[10]; const char *class_name = lpszClass;
     if(((uintptr_t) lpszClass & 0xffff) == (uintptr_t) lpszClass) {
-        sprintf(value, "#%d", (uint16_t) (uintptr_t) lpszClass);
+        our_snprintf(value, sizeof(value),
+            "#%d", (uint16_t) (uintptr_t) lpszClass);
         class_name = value;
     }
 
@@ -98,9 +102,11 @@ Parameters::
 
 Pre::
 
-    wchar_t value[10]; const wchar_t *class_name = lpszClass;
+    char temp[10]; wchar_t value[10]; const wchar_t *class_name = lpszClass;
     if(((uintptr_t) lpszClass & 0xffff) == (uintptr_t) lpszClass) {
-        wsprintfW(value, L"#%d", (uint16_t) (uintptr_t) lpszClass);
+        our_snprintf(temp, sizeof(temp),
+            "#%d", (uint16_t) (uintptr_t) lpszClass);
+        wcsncpyA(value, temp, sizeof(temp));
         class_name = value;
     }
 
