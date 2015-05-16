@@ -506,6 +506,11 @@ Logging::
     u filepath source_file
     u regkey regkey
 
+Post::
+
+    free_unicode_buffer(regkey);
+    free_unicode_buffer(source_file);
+
 
 NtLoadKeyEx
 ===========
@@ -535,6 +540,11 @@ Logging::
 
     u filepath source_file
     u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
+    free_unicode_buffer(source_file);
 
 
 NtQueryKey
@@ -567,6 +577,10 @@ Logging::
     B buffer ResultLength, KeyInformation
     u regkey regkey
 
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 NtSaveKey
 =========
@@ -593,6 +607,11 @@ Logging::
 
     u regkey regkey
     u filepath filepath
+
+Post::
+
+    free_unicode_buffer(filepath);
+    free_unicode_buffer(regkey);
 
 
 NtSaveKeyEx
@@ -621,3 +640,8 @@ Logging::
 
     u regkey regkey
     u filepath filepath
+
+Post::
+
+    free_unicode_buffer(filepath);
+    free_unicode_buffer(regkey);
