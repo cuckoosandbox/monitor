@@ -262,10 +262,11 @@ static void _log_stacktrace(bson *b)
 
         symbol((const uint8_t *) addrs[idx], sym, sizeof(sym)-32);
         if(sym[0] != 0) {
-            strcat(sym, " @ ");
+            our_snprintf(sym + our_strlen(sym),
+                sizeof(sym) - our_strlen(sym), " @ ");
         }
 
-        our_snprintf(sym + strlen(sym), sizeof(sym) - strlen(sym),
+        our_snprintf(sym + our_strlen(sym), sizeof(sym) - our_strlen(sym),
             "%p", (const uint8_t *) addrs[idx]);
         bson_append_string(b, number, sym);
     }
@@ -419,7 +420,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
                     // that and if that's the case, then ignore the trailing
                     // nullbyte.
                     if(data != NULL &&
-                            strlen((const char *) data) == length - 1) {
+                            our_strlen((const char *) data) == length - 1) {
                         length--;
                     }
                     log_string(&b, idx, (const char *) data, length);
@@ -582,7 +583,7 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
             strcat(sym, " @ ");
         }
 
-        our_snprintf(sym + strlen(sym), sizeof(sym) - strlen(sym),
+        our_snprintf(sym + our_strlen(sym), sizeof(sym) - our_strlen(sym),
             "%p", (void *) return_addresses[idx]);
         bson_append_string(&s, number, sym);
     }

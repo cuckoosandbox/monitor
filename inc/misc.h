@@ -102,6 +102,8 @@ int ultostr(intptr_t value, char *str, int base);
 
 int our_vsnprintf(char *buf, int length, const char *fmt, va_list args);
 int our_snprintf(char *buf, int length, const char *fmt, ...);
+int our_memcmp(const void *a, const void *b, uint32_t length);
+uint32_t our_strlen(const char *s);
 
 const uint8_t *module_from_address(const uint8_t *addr);
 uint32_t module_image_size(const uint8_t *addr);

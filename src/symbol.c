@@ -44,7 +44,7 @@ const uint8_t *module_from_address(const uint8_t *addr)
 
     // We're looking for either an MZ header or the image base address
     // of our monitor.
-    if(memcmp(addr, "MZ", 2) == 0 || addr == g_monitor_base_address) {
+    if(our_memcmp(addr, "MZ", 2) == 0 || addr == g_monitor_base_address) {
         return addr;
     }
 

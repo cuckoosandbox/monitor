@@ -1242,3 +1242,23 @@ int our_snprintf(char *buf, int length, const char *fmt, ...)
     va_end(args);
     return ret;
 }
+
+int our_memcmp(const void *a, const void *b, uint32_t length)
+{
+    const uint8_t *_a = (const uint8_t *) a, *_b = (const uint8_t *) b;
+    for (; length != 0; _a++, _b++, length--) {
+        if(*_a != *_b) {
+            return *_a - *_b;
+        }
+    }
+    return 0;
+}
+
+uint32_t our_strlen(const char *s)
+{
+    uint32_t ret = 0;
+    while (*s != 0) {
+        ret++, s++;
+    }
+    return ret;
+}
