@@ -496,6 +496,21 @@ Parameters::
     ** DWORD dwMoveMethod move_method
 
 
+SetFileInformationByHandle
+==========================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hFile file_handle
+    ** FILE_INFO_BY_HANDLE_CLASS FileInformationClass information_class
+    *  LPVOID lpFileInformation
+    *  DWORD dwBufferSize
+
+
 DeviceIoControl
 ===============
 

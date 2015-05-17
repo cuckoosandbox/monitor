@@ -498,6 +498,21 @@ Parameters::
     *  DWORD dwReserved
 
 
+InternetSetStatusCallback
+=========================
+
+Signature::
+
+    * Is success: 1
+    * Library: wininet
+    * Return value: INTERNET_STATUS_CALLBACK
+
+Parameters::
+
+    ** HINTERNET hInternet internet_handle
+    ** INTERNET_STATUS_CALLBACK lpfnInternetCallback callback
+
+
 DeleteUrlCacheEntryA
 ====================
 

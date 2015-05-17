@@ -310,23 +310,6 @@ Logging::
     i processor_count lpSystemInfo->dwNumberOfProcessors
 
 
-NetUserGetInfo
-==============
-
-Signature::
-
-    * Is success: ret == 0
-    * Library: netapi32
-    * Return value: int
-
-Parameters::
-
-    ** LPCWSTR servername server_name
-    ** LPCWSTR username username
-    ** DWORD level level
-    *  LPBYTE *bufptr
-
-
 SetErrorMode
 ============
 
@@ -426,7 +409,7 @@ Parameters::
 
 Pre::
 
-    unsigned long pid, tid;
+    unsigned long pid = 0, tid;
 
     // TODO Will this still happen before the notify message is executed?
     tid = GetWindowThreadProcessId(hWnd, &pid);
@@ -454,7 +437,7 @@ Parameters::
 
 Pre::
 
-    unsigned long pid, tid;
+    unsigned long pid = 0, tid;
 
     // TODO Will this still happen before the notify message is executed?
     tid = GetWindowThreadProcessId(hWnd, &pid);

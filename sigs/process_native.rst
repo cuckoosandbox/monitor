@@ -252,8 +252,14 @@ Pre::
         section_name = extract_unicode_string(ObjectAttributes->ObjectName);
     }
 
+    HANDLE object_handle = NULL;
+    if(ObjectAttributes != NULL) {
+        object_handle = ObjectAttributes->RootDirectory;
+    }
+
 Logging::
 
+    l object_handle (uintptr_t) object_handle
     u section_name section_name
 
 Post::
