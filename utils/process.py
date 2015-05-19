@@ -560,11 +560,11 @@ class FlagsProcessor(object):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, help='Action to perform.')
-    parser.add_argument('data_directory', type=str, help='Path to data directory.')
-    parser.add_argument('output_directory', type=str, help='Output directory.')
-    parser.add_argument('signatures_directory', type=str, help='Signature directory.')
+    parser.add_argument('data_directory', type=str, nargs='?', default='data/', help='Path to data directory.')
+    parser.add_argument('output_directory', type=str, nargs='?', default='objects/code/', help='Output directory.')
+    parser.add_argument('signatures_directory', type=str, nargs='?', default='sigs/', help='Signature directory.')
     parser.add_argument('flags_directory', type=str, nargs='?', help='Flags directory.')
-    parser.add_argument('--apis', type=str, help='If set, only hook these functions.')
+    parser.add_argument('-a', '--apis', type=str, help='If set, only hook these functions.')
     args = parser.parse_args()
 
     fp = FlagsProcessor(args.data_directory, args.output_directory)
