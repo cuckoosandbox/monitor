@@ -31,6 +31,7 @@ MULTIPLE = {
     'SUBMIT': False,
     'OPTIONS': True,
     'MODES': True,
+    'EXTENSION': False,
 }
 
 DEFAULTS = {
@@ -47,6 +48,7 @@ DEFAULTS = {
     'SUBMIT': '../../cuckoo/utils/submit.py',
     'OPTIONS': [],
     'MODES': ['winxp', 'win7', 'win7x64'],
+    'EXTENSION': 'exe',
 }
 
 class Dict(dict):
@@ -57,8 +59,6 @@ class Dict(dict):
         return dict.__getitem__(self, name)
 
 def compile_file(fname, arch):
-    output_exe = fname.replace('.c', '-%s.exe' % arch)
-
     kw = Dict(DEFAULTS)
     for line in open(fname, 'rb'):
         if not line.startswith('///'):
@@ -66,7 +66,7 @@ def compile_file(fname, arch):
 
         key, value = line[3:].split('=', 1)
         if key.strip().endswith('+'):
-            kw[key.strip().rstrip('+')] += shlex.split(value)
+            kw[key.rstrip('+').strip()] += shlex.split(value)
         elif MULTIPLE[key.strip()]:
             kw[key.strip()] = shlex.split(value)
         else:
@@ -86,6 +86,8 @@ def compile_file(fname, arch):
         if os.path.exists(path):
             kw.OBJECTS[idx] = path
             continue
+
+    output_exe = fname.replace('.c', '-%s.%s' % (arch, kw.EXTENSION))
 
     compiler = kw.CC86 if arch == 'x86' else kw.CC64
     args = [compiler, '-o', output_exe, fname]
