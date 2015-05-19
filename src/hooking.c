@@ -39,6 +39,13 @@ static csh g_capstone;
 static uintptr_t g_monitor_start;
 static uintptr_t g_monitor_end;
 
+static uintptr_t g_ntdll_start;
+static uintptr_t g_ntdll_end;
+
+// Return address for Old_LdrLoadDll. Will be used later on to decide whether
+// we are "inside" the monitor.
+static uintptr_t g_Old_LdrLoadDll_address;
+
 static void *_cs_malloc(size_t size)
 {
     return mem_alloc(size);
@@ -74,6 +81,10 @@ void hook_init(HMODULE module_handle)
     g_monitor_end = g_monitor_start +
         module_image_size((const uint8_t *) module_handle);
 
+    g_ntdll_start = (uintptr_t) GetModuleHandle("ntdll");
+    g_ntdll_end = g_ntdll_start +
+        module_image_size((const uint8_t *) g_ntdll_start);
+
     GetSystemInfo(&g_si);
     _capstone_init();
 }
@@ -97,20 +108,73 @@ void hook_init2()
     _capstone_init();
 }
 
+static uintptr_t WINAPI _hook_retaddr4(void *a, void *b, void *c, void *d)
+{
+    (void) a; (void) b; (void) c; (void) d;
+
+    // Probably gcc specific.
+    return (uintptr_t) __builtin_return_address(0);
+}
+
+void hook_initcb_LdrLoadDll(hook_t *h)
+{
+    FARPROC fn = *h->orig;
+
+    *h->orig = (FARPROC) _hook_retaddr4;
+
+    g_Old_LdrLoadDll_address = (uintptr_t) h->handler(NULL, 0, NULL, NULL);
+
+    *h->orig = fn;
+}
+
 int hook_in_monitor()
 {
     uintptr_t addrs[RETADDRCNT]; uint32_t count;
+    int inside_LdrLoadDll = 0, outside_ntdll = 0, inside_monitor = 0;
 
     count = stacktrace(NULL, addrs, RETADDRCNT);
 
     // If an address that lies within the monitor DLL is found in the
-    // stacktrace then we consider this call not interesting.
-    for (uint32_t idx = 3; idx < count; idx++) {
+    // stacktrace then we consider this call not interesting. Except for some
+    // edge cases, please keep reading.
+    for (uint32_t idx = count - 1; idx >= 2; idx--) {
         if(addrs[idx] >= g_monitor_start && addrs[idx] < g_monitor_end) {
-            return 1;
+            // If this address belongs to New_LdrLoadDll, our hook handler,
+            // then we increase the following flag and continue. This helps us
+            // with getting API logs for stuff happening in DllMain.
+            if(addrs[idx] == g_Old_LdrLoadDll_address) {
+                inside_LdrLoadDll++;
+                continue;
+            }
+
+            // Inside monitor counts the amount of addresses inside the
+            // monitor but without the LdrLoadDll entries.
+            inside_monitor++;
+            continue;
+        }
+
+        if(inside_LdrLoadDll != 0 && (
+                addrs[idx] < g_ntdll_start || addrs[idx] > g_ntdll_end)) {
+            outside_ntdll++;
         }
     }
-    return 0;
+
+    // Most common case. We are not inside LdrLoadDll and this is the first
+    // occurrence of our monitor in the stacktrace.
+    if(inside_LdrLoadDll == 0 && inside_monitor == 1) {
+        return 0;
+    }
+
+    // Edge case. We are in LdrLoadDll and find ourselves to the first
+    // non-LdrLoadDll occurrence of our monitor in the stacktrace. Or the
+    // second of both, or third of both, etc. Also, at least one entry is
+    // outside of ntdll, to filter LdrLoadDll's own calls.
+    if(inside_LdrLoadDll != 0 && outside_ntdll != 0 &&
+            inside_LdrLoadDll == inside_monitor) {
+        return 0;
+    }
+
+    return 1;
 }
 
 int lde(const void *addr)

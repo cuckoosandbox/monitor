@@ -72,6 +72,7 @@ LdrLoadDll
 
 Signature::
 
+    * Callback: init
     * Library: ntdll
     * Return value: NTSTATUS
     * Special: true

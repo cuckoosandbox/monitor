@@ -78,4 +78,6 @@ int disasm(const void *addr, char *str);
 hook_t *sig_hooks();
 uint32_t sig_hook_count();
 
+void hook_initcb_LdrLoadDll(hook_t *h);
+
 #endif
