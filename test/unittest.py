@@ -121,6 +121,7 @@ def process_file(fname, modes):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--compile-only', action='store_true', help='Only compile')
     parser.add_argument('-m', '--modes', type=str, default='winxp,win7,win7x64', help='Modes to process.')
     args = parser.parse_args()
 
@@ -131,5 +132,11 @@ if __name__ == '__main__':
 
     curdir = os.path.abspath(os.path.dirname(__file__))
     for fname in os.listdir(curdir):
-        if fname.startswith('test-') and fname.endswith('.c'):
+        if not fname.startswith('test-') or not fname.endswith('.c'):
+            continue
+
+        if args.compile_only:
+            compile_file(fname, 'x86')
+            compile_file(fname, 'x64')
+        else:
             process_file(fname, modes=modes)
