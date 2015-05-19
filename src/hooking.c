@@ -508,6 +508,10 @@ int hook(hook_t *h)
     unhook_detect_add_region(h->funcname, h->addr, region_original,
         h->addr, h->stub_used);
 
+    if(h->initcb != NULL) {
+        h->initcb(h);
+    }
+
     h->is_hooked = 1;
     return 0;
 }

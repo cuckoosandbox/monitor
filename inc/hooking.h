@@ -39,6 +39,10 @@ typedef struct _hook_t {
     // Is this a "special" hook?
     int special;
 
+    // Special initialization callback for this function hook. It is called
+    // right after the hooking has successfully taken place.
+    void (*initcb)(struct _hook_t *h);
+
     // Address of the hooked function.
     uint8_t *addr;
 
