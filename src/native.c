@@ -80,6 +80,8 @@ static NTSTATUS (WINAPI *pNtWriteFile)(HANDLE FileHandle, HANDLE Event,
 
 static NTSTATUS (WINAPI *pNtClose)(HANDLE Handle);
 
+static DWORD (WINAPI *pGetTickCount)();
+
 static const char *g_funcnames[] = {
     "NtQueryVirtualMemory",
     "NtAllocateVirtualMemory",
@@ -166,6 +168,14 @@ int native_init()
 
         _native_copy_function(*g_pointers[idx], fp);
     }
+
+    *(uint8_t **) &pGetTickCount = memory;
+    memory += 128;
+
+    // Checked that this will work under at least Windows XP, Windows 7, and
+    // 64-bit Windows 7.
+    _native_copy_function((uint8_t *) pGetTickCount, (const uint8_t *)
+        GetProcAddress(GetModuleHandle("kernel32"), "GetTickCount"));
 
     unsigned long old_protect;
     VirtualProtect(*g_pointers[0], 0x1000, PAGE_EXECUTE_READ, &old_protect);
@@ -356,6 +366,11 @@ int close_handle(HANDLE object_handle)
         return 1;
     }
     return 0;
+}
+
+uint32_t get_tick_count()
+{
+    return pGetTickCount();
 }
 
 void get_last_error(last_error_t *error)

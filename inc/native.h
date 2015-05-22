@@ -80,6 +80,8 @@ NTSTATUS write_file(HANDLE file_handle, const void *buffer, uint32_t length,
 
 int close_handle(HANDLE object_handle);
 
+uint32_t get_tick_count();
+
 void get_last_error(last_error_t *error);
 void set_last_error(last_error_t *error);
 

@@ -296,7 +296,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
     bson_init_size(&b, mem_suggested_size(1024));
     bson_append_int(&b, "I", index);
     bson_append_int(&b, "T", get_current_thread_id());
-    bson_append_int(&b, "t", GetTickCount() - g_starttick);
+    bson_append_int(&b, "t", get_tick_count() - g_starttick);
     bson_append_long(&b, "h", hash);
 
     // If failure has been determined, then log the last error as well.
