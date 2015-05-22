@@ -28,7 +28,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define IMAGE_NT_HEADERS_CROSS IMAGE_NT_HEADERS
 #endif
 
-void symbol_init(HMODULE module_handle);
+typedef void (*symbol_callback_t)(const char *funcname,
+    uintptr_t address, void *context);
+
+void symbol_init(HMODULE monitor_address);
+int symbol_enumerate_module(HMODULE module_handle,
+    symbol_callback_t callback, void *context);
 int symbol(const uint8_t *addr, char *sym, uint32_t length);
 
 #endif

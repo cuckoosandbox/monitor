@@ -114,19 +114,71 @@ static int _eat_pointers_for_module(const uint8_t *mod,
     return 0;
 }
 
-void symbol_init(HMODULE module_handle)
+void symbol_init(HMODULE monitor_address)
 {
-    _eat_pointers_for_module((uint8_t *) module_handle,
+    _eat_pointers_for_module((const uint8_t *) monitor_address,
         &g_monitor_function_addresses, &g_monitor_names_addresses,
         &g_monitor_ordinals, &g_monitor_number_of_names);
 
-    g_monitor_image_size = module_image_size((const uint8_t *) module_handle);
+    g_monitor_image_size =
+        module_image_size((const uint8_t *) monitor_address);
 
     // It's important to resolve the base address at the end of this function
     // because otherwise the earlier function calls will return NULL pointers
     // as the base address has already been initialized, but the fetched
     // values have not.
-    g_monitor_base_address = (const uint8_t *) module_handle;
+    g_monitor_base_address = (const uint8_t *) monitor_address;
+}
+
+int symbol_enumerate_module(HMODULE module_handle,
+    symbol_callback_t callback, void *context)
+{
+    uint32_t *function_addresses, *names_addresses, number_of_names;
+    uint16_t *ordinals;
+
+    if(_eat_pointers_for_module((const uint8_t *) module_handle,
+            &function_addresses, &names_addresses, &ordinals,
+            &number_of_names) < 0) {
+        return -1;
+    }
+
+    for (uint32_t idx = 0; idx < number_of_names; idx++) {
+        const char *funcname =
+            (const char *) module_handle + names_addresses[idx];
+
+        uintptr_t address =
+            (uintptr_t) module_handle + function_addresses[ordinals[idx]];
+
+        callback(funcname, address, context);
+    }
+
+    return 0;
+}
+
+typedef struct _symbol_t {
+    uintptr_t address;
+
+    uintptr_t lower_address;
+    uintptr_t higher_address;
+
+    const char *lower_funcname;
+    const char *higher_funcname;
+} symbol_t;
+
+static void _symbol_callback(
+    const char *funcname, uintptr_t address, symbol_t *s)
+{
+    if(s->address > address && (s->lower_address == 0 ||
+            address > s->lower_address)) {
+        s->lower_address = address;
+        s->lower_funcname = funcname;
+    }
+
+    if(s->address < address && (s->higher_address == 0 ||
+            address < s->higher_address)) {
+        s->higher_address = address;
+        s->higher_funcname = funcname;
+    }
 }
 
 int symbol(const uint8_t *addr, char *sym, uint32_t length)
@@ -138,43 +190,28 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
         return -1;
     }
 
-    uint32_t *function_addresses, *names_addresses, number_of_names;
-    uint16_t *ordinals;
+    symbol_t s;
 
-    if(_eat_pointers_for_module(mod, &function_addresses, &names_addresses,
-            &ordinals, &number_of_names) < 0) {
-        return -1;
-    }
+    s.address = (uintptr_t) addr;
+    s.lower_address = s.higher_address = 0;
+    s.lower_funcname = s.higher_funcname = NULL;
 
-    int32_t lower = -1, higher = -1;
+    symbol_enumerate_module((HMODULE) mod,
+        (symbol_callback_t) &_symbol_callback, &s);
 
-    for (uint32_t idx = 0; idx < number_of_names; idx++) {
-        const uint8_t *fnaddr = mod + function_addresses[ordinals[idx]];
-
-        if(addr > fnaddr && (lower == -1 ||
-                fnaddr > mod + function_addresses[ordinals[lower]])) {
-            lower = idx;
-        }
-        if(addr < fnaddr && (higher == -1 ||
-                fnaddr < mod + function_addresses[ordinals[higher]])) {
-            higher = idx;
-        }
-    }
-
-    if(lower != -1) {
+    if(s.lower_address != 0) {
         len = our_snprintf(sym, length, "%s+%p",
-            (const char *) mod + names_addresses[lower],
-            (uint32_t)(addr - mod - function_addresses[ordinals[lower]]));
+            s.lower_funcname, (uintptr_t) addr - s.lower_address);
         sym += len, length -= len;
     }
-    if(higher != -1) {
-        if(lower != -1) {
+
+    if(s.higher_address != 0) {
+        if(s.lower_address != 0) {
             len = our_snprintf(sym, length, " / ");
             sym += len, length -= len;
         }
         our_snprintf(sym, length, "%s-%p",
-            (const char *) mod + names_addresses[higher],
-            (uint32_t)(mod + function_addresses[ordinals[higher]] - addr));
+            s.higher_funcname, s.higher_address - (uintptr_t) addr);
     }
     return 0;
 }
