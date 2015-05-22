@@ -275,6 +275,38 @@ Logging::
     b headers headers_length, lpszHeaders
 
 
+InternetQueryOptionA
+====================
+
+Signature::
+
+    * Library: wininet
+    * Return value: BOOL
+
+Parameters::
+
+    ** HINTERNET hInternet internet_handle
+    ** DWORD dwOption option
+    *  LPVOID lpBuffer
+    *  LPDWORD lpdwBufferLength
+
+
+InternetSetOptionA
+==================
+
+Signature::
+
+    * Library: wininet
+    * Return value: BOOL
+
+Parameters::
+
+    ** HINTERNET hInternet internet_handle
+    ** DWORD dwOption option
+    *  LPVOID lpBuffer
+    *  DWORD dwBufferLength
+
+
 HttpOpenRequestA
 ================
 
