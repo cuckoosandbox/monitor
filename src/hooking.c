@@ -455,7 +455,7 @@ int hook_create_jump(hook_t *h)
 
 #define MAXRESOLVECNT 50
 
-static int _hook_determine_start(hook_t *h, uint8_t *addr)
+static int _hook_determine_start(hook_t *h)
 {
     // Under Windows 7 some functions have been replaced by a function stub
     // which in turn calls the original function. E.g., a lot of functions
@@ -463,7 +463,7 @@ static int _hook_determine_start(hook_t *h, uint8_t *addr)
     // kernelbase.dll before reaching kernel32.dll.
     // We follow these jumps and add the regions to the list for unhook
     // detection.
-    uint32_t count;
+    uint32_t count; uint8_t *addr = h->addr;
 
     for (count = 0; count < MAXRESOLVECNT; count++) {
         // jmp short imm8
@@ -521,17 +521,19 @@ int hook(hook_t *h)
         return 0;
     }
 
-    HMODULE module_handle = GetModuleHandle(h->library);
-    if(module_handle == NULL) return 0;
+    if(h->addr == NULL) {
+        HMODULE module_handle = GetModuleHandle(h->library);
+        if(module_handle == NULL) return 0;
 
-    FARPROC addr = GetProcAddress(module_handle, h->funcname);
-    if(addr == NULL) {
-        pipe("DEBUG:Error resolving function %z!%z.",
-            h->library, h->funcname);
-        return -1;
+        h->addr = (uint8_t *) GetProcAddress(module_handle, h->funcname);
+        if(h->addr == NULL) {
+            pipe("DEBUG:Error resolving function %z!%z.",
+                h->library, h->funcname);
+            return -1;
+        }
     }
 
-    if(_hook_determine_start(h, (uint8_t *) addr) < 0) {
+    if(_hook_determine_start(h) < 0) {
         pipe("CRITICAL:Error determining start of function %z!%z.",
             h->library, h->funcname);
         return -1;
