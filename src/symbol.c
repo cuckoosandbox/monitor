@@ -166,8 +166,10 @@ typedef struct _symbol_t {
 } symbol_t;
 
 static void _symbol_callback(
-    const char *funcname, uintptr_t address, symbol_t *s)
+    const char *funcname, uintptr_t address, void *context)
 {
+    symbol_t *s = (symbol_t *) context;
+
     if(s->address > address && (s->lower_address == 0 ||
             address > s->lower_address)) {
         s->lower_address = address;
@@ -196,8 +198,7 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
     s.lower_address = s.higher_address = 0;
     s.lower_funcname = s.higher_funcname = NULL;
 
-    symbol_enumerate_module((HMODULE) mod,
-        (symbol_callback_t) &_symbol_callback, &s);
+    symbol_enumerate_module((HMODULE) mod, &_symbol_callback, &s);
 
     if(s.lower_address != 0) {
         len = our_snprintf(sym, length, "%s+%p",
