@@ -36,6 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static SYSTEM_INFO g_si;
 static csh g_capstone;
 
+static slab_t g_function_stubs;
+
 static uintptr_t g_monitor_start;
 static uintptr_t g_monitor_end;
 
@@ -106,6 +108,9 @@ void hook_init2()
 
     cs_option(0, CS_OPT_MEM, (size_t) (uintptr_t) &cs_mem);
     _capstone_init();
+
+    // Memory for function stubs of all the hooks.
+    slab_init(&g_function_stubs, 64, 128, PAGE_EXECUTE_READWRITE);
 }
 
 static uintptr_t WINAPI _hook_retaddr4(void *a, void *b, void *c, void *d)
@@ -532,25 +537,12 @@ int hook(hook_t *h)
         return -1;
     }
 
-    static uint8_t *func_stubs = NULL;
+    h->func_stub = slab_getmem(&g_function_stubs);
+    memset(h->func_stub, 0xcc, slab_size(&g_function_stubs));
 
-    if(func_stubs == NULL) {
-        func_stubs = virtual_alloc(NULL, sig_hook_count() * 64 + 8,
-            MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-        if(func_stubs == NULL) {
-            pipe("CRITICAL:Error allocating memory for hooks!");
-            return -1;
-        }
-
-        // 8-byte align.
-        func_stubs += 8 - ((uintptr_t) func_stubs & 7);
-        memset(func_stubs, 0xcc, sig_hook_count() * 64);
+    if(h->orig != NULL) {
+        *h->orig = (FARPROC) h->func_stub;
     }
-
-    h->func_stub = func_stubs;
-    func_stubs += 64;
-
-    *h->orig = (FARPROC) h->func_stub;
 
     // Create the original function stub.
     h->stub_used = hook_create_stub(h->func_stub,

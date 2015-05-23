@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "memory.h"
 #include "native.h"
+#include "pipe.h"
 
 static SYSTEM_INFO g_si;
 
@@ -161,4 +162,48 @@ int array_unset(array_t *array, uintptr_t index)
 
     LeaveCriticalSection(&array->cs);
     return ret;
+}
+
+static int _slab_ensure(slab_t *slab)
+{
+    if(slab->offset == slab->length) {
+        uint8_t *mem = virtual_alloc(NULL, slab->size * slab->count,
+            MEM_COMMIT | MEM_RESERVE, slab->memprot);
+        if(mem == NULL) {
+            pipe("CRITICAL:Error allocating memory for slab!");
+            return -1;
+        }
+
+        array_set(&slab->array, slab->offset / slab->count, mem);
+
+        slab->length += slab->count;
+    }
+    return 0;
+}
+
+void slab_init(slab_t *slab, uint32_t size, uint32_t count,
+    uint32_t memory_protection)
+{
+    array_init(&slab->array);
+    slab->size = size;
+    slab->count = count;
+    slab->offset = 0;
+    slab->length = 0;
+    slab->memprot = memory_protection;
+}
+
+void *slab_getmem(slab_t *slab)
+{
+    if(_slab_ensure(slab) == 0) {
+        uint8_t *mem = array_get(&slab->array, slab->offset / slab->count);
+        uint8_t *ret = mem + slab->size * (slab->offset % slab->count);
+        slab->offset++;
+        return ret;
+    }
+    return NULL;
+}
+
+uint32_t slab_size(const slab_t *slab)
+{
+    return slab->size;
 }

@@ -28,6 +28,16 @@ typedef struct _array_t {
     CRITICAL_SECTION cs;
 } array_t;
 
+typedef struct _slab_t {
+    array_t array;
+    uint32_t size;
+    uint32_t count;
+
+    uint32_t offset;
+    uint32_t length;
+    uint32_t memprot;
+} slab_t;
+
 uintptr_t roundup2(uintptr_t value);
 uintptr_t mem_suggested_size(uintptr_t size);
 
@@ -50,5 +60,10 @@ static inline uintptr_t array_geti(array_t *array, uintptr_t index)
 {
     return (uintptr_t) array_get(array, index);
 }
+
+void slab_init(slab_t *slab, uint32_t size, uint32_t count,
+    uint32_t memory_protection);
+void *slab_getmem(slab_t *slab);
+uint32_t slab_size(const slab_t *slab);
 
 #endif
