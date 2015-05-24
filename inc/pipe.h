@@ -34,10 +34,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // X  -> (uint64_t) -> 64-bit hexadecimal integer
 //
 
+#include <stdint.h>
+
 void pipe_init(const char *pipe_name);
 
 int pipe(const char *fmt, ...);
-int pipe2(void *out, int *outlen, const char *fmt, ...);
+int32_t pipe2(void *out, uint32_t outlen, const char *fmt, ...);
 
 #define PIPE_MAX_TIMEOUT 10000
 

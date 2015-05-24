@@ -178,14 +178,17 @@ int pipe(const char *fmt, ...)
     return ret;
 }
 
-int pipe2(void *out, int *outlen, const char *fmt, ...)
+int32_t pipe2(void *out, uint32_t outlen, const char *fmt, ...)
 {
     if(g_pipe_name[0] == 0) {
         MessageBox(NULL, "Pipe has not been initialized yet!", "Error", 0);
         return -1;
     }
 
-    static char buf[0x10000]; va_list args; int ret = -1, len;
+    open_pipe_handle();
+
+    static char buf[0x10000]; va_list args;
+    int32_t ret = -1, len; uintptr_t written;
 
     EnterCriticalSection(&g_cs);
 
@@ -193,9 +196,9 @@ int pipe2(void *out, int *outlen, const char *fmt, ...)
     len = _pipe_sprintf(buf, fmt, args);
     va_end(args);
 
-    if(len > 0 && CallNamedPipeW(g_pipe_name, buf, len, out, *outlen,
-            (unsigned long *) outlen, PIPE_MAX_TIMEOUT) != FALSE) {
-        ret = 0;
+    if(len > 0) {
+        transact_named_pipe(g_pipe_handle, buf, len, out, outlen, &written);
+        ret = written;
     }
 
     LeaveCriticalSection(&g_cs);
