@@ -47,6 +47,7 @@ uint32_t path_get_full_path_objattr(
 void wcsncpyA(wchar_t *dst, const char *src, uint32_t length);
 
 void hide_module_from_peb(HMODULE module_handle);
+const wchar_t *get_module_file_name(HMODULE module_handle);
 void destroy_pe_header(HANDLE module_handle);
 
 int copy_unicode_string(const UNICODE_STRING *in,

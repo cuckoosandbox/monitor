@@ -294,6 +294,27 @@ void hide_module_from_peb(HMODULE module_handle)
     }
 }
 
+const wchar_t *get_module_file_name(HMODULE module_handle)
+{
+    LDR_MODULE *mod; PEB *peb;
+
+#if __x86_64__
+    peb = (PEB *) readtls(0x60);
+#else
+    peb = (PEB *) readtls(0x30);
+#endif
+
+    for (mod = (LDR_MODULE *) peb->LoaderData->InLoadOrderModuleList.Flink;
+         mod->BaseAddress != NULL;
+         mod = (LDR_MODULE *) mod->InLoadOrderModuleList.Flink) {
+
+        if(mod->BaseAddress == module_handle) {
+            return mod->BaseDllName.Buffer;
+        }
+    }
+    return NULL;
+}
+
 void destroy_pe_header(HANDLE module_handle)
 {
     DWORD old_protect;

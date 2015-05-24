@@ -192,6 +192,8 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
         return -1;
     }
 
+    const wchar_t *module_name = get_module_file_name((HMODULE) mod);
+
     symbol_t s;
 
     s.address = (uintptr_t) addr;
@@ -208,11 +210,23 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
 
     if(s.higher_address != 0) {
         if(s.lower_address != 0) {
-            len = our_snprintf(sym, length, " / ");
-            sym += len, length -= len;
+            *sym++ = ' ', length--;
         }
-        our_snprintf(sym, length, "%s-%p",
+        len = our_snprintf(sym, length, "%s-%p",
             s.higher_funcname, s.higher_address - (uintptr_t) addr);
+        sym += len, length -= len;
+    }
+
+    if(module_name != NULL) {
+        if(s.lower_address != 0 || s.higher_address != 0) {
+            *sym++ = ' ', length--;
+        }
+
+        while (length-- != 0 && *module_name != 0 && *module_name != '.') {
+            *sym++ = tolower(*module_name++);
+        }
+
+        our_snprintf(sym, length, "+%p", addr - mod);
     }
     return 0;
 }
