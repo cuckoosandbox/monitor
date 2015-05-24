@@ -509,6 +509,11 @@ typedef struct _OBJECT_NAME_INFORMATION {
     WCHAR NameBuffer[1];
 } OBJECT_NAME_INFORMATION, *POBJECT_NAME_INFORMATION;
 
+typedef struct _FILE_PIPE_INFORMATION {
+    ULONG ReadMode;
+    ULONG CompletionMode;
+} FILE_PIPE_INFORMATION, *PFILE_PIPE_INFORMATION;
+
 typedef int EXTENDED_NAME_FORMAT;
 
 static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
@@ -528,6 +533,12 @@ static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
 #define ProcessBasicInformation 0
 #define ThreadBasicInformation 0
 #define UNW_FLAG_NHANDLER 0
+
+#define FILE_PIPE_QUEUE_OPERATION           0x00000000
+#define FILE_PIPE_COMPLETE_OPERATION        0x00000001
+
+#define FILE_PIPE_BYTE_STREAM_MODE          0x00000000
+#define FILE_PIPE_MESSAGE_MODE              0x00000001
 
 #define MAX_PATH_W 0x7fff
 

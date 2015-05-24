@@ -84,6 +84,10 @@ static NTSTATUS (WINAPI *pNtFsControlFile)(HANDLE FileHandle, HANDLE Event,
     const void *InputBuffer, ULONG InputBufferLength,
     void *OutputBuffer, ULONG OutputBufferLength);
 
+static NTSTATUS (WINAPI *pNtSetInformationFile)(HANDLE FileHandle,
+    PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, ULONG Length,
+    FILE_INFORMATION_CLASS FileInformationClass);
+
 static NTSTATUS (WINAPI *pNtClose)(HANDLE Handle);
 
 static NTSTATUS (WINAPI *pNtDelayExecution)(BOOLEAN Alertable,
@@ -106,6 +110,7 @@ static const char *g_funcnames[] = {
     "NtDuplicateObject",
     "NtWriteFile",
     "NtFsControlFile",
+    "NtSetInformationFile",
     "NtClose",
     "NtDelayExecution",
     "NtWaitForSingleObject",
@@ -124,6 +129,7 @@ static void **g_pointers[] = {
     (void **) &pNtDuplicateObject,
     (void **) &pNtWriteFile,
     (void **) &pNtFsControlFile,
+    (void **) &pNtSetInformationFile,
     (void **) &pNtClose,
     (void **) &pNtDelayExecution,
     (void **) &pNtWaitForSingleObject,
@@ -405,6 +411,23 @@ NTSTATUS transact_named_pipe(HANDLE pipe_handle,
         *written = status_block.Information;
     }
     return ret;
+}
+
+NTSTATUS set_named_pipe_handle_mode(HANDLE pipe_handle, uint32_t mode)
+{
+    assert(pNtSetInformationFile != NULL,
+        "pNtSetInformationFile is NULL!", 0);
+
+    FILE_PIPE_INFORMATION pipe_information; IO_STATUS_BLOCK status_block;
+
+    pipe_information.CompletionMode = (mode & PIPE_NOWAIT) ?
+        FILE_PIPE_COMPLETE_OPERATION : FILE_PIPE_QUEUE_OPERATION;
+
+    pipe_information.ReadMode = (mode & PIPE_READMODE_MESSAGE) ?
+        FILE_PIPE_MESSAGE_MODE : FILE_PIPE_BYTE_STREAM_MODE;
+
+    return pNtSetInformationFile(pipe_handle, &status_block,
+        &pipe_information, sizeof(pipe_information), FilePipeInformation);
 }
 
 int close_handle(HANDLE object_handle)

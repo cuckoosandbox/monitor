@@ -82,6 +82,8 @@ NTSTATUS transact_named_pipe(HANDLE pipe_handle,
     const void *inbuf, uintptr_t inbufsz, void *outbuf, uintptr_t outbufsz,
     uintptr_t *written);
 
+NTSTATUS set_named_pipe_handle_mode(HANDLE pipe_handle, uint32_t mode);
+
 int close_handle(HANDLE object_handle);
 
 void sleep(uint32_t milliseconds);

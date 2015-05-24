@@ -141,8 +141,8 @@ static void open_pipe_handle()
     }
     while (g_pipe_handle == INVALID_HANDLE_VALUE);
 
-    DWORD pipe_mode = PIPE_READMODE_MESSAGE | PIPE_WAIT;
-    SetNamedPipeHandleState(g_pipe_handle, &pipe_mode, NULL, NULL);
+    uint32_t pipe_mode = PIPE_READMODE_MESSAGE | PIPE_WAIT;
+    set_named_pipe_handle_mode(g_pipe_handle, pipe_mode);
 }
 
 void pipe_init(const char *pipe_name)
