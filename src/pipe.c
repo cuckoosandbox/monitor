@@ -19,12 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <windows.h>
 #include "misc.h"
+#include "native.h"
 #include "ntapi.h"
 #include "pipe.h"
 #include "utf8.h"
 
 static CRITICAL_SECTION g_cs;
 static wchar_t g_pipe_name[MAX_PATH];
+static HANDLE g_pipe_handle;
 
 static int _pipe_utf8x(char **out, unsigned short x)
 {
@@ -124,10 +126,30 @@ static int _pipe_sprintf(char *out, const char *fmt, va_list args)
     return ret;
 }
 
+static void open_pipe_handle()
+{
+    if(g_pipe_handle != INVALID_HANDLE_VALUE) {
+        return;
+    }
+
+    do {
+        g_pipe_handle = CreateFileW(g_pipe_name, GENERIC_READ | GENERIC_WRITE,
+            FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, NULL);
+
+        sleep(50);
+    }
+    while (g_pipe_handle == INVALID_HANDLE_VALUE);
+
+    DWORD pipe_mode = PIPE_READMODE_MESSAGE | PIPE_WAIT;
+    SetNamedPipeHandleState(g_pipe_handle, &pipe_mode, NULL, NULL);
+}
+
 void pipe_init(const char *pipe_name)
 {
     InitializeCriticalSection(&g_cs);
-    wcsncpyA(g_pipe_name, pipe_name, sizeof(g_pipe_name)/sizeof(wchar_t));
+    wcsncpyA(g_pipe_name, pipe_name, MAX_PATH);
+    g_pipe_handle = INVALID_HANDLE_VALUE;
 }
 
 int pipe(const char *fmt, ...)
@@ -137,6 +159,8 @@ int pipe(const char *fmt, ...)
         return -1;
     }
 
+    open_pipe_handle();
+
     static char buf[0x10000]; va_list args; int ret = -1, len;
 
     EnterCriticalSection(&g_cs);
@@ -145,8 +169,8 @@ int pipe(const char *fmt, ...)
     len = _pipe_sprintf(buf, fmt, args);
     va_end(args);
 
-    if(len > 0 && CallNamedPipeW(g_pipe_name, buf, len, buf, len,
-            (unsigned long *) &len, PIPE_MAX_TIMEOUT) != FALSE) {
+    if(len > 0) {
+        transact_named_pipe(g_pipe_handle, buf, len, buf, sizeof(buf), NULL);
         ret = 0;
     }
 

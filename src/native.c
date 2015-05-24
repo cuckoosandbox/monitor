@@ -78,7 +78,19 @@ static NTSTATUS (WINAPI *pNtWriteFile)(HANDLE FileHandle, HANDLE Event,
     PIO_STATUS_BLOCK IoStatusBlock, const void *Buffer, ULONG Length,
     PLARGE_INTEGER ByteOffset, PULONG Key);
 
+static NTSTATUS (WINAPI *pNtFsControlFile)(HANDLE FileHandle, HANDLE Event,
+    PIO_APC_ROUTINE ApcRoutine, PVOID ApcContext,
+    PIO_STATUS_BLOCK IoStatusBlock, ULONG FsControlCode,
+    const void *InputBuffer, ULONG InputBufferLength,
+    void *OutputBuffer, ULONG OutputBufferLength);
+
 static NTSTATUS (WINAPI *pNtClose)(HANDLE Handle);
+
+static NTSTATUS (WINAPI *pNtDelayExecution)(BOOLEAN Alertable,
+    PLARGE_INTEGER DelayInterval);
+
+static NTSTATUS (WINAPI *pNtWaitForSingleObject)(HANDLE Object,
+    BOOLEAN Alertable, PLARGE_INTEGER Timeout);
 
 static DWORD (WINAPI *pGetTickCount)();
 
@@ -93,7 +105,10 @@ static const char *g_funcnames[] = {
     "NtQueryKey",
     "NtDuplicateObject",
     "NtWriteFile",
+    "NtFsControlFile",
     "NtClose",
+    "NtDelayExecution",
+    "NtWaitForSingleObject",
     NULL,
 };
 
@@ -108,7 +123,10 @@ static void **g_pointers[] = {
     (void **) &pNtQueryKey,
     (void **) &pNtDuplicateObject,
     (void **) &pNtWriteFile,
+    (void **) &pNtFsControlFile,
     (void **) &pNtClose,
+    (void **) &pNtDelayExecution,
+    (void **) &pNtWaitForSingleObject,
 };
 
 // Extract the immediate offset from the first "mov eax, dword [eax+imm]" or
@@ -359,6 +377,36 @@ NTSTATUS write_file(HANDLE file_handle, const void *buffer, uint32_t length,
     return ret;
 }
 
+#define FSCTL_PIPE_TRANSCEIVE \
+    CTL_CODE(FILE_DEVICE_NAMED_PIPE, 5, \
+    METHOD_NEITHER, FILE_READ_DATA | FILE_WRITE_DATA)
+
+NTSTATUS transact_named_pipe(HANDLE pipe_handle,
+    const void *inbuf, uintptr_t inbufsz, void *outbuf, uintptr_t outbufsz,
+    uintptr_t *written)
+{
+    assert(pNtFsControlFile != NULL, "pNtFsControlFile is NULL!", 0);
+    assert(pNtWaitForSingleObject != NULL,
+        "pNtWaitForSingleObject is NULL!", 0);
+
+    IO_STATUS_BLOCK status_block;
+
+    NTSTATUS ret = pNtFsControlFile(pipe_handle, NULL, NULL, NULL,
+        &status_block, FSCTL_PIPE_TRANSCEIVE, inbuf, inbufsz, outbuf,
+        outbufsz);
+    if(ret == STATUS_PENDING) {
+        ret = pNtWaitForSingleObject(pipe_handle, FALSE, NULL);
+        if(NT_SUCCESS(ret) != FALSE) {
+            ret = status_block._.Status;
+        }
+    }
+
+    if(NT_SUCCESS(ret) != FALSE && written != NULL) {
+        *written = status_block.Information;
+    }
+    return ret;
+}
+
 int close_handle(HANDLE object_handle)
 {
     assert(pNtClose != NULL, "pNtClose is NULL!", 0);
@@ -366,6 +414,15 @@ int close_handle(HANDLE object_handle)
         return 1;
     }
     return 0;
+}
+
+void sleep(uint32_t milliseconds)
+{
+    assert(pNtDelayExecution != NULL, "pNtDelayExecution is NULL!", );
+    LARGE_INTEGER li;
+    li.QuadPart = -10000 * (uint64_t) milliseconds;
+
+    pNtDelayExecution(FALSE, &li);
 }
 
 uint32_t get_tick_count()

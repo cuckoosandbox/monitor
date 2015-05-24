@@ -78,8 +78,13 @@ int duplicate_handle(HANDLE source_process_handle, HANDLE source_handle,
 NTSTATUS write_file(HANDLE file_handle, const void *buffer, uint32_t length,
     uint32_t *bytes_written);
 
+NTSTATUS transact_named_pipe(HANDLE pipe_handle,
+    const void *inbuf, uintptr_t inbufsz, void *outbuf, uintptr_t outbufsz,
+    uintptr_t *written);
+
 int close_handle(HANDLE object_handle);
 
+void sleep(uint32_t milliseconds);
 uint32_t get_tick_count();
 
 void get_last_error(last_error_t *error);
