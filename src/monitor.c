@@ -35,7 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 void monitor_init(HMODULE module_handle)
 {
     // Sends crashes to the process rather than showing error popup boxes etc.
-    SetErrorMode(SEM_FAILCRITICALERRORS);
+    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOALIGNMENTFAULTEXCEPT |
+        SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
 
     config_t cfg;
     config_read(&cfg);
