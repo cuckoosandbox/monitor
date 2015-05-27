@@ -282,14 +282,24 @@ void load_dll_crt(uint32_t pid, const wchar_t *dll_path)
 
 void load_dll_apc(uint32_t pid, uint32_t tid, const wchar_t *dll_path)
 {
+    load_library_t s;
+    memset(&s, 0, sizeof(s));
+
+    s.ldr_load_dll = resolve_symbol("ntdll", "LdrLoadDll");
+    s.get_last_error = resolve_symbol("kernel32", "GetLastError");
+
+    s.filepath.Length = lstrlenW(dll_path) * sizeof(wchar_t);
+    s.filepath.MaximumLength = strsizeW(dll_path);
+    s.filepath.Buffer = write_data(pid, dll_path, strsizeW(dll_path));
+
+    void *settings_addr = write_data(pid, &s, sizeof(s));
+    void *shellcode_addr = write_data(pid, &load_library_worker, 0x1000);
+
     HANDLE thread_handle = open_thread(tid);
-    FARPROC load_library_w = resolve_symbol("kernel32", "LoadLibraryW");
 
-    void *dll_addr = write_data(pid, dll_path, strsizeW(dll_path));
-
-    // Add LoadLibraryW(dll_path) to the APC queue.
-    if(QueueUserAPC((PAPCFUNC) load_library_w, thread_handle,
-            (ULONG_PTR) dll_addr) == 0) {
+    // Add LdrLoadDll(..., dll_path, ...) to the APC queue.
+    if(QueueUserAPC((PAPCFUNC) shellcode_addr, thread_handle,
+            (ULONG_PTR) settings_addr) == 0) {
         fprintf(stderr, "[-] Error adding task to APC queue: %ld\n",
             GetLastError());
         exit(1);
