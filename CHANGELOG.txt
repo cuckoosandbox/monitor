@@ -1,3 +1,19 @@
+- Tweak: Use LdrLoadDll instead of LoadLibraryW for injection so processes
+  without kernel32 loaded can be injected as well (thanks Accuvant).
+- Tweak: Log module+offset in the stacktrace.
+- Tweak: More SetErrorMode flags so not to show an error box under Windows 7
+  (thanks Accuvant).
+- Tweak: Reuse pipe handle for multiple commands.
+- New: Use custom slab allocator for allocating hooking function stubs.
+- Tweak: Allow analysis of DllMain functionality of loaded DLLs.
+- New: Various signatures to improve analysis results on Internet Explorer 6,
+  Internet Explorer 8, and Firefox 3.6.
+- Tweak: Use our own sprintf implementation everywhere (except for capstone).
+- Tweak: Get rid of all ws2_32 imports.
+- Remove: Get rid of superfluous dropped file tracking.
+- New: Pipe-based logging which is more stable than Windows sockets.
+- Tweak: Make inject.exe and is32bit.exe unicode compatible.
+- New: Log the last error and the nt status for failed api calls.
 - Remove: ExitThread and ExitProcess signatures (thanks Accuvant).
 - Tweak: Improve compilation so that helper code does not depend on
   automatically generated code, therefore improving compilation time when
