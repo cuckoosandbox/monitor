@@ -32,6 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define DPRINTF(fmt, ...) if(verbose != 0) fprintf(stderr, fmt, ##__VA_ARGS__)
 
+#define NOINLINE __attribute__((noinline))
+
 static int verbose = 0;
 
 uint32_t strsizeW(const wchar_t *s)
@@ -155,7 +157,7 @@ typedef struct _create_process_t {
     FARPROC get_last_error;
 } create_process_t;
 
-uint32_t __attribute__((noinline)) create_process_worker(create_process_t *s)
+uint32_t NOINLINE WINAPI create_process_worker(create_process_t *s)
 {
     uint32_t ret = 0;
 
@@ -239,7 +241,7 @@ typedef struct _load_library_t {
     UNICODE_STRING filepath;
 } load_library_t;
 
-uint32_t __attribute__((noinline)) load_library(load_library_t *s)
+uint32_t NOINLINE WINAPI load_library_worker(load_library_t *s)
 {
     HMODULE module_handle; uint32_t ret = 0;
     if(NT_SUCCESS(s->ldr_load_dll(NULL, 0, s->filepath,
@@ -262,7 +264,7 @@ void load_dll_crt(uint32_t pid, const wchar_t *dll_path)
     s.filepath.Buffer = write_data(pid, dll_path, strsizeW(dll_path));
 
     void *settings_addr = write_data(pid, &s, sizeof(s));
-    void *shellcode_addr = write_data(pid, &load_library, 0x1000);
+    void *shellcode_addr = write_data(pid, &load_library_worker, 0x1000);
 
     // Run LdrLoadDll(..., dll_path, ...) in the target process.
     uint32_t last_error =
