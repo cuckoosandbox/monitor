@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include <tlhelp32.h>
 #include <shlwapi.h>
-#include "../inc/assembly.h"
+#include "../inc/ntapi.h"
 
 #define INJECT_NONE 0
 #define INJECT_CRT  1
@@ -145,190 +145,137 @@ uint32_t create_thread_and_wait(uint32_t pid, void *addr, void *arg)
     return exit_code;
 }
 
+typedef struct _create_process_t {
+    FARPROC create_process_w;
+    wchar_t *filepath;
+    wchar_t *cmdline;
+    wchar_t *curdir;
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    FARPROC get_last_error;
+} create_process_t;
+
+uint32_t __attribute__((noinline)) create_process_worker(create_process_t *s)
+{
+    uint32_t ret = 0;
+
+    if(s->create_process_w(s->filepath, s->cmdline, NULL, NULL, FALSE,
+            CREATE_NEW_CONSOLE | CREATE_SUSPENDED, NULL, s->curdir,
+            &s->si, &s->pi) == FALSE) {
+        ret = s->get_last_error();
+    }
+
+    return ret;
+}
+
 uint32_t start_app(uint32_t from, const wchar_t *path,
     const wchar_t *arguments, const wchar_t *curdir, uint32_t *tid)
 {
-    STARTUPINFO si; PROCESS_INFORMATION pi;
-    memset(&pi, 0, sizeof(pi));
-    memset(&si, 0, sizeof(si));
-    si.cb = sizeof(si);
+    create_process_t s;
+    memset(&s, 0, sizeof(s));
+
+    s.si.cb = sizeof(s.si);
 
     // Emulate explorer.exe's startupinfo flags behavior.
-    si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_SHOWNORMAL;
+    s.si.dwFlags = STARTF_USESHOWWINDOW;
+    s.si.wShowWindow = SW_SHOWNORMAL;
 
-    FARPROC create_process_w = resolve_symbol("kernel32", "CreateProcessW");
-    FARPROC close_handle = resolve_symbol("kernel32", "CloseHandle");
-    FARPROC get_last_error = resolve_symbol("kernel32", "GetLastError");
+    s.create_process_w = resolve_symbol("kernel32", "CreateProcessW");
+    s.get_last_error = resolve_symbol("kernel32", "GetLastError");
 
     wchar_t *cmd_line =
         malloc(strsizeW(path) + strsizeW(arguments) + 4 * sizeof(wchar_t));
     wsprintfW(cmd_line, L"\"%s\" %s", path, arguments);
 
-    void *path_addr = write_data(from, path, strsizeW(path));
-    void *cmd_addr = write_data(from, cmd_line, strsizeW(cmd_line));
-    void *si_addr = write_data(from, &si, sizeof(si));
-    void *pi_addr = write_data(from, &pi, sizeof(pi));
+    s.filepath = write_data(from, path, strsizeW(path));
+    s.cmdline = write_data(from, cmd_line, strsizeW(cmd_line));
+    s.curdir = write_data(from, curdir, strsizeW(curdir));
 
-    void *curdir_addr = write_data(from, curdir, strsizeW(curdir));
+    create_process_t *settings_addr = write_data(from, &s, sizeof(s));
 
-    uint8_t shellcode[512]; uint8_t *ptr = shellcode;
+    void *shellcode_addr = write_data(from, &create_process_worker, 0x1000);
 
-    ptr += asm_pushv(ptr, pi_addr);
-    ptr += asm_pushv(ptr, si_addr);
-    ptr += asm_pushv(ptr, curdir_addr);
-    ptr += asm_pushv(ptr, NULL);
-    ptr += asm_push(ptr, CREATE_NEW_CONSOLE | CREATE_SUSPENDED);
-    ptr += asm_push(ptr, FALSE);
-
-#if __x86_64__
-    ptr += asm_move_regimmv(ptr, R_R9, NULL);
-    ptr += asm_move_regimmv(ptr, R_R8, NULL);
-    ptr += asm_move_regimmv(ptr, R_RDX, cmd_addr);
-    ptr += asm_move_regimmv(ptr, R_RCX, path_addr);
-
-    ptr += asm_pushv(ptr, NULL);
-    ptr += asm_pushv(ptr, NULL);
-    ptr += asm_pushv(ptr, NULL);
-    ptr += asm_pushv(ptr, NULL);
-#else
-    ptr += asm_pushv(ptr, NULL);
-    ptr += asm_pushv(ptr, NULL);
-    ptr += asm_pushv(ptr, cmd_addr);
-    ptr += asm_pushv(ptr, path_addr);
-#endif
-
-    ptr += asm_call(ptr, create_process_w);
-
-#if __x86_64__
-    ptr += asm_add_regimm(ptr, R_RSP, 10 * sizeof(uintptr_t));
-#endif
-
-    // If the return value of CreateProcessW was FALSE, then we return the
-    // GetLastError(), otherwise we return zero.
-#if __x86_64__
-    ptr += asm_jregz(ptr, R_RAX, ASM_MOVE_REGIMM_SIZE + ASM_RETURN_SIZE);
-    ptr += asm_move_regimm(ptr, R_RAX, 0);
-    ptr += asm_return(ptr, 0);
-#else
-    ptr += asm_jregz(ptr, R_EAX, ASM_MOVE_REGIMM_SIZE + ASM_RETURN_SIZE);
-    ptr += asm_move_regimm(ptr, R_EAX, 0);
-    ptr += asm_return(ptr, 4);
-#endif
-
-    ptr += asm_call(ptr, get_last_error);
-
-#if __x86_64__
-    ptr += asm_return(ptr, 0);
-#else
-    ptr += asm_return(ptr, 4);
-#endif
-
-    void *shellcode_addr = write_data(from, shellcode, ptr - shellcode);
-
-    uint32_t last_error = create_thread_and_wait(from, shellcode_addr, NULL);
+    uint32_t last_error =
+        create_thread_and_wait(from, shellcode_addr, settings_addr);
     if(last_error != 0) {
         fprintf(stderr, "[-] Error launching process: %d\n", last_error);
         exit(1);
     }
 
-    read_data(from, pi_addr, &pi, sizeof(pi));
+    read_data(from, settings_addr, &s, sizeof(s));
 
-    free_data(from, pi_addr, sizeof(pi));
-    free_data(from, si_addr, sizeof(si));
-    free_data(from, curdir_addr, strsizeW(curdir));
-    free_data(from, cmd_addr, strsizeW(cmd_line));
-    free_data(from, path_addr, strsizeW(path));
-    free_data(from, shellcode_addr, ptr - shellcode);
+    free_data(from, s.curdir, strsizeW(curdir));
+    free_data(from, s.cmdline, strsizeW(cmd_line));
+    free_data(from, s.filepath, strsizeW(path));
+    free_data(from, shellcode_addr, 0x1000);
+    free_data(from, settings_addr, sizeof(s));
     free(cmd_line);
 
-    ptr = shellcode;
+    HANDLE process_handle = open_process(from), object_handle;
 
-#if __x86_64__
-    ptr += asm_move_regimmv(ptr, R_RCX, pi.hThread);
-#else
-    ptr += asm_pushv(ptr, pi.hThread);
-#endif
-    ptr += asm_call(ptr, close_handle);
+    if(DuplicateHandle(process_handle, s.pi.hThread, GetCurrentProcess(),
+            &object_handle, DUPLICATE_SAME_ACCESS, FALSE,
+            DUPLICATE_CLOSE_SOURCE) != FALSE) {
+        CloseHandle(object_handle);
+    }
 
-#if __x86_64__
-    ptr += asm_move_regimmv(ptr, R_RCX, pi.hProcess);
-#else
-    ptr += asm_pushv(ptr, pi.hProcess);
-#endif
+    if(DuplicateHandle(process_handle, s.pi.hProcess, GetCurrentProcess(),
+            &object_handle, DUPLICATE_SAME_ACCESS, FALSE,
+            DUPLICATE_CLOSE_SOURCE) != FALSE) {
+        CloseHandle(object_handle);
+    }
 
-    ptr += asm_call(ptr, close_handle);
-#if __x86_64__
-    ptr += asm_return(ptr, 0);
-#else
-    ptr += asm_return(ptr, 4);
-#endif
-
-    shellcode_addr = write_data(from, shellcode, ptr - shellcode);
-    create_thread_and_wait(from, shellcode_addr, NULL);
-
-    free_data(from, shellcode_addr, ptr - shellcode);
+    CloseHandle(process_handle);
 
     if(tid != NULL) {
-        *tid = pi.dwThreadId;
+        *tid = s.pi.dwThreadId;
     }
-    return pi.dwProcessId;
+    return s.pi.dwProcessId;
+}
+
+typedef struct _load_library_t {
+    FARPROC ldr_load_dll;
+    FARPROC get_last_error;
+    UNICODE_STRING filepath;
+} load_library_t;
+
+uint32_t __attribute__((noinline)) load_library(load_library_t *s)
+{
+    HMODULE module_handle; uint32_t ret = 0;
+    if(NT_SUCCESS(s->ldr_load_dll(NULL, 0, s->filepath,
+            &module_handle)) == FALSE) {
+        ret = s->get_last_error();
+    }
+    return ret;
 }
 
 void load_dll_crt(uint32_t pid, const wchar_t *dll_path)
 {
-    FARPROC load_library_w = resolve_symbol("kernel32", "LoadLibraryW");
-    FARPROC get_last_error = resolve_symbol("kernel32", "GetLastError");
+    load_library_t s;
+    memset(&s, 0, sizeof(s));
 
-    void *dll_addr = write_data(pid, dll_path, strsizeW(dll_path));
+    s.ldr_load_dll = resolve_symbol("ntdll", "LdrLoadDll");
+    s.get_last_error = resolve_symbol("kernel32", "GetLastError");
 
-    uint8_t shellcode[512]; uint8_t *ptr = shellcode;
+    s.filepath.Length = lstrlenW(dll_path) * sizeof(wchar_t);
+    s.filepath.MaximumLength = strsizeW(dll_path);
+    s.filepath.Buffer = write_data(pid, dll_path, strsizeW(dll_path));
 
-#if __x86_64__
-    ptr += asm_move_regimmv(ptr, R_RCX, dll_addr);
-    ptr += asm_pushv(ptr, NULL);
-#else
-    ptr += asm_pushv(ptr, dll_addr);
-#endif
+    void *settings_addr = write_data(pid, &s, sizeof(s));
+    void *shellcode_addr = write_data(pid, &load_library, 0x1000);
 
-    ptr += asm_call(ptr, load_library_w);
-
-#if __x86_64__
-    ptr += asm_add_regimm(ptr, R_RSP, sizeof(uintptr_t));
-#endif
-
-    // If the return value of LoadLibrary was NULL, then we return the
-    // GetLastError(), otherwise we return zero.
-#if __x86_64__
-    ptr += asm_jregz(ptr, R_RAX, ASM_MOVE_REGIMM_SIZE + ASM_RETURN_SIZE);
-    ptr += asm_move_regimm(ptr, R_RAX, 0);
-    ptr += asm_return(ptr, 0);
-#else
-    ptr += asm_jregz(ptr, R_EAX, ASM_MOVE_REGIMM_SIZE + ASM_RETURN_SIZE);
-    ptr += asm_move_regimm(ptr, R_EAX, 0);
-    ptr += asm_return(ptr, 4);
-#endif
-
-    ptr += asm_call(ptr, get_last_error);
-
-#if __x86_64__
-    ptr += asm_return(ptr, 0);
-#else
-    ptr += asm_return(ptr, 4);
-#endif
-
-    void *shellcode_addr = write_data(pid, shellcode, ptr - shellcode);
-
-    // Run LoadLibraryW(dll_path) in the target process.
-    uint32_t last_error = create_thread_and_wait(pid, shellcode_addr, NULL);
+    // Run LdrLoadDll(..., dll_path, ...) in the target process.
+    uint32_t last_error =
+        create_thread_and_wait(pid, shellcode_addr, settings_addr);
     if(last_error != 0) {
         fprintf(stderr, "[-] Error loading monitor into process: %d\n",
             last_error);
         exit(1);
     }
 
-    free_data(pid, dll_addr, strsizeW(dll_path));
-    free_data(pid, shellcode_addr, ptr - shellcode);
+    free_data(pid, s.filepath.Buffer, strsizeW(dll_path));
+    free_data(pid, settings_addr, sizeof(s));
+    free_data(pid, shellcode_addr, 0x1000);
 }
 
 void load_dll_apc(uint32_t pid, uint32_t tid, const wchar_t *dll_path)
