@@ -244,7 +244,7 @@ typedef struct _load_library_t {
 uint32_t NOINLINE WINAPI load_library_worker(load_library_t *s)
 {
     HMODULE module_handle; uint32_t ret = 0;
-    if(NT_SUCCESS(s->ldr_load_dll(NULL, 0, s->filepath,
+    if(NT_SUCCESS(s->ldr_load_dll(NULL, 0, &s->filepath,
             &module_handle)) == FALSE) {
         ret = s->get_last_error();
     }
@@ -257,7 +257,7 @@ void load_dll_crt(uint32_t pid, const wchar_t *dll_path)
     memset(&s, 0, sizeof(s));
 
     s.ldr_load_dll = resolve_symbol("ntdll", "LdrLoadDll");
-    s.get_last_error = resolve_symbol("kernel32", "GetLastError");
+    s.get_last_error = resolve_symbol("ntdll", "RtlGetLastWin32Error");
 
     s.filepath.Length = lstrlenW(dll_path) * sizeof(wchar_t);
     s.filepath.MaximumLength = strsizeW(dll_path);
@@ -286,7 +286,7 @@ void load_dll_apc(uint32_t pid, uint32_t tid, const wchar_t *dll_path)
     memset(&s, 0, sizeof(s));
 
     s.ldr_load_dll = resolve_symbol("ntdll", "LdrLoadDll");
-    s.get_last_error = resolve_symbol("kernel32", "GetLastError");
+    s.get_last_error = resolve_symbol("ntdll", "RtlGetLastWin32Error");
 
     s.filepath.Length = lstrlenW(dll_path) * sizeof(wchar_t);
     s.filepath.MaximumLength = strsizeW(dll_path);
