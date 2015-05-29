@@ -291,7 +291,7 @@ Parameters::
 
     ** HWND hwndOwner window_handle
     ** int nFolder folder_index
-    *  PIDLIST_ABSOLUTE *ppidl
+    *  void *ppidl
 
 
 SHGetFolderPathW
