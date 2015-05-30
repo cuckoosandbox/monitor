@@ -393,6 +393,33 @@ Parameters::
     ** int vKey key_code
 
 
+GetKeyboardState
+================
+
+Signature::
+
+    * Library: user32
+    * Return value: BOOL
+
+Parameters::
+
+    *  PBYTE lpKeyState
+
+
+GetKeyState
+===========
+
+Signature::
+
+    * Is success: 1
+    * Library: user32
+    * Return value: SHORT
+
+Parameters::
+
+    ** int nVirtKey key_code
+
+
 SendNotifyMessageA
 ==================
 
