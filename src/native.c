@@ -168,6 +168,25 @@ static void _native_copy_function(uint8_t *dst, const uint8_t *src)
     } while (*src != 0xc2 && *src != 0xc3);
 }
 
+static uint8_t *_native_follow_get_tick_count(uint8_t *addr)
+{
+    // Handles the case under Windows 7 where you have to follow a short jump
+    // and an indirect jump before getting to the actual function.
+    if(*addr == 0xeb) {
+        addr = addr + 2 + *(int8_t *)(addr + 1);
+
+        if(*addr == 0xff && addr[1] == 0x25) {
+#if __x86_64__
+            addr += *(uint32_t *)(addr + 2) + 6;
+#else
+            addr = *(uint8_t **)(addr + 2);
+#endif
+            addr = *(uint8_t **) addr;
+        }
+    }
+    return addr;
+}
+
 int native_init()
 {
     g_current_process = GetCurrentProcess();
@@ -198,8 +217,10 @@ int native_init()
 
     // Checked that this will work under at least Windows XP, Windows 7, and
     // 64-bit Windows 7.
-    _native_copy_function((uint8_t *) pGetTickCount, (const uint8_t *)
+    uint8_t *get_tick_count_addr = _native_follow_get_tick_count((uint8_t *)
         GetProcAddress(GetModuleHandle("kernel32"), "GetTickCount"));
+
+    _native_copy_function((uint8_t *) pGetTickCount, get_tick_count_addr);
 
     unsigned long old_protect;
     VirtualProtect(*g_pointers[0], 0x1000, PAGE_EXECUTE_READ, &old_protect);
