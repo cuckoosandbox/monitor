@@ -52,7 +52,7 @@ Parameters::
     ** LPTHREAD_START_ROUTINE lpStartAddress function_address
     ** PVOID lpParameter parameter
     ** BOOL CreateSuspended suspended
-    ** LONG StackZeroBits
+    ** LONG StackZeroBits stack_zero_bits
     *  LONG SizeOfStackCommit
     *  LONG SizeOfStackReserve
     *  PVOID lpBytesBuffer
