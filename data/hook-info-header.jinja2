@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 typedef enum _signature_index_t {
 {%- for hook in sigs if not hook.ignore: %}
-    SIG_{{ hook.apiname }},
+    SIG_{{ hook.signature.library }}_{{ hook.apiname }},
 {%- endfor %}
 } signature_index_t;
 
