@@ -810,3 +810,29 @@ Parameters::
 Logging::
 
     u filepath lpBuffer
+
+
+GetFileAttributesA
+==================
+
+Signature::
+
+    * Is success: ret !=0
+    * Return value: DWORD
+
+Parameters::
+
+    * LPCTSTR lpFileName
+
+Pre::
+
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathA(lpFileName, filepath);
+
+Logging::
+
+    u filepath filepath
+
+Post::
+
+    free_unicode_buffer(filepath);
