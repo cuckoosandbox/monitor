@@ -838,3 +838,31 @@ Logging::
 Post::
 
     free_unicode_buffer(filepath);
+
+
+GetDiskFreeSpaceExA
+===================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    * PCWSTR lpDirectoryName
+    * PULARGE_INTEGER lpFreeBytesAvailable
+    * PULARGE_INTEGER lpTotalNumberOfBytes
+    * PULARGE_INTEGER lpTotalNumberOfFreeBytes
+
+Pre::
+
+    wchar_t *filepath = get_unicode_buffer();
+    path_get_full_pathW(lpDirectoryName, filepath);
+
+Logging::
+
+    u filepath filepath
+
+Post::
+
+    free_unicode_buffer(filepath);
