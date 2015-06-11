@@ -41,6 +41,9 @@ typedef struct _config_t {
 
     // Path to non-interesting hashes.
     char hashes_path[MAX_PATH];
+
+    // Enable diffing logging - this is disabled by default.
+    int diffing_enable;
 } config_t;
 
 void config_read(config_t *cfg);

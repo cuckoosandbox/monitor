@@ -42,6 +42,7 @@ typedef struct _module_t {
 static uint32_t g_module_count, g_list_length;
 static module_t g_modules[MAX_MODULE_COUNT];
 static uint64_t *g_list;
+static int g_diffing_enabled;
 
 static uint64_t _get_module_hash(HMODULE module_handle)
 {
@@ -214,7 +215,7 @@ static int _sort_uint64(const void *a, const void *b)
     return _a - _b;
 }
 
-void diffing_init(const char *path)
+void diffing_init(const char *path, int enable)
 {
     FILE *fp = fopen(path, "rb");
     if(fp != NULL) {
@@ -234,10 +235,18 @@ void diffing_init(const char *path)
         fclose(fp);
         DeleteFile(path);
     }
+
+    g_diffing_enabled = enable;
 }
 
 uint64_t call_hash(const char *fmt, ...)
 {
+    // If no diffing list has been initialized and diffing has not been
+    // explicitly enabled, then ignore all call_hash() calls.
+    if(g_list_length == 0 && g_diffing_enabled == 0) {
+        return HASH_INTERESTING;
+    }
+
     va_list args;
     va_start(args, fmt);
 

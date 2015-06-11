@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // h  -> (HANDLE) -> object handle to be checked against ignored object list
 //
 
-void diffing_init(const char *path);
+void diffing_init(const char *path, int enable);
 uint64_t call_hash(const char *fmt, ...);
 int is_interesting_hash(uint64_t hash);
 

@@ -73,6 +73,9 @@ void config_read(config_t *cfg)
         else if(strcmp(key, "hashes-path") == 0) {
             strcpy(cfg->hashes_path, value);
         }
+        else if(strcmp(key, "diffing-enable") == 0) {
+            cfg->diffing_enable = value[0] == '1';
+        }
     }
     fclose(fp);
     DeleteFile(config_fname);
