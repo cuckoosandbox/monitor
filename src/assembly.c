@@ -123,7 +123,7 @@ int asm_add_regimm(uint8_t *stub, register_t reg, uint32_t value)
 
 int asm_jump_32bit(uint8_t *stub, const void *addr)
 {
-#if DEBUG
+#if DEBUG && !__x86_64__
     stub[0] = 0x68;
     stub[5] = 0xc3;
     *(uint32_t *)(stub + 1) = (uint32_t) (uintptr_t) addr;
