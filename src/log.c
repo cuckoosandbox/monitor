@@ -50,10 +50,13 @@ static HANDLE g_debug_handle;
 
 static void log_raw(const char *buf, size_t length);
 
-static void open_handles()
+static int open_handles()
 {
     g_log_handle = CreateFileW(g_log_pipename, GENERIC_WRITE,
         FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_WRITE_THROUGH, NULL);
+    if(g_log_handle == INVALID_HANDLE_VALUE) {
+        return -1;
+    }
 
     // The process identifier.
     uint32_t process_identifier = get_current_process_id();
@@ -64,6 +67,7 @@ static void open_handles()
         GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
         NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 #endif
+    return 0;
 }
 
 static void log_raw(const char *buf, size_t length)
@@ -79,7 +83,9 @@ static void log_raw(const char *buf, size_t length)
             // case we'll get an invalid handle error. Let's just open a new
             // pipe handle.
             if(status == STATUS_INVALID_HANDLE) {
-                open_handles();
+                if(open_handles() < 0) {
+                    break;
+                }
             }
             else {
                 pipe("CRITICAL:Handle case where the log handle is closed "
