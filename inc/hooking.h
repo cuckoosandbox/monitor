@@ -83,5 +83,6 @@ hook_t *sig_hooks();
 uint32_t sig_hook_count();
 
 void hook_initcb_LdrLoadDll(hook_t *h);
+uint8_t *hook_addrcb_COleScript_Compile(hook_t *h, uint8_t *module_address);
 
 #endif
