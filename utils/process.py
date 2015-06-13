@@ -343,6 +343,13 @@ class SignatureProcessor(object):
             row['signature']['calling_convention'] = \
                 self.CALLING_CONVENTIONS[cconv]
 
+            # Check any defined callback functions.
+            if 'callback' in row['signature']:
+                row['signature']['callback'] = \
+                    row['signature']['callback'].split()
+            else:
+                row['signature']['callback'] = []
+
             # Check the types of each parameter.
             ensure = {}
             for arg in row.get('parameters', []):

@@ -526,10 +526,19 @@ int hook(hook_t *h)
         if(module_handle == NULL) return 0;
 
         h->addr = (uint8_t *) GetProcAddress(module_handle, h->funcname);
-        if(h->addr == NULL) {
+        if(h->addr == NULL && h->addrcb == NULL) {
             pipe("DEBUG:Error resolving function %z!%z.",
                 h->library, h->funcname);
             return -1;
+        }
+
+        if(h->addr == NULL) {
+            h->addr = (uint8_t *) h->addrcb(h, (uint8_t *) module_handle);
+            if(h->addr == NULL) {
+                pipe("DEBUG:Error resolving function %z!%z through our "
+                    "custom callback.", h->library, h->funcname);
+                return -1;
+            }
         }
     }
 
