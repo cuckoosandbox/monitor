@@ -144,9 +144,12 @@ class SignatureProcessor(object):
 
             alias = alias.replace('*', '').replace('[]', '').strip()
 
-            if argname.startswith('*'):
+            while argname.startswith('*'):
                 argname = argname[1:].strip()
-                argtype.append('*')
+                if argtype[-1].startswith('*'):
+                    argtype[-1] += '*'
+                else:
+                    argtype.append('*')
 
             if argname.endswith('[]'):
                 argname = argname[:-2].strip()
