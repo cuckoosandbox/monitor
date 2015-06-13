@@ -1,7 +1,6 @@
 Signature::
 
     * Calling convention: WINAPI
-    * Library: jscript
 
 
 COleScript_Compile
@@ -11,6 +10,7 @@ Signature::
 
     * Callback: addr
     * Is success: ret >= 0
+    * Library: jscript
     * Special: true
     * Return value: int
 
