@@ -32,8 +32,11 @@ typedef void (*symbol_callback_t)(const char *funcname,
     uintptr_t address, void *context);
 
 void symbol_init(HMODULE monitor_address);
+uint32_t module_image_size(const uint8_t *addr);
+
 int symbol_enumerate_module(HMODULE module_handle,
     symbol_callback_t callback, void *context);
+
 int symbol(const uint8_t *addr, char *sym, uint32_t length);
 
 #endif

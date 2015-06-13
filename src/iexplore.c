@@ -28,12 +28,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static uint8_t *_addr_colescript_compile(
     uint8_t *module_address, uintptr_t module_size, uintptr_t eval_code_addr)
 {
-    (void) module_address; (void) module_size; (void) eval_code_addr;
-
     uint8_t *code_ptr = NULL;
 
     // Locate 'lea rax, "eval code"' instruction.
-    for (uint32_t idx = 0; idx < eval_code_addr - 20; idx++) {
+    for (uint32_t idx = 0; idx < module_size - 20; idx++) {
         if(memcmp(&module_address[idx], "\x48\x8d\x05", 3) != 0) {
             continue;
         }
@@ -218,6 +216,56 @@ uint8_t *hook_addrcb_CDocument_write(hook_t *h, uint8_t *module_address)
                 module_address, module_size, newline_addr);
             if(ret != NULL) {
                 return ret;
+            }
+        }
+    }
+
+    return NULL;
+}
+
+uint8_t *hook_addrcb_CHyperlink_SetUrlComponent(
+    hook_t *h, uint8_t *module_address)
+{
+    (void) h;
+
+    uint32_t module_size = module_image_size(module_address);
+
+    // We are going to be looking for a sequence of instructions to find the
+    // CHyperLink::SetUrlComponent function.
+    for (uint32_t idx = 0; idx < module_size - 20; idx++) {
+        // We look for a relative call followed immediately by a cmp reg, 7
+        // instruction.
+        if(module_address[idx] != 0xe8 || module_address[idx+5] != 0x83 ||
+                ((module_address[idx+6] >> 3) & 7) != 7 ||
+                module_address[idx+7] != 7) {
+            continue;
+        }
+
+        // We then look for a mov [stack], 0x10000000 instruction followed by
+        // a relative call instruction in the upcoming 256 bytes.
+        uint8_t *ptr = &module_address[idx];
+        while (ptr < &module_address[idx + 0x100]) {
+            int32_t len = lde(ptr);
+
+            // If found, set ptr to null and break.
+            if(*ptr == 0xc7 && ptr[len] == 0xe8 &&
+                    memcmp(&ptr[len-4], "\x00\x00\x00\x10", 4) == 0) {
+                ptr = NULL;
+                break;
+            }
+
+            ptr += len;
+        }
+
+        // If ptr was set to null then we found the function.
+        if(ptr != NULL) {
+            continue;
+        }
+
+        for (uint32_t jdx = 0; jdx < 256; jdx++) {
+            // Look for three nop instructions.
+            if(memcmp(&module_address[idx - jdx], "\x90\x90\x90", 3) == 0) {
+                return &module_address[idx - jdx + 3];
             }
         }
     }

@@ -28,6 +28,8 @@ void log_init(const char *pipe_name);
 void log_api(uint32_t index, int is_success, uintptr_t return_value,
     uint64_t hash, last_error_t *lasterr, ...);
 
+void log_wstring(bson *b, const char *idx, const wchar_t *str, int length);
+
 void log_anomaly(const char *subcategory,
     const char *funcname, const char *msg);
 

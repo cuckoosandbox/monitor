@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <stdarg.h>
 #include <windows.h>
-#include "bson/bson.h"
+#include "bson.h"
 #include "hooking.h"
 #include "memory.h"
 #include "misc.h"
@@ -129,8 +129,7 @@ static void log_string(bson *b, const char *idx, const char *str, int length)
     mem_free(utf8s);
 }
 
-static void log_wstring(bson *b, const char *idx,
-    const wchar_t *str, int length)
+void log_wstring(bson *b, const char *idx, const wchar_t *str, int length)
 {
     if(str == NULL) {
         bson_append_string_n(b, idx, "", 0);

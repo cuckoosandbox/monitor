@@ -69,3 +69,21 @@ Logging::
 Post::
 
     bson_destroy(&b);
+
+
+CHyperlink_SetUrlComponent
+==========================
+
+Signature::
+
+    * Callback: addr
+    * Is success: 1
+    * Library: mshtml
+    * Special: true
+    * Return value: int
+
+Parameters::
+
+    *  void *chyperlink
+    ** const wchar_t *component
+    ** int index
