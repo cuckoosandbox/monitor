@@ -75,6 +75,7 @@ int lde(const void *addr);
 int hook_in_monitor();
 
 int hook(hook_t *h);
+int hook_missing_hooks(HMODULE module_handle);
 
 #define DISASM_BUFSIZ 128
 

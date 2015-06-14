@@ -34,5 +34,14 @@
         "signature": {
             "category": "__notification__"
         }
+    },
+    {
+        "apiname": "__missing__",
+        "parameters": [
+            {"argtype": "LPCSTR", "argname": "function_name"}
+        ],
+        "signature": {
+            "category": "__notification__"
+        }
     }
 ]

@@ -30,8 +30,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "misc.h"
 #include "native.h"
 #include "ntapi.h"
+#include "log.h"
 #include "pipe.h"
+#include "symbol.h"
 #include "unhook.h"
+
+#define MISSING_HANDLE_COUNT 128
 
 static SYSTEM_INFO g_si;
 static csh g_capstone;
@@ -43,6 +47,13 @@ static uintptr_t g_monitor_end;
 
 static uintptr_t g_ntdll_start;
 static uintptr_t g_ntdll_end;
+
+static uint32_t g_missing_handle_count;
+static HMODULE g_missing_handles[MISSING_HANDLE_COUNT];
+
+static const char *g_missing_blacklist[] = {
+    NULL,
+};
 
 // Return address for Old_LdrLoadDll. Will be used later on to decide whether
 // we are "inside" the monitor.
@@ -587,5 +598,66 @@ int hook(hook_t *h)
     }
 
     h->is_hooked = 1;
+    return 0;
+}
+
+static void _hook_missing_hooks_worker(
+    const char *funcname, uintptr_t address, void *context)
+{
+    (void) context;
+
+    // This is not a missing hook.
+    for (hook_t *h = sig_hooks(); h->funcname != NULL; h++) {
+        if(strcmp(h->funcname, funcname) == 0) {
+            return;
+        }
+    }
+
+    // Check our function name blacklist.
+    for (const char **ptr = g_missing_blacklist; *ptr != NULL; ptr++) {
+        if(strcmp(*ptr, funcname) == 0) {
+            return;
+        }
+    }
+
+    uint8_t *handler = slab_getmem(&g_function_stubs);
+    uint8_t *ptr = handler;
+
+    hook_t h;
+
+    memset(&h, 0, sizeof(h));
+    h.addr = (uint8_t *) address;
+    h.handler = (FARPROC) handler;
+    h.funcname = funcname;
+
+    if(hook(&h) == 0) {
+        ptr += asm_pushv(ptr, funcname);
+        ptr += asm_call(ptr, &log_missing_hook);
+        ptr += asm_jump(ptr, h.func_stub);
+        log_debug("Welcome missing hook: %s\n", funcname);
+    }
+    else {
+        log_debug("Error hooking missing hook: %s\n", funcname);
+    }
+}
+
+int hook_missing_hooks(HMODULE module_handle)
+{
+    for (uint32_t idx = 0; idx < g_missing_handle_count; idx++) {
+        if(g_missing_handles[idx] == module_handle) {
+            return 0;
+        }
+    }
+
+    if(g_missing_handle_count == MISSING_HANDLE_COUNT) {
+        pipe("CRITICAL:Reached missing handle count!");
+        return -1;
+    }
+
+    g_missing_handles[g_missing_handle_count++] = module_handle;
+
+    log_debug("Applying missing hooks @ %p\n", module_handle);
+    symbol_enumerate_module(module_handle, &_hook_missing_hooks_worker, NULL);
+    log_debug("Finished missing hooks @ %p\n", module_handle);
     return 0;
 }

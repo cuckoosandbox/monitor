@@ -639,6 +639,13 @@ void log_debug(const char *fmt, ...)
 
 #endif
 
+void WINAPI log_missing_hook(const char *funcname)
+{
+    // if(hook_in_monitor() == 0) {
+        log_api(sig_index_missing(), 1, 0, 0, NULL, funcname);
+    // }
+}
+
 void log_init(const char *pipe_name)
 {
     InitializeCriticalSection(&g_mutex);
