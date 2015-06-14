@@ -64,6 +64,8 @@ static uint8_t *_addr_colescript_compile(
     }
 
     if(code_ptr == NULL) {
+        pipe("WARNING:COleScript::Compile error locating "
+            "\"lea rax, 'eval code'\" instruction [aborting hook]");
         return NULL;
     }
 
@@ -76,6 +78,8 @@ static uint8_t *_addr_colescript_compile(
         code_ptr += lde(code_ptr);
     }
 
+    pipe("WARNING:COleScript::Compile error fetching address "
+        "of the first call [aborting hook]");
     return NULL;
 }
 
@@ -134,6 +138,8 @@ uint8_t *hook_addrcb_COleScript_Compile(hook_t *h, uint8_t *module_address)
     uint8_t *eval_code_addr = memmem(module_address, module_size,
         L"eval code", sizeof(L"eval code"), NULL);
     if(eval_code_addr == NULL) {
+        pipe("WARNING:COleScript::Compile error locating 'eval code' "
+            "string [aborting hook]");
         return NULL;
     }
 
@@ -234,6 +240,7 @@ uint8_t *hook_addrcb_CDocument_write(hook_t *h, uint8_t *module_address)
         }
     }
 
+    pipe("WARNING:CDocument::write error locating address [aborting hook]");
     return NULL;
 }
 
@@ -298,6 +305,8 @@ uint8_t *hook_addrcb_CIFrameElement_CreateElement(
     uint8_t *iframe_addr = memmem(module_address, module_size,
         L"IFRAME", sizeof(L"IFRAME"), NULL);
     if(iframe_addr == NULL) {
+        pipe("WARNING:CIFrameElement::CreateElement error locating "
+            "'IFRAME' string [aborting hook]");
         return NULL;
     }
 
@@ -309,6 +318,8 @@ uint8_t *hook_addrcb_CIFrameElement_CreateElement(
     uint8_t *ret = memmem(module_address, module_size,
         &iframe_addr, sizeof(iframe_addr), NULL);
     if(ret == NULL) {
+        pipe("WARNING:CIFrameElement::CreateElement error locating "
+            "'IFRAME' string cross reference [aborting hook]");
         return NULL;
     }
 
