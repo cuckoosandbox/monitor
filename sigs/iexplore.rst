@@ -87,3 +87,20 @@ Parameters::
     *  void *chyperlink
     ** const wchar_t *component
     ** int index
+
+
+CIFrameElement_CreateElement
+============================
+
+Signature::
+
+    * Callback: addr
+    * Library: mshtml
+    * Special: true
+    * Return value: HRESULT
+
+Parameters::
+
+    *  void *chtmtag
+    *  void *cdoc
+    ** void **celement

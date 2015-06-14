@@ -272,3 +272,40 @@ uint8_t *hook_addrcb_CHyperlink_SetUrlComponent(
 
     return NULL;
 }
+
+uint8_t *hook_addrcb_CIFrameElement_CreateElement(
+    hook_t *h, uint8_t *module_address)
+{
+    (void) h;
+
+    uint32_t module_size = module_image_size(module_address);
+    uint8_t *iframe_addr = NULL;
+
+    // Locate the "IFRAME" string.
+    for (uint32_t idx = 0; idx < module_size - 20; idx++) {
+        if(memcmp(&module_address[idx], L"IFRAME", sizeof(L"IFRAME")) == 0) {
+            iframe_addr = &module_address[idx];
+            break;
+        }
+    }
+
+#if !__x86_64__
+    return NULL;
+#endif
+
+    if(iframe_addr == NULL) {
+        return NULL;
+    }
+
+    // Find the cross-reference of the IFRAME string and return the address
+    // of our target function.
+    for (uint32_t idx = 0; idx < module_size - 20; idx++) {
+        if(memcmp(&module_address[idx],
+                &iframe_addr, sizeof(uintptr_t)) == 0) {
+            return *(uint8_t **)(
+                &module_address[idx] + 2 * sizeof(uintptr_t));
+        }
+    }
+
+    return NULL;
+}

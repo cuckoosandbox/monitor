@@ -87,5 +87,7 @@ uint8_t *hook_addrcb_COleScript_Compile(hook_t *h, uint8_t *module_address);
 uint8_t *hook_addrcb_CDocument_write(hook_t *h, uint8_t *module_address);
 uint8_t *hook_addrcb_CHyperlink_SetUrlComponent(
     hook_t *h, uint8_t *module_address);
+uint8_t *hook_addrcb_CIFrameElement_CreateElement(
+    hook_t *h, uint8_t *module_address);
 
 #endif

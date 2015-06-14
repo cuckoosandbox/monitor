@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <windows.h>
+#include "bson.h"
 #include "native.h"
 
 void log_init(const char *pipe_name);
