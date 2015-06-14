@@ -23,6 +23,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "pipe.h"
 #include "symbol.h"
 
+static uint8_t *memmem(
+    uint8_t *haystack, uint32_t haylength,
+    void *needle, uint32_t needlength,
+    uint32_t *idx)
+{
+    uint32_t _idx = 0;
+
+    if(idx == NULL) {
+        idx = &_idx;
+    }
+
+    for (; *idx < haylength - needlength; *idx += 1) {
+        if(memcmp(&haystack[*idx], needle, needlength) == 0) {
+            return &haystack[*idx];
+        }
+    }
+    return NULL;
+}
+
 #if __x86_64__
 
 static uint8_t *_addr_colescript_compile(
@@ -110,22 +129,16 @@ uint8_t *hook_addrcb_COleScript_Compile(hook_t *h, uint8_t *module_address)
     (void) h;
 
     uint32_t module_size = module_image_size(module_address);
-    uintptr_t eval_code_addr = 0;
 
     // Locate address of the "eval code" string.
-    for (uint32_t idx = 0; idx < module_size - 20; idx++) {
-        if(memcmp(&module_address[idx], L"eval code", 20) == 0) {
-            eval_code_addr = (uintptr_t) &module_address[idx];
-            break;
-        }
-    }
-
-    if(eval_code_addr == 0) {
+    uint8_t *eval_code_addr = memmem(module_address, module_size,
+        L"eval code", sizeof(L"eval code"), NULL);
+    if(eval_code_addr == NULL) {
         return NULL;
     }
 
     return _addr_colescript_compile(
-        module_address, module_size, eval_code_addr);
+        module_address, module_size, (uintptr_t) eval_code_addr);
 }
 
 #if __x86_64__
@@ -205,18 +218,19 @@ uint8_t *hook_addrcb_CDocument_write(hook_t *h, uint8_t *module_address)
     (void) h;
 
     uint32_t module_size = module_image_size(module_address);
-    uintptr_t newline_addr = 0;
 
     // Locate a possible address of the "\r\n" string.
     for (uint32_t idx = 0; idx < module_size - 20; idx++) {
-        if(memcmp(&module_address[idx], L"\r\n", 6) == 0) {
-            newline_addr = (uintptr_t) &module_address[idx];
+        uint8_t *newline_addr = memmem(module_address, module_size,
+            L"\r\n", sizeof(L"\r\n"), &idx);
+        if(newline_addr == NULL) {
+            break;
+        }
 
-            uint8_t *ret = _addr_cdocument_write(
-                module_address, module_size, newline_addr);
-            if(ret != NULL) {
-                return ret;
-            }
+        uint8_t *ret = _addr_cdocument_write(
+            module_address, module_size, (uintptr_t) newline_addr);
+        if(ret != NULL) {
+            return ret;
         }
     }
 
@@ -279,33 +293,25 @@ uint8_t *hook_addrcb_CIFrameElement_CreateElement(
     (void) h;
 
     uint32_t module_size = module_image_size(module_address);
-    uint8_t *iframe_addr = NULL;
 
     // Locate the "IFRAME" string.
-    for (uint32_t idx = 0; idx < module_size - 20; idx++) {
-        if(memcmp(&module_address[idx], L"IFRAME", sizeof(L"IFRAME")) == 0) {
-            iframe_addr = &module_address[idx];
-            break;
-        }
+    uint8_t *iframe_addr = memmem(module_address, module_size,
+        L"IFRAME", sizeof(L"IFRAME"), NULL);
+    if(iframe_addr == NULL) {
+        return NULL;
     }
 
 #if !__x86_64__
     return NULL;
 #endif
 
-    if(iframe_addr == NULL) {
+    // Find the cross-reference of the 'IFRAME' string.
+    uint8_t *ret = memmem(module_address, module_size,
+        &iframe_addr, sizeof(iframe_addr), NULL);
+    if(ret == NULL) {
         return NULL;
     }
 
-    // Find the cross-reference of the IFRAME string and return the address
-    // of our target function.
-    for (uint32_t idx = 0; idx < module_size - 20; idx++) {
-        if(memcmp(&module_address[idx],
-                &iframe_addr, sizeof(uintptr_t)) == 0) {
-            return *(uint8_t **)(
-                &module_address[idx] + 2 * sizeof(uintptr_t));
-        }
-    }
-
-    return NULL;
+    // Return the function pointer.
+    return *(uint8_t **)(ret + 2 * sizeof(uintptr_t));
 }
