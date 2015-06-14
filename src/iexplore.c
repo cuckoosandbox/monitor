@@ -128,11 +128,10 @@ static uint8_t *_addr_colescript_compile(
 
 #endif
 
-uint8_t *hook_addrcb_COleScript_Compile(hook_t *h, uint8_t *module_address)
+uint8_t *hook_addrcb_COleScript_Compile(hook_t *h,
+    uint8_t *module_address, uint32_t module_size)
 {
     (void) h;
-
-    uint32_t module_size = module_image_size(module_address);
 
     // Locate address of the "eval code" string.
     uint8_t *eval_code_addr = memmem(module_address, module_size,
@@ -219,11 +218,10 @@ static uint8_t *_addr_cdocument_write(
 
 #endif
 
-uint8_t *hook_addrcb_CDocument_write(hook_t *h, uint8_t *module_address)
+uint8_t *hook_addrcb_CDocument_write(hook_t *h,
+    uint8_t *module_address, uint32_t module_size)
 {
     (void) h;
-
-    uint32_t module_size = module_image_size(module_address);
 
     // Locate a possible address of the "\r\n" string.
     for (uint32_t idx = 0; idx < module_size - 20; idx++) {
@@ -245,11 +243,9 @@ uint8_t *hook_addrcb_CDocument_write(hook_t *h, uint8_t *module_address)
 }
 
 uint8_t *hook_addrcb_CHyperlink_SetUrlComponent(
-    hook_t *h, uint8_t *module_address)
+    hook_t *h, uint8_t *module_address, uint32_t module_size)
 {
     (void) h;
-
-    uint32_t module_size = module_image_size(module_address);
 
     // We are going to be looking for a sequence of instructions to find the
     // CHyperLink::SetUrlComponent function.
@@ -295,11 +291,9 @@ uint8_t *hook_addrcb_CHyperlink_SetUrlComponent(
 }
 
 uint8_t *hook_addrcb_CIFrameElement_CreateElement(
-    hook_t *h, uint8_t *module_address)
+    hook_t *h, uint8_t *module_address, uint32_t module_size)
 {
     (void) h;
-
-    uint32_t module_size = module_image_size(module_address);
 
     // Locate the "IFRAME" string.
     uint8_t *iframe_addr = memmem(module_address, module_size,

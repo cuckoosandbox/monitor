@@ -533,7 +533,12 @@ int hook(hook_t *h)
         }
 
         if(h->addr == NULL) {
-            h->addr = (uint8_t *) h->addrcb(h, (uint8_t *) module_handle);
+            uint32_t module_size =
+                module_image_size((const uint8_t *) module_handle);
+
+            h->addr = (uint8_t *) h->addrcb(h,
+                (uint8_t *) module_handle, module_size);
+
             if(h->addr == NULL) {
                 pipe("DEBUG:Error resolving function %z!%z through our "
                     "custom callback.", h->library, h->funcname);
