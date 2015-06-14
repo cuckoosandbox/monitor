@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "ntapi.h"
 
-void misc_init(HMODULE module_handle, const char *shutdown_mutex);
+int misc_init(HMODULE module_handle, const char *shutdown_mutex);
 
 // Call functions from monitor.c indirectly so that we don't have to include
 // it by default when doing unittests.

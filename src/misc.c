@@ -65,7 +65,7 @@ static uint32_t g_alias_index;
     wcscpy(g_aliases[g_alias_index][1], after); \
     g_alias_index++;
 
-void misc_init(HMODULE module_handle, const char *shutdown_mutex)
+int misc_init(HMODULE module_handle, const char *shutdown_mutex)
 {
     g_monitor_start = (uintptr_t) module_handle;
     g_monitor_end = g_monitor_start +
@@ -75,11 +75,18 @@ void misc_init(HMODULE module_handle, const char *shutdown_mutex)
 
     *(FARPROC *) &pRtlAddVectoredExceptionHandler =
         GetProcAddress(mod, "RtlAddVectoredExceptionHandler");
+    if(pRtlAddVectoredExceptionHandler == NULL) {
+        pipe("CRITICAL:Error fetching RtlAddVectoredExceptionHandler");
+        return -1;
+    }
 
     pRtlAddVectoredExceptionHandler(TRUE, &_exception_handler);
 
     strncpy(g_shutdown_mutex, shutdown_mutex, sizeof(g_shutdown_mutex));
 
+    // TODO Replace custom unicode buffer logic by implementing free() support
+    // to our slab allocator (which is actually what a slab allocator is
+    // supposed to do, afaik).
     array_init(&g_unicode_buffer_ptr_array);
     array_init(&g_unicode_buffer_use_array);
 
@@ -99,6 +106,7 @@ void misc_init(HMODULE module_handle, const char *shutdown_mutex)
             ADD_ALIAS(target_path, device_name);
         }
     }
+    return 0;
 }
 
 void misc_set_hook_library(void (*monitor_hook)(const char *library))
@@ -995,6 +1003,7 @@ int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length)
 {
     uint32_t count = 0; uintptr_t image_base, establisher_frame;
     RUNTIME_FUNCTION *runtime_function; void *handler_data; CONTEXT _ctx;
+    KNONVOLATILE_CONTEXT_POINTERS nv_ctx_ptrs;
 
     if(ctx == NULL) {
         ctx = &_ctx;
@@ -1015,9 +1024,10 @@ int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length)
             ctx->Rsp += 8;
         }
         else {
+            memset(&nv_ctx_ptrs, 0, sizeof(nv_ctx_ptrs));
             RtlVirtualUnwind(UNW_FLAG_NHANDLER, image_base, ctx->Rip,
                 runtime_function, ctx, &handler_data, &establisher_frame,
-                NULL);
+                &nv_ctx_ptrs);
         }
     }
 

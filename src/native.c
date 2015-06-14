@@ -193,6 +193,7 @@ int native_init()
     g_current_process_id = GetCurrentProcessId();
     g_current_thread = GetCurrentThread();
 
+    // TODO Use the slab allocator here as well.
     uint8_t *memory = VirtualAlloc(NULL, 0x1000,
         MEM_RESERVE|MEM_COMMIT, PAGE_EXECUTE_READWRITE);
     if(memory == NULL) return -1;

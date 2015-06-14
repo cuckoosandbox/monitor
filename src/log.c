@@ -52,6 +52,7 @@ static void log_raw(const char *buf, size_t length);
 
 static int open_handles()
 {
+    // TODO Use NtCreateFile instead of CreateFileW.
     g_log_handle = CreateFileW(g_log_pipename, GENERIC_WRITE,
         FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_WRITE_THROUGH, NULL);
     if(g_log_handle == INVALID_HANDLE_VALUE) {
@@ -560,8 +561,8 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
 
     char sym[512], number[20];
 
-    const uint8_t *exception_address = (const uint8_t *)
-        rec->ExceptionAddress;
+    const uint8_t *exception_address =
+        (const uint8_t *) rec->ExceptionAddress;
 
     our_snprintf(buf, sizeof(buf), "%p", exception_address);
     bson_append_string(&e, "address", buf);

@@ -77,7 +77,7 @@ static void _capstone_init()
 #endif
 }
 
-void hook_init(HMODULE module_handle)
+int hook_init(HMODULE module_handle)
 {
     g_monitor_start = (uintptr_t) module_handle;
     g_monitor_end = g_monitor_start +
@@ -89,9 +89,10 @@ void hook_init(HMODULE module_handle)
 
     GetSystemInfo(&g_si);
     _capstone_init();
+    return 0;
 }
 
-void hook_init2()
+int hook_init2()
 {
     if(g_capstone != 0) {
         cs_close(&g_capstone);
@@ -111,6 +112,7 @@ void hook_init2()
 
     // Memory for function stubs of all the hooks.
     slab_init(&g_function_stubs, 64, 128, PAGE_EXECUTE_READWRITE);
+    return 0;
 }
 
 static uintptr_t WINAPI _hook_retaddr4(void *a, void *b, void *c, void *d)
@@ -509,7 +511,7 @@ static int _hook_determine_start(hook_t *h)
     // instruction resembles "mov eax, imm32"), then skip the first
     // instruction.
     if(memcmp(h->funcname, "Nt", 2) == 0 && *addr == 0xb8) {
-        h->skip += 5;
+        // h->skip += 5;
     }
 
     return 0;
