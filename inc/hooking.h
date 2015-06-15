@@ -86,6 +86,8 @@ uint32_t sig_hook_count();
 
 void hook_initcb_LdrLoadDll(hook_t *h);
 
+uint8_t *hook_addrcb_RtlDispatchException(hook_t *h,
+    uint8_t *module_address, uint32_t module_size);
 uint8_t *hook_addrcb_COleScript_Compile(hook_t *h,
     uint8_t *module_address, uint32_t module_size);
 uint8_t *hook_addrcb_CDocument_write(hook_t *h,

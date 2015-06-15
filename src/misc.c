@@ -45,14 +45,6 @@ void (*g_hook_library)(const char *library);
 #define HKCU_PREFIX2 L"HKEY_USERS\\S-1-5-"
 #define HKLM_PREFIX  L"\\REGISTRY\\MACHINE"
 
-static PVOID (WINAPI *pRtlAddVectoredExceptionHandler)(
-    ULONG FirstHandler,
-    PVECTORED_EXCEPTION_HANDLER VectoredHandler
-);
-
-static LONG CALLBACK _exception_handler(
-    EXCEPTION_POINTERS *exception_pointers);
-
 static wchar_t g_aliases[64][2][MAX_PATH];
 static uint32_t g_alias_index;
 
@@ -70,17 +62,6 @@ int misc_init(HMODULE module_handle, const char *shutdown_mutex)
     g_monitor_start = (uintptr_t) module_handle;
     g_monitor_end = g_monitor_start +
         module_image_size((const uint8_t *) module_handle);
-
-    HMODULE mod = GetModuleHandle("ntdll");
-
-    *(FARPROC *) &pRtlAddVectoredExceptionHandler =
-        GetProcAddress(mod, "RtlAddVectoredExceptionHandler");
-    if(pRtlAddVectoredExceptionHandler == NULL) {
-        pipe("CRITICAL:Error fetching RtlAddVectoredExceptionHandler");
-        return -1;
-    }
-
-    pRtlAddVectoredExceptionHandler(TRUE, &_exception_handler);
 
     strncpy(g_shutdown_mutex, shutdown_mutex, sizeof(g_shutdown_mutex));
 
@@ -1061,19 +1042,6 @@ int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length)
 }
 
 #endif
-
-static LONG CALLBACK _exception_handler(
-    EXCEPTION_POINTERS *exception_pointers)
-{
-    uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
-
-    count = stacktrace(exception_pointers->ContextRecord, addrs, RETADDRCNT);
-
-    log_exception(exception_pointers->ContextRecord,
-        exception_pointers->ExceptionRecord, addrs, count);
-
-    return EXCEPTION_CONTINUE_SEARCH;
-}
 
 void *memdup(const void *addr, uint32_t length)
 {

@@ -145,6 +145,31 @@ void hook_initcb_LdrLoadDll(hook_t *h)
     *h->orig = fn;
 }
 
+uint8_t *hook_addrcb_RtlDispatchException(hook_t *h,
+    uint8_t *module_address, uint32_t module_size)
+{
+    (void) h; (void) module_size;
+
+    uint8_t *ki_user_exception_dispatcher = (uint8_t *)
+        GetProcAddress((HMODULE) module_address, "KiUserExceptionDispatcher");
+    if(ki_user_exception_dispatcher == NULL) {
+        pipe("WARNING:ntdll!RtlDispatchException unable to find "
+            "KiUserExceptionDispatcher [aborting hook]");
+        return NULL;
+    }
+
+    // We are looking for the first relative call instruction.
+    for (uint32_t idx = 0; idx < 32; idx++) {
+        if(*ki_user_exception_dispatcher == 0xe8) {
+            return ki_user_exception_dispatcher +
+                *(int32_t *)(ki_user_exception_dispatcher + 1) + 5;
+        }
+
+        ki_user_exception_dispatcher += lde(ki_user_exception_dispatcher);
+    }
+    return NULL;
+}
+
 int hook_in_monitor()
 {
     uintptr_t addrs[RETADDRCNT]; uint32_t count;
