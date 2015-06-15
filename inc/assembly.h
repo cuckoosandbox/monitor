@@ -50,7 +50,7 @@ typedef enum _register_t {
 #define ASM_CALL_SIZE (ASM_MOVE_REGIMM_SIZE+2)
 #define ASM_RETURN_SIZE 3
 
-#if DEBUG
+#if DEBUG && !__x86_64__
 #define ASM_JUMP_32BIT_SIZE 6
 #else
 #define ASM_JUMP_32BIT_SIZE 5
