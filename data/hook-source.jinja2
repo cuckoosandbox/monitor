@@ -162,7 +162,7 @@ static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }
         return;
         {%- endif %}
     }
-    {%- else %}
+    {%- elif hook.signature.logging != 'no' %}
 
     uint64_t hash = 0;
     {%- endif %}
@@ -185,12 +185,12 @@ static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }
     {%- endfor %}
     {%- endif %}
 
-    {%- if hook.signature.special: %}
+    {%- if hook.signature.special and hook.signature.logging != 'no' : %}
 
     if(hook_in_monitor() == 0) {
         {{ log_api(hook)|indent }}
     }
-    {%- else %}
+    {%- elif hook.signature.logging != 'no' %}
 
     {{ log_api(hook) }}
     {%- endif %}
