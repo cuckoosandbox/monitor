@@ -104,3 +104,35 @@ Parameters::
     *  void *chtmtag
     *  void *cdoc
     ** void **celement
+
+
+CWindow_AddTimeoutCode
+======================
+
+Signature::
+
+    * Callback: addr
+    * Library: mshtml
+    * Special: true
+    * Return value: HRESULT
+
+Parameters::
+
+    *  void *cwindow
+    *  VARIANT *data
+    ** const wchar_t *argument
+    ** int milliseconds
+    *  int repeat
+    *  void *unk2
+
+Pre::
+
+    wchar_t *code = NULL;
+    if(data != NULL && data->vt == VT_BSTR) {
+        code = data->bstrVal;
+    }
+
+Logging::
+
+    u code code
+    i repeat repeat != 0

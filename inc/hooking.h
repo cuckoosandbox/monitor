@@ -96,5 +96,7 @@ uint8_t *hook_addrcb_CHyperlink_SetUrlComponent(hook_t *h,
     uint8_t *module_address, uint32_t module_size);
 uint8_t *hook_addrcb_CIFrameElement_CreateElement(hook_t *h,
     uint8_t *module_address, uint32_t module_size);
+uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
+    hook_t *h, uint8_t *module_address, uint32_t module_size);
 
 #endif

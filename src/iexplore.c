@@ -320,3 +320,129 @@ uint8_t *hook_addrcb_CIFrameElement_CreateElement(
     // Return the function pointer.
     return *(uint8_t **)(ret + 2 * sizeof(uintptr_t));
 }
+
+uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
+    hook_t *h, uint8_t *module_address, uint32_t module_size)
+{
+    (void) h;
+
+    // We're going on a long journey here. First we locate
+    // CDoc::CRecalcHost::CompileExpression as that function uses the
+    // unique L"return (" string.
+    uint8_t *return_str_addr = memmem(module_address, module_size,
+        L"return (", sizeof(L"return ("), NULL);
+    if(return_str_addr == NULL) {
+        pipe("WARNING:CWindow::AddTimeoutCode unable to locate 'return (' "
+            "string [aborting hook]");
+        return NULL;
+    }
+
+    uint8_t *compile_expression = NULL;
+
+    for (uint32_t idx = 0; idx < module_size; idx++) {
+        // Locate the 'lea rdx, "return ("' instruction.
+        if(memmem(module_address, module_size,
+                "\x48\x8d\x15", 3, &idx) == NULL) {
+            break;
+        }
+
+        uint8_t *target = &module_address[idx] +
+            *(int32_t *)(&module_address[idx] + 3) + 7;
+        if(return_str_addr == target) {
+            compile_expression = &module_address[idx];
+            break;
+        }
+    }
+
+    if(compile_expression == NULL) {
+        pipe("WARNING:CWindow::AddTimeoutCode unable to locate correct "
+            "'lea rdx, \"return (\"' instruction [aborting hook]");
+        return NULL;
+    }
+
+    // Then we find the CScriptCollection::ConstructCode function call. We
+    // look for a few flags to indicate that we're about to find this call,
+    // namely, its parameters.
+    // * A register has to be loaded with the address that points to a 32-bit
+    //   zero floating point value.
+    // * The r9d register has to be set to zero (xor r9d, r9d).
+    // * The edx register has to be set to zero (xor edx, edx).
+    uint8_t *construct_code = NULL, *addr = compile_expression;
+    for (uint32_t idx = 0, state = 0; idx < 256; idx++) {
+#if __x86_64__
+        if((*addr == 0x48 || *addr == 0x4c) && addr[1] == 0x8d &&
+                (addr[2] & 0xc7) == 0x05) {
+            uint8_t *target = addr + *(int32_t *)(addr + 3) + 7;
+            if(target >= module_address &&
+                    target < module_address + module_size &&
+                    *(uint32_t *) target == 0) {
+                state |= 1;
+            }
+        }
+        else if(*addr == 0x45 && addr[1] == 0x33 && addr[2] == 0xc9) {
+            state |= 2;
+        }
+        else if(*addr == 0x33 && addr[1] == 0xd2) {
+            state |= 4;
+        }
+        // We found the function.
+        else if(*addr == 0xe8 && state == 7) {
+            construct_code = addr + *(int32_t *)(addr + 1) + 5;
+            break;
+        }
+#endif
+
+        addr += lde(addr);
+    }
+
+    if(construct_code == NULL) {
+        pipe("WARNING:CWindow::AddTimeoutCode unable to find ConstructCode "
+            "function call [aborting hook]");
+        return NULL;
+    }
+
+    FARPROC p_rtl_allocate_heap =
+        GetProcAddress(GetModuleHandle("ntdll"), "RtlAllocateHeap");
+
+    // We find all cross-references to the CScriptCollection::ConstructCode
+    // function.
+    for (uint32_t idx = 0; idx < module_size - 20; idx++) {
+        uint8_t *addr = &module_address[idx];
+        uint8_t *target = addr + *(int32_t *)(addr + 1) + 5;
+        if(*addr != 0xe8 || target != construct_code) {
+            continue;
+        }
+
+        // First go back to find the function start.
+        uint8_t *start = NULL;
+        for (uint32_t jdx = 0; jdx < 512; jdx++) {
+            if(memcmp(addr - jdx, "\x90\x90\x90", 3) == 0) {
+                addr = start = addr - jdx + 3;
+                break;
+            }
+        }
+
+        // Not this one!
+        if(start == NULL) {
+            continue;
+        }
+
+        // Does this function call HeapAlloc at the very start?
+        for (uint32_t jdx = 0; jdx < 32; jdx++) {
+#if __x86_64__
+            target = addr + *(int32_t *)(addr + 2) + 6;
+#endif
+            if(*addr == 0xff && addr[1] == 0x15 &&
+                    target >= module_address &&
+                    target < module_address + module_size) {
+                FARPROC fnaddr = *(FARPROC *) target;
+                if(fnaddr == p_rtl_allocate_heap) {
+                    return start;
+                }
+            }
+
+            addr += lde(addr);
+        }
+    }
+    return NULL;
+}
