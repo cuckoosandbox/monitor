@@ -333,6 +333,30 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
 
             addr += 2;
         }
+#if __x86_64__
+        // In 64-bit mode we have RIP-relative mov instructions. These have
+        // to be relocated properly. Handles "mov reg64, qword [offset]".
+        else if((*addr == 0x48 || *addr == 0x4c) && addr[1] == 0x8b &&
+                (addr[2] & 0xc7) == 0x05) {
+            // Register index and full address.
+            uint32_t reg = ((addr[2] >> 3) & 7) + (*addr == 0x4c ? 8 : 0);
+            const uint8_t *target = addr + *(int32_t *)(addr + 3) + 7;
+
+            // mov reg64, address
+            tramp[0] = 0x48 + (reg >= 8);
+            tramp[1] = 0xb8 + (reg & 7);
+            *(const uint8_t **)(tramp + 2) = target;
+            tramp += 10;
+
+            // mov reg64, qword [reg64]
+            tramp[0] = reg < 8 ? 0x48 : 0x4d;
+            tramp[1] = 0x8b;
+            tramp[2] = (reg & 7) | ((reg & 7) << 3);
+            tramp += 3;
+
+            addr += 7;
+        }
+#endif
         // Return instruction indicates the end of basic block as well so we
         // have to check if we already have enough space for our hook..
         else if((*addr == 0xc3 || *addr == 0xc2) && len > 0) {
