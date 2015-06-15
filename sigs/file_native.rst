@@ -176,7 +176,7 @@ Parameters::
 
 Logging::
 
-    b buffer Length, Buffer
+    b buffer (uintptr_t) Length, Buffer
 
 Interesting::
 
@@ -218,17 +218,13 @@ Ensure::
 
     IoStatusBlock
 
-Pre::
-
-    memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
-
 Interesting::
 
     h file_handle
 
 Prelog::
 
-    b input_buffer InputBufferLength, InputBuffer
+    b input_buffer (uintptr_t) InputBufferLength, InputBuffer
 
 Logging::
 

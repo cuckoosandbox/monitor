@@ -62,7 +62,7 @@ Ensure::
 
 Prelog::
 
-    b buffer pDataIn->cbData, pDataIn->pbData
+    b buffer (uintptr_t) pDataIn->cbData, pDataIn->pbData
 
 
 CryptUnprotectData
@@ -92,7 +92,7 @@ Logging::
 
     u description ppszDataDescr != NULL ? *ppszDataDescr : NULL
     b entropy pOptionalEntropy->cbData, pOptionalEntropy->pbData
-    b buffer pDataOut->cbData, pDataOut->pbData
+    b buffer (uintptr_t) pDataOut->cbData, pDataOut->pbData
 
 
 CryptProtectMemory
@@ -111,7 +111,7 @@ Parameters::
 
 Prelog::
 
-    b buffer cbData, pData
+    b buffer (uintptr_t) cbData, pData
 
 
 CryptUnprotectMemory
@@ -130,7 +130,7 @@ Parameters::
 
 Logging::
 
-    b buffer cbData, pData
+    b buffer (uintptr_t) cbData, pData
 
 
 CryptDecrypt
@@ -150,9 +150,13 @@ Parameters::
     *  BYTE *pbData
     *  DWORD *pdwDataLen
 
+Ensure::
+
+    pdwDataLen
+
 Logging::
 
-    B buffer pdwDataLen, pbData
+    b buffer (uintptr_t) *pdwDataLen, pbData
 
 
 CryptEncrypt
@@ -175,7 +179,7 @@ Parameters::
 
 Logging::
 
-    b buffer dwBufLen, pbData
+    b buffer (uintptr_t) dwBufLen, pbData
 
 
 CryptHashData
@@ -195,7 +199,7 @@ Parameters::
 
 Logging::
 
-    b buffer dwDataLen, pbData
+    b buffer (uintptr_t) dwDataLen, pbData
 
 
 CryptDecodeMessage
@@ -222,9 +226,13 @@ Parameters::
     *  PCCERT_CONTEXT *ppXchgCert
     *  PCCERT_CONTEXT *ppSignerCert
 
+Ensure::
+
+    pcbDecoded
+
 Logging::
 
-    B buffer pcbDecoded, pbDecoded
+    b buffer (uintptr_t) *pcbDecoded, pbDecoded
 
 
 CryptDecryptMessage
@@ -244,9 +252,13 @@ Parameters::
     *  DWORD *pcbDecrypted
     *  PCCERT_CONTEXT *ppXchgCert
 
+Ensure::
+
+    pcbDecrypted
+
 Logging::
 
-    B buffer pcbDecrypted, pbDecrypted
+    b buffer (uintptr_t) *pcbDecrypted, pbDecrypted
 
 
 CryptEncryptMessage
@@ -269,7 +281,7 @@ Parameters::
 
 Prelog::
 
-    b buffer cbToBeEncrypted, pbToBeEncrypted
+    b buffer (uintptr_t) cbToBeEncrypted, pbToBeEncrypted
 
 
 CryptHashMessage
@@ -294,7 +306,7 @@ Parameters::
 
 Pre::
 
-    uint32_t length = 0;
+    uintptr_t length = 0;
     for (uint32_t idx = 0; idx < cToBeHashed; idx++) {
         length += rgcbToBeHashed[idx];
     }
@@ -333,9 +345,13 @@ Parameters::
     *  BYTE *pbData
     *  DWORD *pdwDataLen
 
+Ensure::
+
+    pdwDataLen
+
 Logging::
 
-    B buffer pdwDataLen, pbData
+    b buffer (uintptr_t) *pdwDataLen, pbData
 
 
 CryptGenKey
@@ -398,6 +414,10 @@ Parameters::
     *  void *pvStructInfo
     *  DWORD *pcbStructInfo
 
+Ensure::
+
+    pcbStructInfo
+
 Pre::
 
     char number[32]; const char *struct_type = lpszStructType;
@@ -419,4 +439,4 @@ Middle::
 Logging::
 
     s struct_type struct_type
-    B buffer pcbStructInfo, buf
+    b buffer (uintptr_t) *pcbStructInfo, buf

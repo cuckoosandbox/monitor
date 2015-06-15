@@ -547,7 +547,7 @@ Prelog::
 
 Logging::
 
-    B output_buffer lpBytesReturned, lpOutBuffer
+    b output_buffer (uintptr_t) *lpBytesReturned, lpOutBuffer
 
 
 GetSystemDirectoryA

@@ -189,6 +189,10 @@ Flags::
 
     information_class
 
+Ensure::
+
+    ResultLength
+
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
@@ -201,7 +205,7 @@ Interesting::
 
 Logging::
 
-    B buffer ResultLength, KeyInformation
+    b buffer (uintptr_t) *ResultLength, KeyInformation
     u regkey regkey
 
 Post::
@@ -387,7 +391,7 @@ Pre::
 
 Logging::
 
-    B buffer BufferLength, ValueBuffer
+    b buffer (uintptr_t) *BufferLength, ValueBuffer
     u regkey regkey
 
 Post::
@@ -562,6 +566,10 @@ Flags::
 
     information_class
 
+Ensure::
+
+    ResultLength
+
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
@@ -574,7 +582,7 @@ Interesting::
 
 Logging::
 
-    B buffer ResultLength, KeyInformation
+    b buffer (uintptr_t) *ResultLength, KeyInformation
     u regkey regkey
 
 Post::

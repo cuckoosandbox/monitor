@@ -446,9 +446,13 @@ Parameters::
     *  DWORD dwNumberOfBytesToRead
     *  LPDWORD lpdwNumberOfBytesRead
 
+Ensure::
+
+    lpdwNumberOfBytesRead
+
 Logging::
 
-    B buffer lpdwNumberOfBytesRead, lpBuffer
+    b buffer (uintptr_t) *lpdwNumberOfBytesRead, lpBuffer
 
 
 InternetWriteFile
@@ -466,9 +470,13 @@ Parameters::
     *  DWORD dwNumberOfBytesToWrite
     *  LPDWORD lpdwNumberOfBytesWritten
 
+Ensure::
+
+    lpdwNumberOfBytesWritten
+
 Logging::
 
-    B buffer lpdwNumberOfBytesWritten, lpBuffer
+    b buffer (uintptr_t) *lpdwNumberOfBytesWritten, lpBuffer
 
 
 InternetCloseHandle
@@ -755,9 +763,13 @@ Parameters::
     *  LPDWORD lpdwBufferLength
     ** LPDWORD lpdwIndex index
 
+Ensure::
+
+    lpdwBufferLength
+
 Logging::
 
-    B buffer lpdwBufferLength, lpvBuffer
+    b buffer (uintptr_t) *lpdwBufferLength, lpvBuffer
 
 
 ObtainUserAgentString

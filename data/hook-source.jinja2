@@ -169,7 +169,7 @@ static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }
 
     {%- if hook.prelog: %}
 
-    uint32_t prelen = {{ hook.prelog.length }};
+    uintptr_t prelen = {{ hook.prelog.length }};
     uint8_t *prebuf = memdup({{ hook.prelog.buffer }}, prelen);
     {%- endif %}
 
