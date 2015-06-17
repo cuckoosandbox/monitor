@@ -1,5 +1,6 @@
 Signature::
 
+    * Callback: addr
     * Calling convention: WINAPI
 
 
@@ -8,7 +9,6 @@ COleScript_Compile
 
 Signature::
 
-    * Callback: addr
     * Is success: ret >= 0
     * Library: jscript
     * Special: true
@@ -31,7 +31,6 @@ CDocument_write
 
 Signature::
 
-    * Callback: addr
     * Is success: 1
     * Library: mshtml
     * Special: true
@@ -76,7 +75,6 @@ CHyperlink_SetUrlComponent
 
 Signature::
 
-    * Callback: addr
     * Is success: 1
     * Library: mshtml
     * Special: true
@@ -94,7 +92,6 @@ CIFrameElement_CreateElement
 
 Signature::
 
-    * Callback: addr
     * Library: mshtml
     * Special: true
     * Return value: HRESULT
@@ -111,7 +108,6 @@ CWindow_AddTimeoutCode
 
 Signature::
 
-    * Callback: addr
     * Library: mshtml
     * Special: true
     * Return value: HRESULT
