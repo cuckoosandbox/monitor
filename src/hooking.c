@@ -583,29 +583,31 @@ int hook(hook_t *h)
         return 0;
     }
 
-    if(h->addr == NULL) {
-        HMODULE module_handle = GetModuleHandle(h->library);
-        if(module_handle == NULL) return 0;
+    HMODULE module_handle = GetModuleHandle(h->library);
+    if(module_handle == NULL) return 0;
 
+    // If an address callback has been provided, try to locate the functions'
+    // address through it.
+    if(h->addr == NULL && h->addrcb != NULL) {
+        uint32_t module_size =
+            module_image_size((const uint8_t *) module_handle);
+
+        h->addr = h->addrcb(h, (uint8_t *) module_handle, module_size);
+
+        if(h->addr == NULL) {
+            pipe("DEBUG:Error resolving function %z!%z through our "
+                "custom callback.", h->library, h->funcname);
+            return -1;
+        }
+    }
+
+    // Try to obtain the address dynamically.
+    if(h->addr == NULL) {
         h->addr = (uint8_t *) GetProcAddress(module_handle, h->funcname);
-        if(h->addr == NULL && h->addrcb == NULL) {
+        if(h->addr == NULL) {
             pipe("DEBUG:Error resolving function %z!%z.",
                 h->library, h->funcname);
             return -1;
-        }
-
-        if(h->addr == NULL) {
-            uint32_t module_size =
-                module_image_size((const uint8_t *) module_handle);
-
-            h->addr = (uint8_t *) h->addrcb(h,
-                (uint8_t *) module_handle, module_size);
-
-            if(h->addr == NULL) {
-                pipe("DEBUG:Error resolving function %z!%z through our "
-                    "custom callback.", h->library, h->funcname);
-                return -1;
-            }
         }
     }
 
