@@ -132,3 +132,33 @@ Logging::
 
     u code code
     i repeat repeat != 0
+
+
+CScriptElement_put_src
+======================
+
+Signature::
+
+    * Library: mshtml
+    * Return value: HRESULT
+    * Special: true
+
+Parameters::
+
+    *  void *cscriptelement
+    ** const wchar_t *url
+
+
+CElement_put_innerHTML
+======================
+
+Signature::
+
+    * Library: mshtml
+    * Return value: HRESULT
+    * Special: true
+
+Parameters::
+
+    *  void *celement
+    ** const wchar_t *html

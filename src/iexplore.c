@@ -133,6 +133,10 @@ uint8_t *hook_addrcb_COleScript_Compile(hook_t *h,
 {
     (void) h;
 
+#if !__x86_64__
+    return NULL;
+#endif
+
     // Locate address of the "eval code" string.
     uint8_t *eval_code_addr = memmem(module_address, module_size,
         L"eval code", sizeof(L"eval code"), NULL);
@@ -326,6 +330,10 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
 {
     (void) h;
 
+#if !__x86_64__
+    return NULL;
+#endif
+
     // We're going on a long journey here. First we locate
     // CDoc::CRecalcHost::CompileExpression as that function uses the
     // unique L"return (" string.
@@ -444,5 +452,99 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
             addr += lde(addr);
         }
     }
+
+    pipe("WARNING:CWindow::AddTimeoutCode unable to find our function based "
+        "on ConstructCode cross-references [aborting hook]");
+    return NULL;
+}
+
+uint8_t *hook_addrcb_CScriptElement_put_src(
+    hook_t *h, uint8_t *module_address, uint32_t module_size)
+{
+    (void) h;
+
+    uint8_t *diid_disphtmlscriptelement = memmem(module_address, module_size,
+        "\x30\xf5\x50\x30\xb5\x98\xcf\x11\xbb\x82\x00\xaa\x00\xbd\xce\x0b",
+        16, NULL);
+    if(diid_disphtmlscriptelement == NULL) {
+        pipe("WARNING:CScriptElement::put_src unable to find "
+            "DIID_DispHTMLScriptElement [aborting hook]");
+        return NULL;
+    }
+
+    uint8_t *addr_diid = memmem(module_address, module_size,
+        &diid_disphtmlscriptelement, sizeof(diid_disphtmlscriptelement),
+        NULL);
+    if(addr_diid == NULL) {
+        pipe("WARNING:CScriptElement::put_src unable to find cross-reference "
+            "to DIID_DispHTMLScriptElement [aborting hook]");
+        return NULL;
+    }
+
+    uint8_t *addr_addr_diid = memmem(module_address, module_size,
+        &addr_diid, sizeof(addr_diid), NULL);
+    if(addr_diid == NULL) {
+        pipe("WARNING:CScriptElement::put_src unable to find cross-reference "
+            "of cross-reference to DIID_DispHTMLScriptElement "
+            "[aborting hook]");
+        return NULL;
+    }
+
+    uint8_t **ihtml_script_element_vtable =
+        *(uint8_t ***)(addr_addr_diid + sizeof(uintptr_t));
+    if(ihtml_script_element_vtable == NULL) {
+        pipe("WARNING:CScriptElement::put_src unable to find "
+            "IHTMLScriptElement vtable [aborting hook]");
+        return NULL;
+    }
+
+    return ihtml_script_element_vtable[7];
+}
+
+uint8_t *hook_addrcb_CElement_put_innerHTML(
+    hook_t *h, uint8_t *module_address, uint32_t module_size)
+{
+    (void) h;
+
+    uint8_t *innerhtml_addr = memmem(module_address, module_size,
+        L"innerHTML", sizeof(L"innerHTML"), NULL);
+    if(innerhtml_addr == NULL) {
+        pipe("WARNING:CElement::put_innerHTML unable to find 'innerHTML' "
+            "string [aborting hook]");
+        return NULL;
+    }
+
+    uint8_t *innerhtml_xref = memmem(module_address, module_size,
+        &innerhtml_addr, sizeof(innerhtml_addr), NULL);
+    if(innerhtml_xref == NULL) {
+        pipe("WARNING:CElement::put_innerHTML unable to find 'innerHTML' "
+            "string cross-reference [aborting hook]");
+        return NULL;
+    }
+
+    uint8_t *propdesc_innerhtml = innerhtml_xref - sizeof(uintptr_t);
+    for (uint32_t idx = 0; idx < module_size; idx++) {
+        if(memmem(module_address, module_size,
+                "\x4c\x8d\x0d", 3, &idx) == NULL) {
+            pipe("WARNING:CElement::put_innerHTML unable to locate "
+                "'lea r9, propdesc_innerHTML' instruction [aborting hook]");
+            return NULL;
+        }
+
+        uint8_t *target = &module_address[idx] +
+            *(int32_t *)(&module_address[idx] + 3) + 7;
+        if(target != propdesc_innerhtml) {
+            continue;
+        }
+
+        for (uint32_t jdx = 0; jdx < 256; jdx++) {
+            if(memcmp(&module_address[idx - jdx], "\x90\x90\x90", 3) == 0) {
+                return &module_address[idx - jdx + 3];
+            }
+        }
+    }
+
+    pipe("WARNING:CElement::put_innerHTML unable to locate function "
+        "[aborting hook]");
     return NULL;
 }
