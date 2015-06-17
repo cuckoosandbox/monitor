@@ -137,7 +137,7 @@ Parameters::
 Logging::
 
     i sent ret
-    b buffer len, buf
+    b buffer (uintptr_t) len, buf
 
 
 sendto
@@ -167,7 +167,7 @@ Logging::
     s ip_address ip
     i port port
     i sent ret
-    b buffer len, buf
+    b buffer (uintptr_t) len, buf
 
 
 recv
@@ -187,7 +187,7 @@ Parameters::
 
 Logging::
 
-    b buffer ret > 0 ? ret : 0, buf
+    b buffer (uintptr_t)(ret > 0 ? ret : 0), buf
 
 
 recvfrom
@@ -216,7 +216,7 @@ Logging::
 
     s ip_address ip
     i port port
-    b buffer ret > 0 ? ret : 0, buf
+    b buffer (uintptr_t)(ret > 0 ? ret : 0), buf
 
 
 accept
@@ -317,7 +317,7 @@ Parameters::
 
 Logging::
 
-    b buffer optlen, optval
+    b buffer (uintptr_t) optlen, optval
 
 
 ioctlsocket
@@ -408,7 +408,7 @@ Parameters::
 
 Middle::
 
-    uint8_t *buf = NULL; uint32_t length = 0;
+    uint8_t *buf = NULL; uintptr_t length = 0;
     wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
     if(lpNumberOfBytesRecvd != NULL && *lpNumberOfBytesRecvd < length) {
@@ -451,7 +451,7 @@ Middle::
     const char *ip = NULL; int port = 0;
     get_ip_port(lpFrom, &ip, &port);
 
-    uint8_t *buf = NULL; uint32_t length = 0;
+    uint8_t *buf = NULL; uintptr_t length = 0;
     wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
     if(lpNumberOfBytesRecvd != NULL && *lpNumberOfBytesRecvd < length) {
@@ -491,7 +491,7 @@ Parameters::
 
 Middle::
 
-    uint8_t *buf = NULL; uint32_t length = 0;
+    uint8_t *buf = NULL; uintptr_t length = 0;
     wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
     if(lpNumberOfBytesSent != NULL && *lpNumberOfBytesSent < length) {
@@ -536,7 +536,7 @@ Pre::
 
 Middle::
 
-    uint8_t *buf = NULL; uint32_t length = 0;
+    uint8_t *buf = NULL; uintptr_t length = 0;
     wsabuf_get_buffer(dwBufferCount, lpBuffers, &buf, &length);
 
     if(lpNumberOfBytesSent != NULL && *lpNumberOfBytesSent < length) {
@@ -660,6 +660,10 @@ Parameters::
     *  LPDWORD lpdwBytesSent
     *  LPOVERLAPPED lpOverlapped
 
+Ensure::
+
+    lpdwBytesSent
+
 Pre::
 
     const char *ip = NULL; int port = 0;
@@ -669,7 +673,7 @@ Logging::
 
     s ip_address ip
     i port port
-    B buffer lpdwBytesSent, lpSendBuffer
+    b buffer (uintptr_t) *lpdwBytesSent, lpSendBuffer
 
 
 TransmitFile

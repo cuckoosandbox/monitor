@@ -1081,7 +1081,7 @@ void clsid_to_string(REFCLSID rclsid, wchar_t *buf)
 }
 
 void wsabuf_get_buffer(uint32_t buffer_count, const WSABUF *buffers,
-    uint8_t **ptr, uint32_t *length)
+    uint8_t **ptr, uintptr_t *length)
 {
     *length = 0;
     for (uint32_t idx = 0; idx < buffer_count; idx++) {
