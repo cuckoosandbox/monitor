@@ -174,3 +174,14 @@ int asm_return(uint8_t *stub, uint16_t value)
 
     return stub - base;
 }
+
+uint8_t *asm_get_rel_jump_target(uint8_t *addr)
+{
+    if(*addr == 0xeb) {
+        return addr + *(int8_t *)(addr + 1) + 2;
+    }
+    if(*addr == 0xe9) {
+        return addr + *(int32_t *)(addr + 1) + 5;
+    }
+    return NULL;
+}

@@ -619,6 +619,65 @@ int hook(hook_t *h)
         return -1;
     }
 
+    // Handle delay loaded forwarders. In some situations an exported symbol
+    // will forward execution to another DLL. If this other DLL is delay
+    // loaded then we can only hook the function after the delay-loaded DLL
+    // has been loaded. In addition to that we'll want to hook the function
+    // in the delay-loaded DLL rather than in the current DLL. So we update
+    // the library of this hook to represent the one of the delay-loaded DLL.
+    IMAGE_DELAYLOAD_DESCRIPTOR *did = NULL;
+
+#if __x86_64__
+    // In 64-bit mode delay-loaded function stubs start with a "lea eax, addr"
+    // instruction followed by a relative jump.
+    if(memcmp(h->addr, "\x48\x8d\x05", 3) == 0 &&
+            (h->addr[7] == 0xeb || h->addr[7] == 0xe9)) {
+        uint8_t *target = asm_get_rel_jump_target(&h->addr[7]);
+
+        // We're now going to look for the delay import descriptor structure.
+        for (uint32_t idx = 0; idx < 128; idx++, target++) {
+            // We're looking for a "lea ecx, addr" instruction. Not using
+            // capstone here as it seems to have difficulties disassembling
+            // various xmm related instructions.
+            if(memcmp(target, "\x48\x8d\x0d", 3) == 0) {
+                target += *(int32_t *)(target + 3) + 7;
+                did = (IMAGE_DELAYLOAD_DESCRIPTOR *) target;
+                break;
+            }
+        }
+    }
+#else
+    // In 32-bit mode delay-loaded function stubs start with a "mov eax, addr"
+    // instruction followed by a relative jump.
+    if(*h->addr == 0xb8 && (h->addr[5] == 0xeb || h->addr[5] == 0xe9)) {
+        uint8_t *target = asm_get_rel_jump_target(&h->addr[5]);
+
+        // We're now going to look for the delay import descriptor structure.
+        for (uint32_t idx = 0; idx < 32; idx++) {
+            // We're looking for a "push addr" instruction.
+            if(*target == 0x68) {
+                did = *(IMAGE_DELAYLOAD_DESCRIPTOR **)(target + 1);
+                break;
+            }
+            target += lde(target);
+        }
+    }
+#endif
+
+    // We identified this function to be a forwarder for a delay-loaded DLL
+    // function. Update the library, set the earlier located address to a
+    // null pointer (so it'll be resolved again), and return success.
+    if(did != NULL) {
+        // We cheat a little bit here but that should be fine.
+        char *library = slab_getmem(&g_function_stubs);
+        library_from_asciiz((const char *) module_handle + did->DllNameRVA,
+            library, slab_size(&g_function_stubs));
+
+        h->library = library;
+        h->addr = NULL;
+        return 0;
+    }
+
     h->func_stub = slab_getmem(&g_function_stubs);
     memset(h->func_stub, 0xcc, slab_size(&g_function_stubs));
 

@@ -950,6 +950,33 @@ int is_shutting_down()
     return 0;
 }
 
+void library_from_asciiz(const char *str, char *library, uint32_t length)
+{
+    memset(library, 0, length);
+
+    if(str != NULL) {
+        const char *libname = str;
+
+        // Follow through all directories.
+        for (const char *ptr = libname; *ptr != 0; ptr++) {
+            if(*ptr == '\\' || *ptr == '/') {
+                libname = ptr + 1;
+            }
+        }
+
+        // Copy the library name into our ascii library buffer.
+        length = MIN(length - 1, strlen(libname));
+        for (uint32_t idx = 0; idx < length; idx++) {
+            library[idx] = libname[idx];
+        }
+
+        // Strip off any remaining ".dll".
+        if(stricmp(&library[length - 4], ".dll") == 0) {
+            library[length - 4] = 0;
+        }
+    }
+}
+
 void library_from_unicode_string(const UNICODE_STRING *us,
     char *library, int32_t length)
 {
