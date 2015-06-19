@@ -540,7 +540,7 @@ static int _hook_determine_start(hook_t *h)
             unhook_detect_add_region(h->funcname, addr, addr, addr, 6);
 
 #if __x86_64__
-            addr += *(uint32_t *)(addr + 2) + 6;
+            addr += *(int32_t *)(addr + 2) + 6;
 #else
             addr = *(uint8_t **)(addr + 2);
 #endif
@@ -550,12 +550,14 @@ static int _hook_determine_start(hook_t *h)
             continue;
         }
 
+#if !__x86_64__
         // mov edi, edi ; push ebp ; mov ebp, esp ; pop ebp ; jmp short imm8
         if(memcmp(addr, "\x8b\xff\x55\x8b\xec\x5d\xeb", 7) == 0) {
             unhook_detect_add_region(h->funcname, addr, addr, addr, 8);
             addr = addr + 8 + *(int8_t *)(addr + 7);
             continue;
         }
+#endif
 
         break;
     }
