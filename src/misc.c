@@ -1239,7 +1239,7 @@ int our_vsnprintf(char *buf, int length, const char *fmt, va_list args)
             break;
 
         case 'd':
-            v = va_arg(args, intptr_t);
+            v = va_arg(args, int32_t);
             l = ultostr(v >= 0 ? v : -v, tmp, 10);
             if(length > l + (v < 0)) {
                 if(v < 0) {
