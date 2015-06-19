@@ -359,9 +359,11 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
             addr += 2;
         }
 #if __x86_64__
-        // In 64-bit mode we have RIP-relative mov instructions. These have
-        // to be relocated properly. Handles "mov reg64, qword [offset]".
-        else if((*addr == 0x48 || *addr == 0x4c) && addr[1] == 0x8b &&
+        // In 64-bit mode we have RIP-relative mov and lea instructions. These
+        // have to be relocated properly. Handles "mov reg64, qword [offset]"
+        // and "lea reg64, qword [offset]".
+        else if((*addr == 0x48 || *addr == 0x4c) &&
+                (addr[1] == 0x8b || addr[1] == 0x8d) &&
                 (addr[2] & 0xc7) == 0x05) {
             // Register index and full address.
             uint32_t reg = ((addr[2] >> 3) & 7) + (*addr == 0x4c ? 8 : 0);
@@ -373,12 +375,15 @@ int hook_create_stub(uint8_t *tramp, const uint8_t *addr, int len)
             *(const uint8_t **)(tramp + 2) = target;
             tramp += 10;
 
-            // mov reg64, qword [reg64]
-            tramp[0] = reg < 8 ? 0x48 : 0x4d;
-            tramp[1] = 0x8b;
-            tramp[2] = (reg & 7) | ((reg & 7) << 3);
-            tramp += 3;
-
+            // If it was a mov instruction then also emit the pointer
+            // dereference part.
+            if(addr[1] == 0x8b) {
+                // mov reg64, qword [reg64]
+                tramp[0] = reg < 8 ? 0x48 : 0x4d;
+                tramp[1] = 0x8b;
+                tramp[2] = (reg & 7) | ((reg & 7) << 3);
+                tramp += 3;
+            }
             addr += 7;
         }
 #endif
