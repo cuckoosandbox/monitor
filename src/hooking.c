@@ -680,7 +680,7 @@ int hook(hook_t *h)
 
         h->library = library;
         h->addr = NULL;
-        return 0;
+        return 1;
     }
 
     h->func_stub = slab_getmem(&g_function_stubs);

@@ -85,7 +85,11 @@ void monitor_hook(const char *library)
             continue;
         }
 
-        hook(h);
+        // Return value 1 indicates to retry the hook. This is important for
+        // delay-loaded function forwarders as the delay-loaded DLL may
+        // already have been loaded. In that case we want to hook the function
+        // forwarder right away.
+        while (hook(h) == 1);
     }
 }
 
