@@ -227,6 +227,10 @@ uint8_t *hook_addrcb_CDocument_write(hook_t *h,
 {
     (void) h;
 
+#if !__x86_64__
+    return NULL;
+#endif
+
     // Locate a possible address of the "\r\n" string.
     for (uint32_t idx = 0; idx < module_size - 20; idx++) {
         uint8_t *newline_addr = memmem(module_address, module_size,
@@ -250,6 +254,10 @@ uint8_t *hook_addrcb_CHyperlink_SetUrlComponent(
     hook_t *h, uint8_t *module_address, uint32_t module_size)
 {
     (void) h;
+
+#if !__x86_64__
+    return NULL;
+#endif
 
     // We are going to be looking for a sequence of instructions to find the
     // CHyperLink::SetUrlComponent function.
@@ -299,6 +307,10 @@ uint8_t *hook_addrcb_CIFrameElement_CreateElement(
 {
     (void) h;
 
+#if !__x86_64__
+    return NULL;
+#endif
+
     // Locate the "IFRAME" string.
     uint8_t *iframe_addr = memmem(module_address, module_size,
         L"IFRAME", sizeof(L"IFRAME"), NULL);
@@ -307,10 +319,6 @@ uint8_t *hook_addrcb_CIFrameElement_CreateElement(
             "'IFRAME' string [aborting hook]");
         return NULL;
     }
-
-#if !__x86_64__
-    return NULL;
-#endif
 
     // Find the cross-reference of the 'IFRAME' string.
     uint8_t *ret = memmem(module_address, module_size,
@@ -463,6 +471,10 @@ uint8_t *hook_addrcb_CScriptElement_put_src(
 {
     (void) h;
 
+#if !__x86_64__
+    return NULL;
+#endif
+
     uint8_t *diid_disphtmlscriptelement = memmem(module_address, module_size,
         "\x30\xf5\x50\x30\xb5\x98\xcf\x11\xbb\x82\x00\xaa\x00\xbd\xce\x0b",
         16, NULL);
@@ -505,6 +517,10 @@ uint8_t *hook_addrcb_CElement_put_innerHTML(
     hook_t *h, uint8_t *module_address, uint32_t module_size)
 {
     (void) h;
+
+#if !__x86_64__
+    return NULL;
+#endif
 
     uint8_t *innerhtml_addr = memmem(module_address, module_size,
         L"innerHTML", sizeof(L"innerHTML"), NULL);
