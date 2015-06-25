@@ -785,3 +785,18 @@ Parameters::
     ** DWORD dwOption option
     ** LPSTR pcszUAOut user_agent
     *  DWORD *cbSize
+
+
+GetBestInterfaceEx
+==================
+
+Signature::
+
+    * Is success: ret == NO_ERROR
+    * Library: iphlpapi
+    * Return value: DWORD
+
+Parameters::
+
+    *  struct sockaddr *pDestAddr
+    *  PDWORD pdwBestIfIndex
