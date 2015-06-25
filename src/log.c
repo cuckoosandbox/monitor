@@ -120,14 +120,19 @@ static void log_string(bson *b, const char *idx, const char *str, int length)
 
     int ret, utf8len;
 
-    char *utf8s = utf8_string(str, length);
-    utf8len = *(int *) utf8s;
-    ret = bson_append_binary(b, idx, BSON_BIN_BINARY, utf8s+4, utf8len);
-    if(ret == BSON_ERROR) {
-        pipe("CRITICAL:Error creating bson string, error, %x utf8len %d.",
-            b->err, utf8len);
+    if(range_is_readable(str, length) != 0) {
+        char *utf8s = utf8_string(str, length);
+        utf8len = *(int *) utf8s;
+        ret = bson_append_binary(b, idx, BSON_BIN_BINARY, utf8s+4, utf8len);
+        if(ret == BSON_ERROR) {
+            pipe("CRITICAL:Error creating bson string, error, %x utf8len %d.",
+                b->err, utf8len);
+        }
+        mem_free(utf8s);
     }
-    mem_free(utf8s);
+    else {
+        bson_append_binary(b, idx, BSON_BIN_BINARY, "<INVALID POINTER>", 17);
+    }
 }
 
 void log_wstring(bson *b, const char *idx, const wchar_t *str, int length)
@@ -137,15 +142,20 @@ void log_wstring(bson *b, const char *idx, const wchar_t *str, int length)
         return;
     }
 
-    int ret, utf8len;
-    char *utf8s = utf8_wstring(str, length);
-    utf8len = *(int *) utf8s;
-    ret = bson_append_binary(b, idx, BSON_BIN_BINARY, utf8s+4, utf8len);
-    if(ret == BSON_ERROR) {
-        pipe("CRITICAL:Error creating bson wstring, error %x, utf8len %d.",
-            b->err, utf8len);
+    if(range_is_readable(str, length) != 0) {
+        int ret, utf8len;
+        char *utf8s = utf8_wstring(str, length);
+        utf8len = *(int *) utf8s;
+        ret = bson_append_binary(b, idx, BSON_BIN_BINARY, utf8s+4, utf8len);
+        if(ret == BSON_ERROR) {
+            pipe("CRITICAL:Error creating bson wstring, error %x, utf8len %d.",
+                b->err, utf8len);
+        }
+        mem_free(utf8s);
     }
-    mem_free(utf8s);
+    else {
+        bson_append_binary(b, idx, BSON_BIN_BINARY, "<INVALID POINTER>", 17);
+    }
 }
 
 static void log_argv(bson *b, const char *idx, int argc, const char **argv)
@@ -183,8 +193,13 @@ static void log_buffer(bson *b, const char *idx,
         trunclength = 0;
     }
 
-    bson_append_binary(b, idx, BSON_BIN_BINARY,
-        (const char *) buf, trunclength);
+    if(range_is_readable(buf, length) != 0) {
+        bson_append_binary(b, idx, BSON_BIN_BINARY,
+            (const char *) buf, trunclength);
+    }
+    else {
+        bson_append_binary(b, idx, BSON_BIN_BINARY, "<INVALID POINTER>", 17);
+    }
 }
 
 void log_explain(uint32_t index)
@@ -469,10 +484,10 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             }
         }
         else if(*fmt == 'c') {
-            wchar_t buf[64];
+            char buf[64];
             REFCLSID rclsid = va_arg(args, REFCLSID);
             clsid_to_string(rclsid, buf);
-            log_wstring(&b, idx, buf, -1);
+            log_string(&b, idx, buf, -1);
         }
         else {
             char buf[2] = {*fmt, 0};

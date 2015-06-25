@@ -1090,11 +1090,30 @@ wchar_t *wcsdup(const wchar_t *s)
     return NULL;
 }
 
-int page_is_readable(const uint8_t *addr)
+int page_is_readable(const void *addr)
 {
     MEMORY_BASIC_INFORMATION_CROSS mbi;
     return virtual_query(addr, &mbi) != FALSE &&
         mbi.State & MEM_COMMIT && mbi.Protect & PAGE_READABLE;
+}
+
+int range_is_readable(const void *addr, uintptr_t size)
+{
+    MEMORY_BASIC_INFORMATION_CROSS mbi;
+    const uint8_t *ptr = (const uint8_t *) addr;
+    const uint8_t *end = ptr + size;
+
+    while (ptr < end) {
+        if(virtual_query(ptr, &mbi) == FALSE ||
+                (mbi.State & MEM_COMMIT) == 0 ||
+                (mbi.Protect & PAGE_READABLE) == 0) {
+            return 0;
+        }
+
+        // Move to the next allocated page.
+        ptr = (const uint8_t *) mbi.BaseAddress + mbi.RegionSize;
+    }
+    return 1;
 }
 
 void clsid_to_string(REFCLSID rclsid, char *buf)
