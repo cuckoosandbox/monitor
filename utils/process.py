@@ -206,7 +206,7 @@ class SignatureProcessor(object):
 
     def _parse_prelog(self, text):
         argtype, argname, parameter = text.split(' ', 2)
-        if argtype != 'b':
+        if argtype != 'b' and argtype != '!b':
             raise Exception('Prelog parameter must be a buffer.')
 
         length, buffer = parameter.split(',')

@@ -497,11 +497,11 @@ Parameters::
 
 Prelog::
 
-    b uncompressed UncompressedBufferSize, UncompressedBuffer
+    !b uncompressed UncompressedBufferSize, UncompressedBuffer
 
 Logging::
 
-    B compressed FinalCompressedSize, CompressedBuffer
+    !B compressed FinalCompressedSize, CompressedBuffer
 
 
 RtlDecompressBuffer
@@ -523,11 +523,11 @@ Parameters::
 
 Prelog::
 
-    b compressed CompressedBufferSize, CompressedBuffer
+    !b compressed CompressedBufferSize, CompressedBuffer
 
 Logging::
 
-    B uncompressed FinalUncompressedSize, UncompressedBuffer
+    !B uncompressed FinalUncompressedSize, UncompressedBuffer
 
 
 RtlDecompressFragment
@@ -551,11 +551,11 @@ Parameters::
 
 Prelog::
 
-    b compressed CompressedBufferSize, CompressedBuffer
+    !b compressed CompressedBufferSize, CompressedBuffer
 
 Logging::
 
-    B uncompressed FinalUncompressedSize, UncompressedFragment
+    !B uncompressed FinalUncompressedSize, UncompressedFragment
 
 
 RtlDispatchException

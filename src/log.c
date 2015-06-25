@@ -202,6 +202,22 @@ static void log_buffer(bson *b, const char *idx,
     }
 }
 
+static void log_buffer_notrunc(bson *b, const char *idx,
+    const uint8_t *buf, uintptr_t length)
+{
+    if(buf == NULL) {
+        length = 0;
+    }
+
+    if(range_is_readable(buf, length) != 0) {
+        bson_append_binary(b, idx, BSON_BIN_BINARY,
+            (const char *) buf, length);
+    }
+    else {
+        bson_append_binary(b, idx, BSON_BIN_BINARY, "<INVALID POINTER>", 17);
+    }
+}
+
 void log_explain(uint32_t index)
 {
     bson b; char argidx[4];
@@ -220,6 +236,12 @@ void log_explain(uint32_t index)
 
     for (uint32_t argnum = 2; *fmt != 0; argnum++, fmt++) {
         ultostr(argnum, argidx, 10);
+
+        // Ignore limitation override.
+        if(*fmt == '!') {
+            argnum--;
+            continue;
+        }
 
         const char *argname = sig_param_name(index, argnum-2);
 
@@ -334,10 +356,17 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
     bson_append_int(&b, "0", is_success);
     bson_append_long(&b, "1", return_value);
 
-    int argnum = 2;
+    int argnum = 2, override = 0;
 
     for (const char *fmt = sig_paramtypes(index); *fmt != 0; fmt++) {
         ultostr(argnum++, idx, 10);
+
+        // Limitation override. At the moment just used for ignoring buffer
+        // truncation.
+        if(*fmt == '!') {
+            override = 1;
+            continue;
+        }
 
         if(*fmt == 's') {
             const char *s = va_arg(args, const char *);
@@ -364,12 +393,22 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
         else if(*fmt == 'b') {
             uintptr_t len = va_arg(args, uintptr_t);
             const uint8_t *s = va_arg(args, const uint8_t *);
-            log_buffer(&b, idx, s, len);
+            if(override == 0) {
+                log_buffer(&b, idx, s, len);
+            }
+            else {
+                log_buffer_notrunc(&b, idx, s, len);
+            }
         }
         else if(*fmt == 'B') {
             uintptr_t *len = va_arg(args, uintptr_t *);
             const uint8_t *s = va_arg(args, const uint8_t *);
-            log_buffer(&b, idx, s, len == NULL ? 0 : *len);
+            if(override == 0) {
+                log_buffer(&b, idx, s, len == NULL ? 0 : *len);
+            }
+            else {
+                log_buffer_notrunc(&b, idx, s, len == NULL ? 0 : *len);
+            }
         }
         else if(*fmt == 'i') {
             int value = va_arg(args, int);
@@ -493,6 +532,8 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             char buf[2] = {*fmt, 0};
             pipe("CRITICAL:Invalid format specifier: %z", buf);
         }
+
+        override = 0;
     }
 
     va_end(args);
