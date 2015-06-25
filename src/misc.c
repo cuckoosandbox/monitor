@@ -1097,14 +1097,13 @@ int page_is_readable(const uint8_t *addr)
         mbi.State & MEM_COMMIT && mbi.Protect & PAGE_READABLE;
 }
 
-void clsid_to_string(REFCLSID rclsid, wchar_t *buf)
+void clsid_to_string(REFCLSID rclsid, char *buf)
 {
-    LPOLESTR ptr; *buf = 0;
+    const uint8_t *ptr = (const uint8_t *) rclsid;
 
-    if(StringFromCLSID(rclsid, &ptr) == S_OK) {
-        wcscpy(buf, ptr);
-        CoTaskMemFree(ptr);
-    }
+    our_snprintf(buf, 64, "{%x%x%x%x-%x%x-%x%x-%x%x-%x%x%x%x%x%x}",
+        ptr[3], ptr[2], ptr[1], ptr[0], ptr[5], ptr[4], ptr[7], ptr[6],
+        ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
 }
 
 void wsabuf_get_buffer(uint32_t buffer_count, const WSABUF *buffers,
@@ -1235,6 +1234,19 @@ int our_vsnprintf(char *buf, int length, const char *fmt, va_list args)
                 *buf++ = '0', *buf++ = 'x';
                 l = ultostr(p, buf, 16);
                 length -= 2 + l, buf += l;
+            }
+            break;
+
+        case 'x':
+            p = va_arg(args, uint32_t);
+            if(length > 8) {
+                l = ultostr(p, buf, 16);
+                // Prepend a single '0' if uneven.
+                if((l & 1) != 0) {
+                    *buf++ = '0', length--;
+                    l = ultostr(p, buf, 16);
+                }
+                length -= l, buf += l;
             }
             break;
 

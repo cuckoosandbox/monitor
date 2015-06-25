@@ -397,7 +397,7 @@ Parameters::
 
 Middle::
 
-    wchar_t uuid[128];
+    char uuid[128];
     clsid_to_string(Uuid, uuid);
 
 Logging::

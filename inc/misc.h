@@ -93,7 +93,7 @@ int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length);
 void *memdup(const void *addr, uint32_t length);
 wchar_t *wcsdup(const wchar_t *s);
 int page_is_readable(const uint8_t *addr);
-void clsid_to_string(REFCLSID rclsid, wchar_t *buf);
+void clsid_to_string(REFCLSID rclsid, char *buf);
 
 uint64_t hash_buffer(const void *buf, uint32_t length);
 uint64_t hash_string(const char *buf, int32_t length);
