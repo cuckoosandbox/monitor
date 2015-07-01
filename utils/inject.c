@@ -469,6 +469,7 @@ int main()
         printf("                         Excluding the application path!\n");
         printf("  --curdir <dirpath>     Current working directory\n");
         printf("  --pid <pid>            Process identifier to inject\n");
+        printf("  --process-name <name>  Process name to inject\n");
         printf("  --tid <tid>            Thread identifier to inject\n");
         printf("  --from <pid>           Inject from another process\n");
         printf("  --from-process <name>  "
@@ -483,7 +484,7 @@ int main()
 
     const wchar_t *dll_path = NULL, *app_path = NULL, *arguments = L"";
     const wchar_t *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
-    const wchar_t *curdir = NULL;
+    const wchar_t *curdir = NULL, *process_name = NULL;
     uint32_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
 
     for (int idx = 1; idx < argc; idx++) {
@@ -527,6 +528,11 @@ int main()
             continue;
         }
 
+        if(wcscmp(argv[idx], L"--process-name") == 0) {
+            process_name = argv[++idx];
+            continue;
+        }
+
         if(wcscmp(argv[idx], L"--tid") == 0) {
             tid = wcstol(argv[++idx], NULL, 10);
             continue;
@@ -566,18 +572,25 @@ int main()
         return 1;
     }
 
-    if(inj_mode == INJECT_CRT && pid == 0 && app_path == NULL) {
+    if(inj_mode == INJECT_CRT && pid == 0 && process_name == NULL &&
+            app_path == NULL) {
         fprintf(stderr, "[-] No injection target has been provided!\n");
         return 1;
     }
 
-    if(inj_mode == INJECT_APC && tid == 0 && app_path == NULL) {
+    if(inj_mode == INJECT_APC && tid == 0 && process_name == NULL &&
+            app_path == NULL) {
         fprintf(stderr, "[-] No injection target has been provided!\n");
         return 1;
     }
 
     if(inj_mode == INJECT_FREE && app_path == NULL) {
         fprintf(stderr, "[-] An app path is required when not injecting!\n");
+        return 1;
+    }
+
+    if(pid != 0 && process_name != NULL) {
+        fprintf(stderr, "[-] Both pid and process-name were set!\n");
         return 1;
     }
 
@@ -670,6 +683,10 @@ int main()
         }
 
         pid = start_app(from, filepath, arguments, curdir, &tid);
+    }
+
+    if(pid == 0 && process_name != NULL) {
+        pid = pid_from_process_name(process_name);
     }
 
     // Drop the configuration file if available.
