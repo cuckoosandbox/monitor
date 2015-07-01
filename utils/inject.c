@@ -124,15 +124,81 @@ void free_data(uint32_t pid, void *addr, uint32_t length)
     }
 }
 
+// Windows Vista and later have session restriction - a user-mode restriction
+// to disallow injection into Windows services. The following toggles the
+// restriction.
+int toggle_session_restriction(int enable)
+{
+    static uint8_t origbuf[32];
+
+    FARPROC p_csr_client_call_server =
+        GetProcAddress(GetModuleHandle("ntdll"), "CsrClientCallServer");
+    if(p_csr_client_call_server == NULL) {
+        return -1;
+    }
+
+    // The following offsets are based on Brad Spengler's work after he
+    // fixed up a working implementation in 64-bit mode - which apparently
+    // was not yet publicly available. It seems that NtRequestWaitReplyPort
+    // has to return success and that this return value is propagated into
+    // offset 32 and 52 of the first argument, for 32-bit and 64-bit hosts,
+    // respectively. The following two stubs do just that - spoof the
+    // successful return value and put it at the right offset.
+
+#if __x86_64__
+    const unsigned char payload[] = {
+        // xor eax, eax
+        0x33, 0xc0,
+        // mov dword [rcx+offset], eax
+        0x89, 0x41, 0x34,
+        // ret
+        0xc3
+    };
+#else
+    const unsigned char payload[] = {
+        // xor eax, eax
+        0x33, 0xc0,
+        // mov ecx, [esp+4]
+        0x8b, 0x4c, 0x24, 0x04,
+        // mov dword [ecx+offset], eax
+        0x89, 0x41, 0x20,
+        // retn 0x10
+        0xc2, 0x10, 0x00
+    };
+#endif
+
+    unsigned long old_protect;
+    if(VirtualProtect(p_csr_client_call_server, sizeof(payload),
+            PAGE_EXECUTE_READWRITE, &old_protect) != FALSE) {
+
+        if(enable != 0) {
+            memcpy(origbuf, p_csr_client_call_server, sizeof(payload));
+            memcpy(p_csr_client_call_server, payload, sizeof(payload));
+        }
+        else {
+            memcpy(p_csr_client_call_server, origbuf, sizeof(payload));
+        }
+
+        VirtualProtect(p_csr_client_call_server, sizeof(payload),
+            old_protect, &old_protect);
+        return 0;
+    }
+    return -1;
+}
+
 uint32_t create_thread_and_wait(uint32_t pid, void *addr, void *arg)
 {
     HANDLE process_handle = open_process(pid);
 
+    toggle_session_restriction(1);
     HANDLE thread_handle = CreateRemoteThread(process_handle, NULL, 0,
         (LPTHREAD_START_ROUTINE) addr, arg, 0, NULL);
+    uint32_t return_value = GetLastError();
+    toggle_session_restriction(0);
+
     if(thread_handle == NULL) {
-        fprintf(stderr, "[-] Error injecting remote thread in process: %ld\n",
-            GetLastError());
+        fprintf(stderr, "[-] Error injecting remote thread in process: %d\n",
+            return_value);
         exit(1);
     }
 
