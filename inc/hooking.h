@@ -102,5 +102,9 @@ uint8_t *hook_addrcb_CScriptElement_put_src(
     hook_t *h, uint8_t *module_address, uint32_t module_size);
 uint8_t *hook_addrcb_CElement_put_innerHTML(
     hook_t *h, uint8_t *module_address, uint32_t module_size);
+uint8_t *hook_addrcb_PRF(
+    hook_t *h, uint8_t *module_address, uint32_t module_size);
+uint8_t *hook_addrcb_Ssl3GenerateKeyMaterial(
+    hook_t *h, uint8_t *module_address, uint32_t module_size);
 
 #endif

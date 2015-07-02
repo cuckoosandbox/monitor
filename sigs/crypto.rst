@@ -440,3 +440,78 @@ Logging::
 
     s struct_type struct_type
     b buffer (uintptr_t) *pcbStructInfo, buf
+
+
+PRF
+===
+
+Signature::
+
+    * Callback: addr
+    * Library: ncrypt
+    * Return value: NTSTATUS
+
+Parameters::
+
+    *  void *unk1
+    *  uintptr_t unk2
+    *  uint8_t *buf1
+    *  uintptr_t buf1_length
+    *  const char *type
+    *  uint32_t type_length
+    *  uint8_t *buf2
+    *  uint32_t buf2_length
+    *  uint8_t *buf3
+    *  uint32_t buf3_length
+
+Middle::
+
+    uintptr_t secret_length = 0, random_length = 0;
+    uint8_t *secret = NULL, *client_random = NULL, *server_random = NULL;
+
+    if(type_length == 13 && strcmp(type, "key expansion") == 0) {
+        secret_length = buf1_length;
+        secret = buf1;
+
+        random_length = 32;
+        server_random = buf2;
+        client_random = buf2 + random_length;
+    }
+
+Logging::
+
+    b client_random random_length, client_random
+    b server_random random_length, server_random
+    b master_secret secret_length, secret
+
+
+Ssl3GenerateKeyMaterial
+=======================
+
+Signature::
+
+    * Callback: addr
+    * Library: ncrypt
+    * Return value: NTSTATUS
+
+Parameters::
+
+    *  uintptr_t unk1
+    *  uint8_t *secret
+    *  uintptr_t secret_length
+    *  uint8_t *seed
+    *  uintptr_t seed_length
+    *  void *unk2
+    *  uintptr_t unk3
+
+Middle::
+
+    uintptr_t random_length = 32;
+    uint8_t *server_random = seed;
+    uint8_t *client_random = seed + random_length;
+
+Logging::
+
+    b client_random random_length, client_random
+    b server_random random_length, server_random
+    b master_secret secret_length, secret

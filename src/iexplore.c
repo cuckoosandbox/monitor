@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdint.h>
 #include <windows.h>
+#include "assembly.h"
 #include "hooking.h"
 #include "pipe.h"
 #include "symbol.h"
@@ -562,5 +563,79 @@ uint8_t *hook_addrcb_CElement_put_innerHTML(
 
     pipe("WARNING:CElement::put_innerHTML unable to locate function "
         "[aborting hook]");
+    return NULL;
+}
+
+uint8_t *hook_addrcb_PRF(
+    hook_t *h, uint8_t *module_address, uint32_t module_size)
+{
+    (void) h;
+
+    uint8_t *master_secret_addr = memmem(module_address, module_size,
+        "master secret", sizeof("master secret"), NULL);
+    if(master_secret_addr == NULL) {
+        pipe("WARNING:PRF unable to find 'master secret' "
+            "string [aborting hook]");
+        return NULL;
+    }
+
+#if __x86_64__
+    for (uint32_t idx = 0; idx < module_size; idx++) {
+        if(memmem(module_address, module_size,
+                "\x48\x8d\x05", 3, &idx) == NULL) {
+            break;
+        }
+
+        uint8_t *target = &module_address[idx] +
+            *(int32_t *)(&module_address[idx] + 3) + 7;
+        if(target != master_secret_addr) {
+            continue;
+        }
+
+        // Look for a call instruction within the next few instructions.
+        for (uint32_t jdx = 0; jdx < 8; jdx++) {
+            if(module_address[idx] == 0xe8) {
+                return asm_get_rel_call_target(&module_address[idx]);
+            }
+
+            idx += lde(&module_address[idx]);
+        }
+    }
+#else
+    uint8_t push_buf[5] = {0x68};
+    *(uint8_t **)(push_buf + 1) = master_secret_addr;
+
+    uint8_t *master_secret_xref = memmem(module_address, module_size,
+        push_buf, sizeof(push_buf), NULL);
+    if(master_secret_xref == NULL) {
+        pipe("WARNING:PRF unable to locate the 'master secret' "
+            "cross-reference instruction [aborting hook]");
+        return NULL;
+    }
+
+    for (uint32_t idx = 0; idx < 8; idx++) {
+        if(*master_secret_xref == 0xe8) {
+            return asm_get_rel_call_target(master_secret_xref);
+        }
+        master_secret_xref += lde(master_secret_xref);
+    }
+#endif
+
+    pipe("WARNING:PRF unable to locate the PRF function [aborting hook]");
+    return NULL;
+}
+
+uint8_t *hook_addrcb_Ssl3GenerateKeyMaterial(
+    hook_t *h, uint8_t *module_address, uint32_t module_size)
+{
+    (void) h;
+
+    // TODO Look for "HHHHHHHH" and then look for the function that does not
+    // reference the "HASH" string soon after.
+    // The following is just a temporary solution.
+    uint8_t *prf_addr = hook_addrcb_PRF(h, module_address, module_size);
+    if((((uintptr_t) prf_addr) & 0xffff) == 0x4bc0) {
+        return prf_addr + (0xe100 - 0x4bc0);
+    }
     return NULL;
 }
