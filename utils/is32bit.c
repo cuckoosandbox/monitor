@@ -19,8 +19,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdint.h>
 #include <windows.h>
+#include <tlhelp32.h>
 
 static BOOL (WINAPI *pIsWow64Process)(HANDLE hProcess, PBOOL Wow64Process);
+
+uint32_t pid_from_process_name(const wchar_t *process_name)
+{
+    PROCESSENTRY32W row; HANDLE snapshot_handle;
+
+    snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if(snapshot_handle == INVALID_HANDLE_VALUE) {
+        fprintf(stderr, "[-] Error obtaining snapshot handle: %ld\n",
+            GetLastError());
+        exit(1);
+    }
+
+    row.dwSize = sizeof(row);
+    if(Process32FirstW(snapshot_handle, &row) == FALSE) {
+        fprintf(stderr, "[-] Error enumerating the first process: %ld\n",
+            GetLastError());
+        exit(1);
+    }
+
+    do {
+        if(wcsicmp(row.szExeFile, process_name) == 0) {
+            CloseHandle(snapshot_handle);
+            return row.th32ProcessID;
+        }
+    } while (Process32NextW(snapshot_handle, &row) != FALSE);
+
+    CloseHandle(snapshot_handle);
+
+    fprintf(stderr, "[-] Error finding process by name: %S\n", process_name);
+    exit(1);
+}
 
 HANDLE open_process(uint32_t pid)
 {
@@ -122,11 +154,13 @@ int main()
     if(argc != 3) {
         printf("Usage: %S <option..>\n", argv[0]);
         printf("Options:\n");
-        printf("  -p --pid  <pid>\n");
-        printf("  -f --file <path>\n");
+        printf("  -p --pid          <pid>\n");
+        printf("  -n --process-name <process-name>\n");
+        printf("  -f --file         <path>\n");
         printf("\n");
         printf("Examples:\n");
         printf("%S -p 1234\n", argv[0]);
+        printf("%S -n lsass.exe\n", argv[0]);
         printf("%S -f %S\n", argv[0], argv[0]);
         return 1;
     }
@@ -136,6 +170,12 @@ int main()
 
     if(wcscmp(argv[1], L"-p") == 0 || wcscmp(argv[1], L"--pid") == 0) {
         uint32_t pid = wcstoul(argv[2], NULL, 10);
+        return determine_process_identifier(pid);
+    }
+
+    if(wcscmp(argv[1], L"-n") == 0 ||
+            wcscmp(argv[1], L"--process-name") == 0) {
+        uint32_t pid = pid_from_process_name(argv[2]);
         return determine_process_identifier(pid);
     }
 
