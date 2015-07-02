@@ -185,3 +185,11 @@ uint8_t *asm_get_rel_jump_target(uint8_t *addr)
     }
     return NULL;
 }
+
+uint8_t *asm_get_rel_call_target(uint8_t *addr)
+{
+    if(*addr == 0xe8) {
+        return addr + *(int32_t *)(addr + 1) + 5;
+    }
+    return NULL;
+}

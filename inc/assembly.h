@@ -77,5 +77,6 @@ static inline int asm_pushv(uint8_t *stub, const void *value)
 }
 
 uint8_t *asm_get_rel_jump_target(uint8_t *addr);
+uint8_t *asm_get_rel_call_target(uint8_t *addr);
 
 #endif
