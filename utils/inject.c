@@ -171,7 +171,7 @@ int toggle_session_restriction(int enable)
     if(VirtualProtect(p_csr_client_call_server, sizeof(payload),
             PAGE_EXECUTE_READWRITE, &old_protect) != FALSE) {
 
-        if(enable != 0) {
+        if(enable == 0) {
             memcpy(origbuf, p_csr_client_call_server, sizeof(payload));
             memcpy(p_csr_client_call_server, payload, sizeof(payload));
         }
@@ -190,11 +190,11 @@ uint32_t create_thread_and_wait(uint32_t pid, void *addr, void *arg)
 {
     HANDLE process_handle = open_process(pid);
 
-    toggle_session_restriction(1);
+    toggle_session_restriction(0);
     HANDLE thread_handle = CreateRemoteThread(process_handle, NULL, 0,
         (LPTHREAD_START_ROUTINE) addr, arg, 0, NULL);
     uint32_t return_value = GetLastError();
-    toggle_session_restriction(0);
+    toggle_session_restriction(1);
 
     if(thread_handle == NULL) {
         fprintf(stderr, "[-] Error injecting remote thread in process: %d\n",
