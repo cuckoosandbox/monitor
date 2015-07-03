@@ -190,11 +190,16 @@ uint32_t create_thread_and_wait(uint32_t pid, void *addr, void *arg)
 {
     HANDLE process_handle = open_process(pid);
 
-    toggle_session_restriction(0);
     HANDLE thread_handle = CreateRemoteThread(process_handle, NULL, 0,
         (LPTHREAD_START_ROUTINE) addr, arg, 0, NULL);
     uint32_t return_value = GetLastError();
-    toggle_session_restriction(1);
+    if(thread_handle == NULL && return_value == ERROR_NOT_ENOUGH_MEMORY) {
+        toggle_session_restriction(0);
+        thread_handle = CreateRemoteThread(process_handle, NULL, 0,
+            (LPTHREAD_START_ROUTINE) addr, arg, 0, NULL);
+        return_value = GetLastError();
+        toggle_session_restriction(1);
+    }
 
     if(thread_handle == NULL) {
         fprintf(stderr, "[-] Error injecting remote thread in process: %d\n",
