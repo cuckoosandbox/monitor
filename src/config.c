@@ -76,6 +76,9 @@ void config_read(config_t *cfg)
         else if(strcmp(key, "diffing-enable") == 0) {
             cfg->diffing_enable = value[0] == '1';
         }
+        else if(strcmp(key, "track") == 0) {
+            cfg->track = value[0] == '1';
+        }
     }
     fclose(fp);
     DeleteFile(config_fname);

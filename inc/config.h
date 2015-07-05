@@ -44,6 +44,9 @@ typedef struct _config_t {
 
     // Enable diffing logging - this is disabled by default.
     int diffing_enable;
+
+    // Whether this pid should be monitored for in the analyzer.
+    int track;
 } config_t;
 
 void config_read(config_t *cfg);
