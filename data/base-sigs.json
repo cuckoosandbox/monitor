@@ -4,8 +4,8 @@
         "parameters": [
             {"argtype": "ULONG", "argname": "time_low"},
             {"argtype": "ULONG", "argname": "time_high"},
-            {"argtype": "ULONG", "argname": "process_identifier"},
-            {"argtype": "ULONG", "argname": "parent_process_identifier"},
+            {"argtype": "ULONG", "argname": "pid"},
+            {"argtype": "ULONG", "argname": "ppid"},
             {"argtype": "LPWSTR", "argname": "module_path"}
         ],
         "signature": {
@@ -15,7 +15,7 @@
     {
         "apiname": "__anomaly__",
         "parameters": [
-            {"argtype": "ULONG", "argname": "thread_identifier"},
+            {"argtype": "ULONG", "argname": "tid"},
             {"argtype": "LPCSTR", "argname": "subcategory"},
             {"argtype": "LPCSTR", "argname": "function_name"},
             {"argtype": "LPCSTR", "argname": "message"}
