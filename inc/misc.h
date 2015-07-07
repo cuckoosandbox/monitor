@@ -32,10 +32,10 @@ void hook_library(const char *library);
 wchar_t *get_unicode_buffer();
 void free_unicode_buffer(wchar_t *ptr);
 
-uintptr_t pid_from_process_handle(HANDLE process_handle);
-uintptr_t pid_from_thread_handle(HANDLE thread_handle);
-uintptr_t tid_from_thread_handle(HANDLE thread_handle);
-uintptr_t parent_process_id();
+uint32_t pid_from_process_handle(HANDLE process_handle);
+uint32_t pid_from_thread_handle(HANDLE thread_handle);
+uint32_t tid_from_thread_handle(HANDLE thread_handle);
+uint32_t parent_process_identifier();
 
 uint32_t path_get_full_pathA(const char *in, wchar_t *out);
 uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out);

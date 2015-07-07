@@ -170,9 +170,9 @@ void free_unicode_buffer(wchar_t *ptr)
     virtual_free(ptr, (MAX_PATH_W+1) * sizeof(wchar_t), MEM_RELEASE);
 }
 
-uintptr_t pid_from_process_handle(HANDLE process_handle)
+uint32_t pid_from_process_handle(HANDLE process_handle)
 {
-    PROCESS_BASIC_INFORMATION pbi; uintptr_t ret = 0;
+    PROCESS_BASIC_INFORMATION pbi; uint32_t ret = 0;
 
     if(process_handle == get_current_process()) {
         return get_current_process_id();
@@ -194,9 +194,9 @@ uintptr_t pid_from_process_handle(HANDLE process_handle)
     return ret;
 }
 
-uintptr_t pid_from_thread_handle(HANDLE thread_handle)
+uint32_t pid_from_thread_handle(HANDLE thread_handle)
 {
-    THREAD_BASIC_INFORMATION tbi; uintptr_t ret = 0;
+    THREAD_BASIC_INFORMATION tbi; uint32_t ret = 0;
 
     if(thread_handle == get_current_thread()) {
         return get_current_process_id();
@@ -211,16 +211,16 @@ uintptr_t pid_from_thread_handle(HANDLE thread_handle)
     uint32_t length = query_information_thread(thread_handle,
         ThreadBasicInformation, &tbi, sizeof(tbi));
     if(length == sizeof(tbi)) {
-        ret = (uintptr_t) tbi.ClientId.UniqueProcess;
+        ret = (uint32_t) (uintptr_t) tbi.ClientId.UniqueProcess;
     }
 
     close_handle(thread_handle);
     return ret;
 }
 
-uintptr_t tid_from_thread_handle(HANDLE thread_handle)
+uint32_t tid_from_thread_handle(HANDLE thread_handle)
 {
-    THREAD_BASIC_INFORMATION tbi; uintptr_t ret = 0;
+    THREAD_BASIC_INFORMATION tbi; uint32_t ret = 0;
 
     if(duplicate_handle(get_current_process(), thread_handle,
             get_current_process(), &thread_handle, THREAD_QUERY_INFORMATION,
@@ -231,21 +231,21 @@ uintptr_t tid_from_thread_handle(HANDLE thread_handle)
     uint32_t length = query_information_thread(thread_handle,
         ThreadBasicInformation, &tbi, sizeof(tbi));
     if(length == sizeof(tbi)) {
-        ret = (uintptr_t) tbi.ClientId.UniqueThread;
+        ret = (uint32_t) (uintptr_t) tbi.ClientId.UniqueThread;
     }
 
     close_handle(thread_handle);
     return ret;
 }
 
-uintptr_t parent_process_id()
+uint32_t parent_process_identifier()
 {
     PROCESS_BASIC_INFORMATION pbi;
 
     uint32_t length = query_information_process(get_current_process(),
         ProcessBasicInformation, &pbi, sizeof(pbi));
     if(length == sizeof(pbi)) {
-        return (uintptr_t) pbi.InheritedFromUniqueProcessId;
+        return (uint32_t) (uintptr_t) pbi.InheritedFromUniqueProcessId;
     }
     return 0;
 }
