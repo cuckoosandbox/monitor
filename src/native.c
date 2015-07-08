@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     }
 
 static HANDLE g_current_process;
-static uintptr_t g_current_process_id;
+static uint32_t g_current_process_id;
 static HANDLE g_current_thread;
 
 static int32_t g_win32_error_offset;
@@ -498,7 +498,7 @@ HANDLE get_current_process()
     return g_current_process;
 }
 
-uintptr_t get_current_process_id()
+uint32_t get_current_process_id()
 {
     assert(g_current_process_id != 0, "Current process identifier is 0!", 0);
     return g_current_process_id;
@@ -510,7 +510,7 @@ HANDLE get_current_thread()
     return g_current_thread;
 }
 
-uintptr_t get_current_thread_id()
+uint32_t get_current_thread_id()
 {
     assert(g_current_thread != NULL, "Current thread handle is NULL!", 0);
     return tid_from_thread_handle(g_current_thread);

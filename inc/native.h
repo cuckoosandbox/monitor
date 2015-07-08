@@ -94,8 +94,8 @@ void get_last_error(last_error_t *error);
 void set_last_error(last_error_t *error);
 
 HANDLE get_current_process();
-uintptr_t get_current_process_id();
+uint32_t get_current_process_id();
 HANDLE get_current_thread();
-uintptr_t get_current_thread_id();
+uint32_t get_current_thread_id();
 
 #endif
