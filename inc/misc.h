@@ -111,6 +111,8 @@ uint32_t our_strlen(const char *s);
 const uint8_t *module_from_address(const uint8_t *addr);
 uint32_t module_image_size(const uint8_t *addr);
 
+void chtmtag_attrs(const void *chtmtag, bson *b);
+
 #define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
     OBJECT_ATTRIBUTES local_name; UNICODE_STRING local_name##_unistr; \
     wchar_t *local_name##_buffer = get_unicode_buffer(); \

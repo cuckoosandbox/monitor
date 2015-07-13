@@ -639,3 +639,30 @@ uint8_t *hook_addrcb_Ssl3GenerateKeyMaterial(
     }
     return NULL;
 }
+
+void chtmtag_attrs(const void *chtmtag, bson *b)
+{
+#if !__x86_64__
+    return;
+#endif
+
+    uint16_t count = *((const uint16_t *) chtmtag + 1);
+    const wchar_t **ptr = (const wchar_t **)((const uint8_t *) chtmtag + 32);
+
+    while (count-- != 0) {
+        const wchar_t *key = ptr[0];
+        uintptr_t keylen = (uintptr_t) ptr[1];
+        const wchar_t *value = ptr[2];
+        uintptr_t valuelen = (uintptr_t) ptr[3];
+
+        char *utf8key = utf8_wstring(key, keylen);
+        char *utf8val = utf8_wstring(value, valuelen);
+        uint32_t utf8vallen = *(uint32_t *) utf8val;
+
+        bson_append_binary(b, utf8key+4, BSON_BIN_BINARY,
+            utf8val+4, utf8vallen);
+        mem_free(utf8val);
+
+        ptr += 40 / sizeof(uintptr_t);
+    }
+}

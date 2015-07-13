@@ -100,7 +100,23 @@ Parameters::
 
     *  void *chtmtag
     *  void *cdoc
-    ** void **celement
+    *  void **celement
+
+Middle::
+
+    bson b;
+
+    bson_init_size(&b, mem_suggested_size(1024));
+    chtmtag_attrs(chtmtag, &b);
+    bson_finish(&b);
+
+Logging::
+
+    z attributes &b
+
+Post::
+
+    bson_destroy(&b);
 
 
 CWindow_AddTimeoutCode
