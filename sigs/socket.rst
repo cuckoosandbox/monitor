@@ -648,6 +648,7 @@ ConnectEx
 
 Signature::
 
+    * Prune: resolve
     * Return value: BOOL
 
 Parameters::
@@ -681,6 +682,7 @@ TransmitFile
 
 Signature::
 
+    * Prune: resolve
     * Return value: BOOL
 
 Parameters::

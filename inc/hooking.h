@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define RETADDRCNT 64
 
+#define HOOK_PRUNE_RESOLVERR 1
+
 typedef struct _hook_t {
     // Library and function name.
     const char *library;
@@ -38,6 +40,10 @@ typedef struct _hook_t {
 
     // Is this a "special" hook?
     int special;
+
+    // Various flags on limiting the amount of non-critical errors shown
+    // related to API hooks.
+    int report;
 
     // Special address resolve callback for this function hook. It is called
     // in order to resolve the address of the function to be hooked.

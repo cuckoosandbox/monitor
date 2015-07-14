@@ -612,8 +612,10 @@ int hook(hook_t *h)
     if(h->addr == NULL) {
         h->addr = (uint8_t *) GetProcAddress(module_handle, h->funcname);
         if(h->addr == NULL) {
-            pipe("DEBUG:Error resolving function %z!%z.",
-                h->library, h->funcname);
+            if((h->report & HOOK_PRUNE_RESOLVERR) != HOOK_PRUNE_RESOLVERR) {
+                pipe("DEBUG:Error resolving function %z!%z.",
+                    h->library, h->funcname);
+            }
             return -1;
         }
     }
