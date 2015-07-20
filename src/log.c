@@ -593,22 +593,32 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
         NULL,
     };
 
-    uintptr_t regvalues[] = {
-        ctx->Rax, ctx->Rcx, ctx->Rdx, ctx->Rbx,
-        ctx->Rsp, ctx->Rbp, ctx->Rsi, ctx->Rdi,
-        ctx->R8,  ctx->R9,  ctx->R10, ctx->R11,
-        ctx->R12, ctx->R13, ctx->R14, ctx->R15,
-    };
+    uintptr_t regvalues[16] = {};
+
+    if(ctx != NULL) {
+        uintptr_t registers[] = {
+            ctx->Rax, ctx->Rcx, ctx->Rdx, ctx->Rbx,
+            ctx->Rsp, ctx->Rbp, ctx->Rsi, ctx->Rdi,
+            ctx->R8,  ctx->R9,  ctx->R10, ctx->R11,
+            ctx->R12, ctx->R13, ctx->R14, ctx->R15,
+        };
+        memcpy(regvalues, registers, sizeof(registers));
+    }
 #else
     static const char *regnames[] = {
         "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi",
         NULL,
     };
 
-    uintptr_t regvalues[] = {
-        ctx->Eax, ctx->Ecx, ctx->Edx, ctx->Ebx,
-        ctx->Esp, ctx->Ebp, ctx->Esi, ctx->Edi,
-    };
+    uintptr_t regvalues[8] = {};
+
+    if(regvalues != NULL) {
+        uintptr_t registers[] = {
+            ctx->Eax, ctx->Ecx, ctx->Edx, ctx->Ebx,
+            ctx->Esp, ctx->Ebp, ctx->Esi, ctx->Edi,
+        };
+        memcpy(regvalues, registers, sizeof(registers));
+    }
 #endif
 
     for (uint32_t idx = 0; regnames[idx] != NULL; idx++) {
