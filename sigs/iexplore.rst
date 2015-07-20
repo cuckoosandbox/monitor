@@ -2,6 +2,9 @@ Signature::
 
     * Callback: addr
     * Calling convention: WINAPI
+    * Category: iexplore
+    * Logging: always
+    * Special: true
 
 
 COleScript_Compile
@@ -11,7 +14,6 @@ Signature::
 
     * Is success: ret >= 0
     * Library: jscript
-    * Special: true
     * Return value: int
 
 Parameters::
@@ -33,7 +35,6 @@ Signature::
 
     * Is success: 1
     * Library: mshtml
-    * Special: true
     * Return value: int
 
 Parameters::
@@ -77,7 +78,6 @@ Signature::
 
     * Is success: 1
     * Library: mshtml
-    * Special: true
     * Return value: int
 
 Parameters::
@@ -93,7 +93,6 @@ CIFrameElement_CreateElement
 Signature::
 
     * Library: mshtml
-    * Special: true
     * Return value: HRESULT
 
 Parameters::
@@ -125,7 +124,6 @@ CWindow_AddTimeoutCode
 Signature::
 
     * Library: mshtml
-    * Special: true
     * Return value: HRESULT
 
 Parameters::
@@ -157,7 +155,6 @@ Signature::
 
     * Library: mshtml
     * Return value: HRESULT
-    * Special: true
 
 Parameters::
 
@@ -172,7 +169,6 @@ Signature::
 
     * Library: mshtml
     * Return value: HRESULT
-    * Special: true
 
 Parameters::
 
