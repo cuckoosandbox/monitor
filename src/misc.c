@@ -128,7 +128,7 @@ wchar_t *get_unicode_buffer()
             ptrs[idx] =
                 virtual_alloc_rw(NULL, (MAX_PATH_W+1) * sizeof(wchar_t));
             if(ptrs[idx] == NULL) {
-                pipe("CRITICAL:Error allocating memory for unicode buffer");
+                pipe("WARNING:Error allocating memory for unicode buffer");
             }
         }
 
@@ -1013,13 +1013,21 @@ int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length)
     RUNTIME_FUNCTION *runtime_function; void *handler_data; CONTEXT _ctx;
     KNONVOLATILE_CONTEXT_POINTERS nv_ctx_ptrs;
 
+    uintptr_t top = readtls(0x08) - 2 * sizeof(uintptr_t);
+    uintptr_t bottom = readtls(0x10);
+
     if(ctx == NULL) {
         ctx = &_ctx;
         RtlCaptureContext(&_ctx);
     }
 
-    while (count < length && ctx->Rip != 0) {
+    while (count < length && ctx->Rip != 0 &&
+            ctx->Rsp >= bottom && ctx->Rsp < top) {
+
         addrs[count++] = ctx->Rip;
+        if(range_is_readable((uint8_t *) ctx->Rip, sizeof(ctx->Rip)) == 0) {
+            continue;
+        }
 
         // This function calls NtQueryVirtualMemory() under the hood. If any
         // stack overflows occur due to recursion issues, this is probably

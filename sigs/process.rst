@@ -275,7 +275,7 @@ Parameters::
 Logging::
 
     u process_name lppe->szExeFile
-    i process_id lppe->th32ProcessID
+    i process_identifier lppe->th32ProcessID
 
 
 Process32NextW
@@ -294,7 +294,7 @@ Parameters::
 Logging::
 
     u process_name lppe->szExeFile
-    i process_id lppe->th32ProcessID
+    i process_identifier lppe->th32ProcessID
 
 
 Module32FirstW

@@ -3,7 +3,7 @@ CC64 = x86_64-w64-mingw32-gcc -m64
 AR = ar
 CFLAGS = -Wall -Wextra -std=c99 -static -Wno-missing-field-initializers \
 		 -I inc/ -I objects/code/ -I src/bson/
-LDFLAGS = -lws2_32 -lshlwapi -lole32
+LDFLAGS = -lshlwapi
 MAKEFLAGS = -j8
 
 SIGS = $(wildcard sigs/*.rst)
