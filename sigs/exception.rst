@@ -95,3 +95,50 @@ Parameters::
 Interesting::
 
     p VectoredHandlerHandle
+
+
+RtlDispatchException
+====================
+
+Signature::
+
+    * Callback: addr
+    * Is success: 1
+    * Library: ntdll
+    * Logging: no
+    * Return value: void *
+    * Special: true
+
+Parameters::
+
+    *  EXCEPTION_RECORD *ExceptionRecord
+    *  CONTEXT *Context
+
+Pre::
+
+    uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
+
+    count = stacktrace(Context, addrs, RETADDRCNT);
+    log_exception(Context, ExceptionRecord, addrs, count);
+
+
+RtlRaiseException
+=================
+
+Signature::
+
+    * Is success: 1
+    * Library: ntdll
+    * Return value: void *
+    * Special: true
+
+Parameters::
+
+    * EXCEPTION_RECORD *ExceptionRecord
+
+Pre::
+
+    uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
+
+    count = stacktrace(NULL, addrs, RETADDRCNT);
+    log_exception(NULL, ExceptionRecord, addrs, count);
