@@ -18,8 +18,43 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <windows.h>
-#include "ntapi.h"
 #include "config.h"
+#include "hooking.h"
+#include "ntapi.h"
+
+static uint32_t _parse_mode(const char *mode)
+{
+    uint32_t ret = HOOK_MODE_ALL;
+    while (*mode != 0) {
+        if(*mode == ' ' || *mode == ',') {
+            mode++;
+            continue;
+        }
+
+        if(strnicmp(mode, "dumptls", 7) == 0) {
+            ret |= HOOK_MODE_DUMPTLS;
+            mode += 7;
+            continue;
+        }
+
+        if(strnicmp(mode, "iexplore", 8) == 0) {
+            ret |= HOOK_MODE_IEXPLORE;
+            mode += 8;
+            continue;
+        }
+
+        if(strnicmp(mode, "exploit", 7) == 0) {
+            ret |= HOOK_MODE_EXPLOIT;
+            mode += 7;
+            continue;
+        }
+
+        // Report.. find a more proper way? At this point the pipe has not
+        // yet been initialized, so.
+        MessageBox(NULL, "Invalid Monitor Mode", mode, 0);
+    }
+    return ret;
+}
 
 void config_read(config_t *cfg)
 {
@@ -78,6 +113,9 @@ void config_read(config_t *cfg)
         }
         else if(strcmp(key, "track") == 0) {
             cfg->track = value[0] == '1';
+        }
+        else if(strcmp(key, "mode") == 0) {
+            cfg->mode = _parse_mode(value);
         }
     }
     fclose(fp);

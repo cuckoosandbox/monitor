@@ -27,6 +27,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define HOOK_PRUNE_RESOLVERR 1
 
+#define HOOK_MODE_ALL      0
+#define HOOK_MODE_DUMPTLS  1
+#define HOOK_MODE_IEXPLORE 2
+#define HOOK_MODE_EXPLOIT  4
+
 typedef struct _hook_t {
     // Library and function name.
     const char *library;
@@ -44,6 +49,9 @@ typedef struct _hook_t {
     // Various flags on limiting the amount of non-critical errors shown
     // related to API hooks.
     int report;
+
+    // Mode indicating in which monitor modes this hook should be enabled.
+    int mode;
 
     // Special address resolve callback for this function hook. It is called
     // in order to resolve the address of the function to be hooked.

@@ -353,6 +353,13 @@ class SignatureProcessor(object):
             else:
                 row['signature']['callback'] = []
 
+            # Convert the modes to their macro representatives.
+            if 'mode' in row['signature']:
+                modes = []
+                for mode in row['signature']['mode'].split():
+                    modes.append('HOOK_MODE_%s' % mode.upper())
+                row['signature']['mode'] = '|'.join(modes)
+
             # Check the types of each parameter.
             ensure = {}
             for arg in row.get('parameters', []):

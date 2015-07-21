@@ -47,6 +47,9 @@ typedef struct _config_t {
 
     // Whether this pid should be monitored for in the analyzer.
     int track;
+
+    // Monitoring mode.
+    int mode;
 } config_t;
 
 void config_read(config_t *cfg);

@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "unhook.h"
 
 static int g_track;
+static uint32_t g_mode;
 
 void monitor_init(HMODULE module_handle)
 {
@@ -77,6 +78,7 @@ void monitor_init(HMODULE module_handle)
     destroy_pe_header(module_handle);
 
     g_track = cfg.track;
+    g_mode = cfg.mode;
 }
 
 void monitor_hook(const char *library)
@@ -89,10 +91,17 @@ void monitor_hook(const char *library)
             continue;
         }
 
+        // We only hook this function if the monitor mode is "hook everything"
+        // or if the monitor mode matches the mode of this hook.
+        if(g_mode != HOOK_MODE_ALL && (g_mode & h->mode) == 0) {
+            continue;
+        }
+
         // Return value 1 indicates to retry the hook. This is important for
         // delay-loaded function forwarders as the delay-loaded DLL may
         // already have been loaded. In that case we want to hook the function
-        // forwarder right away.
+        // forwarder right away. (Note that the library member of the hook
+        // object is updated in the case of retrying).
         while (hook(h) == 1);
     }
 }

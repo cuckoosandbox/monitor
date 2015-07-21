@@ -449,6 +449,7 @@ Signature::
 
     * Callback: addr
     * Library: ncrypt
+    * Mode: dumptls
     * Return value: NTSTATUS
 
 Parameters::
@@ -492,6 +493,7 @@ Signature::
 
     * Callback: addr
     * Library: ncrypt
+    * Mode: dumptls
     * Return value: NTSTATUS
 
 Parameters::

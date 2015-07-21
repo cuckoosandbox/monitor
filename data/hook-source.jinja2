@@ -272,8 +272,9 @@ static hook_t g_hooks[] = {
         "{{ hook.apiname }}",
         (FARPROC) New_{{ hook.signature.library }}_{{ hook.apiname }},
         (FARPROC *) &Old_{{ hook.signature.library }}_{{ hook.apiname }},
-        {{ hook.signature.special.__int__() }},
+        .special = {{ hook.signature.special.__int__() }},
         .report = {% if 'resolve' in hook.signature.prune %}HOOK_PRUNE_RESOLVERR{% else %}0{% endif %},
+        .mode = {% if 'mode' in hook.signature %}{{ hook.signature.mode }}{% else %}HOOK_MODE_ALL{% endif %},
         {% if 'init' in hook.signature.callback %}.initcb = &hook_initcb_{{ hook.apiname }},{% endif %}
         {% if 'addr' in hook.signature.callback %}.addrcb = &hook_addrcb_{{ hook.apiname }},{% endif %}
     },
