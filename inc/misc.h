@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MONITOR_MISC_H
 
 #include <windows.h>
+#include "bson.h"
 #include "ntapi.h"
 
 int misc_init(HMODULE module_handle, const char *shutdown_mutex);

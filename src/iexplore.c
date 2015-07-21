@@ -20,9 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <windows.h>
 #include "assembly.h"
+#include "bson.h"
 #include "hooking.h"
+#include "memory.h"
 #include "pipe.h"
 #include "symbol.h"
+#include "utf8.h"
 
 static uint8_t *memmem(
     uint8_t *haystack, uint32_t haylength,
@@ -407,6 +410,8 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
             construct_code = addr + *(int32_t *)(addr + 1) + 5;
             break;
         }
+#else
+        (void) state;
 #endif
 
         addr += lde(addr);
