@@ -1327,3 +1327,13 @@ uint32_t our_strlen(const char *s)
     }
     return ret;
 }
+
+void hexencode(char *dst, const uint8_t *src, uint32_t length)
+{
+    static const char charset[] = "0123456789abcdef";
+    for (; length != 0; src++, length--) {
+        *dst++ = charset[*src >> 4];
+        *dst++ = charset[*src & 15];
+    }
+    *dst = 0;
+}

@@ -458,7 +458,7 @@ Parameters::
     *  uintptr_t unk2
     *  uint8_t *buf1
     *  uintptr_t buf1_length
-    *  const char *type
+    ** const char *type
     *  uint32_t type_length
     *  uint8_t *buf2
     *  uint32_t buf2_length
@@ -467,23 +467,32 @@ Parameters::
 
 Middle::
 
-    uintptr_t secret_length = 0, random_length = 0;
-    uint8_t *secret = NULL, *client_random = NULL, *server_random = NULL;
+    uintptr_t master_secret_length = 0, random_length = 0;
+    uint8_t *master_secret = NULL, *client_random = NULL;
+    uint8_t *server_random = NULL;
 
-    if(type_length == 13 && strcmp(type, "key expansion") == 0) {
-        secret_length = buf1_length;
-        secret = buf1;
+    char server_random_repr[32*2+1] = {}, client_random_repr[32*2+1] = {};
+    char master_secret_repr[48*2+1] = {};
+
+    if(type_length == 13 && strcmp(type, "key expansion") == 0 &&
+            buf2_length == 64) {
+        master_secret_length = buf1_length;
+        master_secret = buf1;
 
         random_length = 32;
         server_random = buf2;
         client_random = buf2 + random_length;
+
+        hexencode(server_random_repr, server_random, random_length);
+        hexencode(client_random_repr, client_random, random_length);
+        hexencode(master_secret_repr, master_secret, master_secret_length);
     }
 
 Logging::
 
-    b client_random random_length, client_random
-    b server_random random_length, server_random
-    b master_secret secret_length, secret
+    s client_random client_random_repr
+    s server_random server_random_repr
+    s master_secret master_secret_repr
 
 
 Ssl3GenerateKeyMaterial
@@ -512,8 +521,17 @@ Middle::
     uint8_t *server_random = seed;
     uint8_t *client_random = seed + random_length;
 
+    char server_random_repr[32*2+1] = {}, client_random_repr[32*2+1] = {};
+    char master_secret_repr[48*2+1] = {};
+
+    if(seed_length == 64 && secret_length == 48) {
+        hexencode(server_random_repr, server_random, random_length);
+        hexencode(client_random_repr, client_random, random_length);
+        hexencode(master_secret_repr, secret, secret_length);
+    }
+
 Logging::
 
-    b client_random random_length, client_random
-    b server_random random_length, server_random
-    b master_secret secret_length, secret
+    s client_random client_random_repr
+    s server_random server_random_repr
+    s master_secret master_secret_repr
