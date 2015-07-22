@@ -242,7 +242,8 @@ uint32_t NOINLINE WINAPI create_process_worker(create_process_t *s)
 }
 
 uint32_t start_app(uint32_t from, const wchar_t *path,
-    const wchar_t *arguments, const wchar_t *curdir, uint32_t *tid)
+    const wchar_t *arguments, const wchar_t *curdir, uint32_t *tid,
+    int show_window)
 {
     create_process_t s;
     memset(&s, 0, sizeof(s));
@@ -251,7 +252,7 @@ uint32_t start_app(uint32_t from, const wchar_t *path,
 
     // Emulate explorer.exe's startupinfo flags behavior.
     s.si.dwFlags = STARTF_USESHOWWINDOW;
-    s.si.wShowWindow = SW_SHOWNORMAL;
+    s.si.wShowWindow = show_window;
 
     s.create_process_w = resolve_symbol("kernel32", "CreateProcessW");
     s.get_last_error = resolve_symbol("kernel32", "GetLastError");
@@ -473,6 +474,7 @@ int main()
         printf("  --args <args>          Command-line arguments\n");
         printf("                         Excluding the application path!\n");
         printf("  --curdir <dirpath>     Current working directory\n");
+        printf("  --maximize             Maximize the newly created GUI\n");
         printf("  --pid <pid>            Process identifier to inject\n");
         printf("  --process-name <name>  Process name to inject\n");
         printf("  --tid <tid>            Thread identifier to inject\n");
@@ -491,6 +493,7 @@ int main()
     const wchar_t *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
     const wchar_t *curdir = NULL, *process_name = NULL;
     uint32_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
+    uint32_t show_window = SW_SHOWNORMAL;
 
     for (int idx = 1; idx < argc; idx++) {
         if(wcscmp(argv[idx], L"--crt") == 0) {
@@ -525,6 +528,11 @@ int main()
 
         if(wcscmp(argv[idx], L"--curdir") == 0) {
             curdir = argv[++idx];
+            continue;
+        }
+
+        if(wcscmp(argv[idx], L"--maximize") == 0) {
+            show_window = SW_MAXIMIZE;
             continue;
         }
 
@@ -687,7 +695,7 @@ int main()
             return 1;
         }
 
-        pid = start_app(from, filepath, arguments, curdir, &tid);
+        pid = start_app(from, filepath, arguments, curdir, &tid, show_window);
     }
 
     if(pid == 0 && process_name != NULL) {
@@ -729,7 +737,8 @@ int main()
         wchar_t buf[1024];
         wsprintfW(buf, L"\"%s\" -p %d", dbg_path, pid);
 
-        start_app(GetCurrentProcessId(), dbg_path, buf, NULL, NULL);
+        start_app(GetCurrentProcessId(), dbg_path, buf,
+            NULL, NULL, SW_SHOWNORMAL);
 
         Sleep(5000);
     }
