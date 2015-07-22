@@ -31,6 +31,11 @@ static uint32_t _parse_mode(const char *mode)
             continue;
         }
 
+        if(*mode >= '0' && *mode <= '9') {
+            ret = strtoul(mode, NULL, 10);
+            break;
+        }
+
         if(strnicmp(mode, "dumptls", 7) == 0) {
             ret |= HOOK_MODE_DUMPTLS;
             mode += 7;

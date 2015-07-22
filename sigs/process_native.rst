@@ -138,8 +138,10 @@ Logging::
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        pipe("PROCESS2:%d,%d", pid_from_process_handle(*ProcessHandle),
-            tid_from_thread_handle(*ThreadHandle));
+        pipe("PROCESS2:%d,%d,%d",
+            pid_from_process_handle(*ProcessHandle),
+            tid_from_thread_handle(*ThreadHandle),
+            g_monitor_mode);
         sleep_skip_disable();
     }
 
@@ -183,9 +185,10 @@ Logging::
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        pipe("PROCESS2:%d,%d",
+        pipe("PROCESS2:%d,%d,%d",
             pid_from_process_handle(ProcessInformation->ProcessHandle),
-            tid_from_thread_handle(ProcessInformation->ThreadHandle));
+            tid_from_thread_handle(ProcessInformation->ThreadHandle),
+            g_monitor_mode);
         sleep_skip_disable();
     }
 

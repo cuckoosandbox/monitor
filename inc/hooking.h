@@ -121,4 +121,6 @@ uint8_t *hook_addrcb_PRF(
 uint8_t *hook_addrcb_Ssl3GenerateKeyMaterial(
     hook_t *h, uint8_t *module_address, uint32_t module_size);
 
+int iexplore_should_propagate_monitor_mode(const wchar_t *cmdline);
+
 #endif

@@ -441,7 +441,7 @@ Pre::
 
     // TODO Will this still happen before the notify message is executed?
     tid = GetWindowThreadProcessId(hWnd, &pid);
-    pipe("PROCESS2:%d,%d", pid, tid);
+    pipe("PROCESS2:%d,%d,%d", pid, tid, HOOK_MODE_ALL);
 
 Logging::
 
@@ -469,7 +469,7 @@ Pre::
 
     // TODO Will this still happen before the notify message is executed?
     tid = GetWindowThreadProcessId(hWnd, &pid);
-    pipe("PROCESS2:%d,%d", pid, tid);
+    pipe("PROCESS2:%d,%d,%d", pid, tid, HOOK_MODE_ALL);
 
 Logging::
 

@@ -19,9 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MONITOR_MONITOR_H
 #define MONITOR_MONITOR_H
 
+#include <stdint.h>
 #include <windows.h>
 
 void monitor_init(HMODULE module_handle);
 void monitor_hook(const char *library);
+
+extern uint32_t g_monitor_mode;
 
 #endif

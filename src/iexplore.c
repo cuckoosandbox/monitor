@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 static uint8_t *memmem(
     uint8_t *haystack, uint32_t haylength,
-    void *needle, uint32_t needlength,
+    const void *needle, uint32_t needlength,
     uint32_t *idx)
 {
     uint32_t _idx = 0;
@@ -44,6 +44,13 @@ static uint8_t *memmem(
         }
     }
     return NULL;
+}
+
+static uint8_t *memmemW(const void *haystack, uint32_t haylength,
+    const wchar_t *needle, uint32_t *idx)
+{
+    return memmem((uint8_t *) haystack, haylength, needle,
+        lstrlenW(needle) * sizeof(wchar_t), idx);
 }
 
 #if __x86_64__
@@ -670,4 +677,26 @@ void chtmtag_attrs(const void *chtmtag, bson *b)
 
         ptr += 40 / sizeof(uintptr_t);
     }
+}
+
+int iexplore_should_propagate_monitor_mode(const wchar_t *cmdline)
+{
+    if(cmdline == NULL) {
+        return 0;
+    }
+
+    uint32_t length = lstrlenW(cmdline) * sizeof(wchar_t);
+
+    // If the following few strings are present in the command line arguments
+    // to the CreateProcess() call then we're going to assume we're looking
+    // at a legitimate Internet Explorer process and propagate the monitor
+    // mode.
+    if((g_monitor_mode & HOOK_MODE_IEXPLORE) == HOOK_MODE_IEXPLORE &&
+            memmemW(cmdline, length, L"iexplore.exe", NULL) != NULL &&
+            memmemW(cmdline, length, L"SCODEF:", NULL) != NULL &&
+            memmemW(cmdline, length, L"CREDAT:", NULL) != NULL) {
+        return 1;
+    }
+
+    return 0;
 }

@@ -66,9 +66,18 @@ Logging::
 Post::
 
     if(ret != FALSE) {
-        pipe("PROCESS2:%d,%d",
+        uint32_t mode = HOOK_MODE_ALL;
+
+        // In case it's required propagate the Internet Explorer monitoring
+        // mode.
+        if(iexplore_should_propagate_monitor_mode(lpCommandLine) != 0) {
+            mode |= g_monitor_mode & (HOOK_MODE_IEXPLORE|HOOK_MODE_EXPLOIT);
+        }
+
+        pipe("PROCESS2:%d,%d,%d",
             lpProcessInformation->dwProcessId,
-            lpProcessInformation->dwThreadId);
+            lpProcessInformation->dwThreadId,
+            mode);
 
         // If the CREATE_SUSPENDED flag was not set then we have to resume
         // the main thread ourselves.
