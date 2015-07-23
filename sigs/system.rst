@@ -74,6 +74,7 @@ Signature::
 
     * Callback: init
     * Library: ntdll
+    * Mode: iexplore
     * Return value: NTSTATUS
     * Special: true
 

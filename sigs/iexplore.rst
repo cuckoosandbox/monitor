@@ -4,6 +4,7 @@ Signature::
     * Calling convention: WINAPI
     * Category: iexplore
     * Logging: always
+    * Mode: iexplore
     * Special: true
 
 

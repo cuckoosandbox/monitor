@@ -10,6 +10,7 @@ CreateProcessInternalW
 Signature::
 
     * Library: kernel32
+    * Mode: iexplore
     * Return value: BOOL
     * Special: true
 
