@@ -22,9 +22,9 @@ Parameters::
     *  void *this
     *  void *script_body
     ** const wchar_t *script
-    *  uint32_t unk1
-    *  uint32_t unk2
-    *  uint32_t unk3
+    *  uintptr_t unk1
+    *  uintptr_t unk2
+    *  uintptr_t unk3
     ** const wchar_t *type
     *  void *exception
 
