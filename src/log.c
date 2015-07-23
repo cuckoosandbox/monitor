@@ -52,12 +52,14 @@ static void log_raw(const char *buf, size_t length);
 
 static int open_handles()
 {
-    // TODO Use NtCreateFile instead of CreateFileW.
-    g_log_handle = CreateFileW(g_log_pipename, GENERIC_WRITE,
-        FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_WRITE_THROUGH, NULL);
-    if(g_log_handle == INVALID_HANDLE_VALUE) {
-        return -1;
-    }
+    do {
+        // TODO Use NtCreateFile instead of CreateFileW.
+        g_log_handle = CreateFileW(g_log_pipename, GENERIC_WRITE,
+            FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
+            FILE_FLAG_WRITE_THROUGH, NULL);
+
+        sleep(50);
+    } while (g_log_handle == INVALID_HANDLE_VALUE);
 
     // The process identifier.
     uint32_t process_identifier = get_current_process_id();

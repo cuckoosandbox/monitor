@@ -138,8 +138,7 @@ static void open_pipe_handle()
             FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, NULL);
 
         sleep(50);
-    }
-    while (g_pipe_handle == INVALID_HANDLE_VALUE);
+    } while (g_pipe_handle == INVALID_HANDLE_VALUE);
 
     uint32_t pipe_mode = PIPE_READMODE_MESSAGE | PIPE_WAIT;
     set_named_pipe_handle_mode(g_pipe_handle, pipe_mode);
