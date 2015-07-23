@@ -1,6 +1,6 @@
 CC32 = i686-w64-mingw32-gcc -m32
 CC64 = x86_64-w64-mingw32-gcc -m64
-CFLAGS = -Wall -Wextra -O0 -std=c99 -static
+CFLAGS = -Wall -Wextra -O2 -std=c99 -static -s -mwindows
 LDFLAGS = -lshlwapi
 
 UTILSRC = $(wildcard *.c)
