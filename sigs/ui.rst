@@ -160,6 +160,52 @@ Interesting::
     i language_identifier
 
 
+DrawTextExA
+===========
+
+Parameters::
+
+    *  HDC hdc
+    *  LPSTR lpchText
+    *  int cchText
+    *  LPRECT lprc
+    *  UINT dwDTFormat
+    *  LPDRAWTEXTPARAMS lpDTParams
+
+Middle::
+
+    if(cchText == -1) {
+        cchText = strlen(lpchText);
+    }
+
+Logging::
+
+    S string cchText, lpchText
+
+
+DrawTextExW
+===========
+
+Parameters::
+
+    *  HDC hdc
+    *  LPWSTR lpchText
+    *  int cchText
+    *  LPRECT lprc
+    *  UINT dwDTFormat
+    *  LPDRAWTEXTPARAMS lpDTParams
+
+Middle::
+
+    if(cchText == -1) {
+        cchText = lstrlenW(lpchText);
+    }
+
+Logging::
+
+    U string cchText, lpchText
+
+
 _CreateWindowExA
 ================
 
