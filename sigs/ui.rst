@@ -206,6 +206,50 @@ Logging::
     U string cchText, lpchText
 
 
+LoadStringA
+===========
+
+Parameters::
+
+    ** HINSTANCE hInstance module_handle
+    ** UINT uID id
+    *  LPSTR lpBuffer
+    *  int nBufferMax
+
+Middle::
+
+    const char *buf = lpBuffer;
+    if(nBufferMax == 0 && lpBuffer != NULL) {
+        buf = *(const char **) lpBuffer;
+    }
+
+Logging::
+
+    s string buf
+
+
+LoadStringW
+===========
+
+Parameters::
+
+    ** HINSTANCE hInstance module_handle
+    ** UINT uID id
+    *  LPWSTR lpBuffer
+    *  int nBufferMax
+
+Middle::
+
+    const wchar_t *buf = lpBuffer;
+    if(nBufferMax == 0 && lpBuffer != NULL) {
+        buf = *(const wchar_t **) lpBuffer;
+    }
+
+Logging::
+
+    u string buf
+
+
 _CreateWindowExA
 ================
 
