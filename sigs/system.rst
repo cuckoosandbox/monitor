@@ -54,6 +54,19 @@ Interesting::
     i thread_identifier
 
 
+OutputDebugStringA
+==================
+
+Signature::
+
+    * Library: kernel32
+    * Return value: void
+
+Parameters::
+
+    ** LPSTR lpOutputString string
+
+
 UnhookWindowsHookEx
 ===================
 
