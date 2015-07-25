@@ -48,6 +48,9 @@ void (*g_hook_library)(const char *library);
 static wchar_t g_aliases[64][2][MAX_PATH];
 static uint32_t g_alias_index;
 
+uint32_t g_monitor_track = 1;
+uint32_t g_monitor_mode = HOOK_MODE_ALL;
+
 #define ADD_ALIAS(before, after) \
     if(g_alias_index == 64) { \
         pipe("CRITICAL:Too many aliases!"); \
@@ -98,6 +101,12 @@ void misc_set_hook_library(void (*monitor_hook)(const char *library))
 void hook_library(const char *library)
 {
     g_hook_library(library);
+}
+
+void misc_set_monitor_options(uint32_t track, uint32_t mode)
+{
+    g_monitor_track = track;
+    g_monitor_mode = mode;
 }
 
 // Maximum number of buffers that we reuse.

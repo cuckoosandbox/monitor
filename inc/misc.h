@@ -30,6 +30,8 @@ int misc_init(HMODULE module_handle, const char *shutdown_mutex);
 void misc_set_hook_library(void (*monitor_hook)(const char *library));
 void hook_library(const char *library);
 
+void misc_set_monitor_options(uint32_t track, uint32_t mode);
+
 wchar_t *get_unicode_buffer();
 void free_unicode_buffer(wchar_t *ptr);
 
@@ -139,5 +141,8 @@ static inline uintptr_t get_ebp()
 }
 
 #endif
+
+extern uint32_t g_monitor_track;
+extern uint32_t g_monitor_mode;
 
 #endif

@@ -34,9 +34,6 @@ BSONOBJ64 = $(BSON:%.c=objects/x64/%.o)
 LIBCAPSTONE32 = src/capstone/capstone-x86.lib
 LIBCAPSTONE64 = src/capstone/capstone-x64.lib
 
-DLL32 = monitor-x86.dll
-DLL64 = monitor-x64.dll
-
 ifdef DEBUG
 	CFLAGS += -DDEBUG=1 -O0 -ggdb
 	RELMODE = debug
@@ -45,8 +42,8 @@ else
 	RELMODE = release
 endif
 
-all: dirs $(DLL32) $(DLL64)
-	+make -C utils/
+all: dirs bin/inject-x86.exe bin/inject-x64.exe bin/is32bit.exe \
+		bin/monitor-x86.dll bin/monitor-x64.dll
 
 dirs: | objects/
 
@@ -98,11 +95,20 @@ $(FLAGOBJ32): $(FLAGSRC) $(HEADER) Makefile
 $(FLAGOBJ64): $(FLAGSRC) $(HEADER) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS)
 
-$(DLL32): $(SRCOBJ32) $(HOOKOBJ32) $(FLAGOBJ32) $(BSONOBJ32) $(LIBCAPSTONE32)
-	$(CC32) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
+bin/monitor-x86.dll: $(SRCOBJ32) $(HOOKOBJ32) $(FLAGOBJ32) $(BSONOBJ32) $(LIBCAPSTONE32)
+	$(CC32) -shared -o $@ bin/monitor.c $^ $(CFLAGS) $(LDFLAGS)
 
-$(DLL64): $(SRCOBJ64) $(HOOKOBJ64) $(FLAGOBJ64) $(BSONOBJ64) $(LIBCAPSTONE64)
-	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
+bin/monitor-x64.dll: $(SRCOBJ64) $(HOOKOBJ64) $(FLAGOBJ64) $(BSONOBJ64) $(LIBCAPSTONE64)
+	$(CC64) -shared -o $@ bin/monitor.c $^ $(CFLAGS) $(LDFLAGS)
+
+bin/inject-x86.exe: bin/inject.c src/assembly.c
+	$(CC32) -o $@ $^ $(CFLAGS) $(LDFLAGS) -I inc
+
+bin/inject-x64.exe: bin/inject.c src/assembly.c
+	$(CC64) -o $@ $^ $(CFLAGS) $(LDFLAGS) -I inc
+
+bin/is32bit.exe: bin/is32bit.c
+	$(CC32) -o $@ $^ $(CFLAGS)
 
 clean:
 	rm -rf objects/ $(DLL32) $(DLL64)

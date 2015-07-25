@@ -32,9 +32,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "symbol.h"
 #include "unhook.h"
 
-static int g_track;
-uint32_t g_monitor_mode;
-
 void monitor_init(HMODULE module_handle)
 {
     // Sends crashes to the process rather than showing error popup boxes etc.
@@ -77,8 +74,7 @@ void monitor_init(HMODULE module_handle)
     // the image size, EAT pointers, etc while the PE header is still intact.
     destroy_pe_header(module_handle);
 
-    g_track = cfg.track;
-    g_monitor_mode = cfg.mode;
+    misc_set_monitor_options(cfg.track, cfg.mode);
 }
 
 void monitor_hook(const char *library)
@@ -116,7 +112,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
         if(is_ignored_process() == 0) {
             monitor_init(hModule);
             monitor_hook(NULL);
-            pipe("LOADED:%d,%d", get_current_process_id(), g_track);
+            pipe("LOADED:%d,%d", get_current_process_id(), g_monitor_track);
         }
         break;
     }
