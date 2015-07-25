@@ -116,10 +116,11 @@ Parameters::
 
 Pre::
 
-    uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
+    // uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
+    // count = stacktrace(Context, addrs, RETADDRCNT);
+    // log_exception(Context, ExceptionRecord, addrs, count);
 
-    count = stacktrace(Context, addrs, RETADDRCNT);
-    log_exception(Context, ExceptionRecord, addrs, count);
+    log_exception(Context, ExceptionRecord, NULL, 0);
 
 
 RtlRaiseException
@@ -129,6 +130,7 @@ Signature::
 
     * Is success: 1
     * Library: ntdll
+    * Logging: no
     * Return value: void *
     * Special: true
 
@@ -138,7 +140,34 @@ Parameters::
 
 Pre::
 
-    uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
+    // uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
+    // count = stacktrace(NULL, addrs, RETADDRCNT);
+    // log_exception(NULL, ExceptionRecord, addrs, count);
 
-    count = stacktrace(NULL, addrs, RETADDRCNT);
-    log_exception(NULL, ExceptionRecord, addrs, count);
+    log_exception(NULL, ExceptionRecord, NULL, 0);
+
+
+_NtRaiseException
+=================
+
+Signature::
+
+    * Is success: 1
+    * Library: ntdll
+    * Logging: no
+    * Return value: NTSTATUS
+    * Special: true
+
+Parameters::
+
+    * EXCEPTION_RECORD *ExceptionRecord
+    * CONTEXT *Context
+    * BOOLEAN HandleException
+
+Pre::
+
+    // uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
+    // count = stacktrace(NULL, addrs, RETADDRCNT);
+    // log_exception(Context, ExceptionRecord, addrs, count);
+
+    log_exception(Context, ExceptionRecord, NULL, 0);
