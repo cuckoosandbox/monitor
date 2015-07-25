@@ -614,7 +614,7 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
 
     uintptr_t regvalues[8] = {};
 
-    if(regvalues != NULL) {
+    if(ctx != NULL) {
         uintptr_t registers[] = {
             ctx->Eax, ctx->Ecx, ctx->Edx, ctx->Ebx,
             ctx->Esp, ctx->Ebp, ctx->Esi, ctx->Edi,
@@ -629,8 +629,10 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
 
     char sym[512], number[20];
 
-    const uint8_t *exception_address =
-        (const uint8_t *) rec->ExceptionAddress;
+    const uint8_t *exception_address = NULL;
+    if(rec != NULL) {
+        exception_address = (const uint8_t *) rec->ExceptionAddress;
+    }
 
     our_snprintf(buf, sizeof(buf), "%p", exception_address);
     bson_append_string(&e, "address", buf);
@@ -643,7 +645,8 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
     symbol(exception_address, sym, sizeof(sym));
     bson_append_string(&e, "symbol", sym);
 
-    our_snprintf(buf, sizeof(buf), "%p", (uintptr_t) rec->ExceptionCode);
+    our_snprintf(buf, sizeof(buf), "%p",
+        rec != NULL ? (uintptr_t) rec->ExceptionCode : 0);
     bson_append_string(&e, "exception_code", buf);
 
     for (uint32_t idx = 0; idx < count; idx++) {
