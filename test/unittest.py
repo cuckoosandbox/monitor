@@ -38,10 +38,10 @@ DEFAULTS = {
     'CC86': 'i686-w64-mingw32-gcc',
     'CC64': 'x86_64-w64-mingw32-gcc',
     'CFLAGS': ['-std=c99', '-Wall', '-Werror', '-s'],
-    'INC': ['-I', '../inc', '-I', '../objects/code'],
+    'INC': ['-I', '../inc', '-I', '../objects/code', '-I', '../src/bson'],
     'OBJECTS': """pipe.o misc.o native.o memory.o utf8.o symbol.o ignore.o
         hooking.o unhook.o assembly.o log.o diffing.o sleep.o
-        flags.o hooks.o config.o
+        flags.o hooks.o config.o iexplore.o
         bson/bson.o bson/numbers.o bson/encoding.o
         ../src/capstone/capstone-%(arch)s.lib""".split(),
     'LDFLAGS': ['-lws2_32', '-lshlwapi', '-lole32'],
