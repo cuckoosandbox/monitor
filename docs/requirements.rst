@@ -12,7 +12,7 @@ Required packages
 To quickly get started the following commands will help setup all
 requirements.
 
-.. code bash::
+.. code-block:: bash
 
     sudo apt-get install mingw-w64 python-pip nasm
     sudo pip install sphinx docutils
