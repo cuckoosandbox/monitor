@@ -17,18 +17,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import argparse
 import copy
 import os
 import shlex
-import subprocess
+import sys
+
+MODES = [
+    'winxp',
+    'win7',
+    'win7x64',
+]
 
 MULTIPLE = {
     'CC': False,
     'CFLAGS': True,
     'INC': True,
     'OBJECTS': True,
-    'SUBMIT': False,
     'OPTIONS': True,
     'MODES': True,
     'EXTENSION': False,
@@ -41,15 +45,16 @@ DEFAULTS = {
     'INC': ['-I', '../inc', '-I', '../objects/code', '-I', '../src/bson'],
     'OBJECTS': """pipe.o misc.o native.o memory.o utf8.o symbol.o ignore.o
         hooking.o unhook.o assembly.o log.o diffing.o sleep.o
-        flags.o hooks.o config.o iexplore.o
+        flags.o hooks.o config.o network.o iexplore.o
         bson/bson.o bson/numbers.o bson/encoding.o
         ../src/capstone/capstone-%(arch)s.lib""".split(),
     'LDFLAGS': ['-lws2_32', '-lshlwapi', '-lole32'],
-    'SUBMIT': '../../cuckoo/utils/submit.py',
     'OPTIONS': [],
     'MODES': ['winxp', 'win7', 'win7x64'],
     'EXTENSION': 'exe',
 }
+
+ALL = []
 
 class Dict(dict):
     def __init__(self, value):
@@ -90,53 +95,25 @@ def compile_file(fname, arch):
     output_exe = fname.replace('.c', '-%s.%s' % (arch, kw.EXTENSION))
 
     compiler = kw.CC86 if arch == 'x86' else kw.CC64
-    args = [compiler, '-o', output_exe, fname]
-    args += kw.CFLAGS + kw.INC + kw.OBJECTS + kw.LDFLAGS
-    subprocess.check_call(args)
-    return kw, output_exe
-
-def submit_file(kw, fname, tags=None):
-    args = [kw.SUBMIT, fname]
-
-    for row in kw.OPTIONS:
-        args += ['--options', row]
-
-    if tags:
-        args += ['--tags', tags]
-
-    subprocess.check_call(args)
-
-def process_file(fname, modes):
-    kw, outfile = compile_file(fname, 'x86')
-
-    if 'winxp' in modes and 'winxp' in kw.MODES:
-        submit_file(kw, outfile, tags='winxp')
-
-    if 'win7' in modes and 'win7' in kw.MODES:
-        submit_file(kw, outfile, tags='win7')
-
-    if 'win7x64' in modes and 'win7x64' in kw.MODES:
-        kw, outfile = compile_file(fname, 'x64')
-        submit_file(kw, outfile, tags='win7x64')
+    args = kw.CFLAGS + kw.INC + kw.OBJECTS + kw.LDFLAGS
+    ALL.append(output_exe)
+    return [
+        '%s: %s' % (output_exe, fname),
+        '\t%s -o %s %s %s' % (compiler, output_exe, fname, ' '.join(args)),
+        '',
+    ]
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--compile-only', action='store_true', help='Only compile')
-    parser.add_argument('-m', '--modes', type=str, default='winxp,win7,win7x64', help='Modes to process.')
-    args = parser.parse_args()
-
-    modes = []
-    for mode in args.modes.split(','):
-        if mode.strip():
-            modes.append(mode.strip())
-
     curdir = os.path.abspath(os.path.dirname(__file__))
+
+    lines = []
     for fname in os.listdir(curdir):
         if not fname.startswith('test-') or not fname.endswith('.c'):
             continue
 
-        if args.compile_only:
-            compile_file(fname, 'x86')
-            compile_file(fname, 'x64')
-        else:
-            process_file(fname, modes=modes)
+        lines += compile_file(fname, 'x86')
+        lines += compile_file(fname, 'x64')
+
+    with open(os.path.join(curdir, 'Makefile'), 'wb') as f:
+        f.write('all: %s\n\n' % ' '.join(ALL))
+        f.write('\n'.join(lines))
