@@ -54,6 +54,7 @@ int is_ignored_filepath(const wchar_t *fname)
     IGNORE_START(L"\\RPC Controls\\");
     IGNORE_START(L"\\Security\\");
     IGNORE_START(L"\\Window\\");
+    IGNORE_START(L"\\Sessions\\");
     return 0;
 }
 
