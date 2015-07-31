@@ -96,6 +96,10 @@ Post::
 NtCreateUserProcess
 ===================
 
+Signature::
+
+    * Prune: resolve
+
 Parameters::
 
     ** PHANDLE ProcessHandle process_handle

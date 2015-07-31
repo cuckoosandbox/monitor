@@ -440,6 +440,7 @@ GetFileInformationByHandleEx
 
 Signature::
 
+    * Prune: resolve
     * Return value: BOOL
 
 Parameters::
@@ -501,6 +502,7 @@ SetFileInformationByHandle
 
 Signature::
 
+    * Prune: resolve
     * Return value: BOOL
 
 Parameters::

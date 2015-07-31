@@ -49,6 +49,7 @@ Signature::
 
     * Is success: 1
     * Library: ntdll
+    * Prune: resolve
     * Return value: PVOID
 
 Parameters::
@@ -68,6 +69,7 @@ Signature::
 
     * Is success: 1
     * Library: ntdll
+    * Prune: resolve
     * Return value: ULONG
 
 Parameters::
@@ -86,6 +88,7 @@ Signature::
 
     * Is success: 1
     * Library: ntdll
+    * Prune: resolve
     * Return value: ULONG
 
 Parameters::

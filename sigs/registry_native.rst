@@ -84,6 +84,10 @@ Post::
 NtOpenKeyEx
 ===========
 
+Signature::
+
+    * Prune: resolve
+
 Parameters::
 
     ** PHANDLE KeyHandle key_handle
@@ -518,6 +522,10 @@ Post::
 
 NtLoadKeyEx
 ===========
+
+Signature::
+
+    * Prune: resolve
 
 Parameters::
 

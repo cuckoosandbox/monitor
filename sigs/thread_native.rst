@@ -43,6 +43,10 @@ Post::
 NtCreateThreadEx
 ================
 
+Signature::
+
+    * Prune: resolve
+
 Parameters::
 
     ** PHANDLE hThread thread_handle
