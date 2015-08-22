@@ -117,7 +117,7 @@ Interesting::
 
 Logging::
 
-    s class_name class_name
+    u class_name class_name
 
 
 MessageBoxTimeoutA

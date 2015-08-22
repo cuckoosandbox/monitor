@@ -241,3 +241,41 @@ Signature::
 Parameters::
 
     ** SC_HANDLE hService service_handle
+
+
+EnumServicesStatusA
+===================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** SC_HANDLE hSCManager service_handle
+    ** DWORD dwServiceType service_type
+    ** DWORD dwServiceState service_status
+    *  LPENUM_SERVICE_STATUS lpServices
+    *  DWORD cbBufSize
+    *  LPDWORD pcbBytesNeeded
+    *  LPDWORD lpServicesReturned
+    *  LPDWORD lpResumeHandle
+
+
+EnumServicesStatusW
+===================
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** SC_HANDLE hSCManager service_handle
+    ** DWORD dwServiceType service_type
+    ** DWORD dwServiceState service_status
+    *  LPENUM_SERVICE_STATUS lpServices
+    *  DWORD cbBufSize
+    *  LPDWORD pcbBytesNeeded
+    *  LPDWORD lpServicesReturned
+    *  LPDWORD lpResumeHandle
