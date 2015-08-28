@@ -450,6 +450,7 @@ Signature::
     * Callback: addr
     * Library: ncrypt
     * Mode: dumptls
+    * Prune: resolve
     * Return value: NTSTATUS
 
 Parameters::
@@ -503,6 +504,7 @@ Signature::
     * Callback: addr
     * Library: ncrypt
     * Mode: dumptls
+    * Prune: resolve
     * Return value: NTSTATUS
 
 Parameters::
