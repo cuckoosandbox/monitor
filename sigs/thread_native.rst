@@ -114,10 +114,55 @@ Parameters::
     ** HANDLE ThreadHandle thread_handle
     *  const CONTEXT *Context
 
+Middle::
+
+    bson registers;
+    bson_init(&registers);
+
+    // TODO What about WOW64 processes?
+    if(Context != NULL) {
+    #if __x86_64__
+        bson_append_long(&registers, "rax", Context->Rax);
+        bson_append_long(&registers, "rcx", Context->Rcx);
+        bson_append_long(&registers, "rdx", Context->Rdx);
+        bson_append_long(&registers, "rbx", Context->Rbx);
+        bson_append_long(&registers, "rsp", Context->Rsp);
+        bson_append_long(&registers, "rbp", Context->Rbp);
+        bson_append_long(&registers, "rsi", Context->Rsi);
+        bson_append_long(&registers, "rdi", Context->Rdi);
+        bson_append_long(&registers, "r8",  Context->R8);
+        bson_append_long(&registers, "r9",  Context->R9);
+        bson_append_long(&registers, "r10", Context->R10);
+        bson_append_long(&registers, "r11", Context->R11);
+        bson_append_long(&registers, "r12", Context->R12);
+        bson_append_long(&registers, "r13", Context->R13);
+        bson_append_long(&registers, "r14", Context->R14);
+        bson_append_long(&registers, "r15", Context->R15);
+        bson_append_long(&registers, "rip", Context->Rip);
+    #else
+        bson_append_int(&registers, "eax", Context->Eax);
+        bson_append_int(&registers, "ecx", Context->Ecx);
+        bson_append_int(&registers, "edx", Context->Edx);
+        bson_append_int(&registers, "ebx", Context->Ebx);
+        bson_append_int(&registers, "esp", Context->Esp);
+        bson_append_int(&registers, "ebp", Context->Ebp);
+        bson_append_int(&registers, "esi", Context->Esi);
+        bson_append_int(&registers, "edi", Context->Edi);
+        bson_append_int(&registers, "eip", Context->Eip);
+    #endif
+    }
+
+    bson_finish(&registers);
+
+Logging::
+
+    z registers &registers
+
 Post::
 
     pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
     sleep_skip_disable();
+    bson_destroy(&registers);
 
 
 NtSuspendThread
