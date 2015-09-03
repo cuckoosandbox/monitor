@@ -1,7 +1,7 @@
 Signature::
 
     * Calling convention: WINAPI
-    * Category: thread
+    * Category: process
     * Library: kernel32
 
 
