@@ -164,8 +164,12 @@ Signature::
 
 Parameters::
 
-    ** HMODULE hModule
-    ** HRSRC hResInfo
+    ** HMODULE hModule module_handle
+    ** HRSRC hResInfo resource_handle
+
+Logging::
+
+    p pointer ret
 
 
 SizeofResource
@@ -179,4 +183,8 @@ Signature::
 Parameters::
 
     ** HMODULE hModule module_handle
-    ** HRSRC hResInfo
+    ** HRSRC hResInfo resource_handle
+
+Logging::
+
+    i resource_size ret
