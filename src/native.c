@@ -53,6 +53,10 @@ static NTSTATUS (WINAPI *pNtProtectVirtualMemory)(HANDLE ProcessHandle,
     CONST VOID **BaseAddress, SIZE_T *NumberOfBytesToProtect,
     ULONG NewAccessProtection, ULONG *OldAccessProtection);
 
+static NTSTATUS (WINAPI *pNtReadVirtualMemory)(HANDLE ProcessHandle,
+    PVOID BaseAddress, PVOID Buffer, SIZE_T NumberOfBytesToRead,
+    PSIZE_T NumberOfBytesReaded);
+
 static NTSTATUS (WINAPI *pNtQueryInformationProcess)(HANDLE ProcessHandle,
     ULONG ProcessInformationClass, VOID *ProcessInformation,
     ULONG ProcessInformationLength, ULONG *ReturnLength);
@@ -103,6 +107,7 @@ static const char *g_funcnames[] = {
     "NtAllocateVirtualMemory",
     "NtFreeVirtualMemory",
     "NtProtectVirtualMemory",
+    "NtReadVirtualMemory",
     "NtQueryInformationProcess",
     "NtQueryInformationThread",
     "NtQueryObject",
@@ -122,6 +127,7 @@ static void **g_pointers[] = {
     (void **) &pNtAllocateVirtualMemory,
     (void **) &pNtFreeVirtualMemory,
     (void **) &pNtProtectVirtualMemory,
+    (void **) &pNtReadVirtualMemory,
     (void **) &pNtQueryInformationProcess,
     (void **) &pNtQueryInformationThread,
     (void **) &pNtQueryObject,
@@ -324,6 +330,22 @@ NTSTATUS virtual_protect(const void *addr, uintptr_t size,
     uint32_t protection)
 {
     return virtual_protect_ex(get_current_process(), addr, size, protection);
+}
+
+NTSTATUS virtual_read_ex(HANDLE process_handle, void *addr,
+    void *buffer, uintptr_t *size)
+{
+    assert(pNtReadVirtualMemory != NULL, "pNtReadVirtualMemory is NULL!", 0);
+    SIZE_T real_size = *size;
+    NTSTATUS ret = pNtReadVirtualMemory(process_handle, addr,
+        buffer, real_size, &real_size);
+    *size = real_size;
+    return ret;
+}
+
+NTSTATUS virtual_read(void *addr, void *buffer, uintptr_t *size)
+{
+    return virtual_read_ex(get_current_process(), addr, buffer, size);
 }
 
 uint32_t query_information_process(HANDLE process_handle,

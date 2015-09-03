@@ -66,6 +66,10 @@ uint32_t query_information_process(HANDLE process_handle,
 uint32_t query_information_thread(HANDLE process_handle,
     uint32_t information_class, void *buf, uint32_t length);
 
+NTSTATUS virtual_read_ex(HANDLE process_handle, void *addr,
+    void *buffer, uintptr_t *size);
+NTSTATUS virtual_read(void *addr, void *buffer, uintptr_t *size);
+
 uint32_t query_object(HANDLE handle, uint32_t information_class,
     void *buf, uint32_t length);
 

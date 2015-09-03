@@ -439,9 +439,34 @@ Parameters::
     ** ULONG AllocationType allocation_type
     ** ULONG Win32Protect win32_protect
 
+Middle::
+
+    uintptr_t buflen = 0; uint8_t *buffer = NULL;
+
+    if(NT_SUCCESS(ret) != FALSE &&
+            pid_from_process_handle(ProcessHandle) != get_current_process_id()) {
+
+        // The actual size of the mapped view.
+        buflen = *ViewSize;
+
+        // As it is non-trivial to extract the base address of the original
+        // mapped section, we'll just go ahead and read the memory from the
+        // remote process.
+        buffer = mem_alloc(buflen);
+        if(buffer != NULL) {
+            virtual_read_ex(ProcessHandle, *BaseAddress, buffer, &buflen);
+        }
+    }
+
+Logging::
+
+    !b buffer buflen, buffer
+
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
         pipe("PROCESS:%d", pid_from_process_handle(ProcessHandle));
         sleep_skip_disable();
     }
+
+    mem_free(buffer);
