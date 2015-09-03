@@ -783,8 +783,26 @@ Signature::
 Parameters::
 
     ** DWORD dwOption option
-    ** LPSTR pcszUAOut user_agent
+    *  LPSTR pcszUAOut
     *  DWORD *cbSize
+
+Ensure::
+
+    cbSize
+
+Pre::
+
+    int length = *cbSize;
+
+Middle::
+
+    if(ret != S_OK) {
+        length = 0;
+    }
+
+Logging::
+
+    S user_agent length, pcszUAOut
 
 
 GetBestInterfaceEx
