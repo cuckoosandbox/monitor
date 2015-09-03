@@ -61,8 +61,8 @@ Logging::
     i creation_flags creation_flags
     i process_identifier lpProcessInformation->dwProcessId
     i thread_identifier lpProcessInformation->dwThreadId
-    i process_handle lpProcessInformation->hProcess
-    i thread_handle lpProcessInformation->hThread
+    p process_handle lpProcessInformation->hProcess
+    p thread_handle lpProcessInformation->hThread
 
 Post::
 
