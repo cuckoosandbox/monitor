@@ -170,6 +170,12 @@ Pre::
 
     wchar_t *module_name = extract_unicode_string(ModuleFileName);
 
+Middle::
+
+    if(NT_SUCCESS(ret) == FALSE && pHModule != NULL) {
+        *pHModule = NULL;
+    }
+
 Logging::
 
     u module_name module_name

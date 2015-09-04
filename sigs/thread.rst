@@ -21,6 +21,10 @@ Parameters::
     ** DWORD dwCreationFlags flags
     ** LPDWORD lpThreadId thread_identifier
 
+Ensure::
+
+    lpThreadId
+
 Post::
 
     if(ret != NULL) {
