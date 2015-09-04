@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <string.h>
 #include "assembly.h"
+#include "misc.h"
+#include "native.h"
 
 #if __x86_64__
 
@@ -206,4 +208,31 @@ uint8_t *asm_get_call_target(uint8_t *addr)
 #endif
     }
     return ret;
+}
+
+int asm_is_call_function(uint8_t *addr,
+    const wchar_t *library, const char *funcname)
+{
+    if(*addr != 0xff || addr[1] != 0x15) {
+        return 0;
+    }
+
+#if __x86_64__
+    addr += *(int32_t *)(addr + 2) + 6;
+#else
+    addr = *(uint8_t **)(addr + 2);
+#endif
+
+    // TODO We should perhaps use range_is_readable() here, but then inject.c
+    // will require every other dependency in the project, resulting in
+    // 500kb inject-{x86,x64}.exe files, which is kind of bloated.
+    addr = *(uint8_t **) addr;
+
+    HMODULE module_handle = GetModuleHandleW(library);
+    if(module_handle == NULL) {
+        return 0;
+    }
+
+    FARPROC fp = GetProcAddress(module_handle, funcname);
+    return (uint8_t *) fp == addr;
 }

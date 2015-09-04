@@ -430,9 +430,6 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
         return NULL;
     }
 
-    FARPROC p_rtl_allocate_heap =
-        GetProcAddress(GetModuleHandle("ntdll"), "RtlAllocateHeap");
-
     // We find all cross-references to the CScriptCollection::ConstructCode
     // function.
     for (uint32_t idx = 0; idx < module_size - 20; idx++) {
@@ -458,14 +455,8 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
         // Does this function call HeapAlloc at the very start?
         for (uint32_t jdx = 0; jdx < 32; jdx++) {
 #if __x86_64__
-            uint8_t *target = addr + *(int32_t *)(addr + 2) + 6;
-            if(*addr == 0xff && addr[1] == 0x15 &&
-                    target >= module_address &&
-                    target < module_address + module_size) {
-                FARPROC fnaddr = *(FARPROC *) target;
-                if(fnaddr == p_rtl_allocate_heap) {
-                    return start;
-                }
+            if(asm_is_call_function(addr, L"ntdll", "RtlAllocateHeap") != 0) {
+                return start;
             }
 #endif
 
