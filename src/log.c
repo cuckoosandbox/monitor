@@ -504,7 +504,10 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
                 }
             }
             else if(*type == REG_QWORD || *type == REG_QWORD_LITTLE_ENDIAN) {
-                uint64_t value = *(uint64_t *) data;
+                uint64_t value = 0;
+                if(data != NULL) {
+                    value = *(uint64_t *) data;
+                }
                 log_int64(&b, idx, value);
             }
             else {
