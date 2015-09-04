@@ -2,7 +2,7 @@ CC32 = i686-w64-mingw32-gcc -m32
 CC64 = x86_64-w64-mingw32-gcc -m64
 AR = ar
 CFLAGS = -Wall -Wextra -std=c99 -static -Wno-missing-field-initializers \
-		 -I inc/ -I objects/code/ -I src/bson/
+		 -I inc/ -I objects/code/ -I src/bson/ -I src/sha1/
 LDFLAGS = -lshlwapi
 MAKEFLAGS = -j8
 
@@ -31,6 +31,10 @@ BSON = $(wildcard src/bson/*.c)
 BSONOBJ32 = $(BSON:%.c=objects/x86/%.o)
 BSONOBJ64 = $(BSON:%.c=objects/x64/%.o)
 
+SHA1 = src/sha1/sha1.c
+SHA1OBJ32 = objects/x86/src/sha1/sha1.o
+SHA1OBJ64 = objects/x64/src/sha1/sha1.o
+
 LIBCAPSTONE32 = src/capstone/capstone-x86.lib
 LIBCAPSTONE64 = src/capstone/capstone-x64.lib
 
@@ -51,6 +55,7 @@ objects/:
 	mkdir -p objects/code/
 	mkdir -p objects/x86/code/ objects/x64/code/
 	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
+	mkdir -p objects/x86/src/sha1/ objects/x64/src/sha1/
 
 $(HOOKSRC): $(SIGS) $(JINJA2) $(HOOKREQ)
 	python utils/process.py $(RELMODE) --apis=$(APIS)
@@ -96,11 +101,11 @@ $(FLAGOBJ64): $(FLAGSRC) $(HEADER) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS)
 
 bin/monitor-x86.dll: bin/monitor.c $(SRCOBJ32) $(HOOKOBJ32) $(FLAGOBJ32) \
-		$(BSONOBJ32) $(LIBCAPSTONE32)
+		$(BSONOBJ32) $(LIBCAPSTONE32) $(SHA1OBJ32)
 	$(CC32) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 bin/monitor-x64.dll: bin/monitor.c $(SRCOBJ64) $(HOOKOBJ64) $(FLAGOBJ64) \
-		$(BSONOBJ64) $(LIBCAPSTONE64)
+		$(BSONOBJ64) $(LIBCAPSTONE64) $(SHA1OBJ64)
 	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 bin/inject-x86.exe: bin/inject.c src/assembly.c
