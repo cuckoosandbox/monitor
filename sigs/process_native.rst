@@ -393,7 +393,7 @@ Ensure::
 
 Logging::
 
-    B buffer NumberOfBytesWritten, Buffer
+    !B buffer NumberOfBytesWritten, Buffer
 
 
 NtProtectVirtualMemory

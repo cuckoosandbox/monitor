@@ -192,7 +192,7 @@ Ensure::
 
 Logging::
 
-    B buffer lpNumberOfBytesWritten, lpBuffer
+    !B buffer lpNumberOfBytesWritten, lpBuffer
 
 
 VirtualProtectEx
