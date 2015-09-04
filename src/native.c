@@ -435,7 +435,6 @@ NTSTATUS transact_named_pipe(HANDLE pipe_handle,
     const void *inbuf, uintptr_t inbufsz, void *outbuf, uintptr_t outbufsz,
     uintptr_t *written)
 {
-#if DEBUG
     if(pNtFsControlFile == NULL && pNtWaitForSingleObject == NULL) {
         DWORD _written = 0;
         TransactNamedPipe(pipe_handle, (void *) inbuf, inbufsz,
@@ -445,7 +444,6 @@ NTSTATUS transact_named_pipe(HANDLE pipe_handle,
         }
         return 0;
     }
-#endif
 
     assert(pNtFsControlFile != NULL, "pNtFsControlFile is NULL!", 0);
     assert(pNtWaitForSingleObject != NULL,
@@ -471,13 +469,11 @@ NTSTATUS transact_named_pipe(HANDLE pipe_handle,
 
 NTSTATUS set_named_pipe_handle_mode(HANDLE pipe_handle, uint32_t mode)
 {
-#if DEBUG
     if(pNtSetInformationFile == NULL) {
         DWORD _mode = mode;
         SetNamedPipeHandleState(pipe_handle, &_mode, NULL, NULL);
         return 0;
     }
-#endif
 
     assert(pNtSetInformationFile != NULL,
         "pNtSetInformationFile is NULL!", 0);
@@ -505,13 +501,11 @@ int close_handle(HANDLE object_handle)
 
 void sleep(uint32_t milliseconds)
 {
-#if DEBUG
     // This should only be the case at the very beginning of execution.
     if(pNtDelayExecution == NULL) {
         Sleep(milliseconds);
         return;
     }
-#endif
 
     assert(pNtDelayExecution != NULL, "pNtDelayExecution is NULL!", );
     LARGE_INTEGER li;
