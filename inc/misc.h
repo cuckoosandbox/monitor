@@ -117,6 +117,8 @@ uint32_t module_image_size(const uint8_t *addr);
 
 void chtmtag_attrs(const void *chtmtag, bson *b);
 
+void sha1(const void *buffer, uintptr_t buflen, char *hexdigest);
+
 #define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
     OBJECT_ATTRIBUTES local_name; UNICODE_STRING local_name##_unistr; \
     wchar_t *local_name##_buffer = get_unicode_buffer(); \

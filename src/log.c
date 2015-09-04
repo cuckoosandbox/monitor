@@ -213,20 +213,32 @@ static void log_buffer(bson *b, const char *idx,
     }
 }
 
-static void log_buffer_notrunc(bson *b, const char *idx,
-    const uint8_t *buf, uintptr_t length)
+static void log_buffer_notrunc(const uint8_t *buf, uintptr_t length)
 {
-    if(buf == NULL) {
-        length = 0;
+    if(buf == NULL || length == 0) {
+        return;
     }
 
+    bson b;
+    bson_init(&b);
+    bson_append_string(&b, "type", "buffer");
+
     if(range_is_readable(buf, length) != 0) {
-        bson_append_binary(b, idx, BSON_BIN_BINARY,
+        bson_append_binary(&b, "buffer", BSON_BIN_BINARY,
             (const char *) buf, length);
+
+        char checksum[64];
+        sha1(buf, length, checksum);
+        bson_append_string(&b, "checksum", checksum);
     }
     else {
-        bson_append_binary(b, idx, BSON_BIN_BINARY, "<INVALID POINTER>", 17);
+        bson_append_string(&b, "buffer", "<INVALID POINTER>");
+        bson_append_string(&b, "checksum", "???");
     }
+
+    bson_finish(&b);
+    log_raw(bson_data(&b), bson_size(&b));
+    bson_destroy(&b);
 }
 
 void log_explain(uint32_t index)
@@ -248,9 +260,10 @@ void log_explain(uint32_t index)
     for (uint32_t argnum = 2; *fmt != 0; argnum++, fmt++) {
         ultostr(argnum, argidx, 10);
 
-        // Ignore limitation override.
+        // Ignore buffers, they are sent over separately.
         if(*fmt == '!') {
-            argnum--;
+            argnum -= 2;
+            fmt++;
             continue;
         }
 
@@ -372,8 +385,8 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
     for (const char *fmt = sig_paramtypes(index); *fmt != 0; fmt++) {
         ultostr(argnum++, idx, 10);
 
-        // Limitation override. At the moment just used for ignoring buffer
-        // truncation.
+        // Limitation override. Instead of displaying this right away in the
+        // report we turn it into a buffer (much like the dropped files).
         if(*fmt == '!') {
             override = 1;
             continue;
@@ -408,7 +421,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
                 log_buffer(&b, idx, s, len);
             }
             else {
-                log_buffer_notrunc(&b, idx, s, len);
+                log_buffer_notrunc(s, len);
             }
         }
         else if(*fmt == 'B') {
@@ -418,7 +431,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
                 log_buffer(&b, idx, s, len == NULL ? 0 : *len);
             }
             else {
-                log_buffer_notrunc(&b, idx, s, len == NULL ? 0 : *len);
+                log_buffer_notrunc(s, len == NULL ? 0 : *len);
             }
         }
         else if(*fmt == 'i') {

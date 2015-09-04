@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "native.h"
 #include "ntapi.h"
 #include "pipe.h"
+#include "sha1.h"
 #include "symbol.h"
 
 static char g_shutdown_mutex[MAX_PATH];
@@ -1345,4 +1346,22 @@ void hexencode(char *dst, const uint8_t *src, uint32_t length)
         *dst++ = charset[*src & 15];
     }
     *dst = 0;
+}
+
+void sha1(const void *buffer, uintptr_t buflen, char *hexdigest)
+{
+    SHA1Context ctx;
+    SHA1Reset(&ctx);
+    SHA1Input(&ctx, buffer, buflen);
+    SHA1Result(&ctx);
+
+    const uint32_t *digest = (const uint32_t *) ctx.Message_Digest;
+    for (uint32_t idx = 0; idx < 5; idx++) {
+        // TODO Our custom snprintf doesn't have proper %08x support yet.
+        hexdigest += our_snprintf(hexdigest, 32, "%x%x%x%x",
+            (digest[idx] >> 24) & 0xff,
+            (digest[idx] >> 16) & 0xff,
+            (digest[idx] >>  8) & 0xff,
+            (digest[idx] >>  0) & 0xff);
+    }
 }
