@@ -416,6 +416,10 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             int value = va_arg(args, int);
             log_int32(&b, idx, value);
         }
+        else if(*fmt == 'I') {
+            int *value = va_arg(args, int *);
+            log_int32(&b, idx, value != NULL ? *value : 0);
+        }
         else if(*fmt == 'l' || *fmt == 'p') {
             uintptr_t value = va_arg(args, uintptr_t);
             log_int64(&b, idx, value);
