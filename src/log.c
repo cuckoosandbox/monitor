@@ -262,7 +262,7 @@ void log_explain(uint32_t index)
 
         // Ignore buffers, they are sent over separately.
         if(*fmt == '!') {
-            argnum -= 2;
+            argnum--;
             fmt++;
             continue;
         }
@@ -389,7 +389,8 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
         // report we turn it into a buffer (much like the dropped files).
         if(*fmt == '!') {
             override = 1;
-            continue;
+            argnum--;
+            fmt++;
         }
 
         if(*fmt == 's') {
