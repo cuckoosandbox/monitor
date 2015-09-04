@@ -1,7 +1,7 @@
 Signature::
 
     * Calling convention: WINAPI
-    * Category: socket
+    * Category: network
     * Library: ws2_32
 
 
