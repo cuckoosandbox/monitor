@@ -113,6 +113,15 @@ static void log_int64(bson *b, const char *idx, int64_t value)
     bson_append_long(b, idx, value);
 }
 
+static void log_intptr(bson *b, const char *idx, intptr_t value)
+{
+#if __x86_64__
+    bson_append_long(b, idx, value);
+#else
+    bson_append_int(b, idx, value);
+#endif
+}
+
 static void log_string(bson *b, const char *idx, const char *str, int length)
 {
     if(str == NULL) {
@@ -422,11 +431,11 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
         }
         else if(*fmt == 'l' || *fmt == 'p') {
             uintptr_t value = va_arg(args, uintptr_t);
-            log_int64(&b, idx, value);
+            log_intptr(&b, idx, value);
         }
         else if(*fmt == 'L' || *fmt == 'P') {
             uintptr_t *ptr = va_arg(args, uintptr_t *);
-            log_int64(&b, idx, ptr != NULL ? *ptr : 0);
+            log_intptr(&b, idx, ptr != NULL ? *ptr : 0);
         }
         else if(*fmt == 'o') {
             ANSI_STRING *str = va_arg(args, ANSI_STRING *);
