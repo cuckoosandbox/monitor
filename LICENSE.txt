@@ -619,3 +619,9 @@ Program, unless a warranty or assumption of liability accompanies a
 copy of the Program in return for a fee.
 
                      END OF TERMS AND CONDITIONS
+
+Following a list of used 3rd party licenses.
+
+    sha1 (Freeware Public License): src/sha1/license.txt
+    bson (Apache License 2.0): src/bson/LICENSE
+    capstone (3-BSD License): src/capstone/LICENSE.TXT
