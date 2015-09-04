@@ -83,7 +83,7 @@ static uint8_t *_addr_colescript_compile(
     // Get the address passed along to the first call instruction.
     for (uint32_t idx = 0; idx < 20; idx++) {
         if(*code_ptr == 0xe8) {
-            return code_ptr + *(int32_t *)(code_ptr + 1) + 5;
+            return asm_get_call_target(code_ptr);
         }
 
         code_ptr += lde(code_ptr);
@@ -414,7 +414,7 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
         }
         // We found the function.
         else if(*addr == 0xe8 && state == 7) {
-            construct_code = addr + *(int32_t *)(addr + 1) + 5;
+            construct_code = asm_get_call_target(addr);
             break;
         }
 #else
@@ -437,8 +437,7 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
     // function.
     for (uint32_t idx = 0; idx < module_size - 20; idx++) {
         uint8_t *addr = &module_address[idx];
-        uint8_t *target = addr + *(int32_t *)(addr + 1) + 5;
-        if(*addr != 0xe8 || target != construct_code) {
+        if(construct_code != asm_get_rel_call_target(addr)) {
             continue;
         }
 
@@ -459,8 +458,7 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
         // Does this function call HeapAlloc at the very start?
         for (uint32_t jdx = 0; jdx < 32; jdx++) {
 #if __x86_64__
-            target = addr + *(int32_t *)(addr + 2) + 6;
-#endif
+            uint8_t *target = addr + *(int32_t *)(addr + 2) + 6;
             if(*addr == 0xff && addr[1] == 0x15 &&
                     target >= module_address &&
                     target < module_address + module_size) {
@@ -469,6 +467,7 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
                     return start;
                 }
             }
+#endif
 
             addr += lde(addr);
         }

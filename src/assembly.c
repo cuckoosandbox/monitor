@@ -193,3 +193,17 @@ uint8_t *asm_get_rel_call_target(uint8_t *addr)
     }
     return NULL;
 }
+
+uint8_t *asm_get_call_target(uint8_t *addr)
+{
+    uint8_t *ret = asm_get_rel_call_target(addr);
+    if(ret == NULL && *addr == 0xff && addr[1] == 0x15) {
+#if __x86_64__
+        addr += *(int32_t *)(addr + 2) + 6;
+        ret = *(uint8_t **) addr;
+#else
+        ret = **(uint8_t ***)(addr + 2);
+#endif
+    }
+    return ret;
+}
