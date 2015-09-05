@@ -107,14 +107,10 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
 {
     (void) hModule; (void) lpReserved;
 
-    switch (dwReason) {
-    case DLL_PROCESS_ATTACH:
-        if(is_ignored_process() == 0) {
-            monitor_init(hModule);
-            monitor_hook(NULL);
-            pipe("LOADED:%d,%d", get_current_process_id(), g_monitor_track);
-        }
-        break;
+    if(dwReason == DLL_PROCESS_ATTACH && is_ignored_process() == 0) {
+        monitor_init(hModule);
+        monitor_hook(NULL);
+        pipe("LOADED:%d,%d", get_current_process_id(), g_monitor_track);
     }
 
     return TRUE;
