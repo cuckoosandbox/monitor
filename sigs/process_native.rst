@@ -349,7 +349,7 @@ NtAllocateVirtualMemory
 Parameters::
 
     ** HANDLE ProcessHandle process_handle
-    ** PVOID *BaseAddress
+    ** PVOID *BaseAddress base_address
     *  ULONG_PTR ZeroBits
     ** PSIZE_T RegionSize region_size
     ** ULONG AllocationType allocation_type

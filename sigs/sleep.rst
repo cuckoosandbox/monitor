@@ -1,7 +1,7 @@
 Signature::
 
     * Calling convention: WINAPI
-    * Category: sleep
+    * Category: synchronisation
 
 
 NtDelayExecution
