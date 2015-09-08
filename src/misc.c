@@ -359,6 +359,8 @@ wchar_t *extract_unicode_string(const UNICODE_STRING *unistr)
         ret[unistr->Length / sizeof(wchar_t)] = 0;
         return ret;
     }
+
+    free_unicode_buffer(ret);
     return NULL;
 }
 
