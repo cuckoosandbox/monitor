@@ -120,6 +120,10 @@ Logging::
     u class_name class_name
 
 
+GetForegroundWindow
+===================
+
+
 MessageBoxTimeoutA
 ==================
 
