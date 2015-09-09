@@ -290,6 +290,10 @@ Parameters::
     *  LPVOID lpBuffer
     *  LPDWORD lpdwBufferLength
 
+Flags::
+
+    option
+
 
 InternetSetOptionA
 ==================
@@ -305,6 +309,10 @@ Parameters::
     ** DWORD dwOption option
     *  LPVOID lpBuffer
     *  DWORD dwBufferLength
+
+Flags::
+
+    option
 
 
 HttpOpenRequestA

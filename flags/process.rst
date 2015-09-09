@@ -57,3 +57,11 @@ NtProtectVirtualMemory_NewAccessProtection
 Inherits::
 
     MemoryProtectionFlags
+
+
+NtAllocateVirtualMemory_Protect
+===============================
+
+Inherits::
+
+    MemoryProtectionFlags

@@ -7,6 +7,7 @@ LDFLAGS = -lshlwapi
 MAKEFLAGS = -j8
 
 SIGS = $(wildcard sigs/*.rst)
+FLAGS = $(wildcard flags/*.rst)
 JINJA2 = $(wildcard data/*.jinja2)
 
 # Dependencies for the auto-generated hook files.
@@ -57,7 +58,7 @@ objects/:
 	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
 	mkdir -p objects/x86/src/sha1/ objects/x64/src/sha1/
 
-$(HOOKSRC): $(SIGS) $(JINJA2) $(HOOKREQ)
+$(HOOKSRC): $(SIGS) $(FLAGS) $(JINJA2) $(HOOKREQ)
 	python utils/process.py $(RELMODE) --apis=$(APIS)
 
 $(FLAGSRC): $(HOOKSRC)

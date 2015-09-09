@@ -355,6 +355,10 @@ Parameters::
     ** ULONG AllocationType allocation_type
     ** ULONG Protect protection
 
+Flags::
+
+    protection
+
 
 NtReadVirtualMemory
 ===================
