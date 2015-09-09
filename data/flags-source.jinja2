@@ -26,22 +26,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ntapi.h"
 
 {% for flag in flags.values(): %}
-static const flag_repr_t _{{ flag.name }}[] = {
-    {%- for row in flag.rows: %}
-    {{ "{" }}{{ row.type_ }}, {{ row.name }}, "{{ row.name }}"},
+static const flag_repr_t _{{ flag.name }}_value[] = {
+    {%- for row in flag.value %}
+    {{ "{" }}{{ row }}, "{{ row }}"{{ "}" }},
     {%- endfor %}
-    {FLAGTYP_NONE, 0, NULL},
+    {0, NULL},
+};
+
+static const flag_repr_t _{{ flag.name }}_bitmask[] = {
+    {%- for row in flag.enum %}
+    {{ "{" }}{{ row }}, "{{ row }}"{{ "}" }},
+    {%- endfor %}
+    {0, NULL},
 };
 {% endfor %}
 
-const flag_repr_t *g_flags[FLAGCNT] = {
-    FLAG_NONE,
+const flag_repr_t *g_flags[FLAGCNT][2] = {
+    {NULL, NULL},
 {%- for name in flags: %}
-    _{{ name }},
+    {{ "{" }}_{{ name }}_value, _{{ name }}_bitmask{{ "}" }},
 {%- endfor %}
 };
 
 const flag_repr_t *flag_value(uint32_t flagidx)
 {
-    return g_flags[flagidx];
+    return g_flags[flagidx][0];
+}
+
+const flag_repr_t *flag_bitmask(uint32_t flagidx)
+{
+    return g_flags[flagidx][1];
 }

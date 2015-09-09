@@ -519,7 +519,7 @@ class FlagsProcessor(object):
             flagname = entry.children[0].astext()
             children = entry.children
 
-            row = dict(name=flagname)
+            row = dict(name=flagname, value=[], enum=[])
 
             for x in xrange(1, len(children), 2):
                 try:
@@ -548,25 +548,11 @@ class FlagsProcessor(object):
             for flag in self.normalize(dp.read_document(flag_path)):
                 self.flags[flag['name']] = flag
 
-                flag['rows'] = []
-
-                if 'enum' in flag:
-                    for f in flag['enum']:
-                        row = dict(name=f, type_='FLAGTYP_ENUM')
-                        flag['rows'].append(row)
-
-                if 'value' in flag:
-                    for f in flag['value']:
-                        row = dict(name=f, type_='FLAGTYP_VALUE')
-                        flag['rows'].append(row)
-
         # Handle inheritance.
         for flag in self.flags.values():
-            rows = []
             for inherit in flag.get('inherits', []):
-                rows += self.flags[inherit]['rows']
-
-            flag['rows'] = rows + flag.get('rows', [])
+                flag['enum'] += self.flags[inherit]['enum']
+                flag['value'] += self.flags[inherit]['value']
 
     def write(self):
         dp = DefinitionProcessor(self.data_dir)
@@ -580,7 +566,7 @@ if __name__ == '__main__':
     parser.add_argument('data_directory', type=str, nargs='?', default='data/', help='Path to data directory.')
     parser.add_argument('output_directory', type=str, nargs='?', default='objects/code/', help='Output directory.')
     parser.add_argument('signatures_directory', type=str, nargs='?', default='sigs/', help='Signature directory.')
-    parser.add_argument('flags_directory', type=str, nargs='?', help='Flags directory.')
+    parser.add_argument('flags_directory', type=str, nargs='?', default='flags/', help='Flags directory.')
     parser.add_argument('-a', '--apis', type=str, help='If set, only hook these functions.')
     args = parser.parse_args()
 

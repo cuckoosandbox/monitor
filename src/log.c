@@ -283,24 +283,35 @@ void log_explain(uint32_t index)
     }
 
     bson_append_finish_array(&b);
-    bson_append_start_object(&b, "flags");
+    bson_append_start_object(&b, "flags_value");
 
-    static const char *types[] = {
-        [FLAGTYP_NONE] = "none",
-        [FLAGTYP_ENUM] = "enum",
-        [FLAGTYP_VALUE] = "value",
-    };
-
-    for (uint32_t idx = 0; sig_flag_value(index, idx) != FLAG_NONE; idx++) {
+    for (uint32_t idx = 0; sig_flag_name(index, idx) != NULL; idx++) {
         const flag_repr_t *f = flag_value(sig_flag_value(index, idx));
         bson_append_start_array(&b, sig_flag_name(index, idx));
 
-        for (uint32_t idx2 = 0; f->type != FLAGTYP_NONE; idx2++, f++) {
+        for (uint32_t idx2 = 0; f->repr != NULL; idx2++, f++) {
             ultostr(idx, argidx, 10);
             bson_append_start_array(&b, argidx);
-            bson_append_string(&b, "0", types[f->type]);
-            bson_append_int(&b, "1", f->value);
-            bson_append_string(&b, "2", f->repr);
+            bson_append_int(&b, "0", f->value);
+            bson_append_string(&b, "1", f->repr);
+            bson_append_finish_array(&b);
+        }
+
+        bson_append_finish_array(&b);
+    }
+
+    bson_append_finish_object(&b);
+    bson_append_start_object(&b, "flags_bitmask");
+
+    for (uint32_t idx = 0; sig_flag_name(index, idx) != NULL; idx++) {
+        const flag_repr_t *f = flag_bitmask(sig_flag_value(index, idx));
+        bson_append_start_array(&b, sig_flag_name(index, idx));
+
+        for (uint32_t idx2 = 0; f->repr != NULL; idx2++, f++) {
+            ultostr(idx, argidx, 10);
+            bson_append_start_array(&b, argidx);
+            bson_append_int(&b, "0", f->value);
+            bson_append_string(&b, "1", f->repr);
             bson_append_finish_array(&b);
         }
 

@@ -52,13 +52,7 @@ void log_debug(const char *fmt, ...);
 // everything every time this code is re-generated, we wrap its data in
 // functions which we reference here.
 
-#define FLAG_NONE     0
-#define FLAGTYP_NONE  0
-#define FLAGTYP_ENUM  1
-#define FLAGTYP_VALUE 2
-
 typedef struct _flag_repr_t {
-    uint32_t type;
     uint32_t value;
     const char *repr;
 } flag_repr_t;
@@ -71,6 +65,7 @@ const char *sig_paramtypes(uint32_t sigidx);
 const char *sig_param_name(uint32_t sigidx, uint32_t argidx);
 uint32_t sig_count();
 const flag_repr_t *flag_value(uint32_t flagidx);
+const flag_repr_t *flag_bitmask(uint32_t flagidx);
 
 uint32_t sig_index_process();
 uint32_t sig_index_anomaly();
