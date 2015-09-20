@@ -481,6 +481,10 @@ int main()
         printf("  --from <pid>           Inject from another process\n");
         printf("  --from-process <name>  "
             "Inject from another process, resolves pid\n");
+        printf("  --only-start           "
+            "Start the application and print pid/tid\n");
+        printf("  --resume-thread        "
+            "Resume the thread of the pid/tid target\n");
         printf("  --config <path>        "
             "Configuration file for the monitor\n");
         printf("  --dbg <path>           "
@@ -493,7 +497,7 @@ int main()
     const wchar_t *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
     const wchar_t *curdir = NULL, *process_name = NULL;
     uint32_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
-    uint32_t show_window = SW_SHOWNORMAL;
+    uint32_t show_window = SW_SHOWNORMAL, only_start = 0, resume_thread_ = 0;
 
     for (int idx = 1; idx < argc; idx++) {
         if(wcscmp(argv[idx], L"--crt") == 0) {
@@ -558,6 +562,16 @@ int main()
 
         if(wcscmp(argv[idx], L"--from-process") == 0) {
             from_process = argv[++idx];
+            continue;
+        }
+
+        if(wcscmp(argv[idx], L"--only-start") == 0) {
+            only_start = 1;
+            continue;
+        }
+
+        if(wcscmp(argv[idx], L"--resume-thread") == 0) {
+            resume_thread_ = 1;
             continue;
         }
 
@@ -714,6 +728,12 @@ int main()
         }
     }
 
+    // Do not do actual injection here, just have the application launched.
+    if(only_start != 0) {
+        printf("%d %d", pid, tid);
+        return 0;
+    }
+
     switch (inj_mode) {
     case INJECT_CRT:
         load_dll_crt(pid, dllpath);
@@ -743,7 +763,7 @@ int main()
         Sleep(5000);
     }
 
-    if(app_path != NULL && tid != 0) {
+    if((app_path != NULL || resume_thread_ != 0) && tid != 0) {
         resume_thread(tid);
     }
 
