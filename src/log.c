@@ -593,6 +593,8 @@ void log_new_process()
     GetModuleFileNameW(NULL, module_path, MAX_PATH_W);
     GetLongPathNameW(module_path, module_path, MAX_PATH_W);
 
+    wchar_t *command_line = GetCommandLineW();
+
     g_starttick = GetTickCount();
 
     FILETIME st;
@@ -600,7 +602,7 @@ void log_new_process()
 
     log_api(sig_index_process(), 1, 0, 0, NULL, st.dwLowDateTime,
         st.dwHighDateTime, get_current_process_id(),
-        parent_process_identifier(), module_path);
+        parent_process_identifier(), module_path, command_line);
 
     free_unicode_buffer(module_path);
 }

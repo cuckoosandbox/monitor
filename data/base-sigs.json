@@ -6,7 +6,8 @@
             {"argtype": "ULONG", "argname": "time_high"},
             {"argtype": "ULONG", "argname": "pid"},
             {"argtype": "ULONG", "argname": "ppid"},
-            {"argtype": "LPWSTR", "argname": "module_path"}
+            {"argtype": "LPWSTR", "argname": "module_path"},
+            {"argtype": "LPWSTR", "argname": "command_line"}
         ],
         "signature": {
             "category": "__notification__"
