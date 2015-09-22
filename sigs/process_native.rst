@@ -358,6 +358,7 @@ Parameters::
 Flags::
 
     protection
+    allocation_type
 
 
 NtReadVirtualMemory
@@ -442,6 +443,10 @@ Parameters::
     *  UINT InheritDisposition
     ** ULONG AllocationType allocation_type
     ** ULONG Win32Protect win32_protect
+
+Flags::
+
+    allocation_type
 
 Middle::
 

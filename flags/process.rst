@@ -65,3 +65,33 @@ NtAllocateVirtualMemory_Protect
 Inherits::
 
     MemoryProtectionFlags
+
+
+AllocationType
+==============
+
+Enum::
+
+    MEM_COMMIT
+    MEM_RESERVE
+    MEM_RESET
+    MEM_LARGE_PAGES
+    MEM_PHYSICAL
+    MEM_TOP_DOWN
+    MEM_WRITE_WATCH
+
+
+NtAllocateVirtualMemory_AllocationType
+======================================
+
+Inherits::
+
+    AllocationType
+
+
+NtMapViewOfSection_AllocationType
+=================================
+
+Inherits::
+
+    AllocationType
