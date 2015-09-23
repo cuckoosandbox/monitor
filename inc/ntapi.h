@@ -516,6 +516,31 @@ typedef struct _FILE_PIPE_INFORMATION {
 
 typedef int EXTENDED_NAME_FORMAT;
 
+typedef struct _LDR_DLL_UNLOADED_NOTIFICATION_DATA {
+    ULONG Flags;                    // Reserved.
+    PUNICODE_STRING FullDllName;    // The full path name of the DLL module.
+    PUNICODE_STRING BaseDllName;    // The base file name of the DLL module.
+    PVOID DllBase;                  // A pointer to the base address for the DLL in memory.
+    ULONG SizeOfImage;              // The size of the DLL image, in bytes.
+} LDR_DLL_UNLOADED_NOTIFICATION_DATA, *PLDR_DLL_UNLOADED_NOTIFICATION_DATA;
+
+typedef struct _LDR_DLL_LOADED_NOTIFICATION_DATA {
+    ULONG Flags;                    // Reserved.
+    PUNICODE_STRING FullDllName;    // The full path name of the DLL module.
+    PUNICODE_STRING BaseDllName;    // The base file name of the DLL module.
+    PVOID DllBase;                  // A pointer to the base address for the DLL in memory.
+    ULONG SizeOfImage;              // The size of the DLL image, in bytes.
+} LDR_DLL_LOADED_NOTIFICATION_DATA, *PLDR_DLL_LOADED_NOTIFICATION_DATA;
+
+typedef union _LDR_DLL_NOTIFICATION_DATA {
+    LDR_DLL_LOADED_NOTIFICATION_DATA Loaded;
+    LDR_DLL_UNLOADED_NOTIFICATION_DATA Unloaded;
+} LDR_DLL_NOTIFICATION_DATA, *PLDR_DLL_NOTIFICATION_DATA;
+
+typedef VOID (CALLBACK LDR_DLL_NOTIFICATION_FUNCTION)(
+    ULONG NotificationReason, PLDR_DLL_NOTIFICATION_DATA NotificationData,
+    PVOID Context);
+
 static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
 {
     return obj != NULL ? obj->ObjectName : NULL;
@@ -541,5 +566,8 @@ static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
 #define FILE_PIPE_MESSAGE_MODE              0x00000001
 
 #define MAX_PATH_W 0x7fff
+
+#define LDR_DLL_NOTIFICATION_REASON_LOADED 1
+#define LDR_DLL_NOTIFICATION_REASON_UNLOADED 2
 
 #endif

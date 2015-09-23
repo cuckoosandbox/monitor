@@ -102,6 +102,10 @@ static NTSTATUS (WINAPI *pNtWaitForSingleObject)(HANDLE Object,
 
 static DWORD (WINAPI *pGetTickCount)();
 
+static NTSTATUS (WINAPI *pLdrRegisterDllNotification)(ULONG Flags,
+    LDR_DLL_NOTIFICATION_FUNCTION LdrDllNotificationFunction,
+    VOID *Context, VOID **Cookie);
+
 static const char *g_funcnames[] = {
     "NtQueryVirtualMemory",
     "NtAllocateVirtualMemory",
@@ -231,6 +235,9 @@ int native_init()
 
     unsigned long old_protect;
     VirtualProtect(*g_pointers[0], 0x1000, PAGE_EXECUTE_READ, &old_protect);
+
+    *(FARPROC *) &pLdrRegisterDllNotification = GetProcAddress(
+        GetModuleHandle("ntdll"), "LdrRegisterDllNotification");
 
     FARPROC pRtlGetLastWin32Error = GetProcAddress(
         GetModuleHandle("ntdll"), "RtlGetLastWin32Error");
@@ -517,6 +524,14 @@ void sleep(uint32_t milliseconds)
 uint32_t get_tick_count()
 {
     return pGetTickCount();
+}
+
+void register_dll_notification(LDR_DLL_NOTIFICATION_FUNCTION fn, void *param)
+{
+    void *cookie = NULL;
+    if(pLdrRegisterDllNotification != NULL) {
+        pLdrRegisterDllNotification(0, fn, param, &cookie);
+    }
 }
 
 void get_last_error(last_error_t *error)

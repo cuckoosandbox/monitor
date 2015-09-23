@@ -88,6 +88,22 @@ static void _capstone_init()
 #endif
 }
 
+static void CALLBACK _ldr_dll_notification(ULONG reason,
+    LDR_DLL_NOTIFICATION_DATA *notification, void *param)
+{
+    (void) param;
+
+    char library[MAX_PATH];
+
+    // DLL loaded notification.
+    if(reason == LDR_DLL_NOTIFICATION_REASON_LOADED && notification != NULL) {
+        library_from_unicode_string(notification->Loaded.BaseDllName,
+            library, sizeof(library));
+
+        hook_library(library);
+    }
+}
+
 int hook_init(HMODULE module_handle)
 {
     g_monitor_start = (uintptr_t) module_handle;
@@ -123,6 +139,11 @@ int hook_init2()
 
     // Memory for function stubs of all the hooks.
     slab_init(&g_function_stubs, 64, 128, PAGE_EXECUTE_READWRITE);
+
+    // TODO At the moment this only works on Vista+, not on Windows XP. As
+    // shown by Brad Spengler it's fairly trivial to achieve the same on
+    // Windows XP but for now.. it's fine.
+    // register_dll_notification(&_ldr_dll_notification, NULL);
     return 0;
 }
 

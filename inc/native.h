@@ -94,6 +94,8 @@ int close_handle(HANDLE object_handle);
 void sleep(uint32_t milliseconds);
 uint32_t get_tick_count();
 
+void register_dll_notification(LDR_DLL_NOTIFICATION_FUNCTION fn, void *param);
+
 void get_last_error(last_error_t *error);
 void set_last_error(last_error_t *error);
 
