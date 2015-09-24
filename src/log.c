@@ -600,9 +600,15 @@ void log_new_process()
     FILETIME st;
     GetSystemTimeAsFileTime(&st);
 
+#if __x86_64__
+    int is_64bit = 1;
+#else
+    int is_64bit = 0;
+#endif
+
     log_api(sig_index_process(), 1, 0, 0, NULL, st.dwLowDateTime,
         st.dwHighDateTime, get_current_process_id(),
-        parent_process_identifier(), module_path, command_line);
+        parent_process_identifier(), module_path, command_line, is_64bit);
 
     free_unicode_buffer(module_path);
 }

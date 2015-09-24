@@ -7,7 +7,8 @@
             {"argtype": "ULONG", "argname": "pid"},
             {"argtype": "ULONG", "argname": "ppid"},
             {"argtype": "LPWSTR", "argname": "module_path"},
-            {"argtype": "LPWSTR", "argname": "command_line"}
+            {"argtype": "LPWSTR", "argname": "command_line"},
+            {"argtype": "int", "argname": "is_64bit"}
         ],
         "signature": {
             "category": "__notification__"
