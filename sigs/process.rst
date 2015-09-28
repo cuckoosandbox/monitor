@@ -195,43 +195,6 @@ Logging::
     !B buffer lpNumberOfBytesWritten, lpBuffer
 
 
-VirtualProtectEx
-================
-
-Signature::
-
-    * Library: kernel32
-    * Return value: BOOL
-
-Parameters::
-
-    ** HANDLE hProcess process_handle
-    ** LPVOID lpAddress base_address
-    ** SIZE_T dwSize size
-    ** DWORD flNewProtect protection
-    *  PDWORD lpflOldProtect
-
-Flags::
-
-    protection
-
-
-VirtualFreeEx
-=============
-
-Signature::
-
-    * Library: kernel32
-    * Return value: BOOL
-
-Parameters::
-
-    ** HANDLE hProcess process_handle
-    ** LPVOID lpAddress base_address
-    ** SIZE_T dwSize size
-    ** DWORD dwFreeType free_type
-
-
 system
 ======
 
