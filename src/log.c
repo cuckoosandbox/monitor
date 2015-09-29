@@ -271,10 +271,16 @@ void log_explain(uint32_t index)
 
         // On certain formats, we need to tell cuckoo about them for
         // nicer display / matching.
-        if(*fmt == 'p' || *fmt == 'P') {
+        if(*fmt == 'p' || *fmt == 'P' || *fmt == 'x') {
             bson_append_start_array(&b, argidx);
             bson_append_string(&b, "0", argname);
-            bson_append_string(&b, "1", "p");
+
+            if(*fmt == 'p' || *fmt == 'P') {
+                bson_append_string(&b, "1", "p");
+            }
+            else if(*fmt == 'x') {
+                bson_append_string(&b, "1", "x");
+            }
             bson_append_finish_array(&b);
         }
         else {
@@ -446,7 +452,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
                 log_buffer_notrunc(s, len == NULL ? 0 : *len);
             }
         }
-        else if(*fmt == 'i') {
+        else if(*fmt == 'i' || *fmt == 'x') {
             int value = va_arg(args, int);
             log_int32(&b, idx, value);
         }
