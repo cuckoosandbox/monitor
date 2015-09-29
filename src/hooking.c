@@ -583,6 +583,13 @@ static int _hook_determine_start(hook_t *h)
             addr = addr + 8 + *(int8_t *)(addr + 7);
             continue;
         }
+
+        // mov edi, edi ; push ebp ; mov ebp, esp ; pop ebp ; jmp imm32
+        if(memcmp(addr, "\x8b\xff\x55\x8b\xec\x5d\xe9", 7) == 0) {
+            unhook_detect_add_region(h->funcname, addr, addr, addr, 8);
+            addr = addr + 11 + *(int32_t *)(addr + 7);
+            continue;
+        }
 #endif
 
         break;
