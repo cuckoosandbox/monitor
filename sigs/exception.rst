@@ -132,8 +132,8 @@ Pre::
     }
 
 
-RtlRaiseException
-=================
+_RtlRaiseException
+==================
 
 Signature::
 
