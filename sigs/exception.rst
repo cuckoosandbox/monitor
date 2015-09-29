@@ -119,11 +119,17 @@ Parameters::
 
 Pre::
 
-    // uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
-    // count = stacktrace(Context, addrs, RETADDRCNT);
-    // log_exception(Context, ExceptionRecord, addrs, count);
+    uint32_t exception_code = 0;
+    if(ExceptionRecord != NULL) {
+        exception_code = ExceptionRecord->ExceptionCode;
+    }
 
-    log_exception(Context, ExceptionRecord, NULL, 0);
+    // Ignore exceptions that are caused by calling OutputDebugString().
+    if(exception_code != DBG_PRINTEXCEPTION_C) {
+        uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
+        count = stacktrace(Context, addrs, RETADDRCNT);
+        log_exception(Context, ExceptionRecord, addrs, count);
+    }
 
 
 RtlRaiseException
