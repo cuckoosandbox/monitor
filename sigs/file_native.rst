@@ -41,10 +41,16 @@ Middle::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
+    wchar_t *filepath_r = NULL;
+    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
+        filepath_r = ObjectAttributes->ObjectName->Buffer;
+    }
+
 Logging::
 
     i share_access share_access
     u filepath filepath
+    u filepath_r filepath_r
 
 Post::
 
@@ -111,10 +117,16 @@ Middle::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
+    wchar_t *filepath_r = NULL;
+    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
+        filepath_r = ObjectAttributes->ObjectName->Buffer;
+    }
+
 Logging::
 
     i share_access share_access
     u filepath filepath
+    u filepath_r filepath_r
 
 Post::
 
