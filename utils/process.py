@@ -550,6 +550,8 @@ class FlagsProcessor(object):
 
         # Handle inheritance.
         for flag in self.flags.values():
+            # TODO Use proper inheritance without duplication,
+            # see also the todo list.
             for inherit in flag.get('inherits', []):
                 flag['enum'] += self.flags[inherit]['enum']
                 flag['value'] += self.flags[inherit]['value']

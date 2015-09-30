@@ -89,7 +89,7 @@ static void _capstone_init()
 }
 
 static void CALLBACK _ldr_dll_notification(ULONG reason,
-    LDR_DLL_NOTIFICATION_DATA *notification, void *param)
+    const LDR_DLL_NOTIFICATION_DATA *notification, void *param)
 {
     (void) param;
 
