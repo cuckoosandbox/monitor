@@ -693,7 +693,8 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
     bson_append_string(&e, "address", buf);
 
     char insn[DISASM_BUFSIZ];
-    if(disasm(exception_address, insn) == 0) {
+    if(range_is_readable(exception_address, 16) != 0 &&
+            disasm(exception_address, insn) == 0) {
         bson_append_string(&e, "instruction", insn);
     }
 
