@@ -185,11 +185,14 @@ static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }
     {%- endfor %}
     {%- endif %}
 
-    {%- if hook.signature.special and hook.signature.logging != 'no' : %}
-
+    {%- if hook.signature.special %}
+        {% if hook.signature.logging == 'always': %}
+    {{ log_api(hook) }}
+        {% elif hook.signature.logging != 'no': %}
     if(hook_in_monitor() == 0) {
         {{ log_api(hook)|indent }}
     }
+        {% endif %}
     {%- elif hook.signature.logging != 'no' %}
 
     {{ log_api(hook) }}
