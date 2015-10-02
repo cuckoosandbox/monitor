@@ -295,7 +295,7 @@ void hide_module_from_peb(HMODULE module_handle)
 
 const wchar_t *get_module_file_name(HMODULE module_handle)
 {
-    LDR_MODULE *mod; PEB *peb;
+    LDR_MODULE *mod, *first_mod; PEB *peb;
 
 #if __x86_64__
     peb = (PEB *) readtls(0x60);
@@ -303,12 +303,20 @@ const wchar_t *get_module_file_name(HMODULE module_handle)
     peb = (PEB *) readtls(0x30);
 #endif
 
-    for (mod = (LDR_MODULE *) peb->LoaderData->InLoadOrderModuleList.Flink;
-         mod->BaseAddress != NULL;
-         mod = (LDR_MODULE *) mod->InLoadOrderModuleList.Flink) {
+    first_mod = mod =
+        (LDR_MODULE *) peb->LoaderData->InLoadOrderModuleList.Flink;
 
+    // Basic sanity checks. At the very most we want to iterate a couple
+    // thousand times through the list - this should be more than enough.
+    // Furthermore stop iterating if the first node is found again.
+    for (uint32_t idx = 0; idx < 0x1000 && mod->BaseAddress != NULL; idx++) {
         if(mod->BaseAddress == module_handle) {
             return mod->BaseDllName.Buffer;
+        }
+
+        mod = (LDR_MODULE *) mod->InLoadOrderModuleList.Flink;
+        if(mod == first_mod) {
+            break;
         }
     }
     return NULL;
