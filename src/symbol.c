@@ -222,7 +222,7 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
             *sym++ = ' ', length--;
         }
 
-        while (length-- != 0 && *module_name != 0 && *module_name != '.') {
+        while (length-- > 20 && *module_name != 0 && *module_name != '.') {
             *sym++ = tolower(*module_name++);
         }
 
