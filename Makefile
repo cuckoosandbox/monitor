@@ -120,7 +120,6 @@ bin/is32bit.exe: bin/is32bit.c
 
 clean:
 	rm -rf objects/ $(DLL32) $(DLL64)
-	+make -C utils/ clean
 
 clean-capstone:
 	rm -rf $(LIBCAPSTONE32) $(LIBCAPSTONE64)
