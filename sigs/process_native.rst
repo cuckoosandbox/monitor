@@ -408,7 +408,7 @@ Parameters::
 
     ** HANDLE ProcessHandle process_handle
     ** PVOID *BaseAddress base_address
-    *  PSIZE_T NumberOfBytesToProtect
+    ** PSIZE_T NumberOfBytesToProtect length
     ** ULONG NewAccessProtection protection
     *  PULONG OldAccessProtection
 
