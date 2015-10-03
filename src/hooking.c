@@ -143,7 +143,7 @@ int hook_init2()
     // TODO At the moment this only works on Vista+, not on Windows XP. As
     // shown by Brad Spengler it's fairly trivial to achieve the same on
     // Windows XP but for now.. it's fine.
-    // register_dll_notification(&_ldr_dll_notification, NULL);
+    register_dll_notification(&_ldr_dll_notification, NULL);
     return 0;
 }
 
