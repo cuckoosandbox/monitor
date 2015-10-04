@@ -100,7 +100,7 @@ static void CALLBACK _ldr_dll_notification(ULONG reason,
         library_from_unicode_string(notification->Loaded.BaseDllName,
             library, sizeof(library));
 
-        hook_library(library);
+        hook_library(library, notification->Loaded.DllBase);
     }
 }
 
@@ -612,22 +612,29 @@ static int _hook_determine_start(hook_t *h)
     return 0;
 }
 
-int hook(hook_t *h)
+int hook(hook_t *h, void *module_handle)
 {
     if(h->is_hooked != 0) {
         return 0;
     }
 
-    HMODULE module_handle = GetModuleHandle(h->library);
-    if(module_handle == NULL) return 0;
+    if(h->module_handle == NULL) {
+        h->module_handle = module_handle;
+        if(h->module_handle == NULL) {
+            h->module_handle = GetModuleHandle(h->library);
+            if(h->module_handle == NULL) {
+                return 0;
+            }
+        }
+    }
 
     // If an address callback has been provided, try to locate the functions'
     // address through it.
     if(h->addr == NULL && h->addrcb != NULL) {
         uint32_t module_size =
-            module_image_size((const uint8_t *) module_handle);
+            module_image_size((const uint8_t *) h->module_handle);
 
-        h->addr = h->addrcb(h, (uint8_t *) module_handle, module_size);
+        h->addr = h->addrcb(h, (uint8_t *) h->module_handle, module_size);
 
         if(h->addr == NULL) {
             pipe("DEBUG:Error resolving function %z!%z through our "
@@ -638,7 +645,7 @@ int hook(hook_t *h)
 
     // Try to obtain the address dynamically.
     if(h->addr == NULL) {
-        h->addr = (uint8_t *) GetProcAddress(module_handle, h->funcname);
+        h->addr = (uint8_t *) GetProcAddress(h->module_handle, h->funcname);
         if(h->addr == NULL) {
             if((h->report & HOOK_PRUNE_RESOLVERR) != HOOK_PRUNE_RESOLVERR) {
                 pipe("DEBUG:Error resolving function %z!%z.",
@@ -705,12 +712,18 @@ int hook(hook_t *h)
     if(did != NULL) {
         // We cheat a little bit here but that should be fine.
         char *library = slab_getmem(&g_function_stubs);
-        library_from_asciiz((const char *) module_handle + did->DllNameRVA,
+        library_from_asciiz((const char *) h->module_handle + did->DllNameRVA,
             library, slab_size(&g_function_stubs));
 
         h->library = library;
+        h->module_handle = GetModuleHandle(library);
         h->addr = NULL;
-        return 1;
+
+        // We're having a special case here. When we return 1, the monitor
+        // will attempt to re-apply the hook (but this time against the new
+        // library). So we should only do this if the new module is already
+        // in-memory.
+        return h->module_handle != NULL ? 1 : 0;
     }
 
     h->func_stub = slab_getmem(&g_function_stubs);
@@ -749,10 +762,8 @@ int hook(hook_t *h)
 }
 
 static void _hook_missing_hooks_worker(
-    const char *funcname, uintptr_t address, void *context)
+    const char *funcname, uintptr_t address, void *module_handle)
 {
-    (void) context;
-
     // This is not a missing hook.
     for (hook_t *h = sig_hooks(); h->funcname != NULL; h++) {
         if(strcmp(h->funcname, funcname) == 0) {
@@ -777,7 +788,7 @@ static void _hook_missing_hooks_worker(
     h.handler = (FARPROC) handler;
     h.funcname = funcname;
 
-    if(hook(&h) == 0) {
+    if(hook(&h, module_handle) == 0) {
         ptr += asm_pushv(ptr, funcname);
         ptr += asm_call(ptr, &log_missing_hook);
         ptr += asm_jump(ptr, h.func_stub);
@@ -804,7 +815,8 @@ int hook_missing_hooks(HMODULE module_handle)
     g_missing_handles[g_missing_handle_count++] = module_handle;
 
     log_debug("Applying missing hooks @ %p\n", module_handle);
-    symbol_enumerate_module(module_handle, &_hook_missing_hooks_worker, NULL);
+    symbol_enumerate_module(module_handle,
+        &_hook_missing_hooks_worker, module_handle);
     log_debug("Finished missing hooks @ %p\n", module_handle);
     return 0;
 }

@@ -77,7 +77,7 @@ void monitor_init(HMODULE module_handle)
     misc_set_monitor_options(cfg.track, cfg.mode);
 }
 
-void monitor_hook(const char *library)
+void monitor_hook(const char *library, void *module_handle)
 {
     // Initialize data about each hook.
     for (hook_t *h = sig_hooks(); h->funcname != NULL; h++) {
@@ -99,7 +99,7 @@ void monitor_hook(const char *library)
         // already have been loaded. In that case we want to hook the function
         // forwarder right away. (Note that the library member of the hook
         // object is updated in the case of retrying).
-        while (hook(h) == 1);
+        while (hook(h, module_handle) == 1);
     }
 }
 
@@ -109,7 +109,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
 
     if(dwReason == DLL_PROCESS_ATTACH && is_ignored_process() == 0) {
         monitor_init(hModule);
-        monitor_hook(NULL);
+        monitor_hook(NULL, NULL);
         pipe("LOADED:%d,%d", get_current_process_id(), g_monitor_track);
     }
 

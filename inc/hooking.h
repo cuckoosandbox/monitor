@@ -62,6 +62,9 @@ typedef struct _hook_t {
     // right after the hooking has successfully taken place.
     void (*initcb)(struct _hook_t *h);
 
+    // Address of the module.
+    void *module_handle;
+
     // Address of the hooked function.
     uint8_t *addr;
 
@@ -88,7 +91,7 @@ int lde(const void *addr);
 
 int hook_in_monitor();
 
-int hook(hook_t *h);
+int hook(hook_t *h, void *module_handle);
 int hook_missing_hooks(HMODULE module_handle);
 
 #define DISASM_BUFSIZ 128

@@ -23,12 +23,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "bson.h"
 #include "ntapi.h"
 
+typedef void (*monitor_hook_t)(const char *library, void *module_handle);
+
 int misc_init(HMODULE module_handle, const char *shutdown_mutex);
 
 // Call functions from monitor.c indirectly so that we don't have to include
 // it by default when doing unittests.
-void misc_set_hook_library(void (*monitor_hook)(const char *library));
-void hook_library(const char *library);
+void misc_set_hook_library(monitor_hook_t monitor_hook);
+void hook_library(const char *library, void *module_handle);
 
 void misc_set_monitor_options(uint32_t track, uint32_t mode);
 

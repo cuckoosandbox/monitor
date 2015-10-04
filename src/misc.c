@@ -40,7 +40,7 @@ static array_t g_unicode_buffer_use_array;
 static uintptr_t g_monitor_start;
 static uintptr_t g_monitor_end;
 
-void (*g_hook_library)(const char *library);
+static monitor_hook_t g_hook_library;
 
 #define HKCU_PREFIX  L"\\REGISTRY\\USER\\S-1-5-"
 #define HKCU_PREFIX2 L"HKEY_USERS\\S-1-5-"
@@ -94,14 +94,14 @@ int misc_init(HMODULE module_handle, const char *shutdown_mutex)
     return 0;
 }
 
-void misc_set_hook_library(void (*monitor_hook)(const char *library))
+void misc_set_hook_library(monitor_hook_t monitor_hook)
 {
     g_hook_library = monitor_hook;
 }
 
-void hook_library(const char *library)
+void hook_library(const char *library, void *module_handle)
 {
-    g_hook_library(library);
+    g_hook_library(library, module_handle);
 }
 
 void misc_set_monitor_options(uint32_t track, uint32_t mode)

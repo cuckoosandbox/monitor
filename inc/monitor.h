@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 
 void monitor_init(HMODULE module_handle);
-void monitor_hook(const char *library);
+void monitor_hook(const char *library, void *module_handle);
 
 extern uint32_t g_monitor_mode;
 
