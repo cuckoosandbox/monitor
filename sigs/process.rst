@@ -138,7 +138,7 @@ Logging::
 
     u filepath filepath
     u parameters pExecInfo->lpParameters
-    l show_type pExecInfo->nShow
+    i show_type pExecInfo->nShow
 
 Post::
 
