@@ -571,7 +571,8 @@ static int _hook_determine_start(hook_t *h)
             addr = *(uint8_t **)(addr + 2);
 #endif
 
-            unhook_detect_add_region(h->funcname, addr, addr, addr, 4);
+            unhook_detect_add_region(h->funcname,
+                addr, addr, addr, sizeof(uintptr_t));
             addr = *(uint8_t **) addr;
             continue;
         }
@@ -586,7 +587,7 @@ static int _hook_determine_start(hook_t *h)
 
         // mov edi, edi ; push ebp ; mov ebp, esp ; pop ebp ; jmp imm32
         if(memcmp(addr, "\x8b\xff\x55\x8b\xec\x5d\xe9", 7) == 0) {
-            unhook_detect_add_region(h->funcname, addr, addr, addr, 8);
+            unhook_detect_add_region(h->funcname, addr, addr, addr, 11);
             addr = addr + 11 + *(int32_t *)(addr + 7);
             continue;
         }
@@ -605,9 +606,9 @@ static int _hook_determine_start(hook_t *h)
     // If this function is a system call wrapper (and thus its first
     // instruction resembles "mov eax, imm32"), then skip the first
     // instruction.
-    if(memcmp(h->funcname, "Nt", 2) == 0 && *addr == 0xb8) {
+    // if(memcmp(h->funcname, "Nt", 2) == 0 && *addr == 0xb8) {
         // h->skip += 5;
-    }
+    // }
 
     return 0;
 }
