@@ -571,9 +571,17 @@ static int _hook_determine_start(hook_t *h)
             addr = *(uint8_t **)(addr + 2);
 #endif
 
+            // In some cases we can't follow the address yet as it is not yet
+            // in-memory. If so we just leave it be for the moment until it is
+            // available for us.
+            uint8_t *addr_deref = *(uint8_t **) addr;
+            if(range_is_readable(addr_deref, sizeof(uint8_t *)) == 0) {
+                return 0;
+            }
+
             unhook_detect_add_region(h->funcname,
                 addr, addr, addr, sizeof(uintptr_t));
-            addr = *(uint8_t **) addr;
+            addr = addr_deref;
             continue;
         }
 
