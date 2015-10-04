@@ -85,6 +85,7 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
 {
     (void) param;
 
+    char msg[512];
     static int watcher_first = 1;
 
     while (g_main_thread == NULL ||
@@ -113,13 +114,30 @@ static DWORD WINAPI _unhook_detect_thread(LPVOID param)
             }
 
             // By default we assume the hook has been modified.
-            const char *msg = "Function hook was modified!";
+            const char *desc = "Function hook was modified!";
 
             // If the memory region matches the original contents, then it
             // has been restored to its original state.
             if(memcmp(r->region_address, r->region_original,
                     r->region_length) == 0) {
-                msg = "Function was unhooked/restored!";
+                desc = "Function was unhooked/restored!";
+            }
+
+            char *ptr = msg + our_snprintf(msg, 64, "%s", desc);
+
+            ptr += our_snprintf(ptr, 32, " original=");
+            for (uint32_t jdx = 0; jdx < r->region_length; jdx++) {
+                ptr += our_snprintf(ptr, 32, "%x", r->region_original[jdx]);
+            }
+
+            ptr += our_snprintf(ptr, 32, " modified=");
+            for (uint32_t jdx = 0; jdx < r->region_length; jdx++) {
+                ptr += our_snprintf(ptr, 32, "%x", r->region_modified[jdx]);
+            }
+
+            ptr += our_snprintf(ptr, 32, " bysample=");
+            for (uint32_t jdx = 0; jdx < r->region_length; jdx++) {
+                ptr += our_snprintf(ptr, 32, "%x", r->region_address[jdx]);
             }
 
             if(r->region_reported == 0) {
