@@ -64,7 +64,8 @@ void monitor_init(HMODULE module_handle)
 
     sleep_init(cfg.first_process, cfg.force_sleep_skip, cfg.startup_time);
 
-    unhook_init_detection(cfg.first_process);
+    // Disable the unhook detection for now. TODO Re-enable.
+    // unhook_init_detection(cfg.first_process);
 
     hide_module_from_peb(module_handle);
 
