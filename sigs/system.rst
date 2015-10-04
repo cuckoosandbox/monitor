@@ -107,11 +107,12 @@ Pre::
 Logging::
 
     u module_name module_name
+    s basename library
 
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        hook_library(library);
+        hook_library(library, NULL);
     }
 
     free_unicode_buffer(module_name);
