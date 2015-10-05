@@ -407,3 +407,17 @@ Middle::
 Logging::
 
     s uuid uuid
+
+
+GetTimeZoneInformation
+======================
+
+Signature::
+
+    * Is success: ret != TIME_ZONE_ID_INVALID
+    * Library: kernel32
+    * Return value: DWORD
+
+Parameters::
+
+    *  LPTIME_ZONE_INFORMATION lpTimeZoneInformation
