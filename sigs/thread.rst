@@ -60,6 +60,26 @@ Post::
     }
 
 
+CreateRemoteThreadEx
+====================
+
+Signature::
+
+    * Prune: resolve
+    * Return value: HANDLE
+
+Parameters::
+
+    ** HANDLE hProcess process_handle
+    *  LPSECURITY_ATTRIBUTES lpThreadAttributes
+    ** SIZE_T dwStackSize stack_size
+    ** LPTHREAD_START_ROUTINE lpStartAddress function_address
+    ** LPVOID lpParameter parameter
+    ** DWORD dwCreationFlags flags
+    ** LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList
+    ** LPDWORD lpThreadId thread_identifier
+
+
 Thread32First
 =============
 
