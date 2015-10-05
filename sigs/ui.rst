@@ -300,3 +300,27 @@ Flags::
 
     extended_style
     style
+
+
+_DialogBoxIndirectParamA
+========================
+
+Parameters::
+
+    *  HINSTANCE hInstance
+    *  LPCDLGTEMPLATE hDialogTemplate
+    *  HWND hWndParent
+    *  DLGPROC lpDialogFunc
+    *  LPARAM dwInitParam
+
+
+_DialogBoxIndirectParamW
+========================
+
+Parameters::
+
+    *  HINSTANCE hInstance
+    *  LPCDLGTEMPLATE hDialogTemplate
+    *  HWND hWndParent
+    *  DLGPROC lpDialogFunc
+    *  LPARAM dwInitParam
