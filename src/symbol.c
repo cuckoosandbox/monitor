@@ -36,7 +36,7 @@ const uint8_t *module_from_address(const uint8_t *addr)
     MEMORY_BASIC_INFORMATION_CROSS mbi;
 
     if(virtual_query(addr, &mbi) == FALSE ||
-            page_is_readable((const uint8_t *) mbi.AllocationBase) == 0) {
+            range_is_readable((const uint8_t *) mbi.AllocationBase, 2) == 0) {
         return NULL;
     }
 

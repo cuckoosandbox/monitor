@@ -576,7 +576,7 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
             // Only append the remainder if this is not the full path.
             if(last_ptr != NULL) {
                 // Everything that's behind the long path that we found
-                // including directory seperator.
+                // including directory separator.
                 *ptr = '\\';
                 wcscat(out, ptr);
             }
@@ -1045,7 +1045,9 @@ int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length)
             ctx->Rsp >= bottom && ctx->Rsp < top) {
 
         addrs[count++] = ctx->Rip;
-        if(range_is_readable((uint8_t *) ctx->Rip, sizeof(ctx->Rip)) == 0) {
+
+        // Instructions can be up to 16 bytes in length.
+        if(range_is_readable((uint8_t *) ctx->Rip, 16) == 0) {
             continue;
         }
 
