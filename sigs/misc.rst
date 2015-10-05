@@ -421,3 +421,40 @@ Signature::
 Parameters::
 
     *  LPTIME_ZONE_INFORMATION lpTimeZoneInformation
+
+
+GetFileVersionInfoSizeExW
+=========================
+
+Signature::
+
+    * Is success: ret != 0
+    * Library: version
+    * Return value: DWORD
+
+Parameters::
+
+    ** DWORD dwFlags flags
+    ** LPCWSTR lptstrFilename filepath
+    *  LPDWORD lpdwHandle
+
+
+GetFileVersionInfoExW
+=====================
+
+Signature::
+
+    * Library: version
+    * Return value: BOOL
+
+Parameters::
+
+    ** DWORD dwFlags flags
+    ** LPCWSTR lptstrFilename filepath
+    *  DWORD dwHandle
+    *  DWORD dwLen
+    *  LPVOID lpData
+
+Logging::
+
+    b buffer dwLen, lpData
