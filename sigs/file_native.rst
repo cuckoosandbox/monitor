@@ -76,6 +76,11 @@ Pre::
     path_get_full_path_objattr(ObjectAttributes, filepath);
     pipe("FILE_DEL:%Z", filepath);
 
+    wchar_t *filepath_r = NULL;
+    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
+        filepath_r = ObjectAttributes->ObjectName->Buffer;
+    }
+
 Interesting::
 
     u filepath
@@ -83,6 +88,7 @@ Interesting::
 Logging::
 
     u filepath filepath
+    u filepath_r filepath_r
 
 Post::
 
@@ -377,6 +383,11 @@ Pre::
     wchar_t *dirpath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, dirpath);
 
+    wchar_t *dirpath_r = NULL;
+    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
+        dirpath_r = ObjectAttributes->ObjectName->Buffer;
+    }
+
 Interesting::
 
     u dirpath
@@ -385,6 +396,7 @@ Interesting::
 Logging::
 
     u dirpath dirpath
+    u dirpath_r dirpath_r
 
 Post::
 
@@ -409,6 +421,11 @@ Pre::
     wchar_t *dirpath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, dirpath);
 
+    wchar_t *dirpath_r = NULL;
+    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
+        dirpath_r = ObjectAttributes->ObjectName->Buffer;
+    }
+
 Interesting::
 
     u dirpath
@@ -417,6 +434,7 @@ Interesting::
 Logging::
 
     u dirpath dirpath
+    u dirpath_r dirpath_r
 
 Post::
 
@@ -436,9 +454,15 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
+    wchar_t *filepath_r = NULL;
+    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
+        filepath_r = ObjectAttributes->ObjectName->Buffer;
+    }
+
 Logging::
 
     u filepath filepath
+    u filepath_r filepath_r
 
 Post::
 
@@ -458,9 +482,15 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
+    wchar_t *filepath_r = NULL;
+    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
+        filepath_r = ObjectAttributes->ObjectName->Buffer;
+    }
+
 Logging::
 
     u filepath filepath
+    u filepath_r filepath_r
 
 Post::
 

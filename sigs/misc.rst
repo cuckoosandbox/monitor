@@ -326,6 +326,7 @@ Middle::
 Logging::
 
     u dirpath dirpath
+    u dirpath_r pszPath
 
 Post::
 

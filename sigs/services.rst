@@ -88,6 +88,7 @@ Interesting::
 Logging::
 
     u filepath filepath
+    s filepath_r lpBinaryPathName
 
 Post::
 
@@ -137,6 +138,7 @@ Interesting::
 Logging::
 
     u filepath filepath
+    u filepath_r lpBinaryPathName
 
 Post::
 

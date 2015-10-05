@@ -29,6 +29,11 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
+    wchar_t *filepath_r = NULL;
+    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
+        filepath_r = ObjectAttributes->ObjectName->Buffer;
+    }
+
 Interesting::
 
     u filepath
@@ -38,6 +43,7 @@ Interesting::
 Logging::
 
     u filepath filepath
+    u filepath_r filepath_r
 
 Post::
 
@@ -73,6 +79,11 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
+    wchar_t *filepath_r = NULL;
+    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
+        filepath_r = ObjectAttributes->ObjectName->Buffer;
+    }
+
 Interesting::
 
     u filepath
@@ -82,6 +93,7 @@ Interesting::
 Logging::
 
     u filepath filepath
+    u filepath_r filepath_r
 
 Post::
 
@@ -124,8 +136,20 @@ Pre::
     wchar_t *process_name = get_unicode_buffer();
     path_get_full_path_objattr(ProcessObjectAttributes, process_name);
 
+    wchar_t *process_name_r = NULL;
+    if(ProcessObjectAttributes != NULL &&
+            ProcessObjectAttributes->ObjectName != NULL) {
+        process_name_r = ProcessObjectAttributes->ObjectName->Buffer;
+    }
+
     wchar_t *thread_name = get_unicode_buffer();
     path_get_full_path_objattr(ThreadObjectAttributes, thread_name);
+
+    wchar_t *thread_name_r = NULL;
+    if(ThreadObjectAttributes != NULL &&
+            ThreadObjectAttributes->ObjectName != NULL) {
+        thread_name_r = ThreadObjectAttributes->ObjectName->Buffer;
+    }
 
     wchar_t *filepath =
         extract_unicode_string(&ProcessParameters->ImagePathName);
@@ -135,7 +159,9 @@ Pre::
 Logging::
 
     u process_name process_name
+    u process_name_r process_name_r
     u thread_name thread_name
+    u thread_name_r thread_name_r
     u filepath filepath
     u command_line command_line
 
@@ -176,6 +202,11 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_unistr(ImagePath, filepath);
 
+    wchar_t *filepath_r = NULL;
+    if(ImagePath != NULL) {
+        filepath_r = ImagePath->Buffer;
+    }
+
 Interesting::
 
     u filepath
@@ -185,6 +216,7 @@ Interesting::
 Logging::
 
     u filepath filepath
+    u filepath_r filepath_r
 
 Post::
 

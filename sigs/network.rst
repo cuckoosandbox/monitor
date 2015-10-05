@@ -33,6 +33,7 @@ Pre::
 Logging::
 
     u filepath filepath
+    u filepath_r szFileName
 
 Post::
 

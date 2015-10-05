@@ -58,6 +58,7 @@ Interesting::
 Logging::
 
     u filepath filepath
+    u filepath_r lpApplicationName
     i creation_flags creation_flags
     i process_identifier lpProcessInformation->dwProcessId
     i thread_identifier lpProcessInformation->dwThreadId
@@ -137,6 +138,7 @@ Interesting::
 Logging::
 
     u filepath filepath
+    u filepath_r pExecInfo->lpFile
     u parameters pExecInfo->lpParameters
     i show_type pExecInfo->nShow
 
