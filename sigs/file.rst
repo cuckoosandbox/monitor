@@ -29,6 +29,7 @@ Interesting::
 Logging::
 
     u dirpath dirpath
+    u dirpath_r lpPathName
 
 Post::
 
@@ -60,6 +61,7 @@ Interesting::
 Logging::
 
     u dirpath dirpath
+    u dirpath_r lpNewDirectory
 
 Post::
 
@@ -89,6 +91,7 @@ Interesting::
 Logging::
 
     u dirpath dirpath
+    u dirpath_r lpPathName
 
 Post::
 
@@ -118,6 +121,7 @@ Interesting::
 Logging::
 
     u dirpath dirpath
+    u dirpath_r lpPathName
 
 Post::
 
@@ -157,7 +161,9 @@ Interesting::
 Logging::
 
     u oldfilepath oldfilepath
+    u oldfilepath_r lpExistingFileName
     u newfilepath newfilepath
+    u newfilepath_r lpNewFileName
 
 Post::
 
@@ -198,6 +204,7 @@ Pre::
 Logging::
 
     u filepath filepath
+    s filepath_r lpFileName
 
 Post::
 
@@ -228,6 +235,7 @@ Pre::
 Logging::
 
     u filepath filepath
+    u filepath_r lpFileName
 
 Post::
 
@@ -263,7 +271,9 @@ Interesting::
 Logging::
 
     u oldfilepath oldfilepath
+    s oldfilepath_r lpExistingFileName
     u newfilepath newfilepath
+    s newfilepath_r lpNewFileName
 
 Post::
 
@@ -300,7 +310,9 @@ Interesting::
 Logging::
 
     u oldfilepath oldfilepath
+    u oldfilepath_r lpExistingFileName
     u newfilepath newfilepath
+    u newfilepath_r lpNewFileName
 
 Post::
 
@@ -340,7 +352,9 @@ Interesting::
 Logging::
 
     u oldfilepath oldfilepath
+    u oldfilepath_r lpExistingFileName
     u newfilepath newfilepath
+    u newfilepath_r lpNewFileName
 
 Post::
 
@@ -372,6 +386,7 @@ Interesting::
 Logging::
 
     u filepath filepath
+    u filepath_r lpFileName
 
 Post::
 
@@ -666,6 +681,7 @@ Pre::
 Logging::
 
     u filepath filepath
+    u filepath_r lpFileName
 
 Post::
 
@@ -692,6 +708,7 @@ Pre::
 Logging::
 
     u filepath filepath
+    u filepath_r lpFileName
     i file_attributes ret
 
 Post::
@@ -720,6 +737,7 @@ Pre::
 Logging::
 
     u filepath filepath
+    u filepath_r lpFileName
 
 
 SetEndOfFile
