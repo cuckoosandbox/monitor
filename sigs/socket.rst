@@ -331,8 +331,16 @@ Signature::
 Parameters::
 
     ** SOCKET s socket
-    ** long cmd
-    ** u_long *argp
+    *  long cmd
+    ** u_long *argp arg
+
+Flags::
+
+    cmd
+
+Logging::
+
+    x cmd cmd
 
 
 closesocket

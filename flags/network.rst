@@ -105,3 +105,18 @@ InternetSetOptionA_dwOption
 Inherits::
 
     InternetQueryOptions
+
+
+ioctlsocket_cmd
+===============
+
+Value::
+
+    FIONREAD
+    FIONBIO
+    FIOASYNC
+    SIOCSHIWAT
+    SIOCGHIWAT
+    SIOCSLOWAT
+    SIOCGLOWAT
+    SIOCATMARK
