@@ -461,3 +461,16 @@ Parameters::
 Logging::
 
     b buffer dwLen, lpData
+
+
+NotifyBootConfigStatus
+======================
+
+Signature::
+
+    * Library: advapi32
+    * Return value: BOOL
+
+Parameters::
+
+    ** BOOL BootAcceptable boot_acceptable
