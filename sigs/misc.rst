@@ -431,6 +431,7 @@ Signature::
 
     * Is success: ret != 0
     * Library: version
+    * Prune: resolve
     * Return value: DWORD
 
 Parameters::
@@ -446,6 +447,7 @@ GetFileVersionInfoExW
 Signature::
 
     * Library: version
+    * Prune: resolve
     * Return value: BOOL
 
 Parameters::

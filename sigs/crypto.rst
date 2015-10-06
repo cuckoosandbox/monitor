@@ -101,6 +101,7 @@ CryptProtectMemory
 Signature::
 
     * Library: crypt32
+    * Prune: resolve
     * Return value: BOOL
 
 Parameters::
@@ -120,6 +121,7 @@ CryptUnprotectMemory
 Signature::
 
     * Library: crypt32
+    * Prune: resolve
     * Return value: BOOL
 
 Parameters::
