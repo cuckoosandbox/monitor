@@ -509,3 +509,40 @@ Signature::
 Parameters::
 
     ** BOOL BootAcceptable boot_acceptable
+
+
+TaskDialog
+==========
+
+Signature::
+
+    * Library: comctl32
+    * Return value: HRESULT
+
+Parameters::
+
+    ** HWND hWndParent parent_window_handle
+    ** HINSTANCE hInstance instance_handle
+    *  PCWSTR pszWindowTitle
+    *  PCWSTR pszMainInstruction
+    *  PCWSTR pszContent
+    ** TASKDIALOG_COMMON_BUTTON_FLAGS dwCommonButtons buttons
+    *  PCWSTR pszIcon
+    ** int *pnButton button
+
+Pre::
+
+    wchar_t title_buf[10], description_buf[10], content_buf[10], icon_buf[10];
+    wchar_t *title, *description, *content, *icon;
+
+    int_or_strW(&title, pszWindowTitle, title_buf);
+    int_or_strW(&description, pszMainInstruction, description_buf);
+    int_or_strW(&content, pszContent, content_buf);
+    int_or_strW(&icon, pszIcon, icon_buf);
+
+Logging::
+
+    u title title
+    u description description
+    u content content
+    u icon icon

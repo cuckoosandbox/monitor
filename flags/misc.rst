@@ -93,3 +93,16 @@ Value::
     SM_SHUTTINGDOWN
     SM_REMOTECONTROL
     SM_CARETBLINKINGENABLED
+
+
+TaskDialog_dwCommonButtons
+==========================
+
+Enum::
+
+    TDCBF_OK_BUTTON
+    TDCBF_YES_BUTTON
+    TDCBF_NO_BUTTON
+    TDCBF_CANCEL_BUTTON
+    TDCBF_RETRY_BUTTON
+    TDCBF_CLOSE_BUTTON
