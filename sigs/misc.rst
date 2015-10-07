@@ -424,6 +424,21 @@ Parameters::
     *  LPTIME_ZONE_INFORMATION lpTimeZoneInformation
 
 
+GetFileVersionInfoSizeW
+=======================
+
+Signature::
+
+    * Is success: ret != 0
+    * Library: version
+    * Return value: DWORD
+
+Parameters::
+
+    ** LPCWSTR lptstrFilename filepath
+    *  LPDWORD lpdwHandle
+
+
 GetFileVersionInfoSizeExW
 =========================
 
@@ -439,6 +454,26 @@ Parameters::
     ** DWORD dwFlags flags
     ** LPCWSTR lptstrFilename filepath
     *  LPDWORD lpdwHandle
+
+
+GetFileVersionInfoW
+===================
+
+Signature::
+
+    * Library: version
+    * Return value: BOOL
+
+Parameters::
+
+    ** LPCWSTR lptstrFilename filepath
+    *  DWORD dwHandle
+    *  DWORD dwLen
+    *  LPVOID lpData
+
+Logging::
+
+    b buffer dwLen, lpData
 
 
 GetFileVersionInfoExW
