@@ -422,13 +422,9 @@ Ensure::
 
 Pre::
 
-    char number[32]; const char *struct_type = lpszStructType;
-    if((((uintptr_t) lpszStructType) & 0xffff) ==
-            (uintptr_t) lpszStructType) {
-        our_snprintf(number, sizeof(number),
-            "#%d", (uint16_t) (uintptr_t) lpszStructType);
-        struct_type = number;
-    }
+    char number[10], *struct_type;
+
+    int_or_strA(&struct_type, lpszStructType, number);
 
 Middle::
 

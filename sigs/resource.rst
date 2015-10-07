@@ -20,20 +20,10 @@ Parameters::
 
 Pre::
 
-    char value[10], value2[10];
-    const char *name = lpName, *type = lpType;
+    char value[10], value2[10], *name, *type;
 
-    if(((uintptr_t) lpName & 0xffff) == (uintptr_t) lpName) {
-        our_snprintf(value, sizeof(value),
-            "#%d", (uint16_t) (uintptr_t) lpName);
-        name = value;
-    }
-
-    if(((uintptr_t) lpType & 0xffff) == (uintptr_t) lpType) {
-        our_snprintf(value2, sizeof(value2),
-            "#%d", (uint16_t) (uintptr_t) lpType);
-        type = value2;
-    }
+    int_or_strA(&name, lpName, value);
+    int_or_strA(&type, lpType, value2);
 
 Logging::
 
@@ -56,22 +46,10 @@ Parameters::
 
 Pre::
 
-    char temp[10]; wchar_t value[10], value2[10];
-    const wchar_t *name = lpName, *type = lpType;
+    wchar_t value[10], value2[10], *name, *type;
 
-    if(((uintptr_t) lpName & 0xffff) == (uintptr_t) lpName) {
-        our_snprintf(temp, sizeof(temp),
-            "#%d", (uint16_t) (uintptr_t) lpName);
-        wcsncpyA(value, temp, sizeof(temp));
-        name = value;
-    }
-
-    if(((uintptr_t) lpType & 0xffff) == (uintptr_t) lpType) {
-        our_snprintf(temp, sizeof(temp),
-            "#%d", (uint16_t) (uintptr_t) lpType);
-        wcsncpyA(value2, temp, sizeof(temp));
-        type = value2;
-    }
+    int_or_strW(&name, lpName, value);
+    int_or_strW(&type, lpType, value2);
 
 Logging::
 
@@ -95,20 +73,10 @@ Parameters::
 
 Pre::
 
-    char value[10], value2[10];
-    const char *name = lpName, *type = lpType;
+    char value[10], value2[10], *name, *type;
 
-    if(((uintptr_t) lpName & 0xffff) == (uintptr_t) lpName) {
-        our_snprintf(value, sizeof(value),
-            "#%d", (uint16_t) (uintptr_t) lpName);
-        name = value;
-    }
-
-    if(((uintptr_t) lpType & 0xffff) == (uintptr_t) lpType) {
-        our_snprintf(value2, sizeof(value2),
-            "#%d", (uint16_t) (uintptr_t) lpType);
-        type = value2;
-    }
+    int_or_strA(&name, lpName, value);
+    int_or_strA(&type, lpType, value2);
 
 Logging::
 
@@ -132,22 +100,10 @@ Parameters::
 
 Pre::
 
-    char temp[10]; wchar_t value[10], value2[10];
-    const wchar_t *name = lpName, *type = lpType;
+    wchar_t value[10], value2[10], *name, *type;
 
-    if(((uintptr_t) lpName & 0xffff) == (uintptr_t) lpName) {
-        our_snprintf(temp, sizeof(temp),
-            "#%d", (uint16_t) (uintptr_t) lpName);
-        wcsncpyA(value, temp, sizeof(temp));
-        name = value;
-    }
-
-    if(((uintptr_t) lpType & 0xffff) == (uintptr_t) lpType) {
-        our_snprintf(temp, sizeof(temp),
-            "#%d", (uint16_t) (uintptr_t) lpType);
-        wcsncpyA(value2, temp, sizeof(temp));
-        type = value2;
-    }
+    int_or_strW(&name, lpName, value);
+    int_or_strW(&type, lpType, value2);
 
 Logging::
 

@@ -121,6 +121,9 @@ void chtmtag_attrs(const void *chtmtag, bson *b);
 
 void sha1(const void *buffer, uintptr_t buflen, char *hexdigest);
 
+void int_or_strA(char **ptr, const char *str, char *numbuf);
+void int_or_strW(wchar_t **ptr, const wchar_t *str, wchar_t *numbuf);
+
 #define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
     OBJECT_ATTRIBUTES local_name; UNICODE_STRING local_name##_unistr; \
     wchar_t *local_name##_buffer = get_unicode_buffer(); \

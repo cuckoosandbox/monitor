@@ -1377,3 +1377,26 @@ void sha1(const void *buffer, uintptr_t buflen, char *hexdigest)
             (digest[idx] >>  0) & 0xff);
     }
 }
+
+// Various Windows functions feature a string parameter which can also be a
+// 16-bit integer given that all but the low 16-bits are zero.
+void int_or_strA(char **ptr, const char *str, char *numbuf)
+{
+    *ptr = (char *) str;
+
+    if(((uintptr_t) str & 0xffff) == (uintptr_t) str) {
+        our_snprintf(numbuf, 10, "#%d", (uint16_t)(uintptr_t) str);
+        *ptr = numbuf;
+    }
+}
+
+void int_or_strW(wchar_t **ptr, const wchar_t *str, wchar_t *numbuf)
+{
+    char temp[10]; *ptr = (wchar_t *) str;
+
+    if(((uintptr_t) str & 0xffff) == (uintptr_t) str) {
+        our_snprintf(temp, 10, "#%d", (uint16_t)(uintptr_t) str);
+        wcsncpyA(numbuf, temp, sizeof(temp));
+        *ptr = numbuf;
+    }
+}
