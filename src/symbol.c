@@ -106,6 +106,13 @@ static int _eat_pointers_for_module(const uint8_t *mod,
     IMAGE_EXPORT_DIRECTORY *export_directory = (IMAGE_EXPORT_DIRECTORY *)(
         mod + export_data_directory->VirtualAddress);
 
+    // Due to corrupted PE files or incorrect loading of the PE file by us
+    // the export directory may point to invalid memory. If so, don't crash.
+    if(range_is_readable(export_directory,
+            sizeof(IMAGE_EXPORT_DIRECTORY)) == 0) {
+        return -1;
+    }
+
     *number_of_names = export_directory->NumberOfNames;
     *function_addresses = (uint32_t *)(
         mod + export_directory->AddressOfFunctions);
