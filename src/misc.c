@@ -1400,3 +1400,30 @@ void int_or_strW(wchar_t **ptr, const wchar_t *str, wchar_t *numbuf)
         *ptr = numbuf;
     }
 }
+
+uint8_t *our_memmem(
+    uint8_t *haystack, uint32_t haylength,
+    const void *needle, uint32_t needlength,
+    uint32_t *idx)
+{
+    uint32_t _idx = 0;
+
+    if(idx == NULL) {
+        idx = &_idx;
+    }
+
+    for (; *idx < haylength - needlength; *idx += 1) {
+        if(memcmp(&haystack[*idx], needle, needlength) == 0) {
+            return &haystack[*idx];
+        }
+    }
+    return NULL;
+}
+
+uint8_t *our_memmemW(
+    const void *haystack, uint32_t haylength,
+    const wchar_t *needle, uint32_t *idx)
+{
+    return our_memmem((uint8_t *) haystack, haylength, needle,
+        lstrlenW(needle) * sizeof(wchar_t), idx);
+}

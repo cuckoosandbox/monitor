@@ -124,6 +124,14 @@ void sha1(const void *buffer, uintptr_t buflen, char *hexdigest);
 void int_or_strA(char **ptr, const char *str, char *numbuf);
 void int_or_strW(wchar_t **ptr, const wchar_t *str, wchar_t *numbuf);
 
+uint8_t *our_memmem(
+    uint8_t *haystack, uint32_t haylength,
+    const void *needle, uint32_t needlength,
+    uint32_t *idx);
+uint8_t *our_memmemW(
+    const void *haystack, uint32_t haylength,
+    const wchar_t *needle, uint32_t *idx);
+
 #define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
     OBJECT_ATTRIBUTES local_name; UNICODE_STRING local_name##_unistr; \
     wchar_t *local_name##_buffer = get_unicode_buffer(); \

@@ -23,35 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "bson.h"
 #include "hooking.h"
 #include "memory.h"
+#include "misc.h"
 #include "pipe.h"
 #include "symbol.h"
 #include "utf8.h"
-
-static uint8_t *memmem(
-    uint8_t *haystack, uint32_t haylength,
-    const void *needle, uint32_t needlength,
-    uint32_t *idx)
-{
-    uint32_t _idx = 0;
-
-    if(idx == NULL) {
-        idx = &_idx;
-    }
-
-    for (; *idx < haylength - needlength; *idx += 1) {
-        if(memcmp(&haystack[*idx], needle, needlength) == 0) {
-            return &haystack[*idx];
-        }
-    }
-    return NULL;
-}
-
-static uint8_t *memmemW(const void *haystack, uint32_t haylength,
-    const wchar_t *needle, uint32_t *idx)
-{
-    return memmem((uint8_t *) haystack, haylength, needle,
-        lstrlenW(needle) * sizeof(wchar_t), idx);
-}
 
 #if __x86_64__
 
@@ -149,7 +124,7 @@ uint8_t *hook_addrcb_COleScript_Compile(hook_t *h,
 #endif
 
     // Locate address of the "eval code" string.
-    uint8_t *eval_code_addr = memmem(module_address, module_size,
+    uint8_t *eval_code_addr = our_memmem(module_address, module_size,
         L"eval code", sizeof(L"eval code"), NULL);
     if(eval_code_addr == NULL) {
         pipe("WARNING:COleScript::Compile error locating 'eval code' "
@@ -244,7 +219,7 @@ uint8_t *hook_addrcb_CDocument_write(hook_t *h,
 
     // Locate a possible address of the "\r\n" string.
     for (uint32_t idx = 0; idx < module_size - 20; idx++) {
-        uint8_t *newline_addr = memmem(module_address, module_size,
+        uint8_t *newline_addr = our_memmem(module_address, module_size,
             L"\r\n", sizeof(L"\r\n"), &idx);
         if(newline_addr == NULL) {
             break;
@@ -323,7 +298,7 @@ uint8_t *hook_addrcb_CIFrameElement_CreateElement(
 #endif
 
     // Locate the "IFRAME" string.
-    uint8_t *iframe_addr = memmem(module_address, module_size,
+    uint8_t *iframe_addr = our_memmem(module_address, module_size,
         L"IFRAME", sizeof(L"IFRAME"), NULL);
     if(iframe_addr == NULL) {
         pipe("WARNING:CIFrameElement::CreateElement error locating "
@@ -332,7 +307,7 @@ uint8_t *hook_addrcb_CIFrameElement_CreateElement(
     }
 
     // Find the cross-reference of the 'IFRAME' string.
-    uint8_t *ret = memmem(module_address, module_size,
+    uint8_t *ret = our_memmem(module_address, module_size,
         &iframe_addr, sizeof(iframe_addr), NULL);
     if(ret == NULL) {
         pipe("WARNING:CIFrameElement::CreateElement error locating "
@@ -356,7 +331,7 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
     // We're going on a long journey here. First we locate
     // CDoc::CRecalcHost::CompileExpression as that function uses the
     // unique L"return (" string.
-    uint8_t *return_str_addr = memmem(module_address, module_size,
+    uint8_t *return_str_addr = our_memmem(module_address, module_size,
         L"return (", sizeof(L"return ("), NULL);
     if(return_str_addr == NULL) {
         pipe("WARNING:CWindow::AddTimeoutCode unable to locate 'return (' "
@@ -368,7 +343,7 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
 
     for (uint32_t idx = 0; idx < module_size; idx++) {
         // Locate the 'lea rdx, "return ("' instruction.
-        if(memmem(module_address, module_size,
+        if(our_memmem(module_address, module_size,
                 "\x48\x8d\x15", 3, &idx) == NULL) {
             break;
         }
@@ -478,7 +453,7 @@ uint8_t *hook_addrcb_CScriptElement_put_src(
     return NULL;
 #endif
 
-    uint8_t *diid_disphtmlscriptelement = memmem(module_address, module_size,
+    uint8_t *diid_disphtmlscriptelement = our_memmem(module_address, module_size,
         "\x30\xf5\x50\x30\xb5\x98\xcf\x11\xbb\x82\x00\xaa\x00\xbd\xce\x0b",
         16, NULL);
     if(diid_disphtmlscriptelement == NULL) {
@@ -487,7 +462,7 @@ uint8_t *hook_addrcb_CScriptElement_put_src(
         return NULL;
     }
 
-    uint8_t *addr_diid = memmem(module_address, module_size,
+    uint8_t *addr_diid = our_memmem(module_address, module_size,
         &diid_disphtmlscriptelement, sizeof(diid_disphtmlscriptelement),
         NULL);
     if(addr_diid == NULL) {
@@ -496,7 +471,7 @@ uint8_t *hook_addrcb_CScriptElement_put_src(
         return NULL;
     }
 
-    uint8_t *addr_addr_diid = memmem(module_address, module_size,
+    uint8_t *addr_addr_diid = our_memmem(module_address, module_size,
         &addr_diid, sizeof(addr_diid), NULL);
     if(addr_diid == NULL) {
         pipe("WARNING:CScriptElement::put_src unable to find cross-reference "
@@ -525,7 +500,7 @@ uint8_t *hook_addrcb_CElement_put_innerHTML(
     return NULL;
 #endif
 
-    uint8_t *innerhtml_addr = memmem(module_address, module_size,
+    uint8_t *innerhtml_addr = our_memmem(module_address, module_size,
         L"innerHTML", sizeof(L"innerHTML"), NULL);
     if(innerhtml_addr == NULL) {
         pipe("WARNING:CElement::put_innerHTML unable to find 'innerHTML' "
@@ -533,7 +508,7 @@ uint8_t *hook_addrcb_CElement_put_innerHTML(
         return NULL;
     }
 
-    uint8_t *innerhtml_xref = memmem(module_address, module_size,
+    uint8_t *innerhtml_xref = our_memmem(module_address, module_size,
         &innerhtml_addr, sizeof(innerhtml_addr), NULL);
     if(innerhtml_xref == NULL) {
         pipe("WARNING:CElement::put_innerHTML unable to find 'innerHTML' "
@@ -543,7 +518,7 @@ uint8_t *hook_addrcb_CElement_put_innerHTML(
 
     uint8_t *propdesc_innerhtml = innerhtml_xref - sizeof(uintptr_t);
     for (uint32_t idx = 0; idx < module_size; idx++) {
-        if(memmem(module_address, module_size,
+        if(our_memmem(module_address, module_size,
                 "\x4c\x8d\x0d", 3, &idx) == NULL) {
             pipe("WARNING:CElement::put_innerHTML unable to locate "
                 "'lea r9, propdesc_innerHTML' instruction [aborting hook]");
@@ -573,7 +548,7 @@ uint8_t *hook_addrcb_PRF(
 {
     (void) h;
 
-    uint8_t *master_secret_addr = memmem(module_address, module_size,
+    uint8_t *master_secret_addr = our_memmem(module_address, module_size,
         "master secret", sizeof("master secret"), NULL);
     if(master_secret_addr == NULL) {
         pipe("WARNING:PRF unable to find 'master secret' "
@@ -583,7 +558,7 @@ uint8_t *hook_addrcb_PRF(
 
 #if __x86_64__
     for (uint32_t idx = 0; idx < module_size; idx++) {
-        if(memmem(module_address, module_size,
+        if(our_memmem(module_address, module_size,
                 "\x48\x8d\x05", 3, &idx) == NULL) {
             break;
         }
@@ -607,7 +582,7 @@ uint8_t *hook_addrcb_PRF(
     uint8_t push_buf[5] = {0x68};
     *(uint8_t **)(push_buf + 1) = master_secret_addr;
 
-    uint8_t *master_secret_xref = memmem(module_address, module_size,
+    uint8_t *master_secret_xref = our_memmem(module_address, module_size,
         push_buf, sizeof(push_buf), NULL);
     if(master_secret_xref == NULL) {
         pipe("WARNING:PRF unable to locate the 'master secret' "
