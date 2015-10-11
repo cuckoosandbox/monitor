@@ -1427,3 +1427,11 @@ uint8_t *our_memmemW(
     return our_memmem((uint8_t *) haystack, haylength, needle,
         lstrlenW(needle) * sizeof(wchar_t), idx);
 }
+
+uint32_t sys_string_length(const BSTR bstr)
+{
+    if(bstr != NULL) {
+        return *((uint32_t *) bstr - 1) / sizeof(wchar_t);
+    }
+    return 0;
+}

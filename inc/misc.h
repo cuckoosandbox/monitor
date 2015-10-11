@@ -132,6 +132,8 @@ uint8_t *our_memmemW(
     const void *haystack, uint32_t haylength,
     const wchar_t *needle, uint32_t *idx);
 
+uint32_t sys_string_length(const BSTR bstr);
+
 #define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
     OBJECT_ATTRIBUTES local_name; UNICODE_STRING local_name##_unistr; \
     wchar_t *local_name##_buffer = get_unicode_buffer(); \

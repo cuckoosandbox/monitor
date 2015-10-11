@@ -52,12 +52,9 @@ Middle::
     for (uint32_t idx = 0, jdx = 0; idx < arr->rgsabound[0].cElements;
             idx++, elements++) {
         if(elements->vt == VT_BSTR && elements->bstrVal != NULL) {
-            uint32_t length = *(uint32_t *)(
-                (uint8_t *) elements->bstrVal - sizeof(uint32_t));
-
             our_snprintf(index, sizeof(index), "%d", jdx++);
             log_wstring(&b, index, elements->bstrVal,
-                length / sizeof(wchar_t));
+                sys_string_length(elements->bstrVal));
         }
     }
 
