@@ -33,6 +33,24 @@ static CLSID our_IID_IUnknown = {
     0x00000000, 0x0000, 0x0000, {0xc0,0x00, 0x00,0x00,0x00,0x00,0x00,0x46},
 };
 
+static HRESULT (WINAPI *pCoCreateInstance)(REFCLSID rclsid,
+    LPUNKNOWN pUnkOuter, DWORD dwClsContext, REFIID riid, LPVOID *ppv);
+
+void init_co_create_instance()
+{
+    if(pCoCreateInstance != NULL) {
+        return;
+    }
+
+    HANDLE module_handle = GetModuleHandle("ole32");
+    if(module_handle == NULL) {
+        return;
+    }
+
+    *(FARPROC *) &pCoCreateInstance =
+        GetProcAddress(module_handle, "CoCreateInstance");
+}
+
 uint8_t *hook_addrcb_IWbemServices_ExecQuery(hook_t *h,
     uint8_t *module_address, uint32_t module_size)
 {
@@ -40,8 +58,10 @@ uint8_t *hook_addrcb_IWbemServices_ExecQuery(hook_t *h,
 
     h->is_hooked = 1;
 
+    init_co_create_instance();
+
     IWbemLocator *wbem_locator = NULL;
-    if(SUCCEEDED(CoCreateInstance(&our_CLSID_WbemLocator, NULL,
+    if(SUCCEEDED(pCoCreateInstance(&our_CLSID_WbemLocator, NULL,
             CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER, &our_IID_IUnknown,
             (void **) &wbem_locator)) == FALSE) {
         pipe("WARNING:IWbemServices::ExecQuery error creating "
@@ -74,8 +94,10 @@ uint8_t *hook_addrcb_IWbemServices_ExecQueryAsync(hook_t *h,
 
     h->is_hooked = 1;
 
+    init_co_create_instance();
+
     IWbemLocator *wbem_locator = NULL;
-    if(SUCCEEDED(CoCreateInstance(&our_CLSID_WbemLocator, NULL,
+    if(SUCCEEDED(pCoCreateInstance(&our_CLSID_WbemLocator, NULL,
             CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER, &our_IID_IUnknown,
             (void **) &wbem_locator)) == FALSE) {
         pipe("WARNING:IWbemServices::ExecQueryAsync error creating "
