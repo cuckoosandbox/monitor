@@ -100,7 +100,7 @@ def compile_file(fname, arch):
     ALL.append(output_exe)
     return [
         '%s: %s %s' % (output_exe, fname, files),
-        '\t%s -o %s %s %s %s' % (compiler, output_exe, fname, args, files),
+        '\t%s -o %s %s %s %s' % (compiler, output_exe, fname, files, args),
         '',
     ]
 
@@ -117,5 +117,5 @@ if __name__ == '__main__':
 
     with open(os.path.join(curdir, 'Makefile'), 'wb') as f:
         f.write('all: %s\n' % ' '.join(ALL))
-        f.write('clean: %s\n\trm $^\n\n' % ' '.join(ALL))
+        f.write('clean:\n\trm -f %s\n\n' % ' '.join(ALL))
         f.write('\n'.join(lines))
