@@ -11,7 +11,7 @@ CoCreateInstance
 
 Parameters::
 
-    ** REFCLSID rclsid
+    ** REFCLSID rclsid clsid
     *  LPUNKNOWN pUnkOuter
     ** DWORD dwClsContext class_context
     ** REFIID riid
@@ -62,11 +62,11 @@ CoCreateInstanceEx
 
 Parameters::
 
-    ** REFCLSID rclsid
+    ** REFCLSID rclsid clsid
     *  IUnknown *punkOuter
     ** DWORD dwClsCtx class_context
     *  COSERVERINFO *pServerInfo
-    ** DWORD dwCount
+    ** DWORD dwCount count
     *  MULTI_QI *pResults
 
 
@@ -75,7 +75,7 @@ CoGetClassObject
 
 Parameters::
 
-    ** REFCLSID rclsid
+    ** REFCLSID rclsid clsid
     ** DWORD dwClsContext class_context
     *  COSERVERINFO *pServerInfo
     ** REFIID riid
