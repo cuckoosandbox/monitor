@@ -577,6 +577,16 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             clsid_to_string(rclsid, buf);
             log_string(&b, idx, buf, -1);
         }
+        else if(*fmt == 't') {
+            const BSTR bstr = va_arg(args, const BSTR);
+            const wchar_t *s = L""; uint32_t len = 0;
+            if(bstr != NULL) {
+                s = (const wchar_t *) bstr;
+                len = sys_string_length(bstr);
+            }
+
+            log_wstring(&b, idx, s, len);
+        }
         else {
             char buf[2] = {*fmt, 0};
             pipe("CRITICAL:Invalid format specifier: %z", buf);

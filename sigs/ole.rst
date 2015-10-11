@@ -23,6 +23,10 @@ Interesting::
     i class_context
     b sizeof(IID), riid
 
+Post::
+
+    ole_enable_hooks(rclsid);
+
 
 OleInitialize
 =============
@@ -69,6 +73,10 @@ Parameters::
     ** DWORD dwCount count
     *  MULTI_QI *pResults
 
+Post::
+
+    ole_enable_hooks(rclsid);
+
 
 CoGetClassObject
 ================
@@ -80,3 +88,7 @@ Parameters::
     *  COSERVERINFO *pServerInfo
     ** REFIID riid
     *  LPVOID *ppv
+
+Post::
+
+    ole_enable_hooks(rclsid);
