@@ -57,6 +57,10 @@ uint32_t module_image_size(const uint8_t *addr)
         return g_monitor_image_size;
     }
 
+    if(addr == NULL) {
+        return 0;
+    }
+
     IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) addr;
     if(image_dos_header->e_magic != IMAGE_DOS_SIGNATURE) {
         return 0;

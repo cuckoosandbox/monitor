@@ -631,9 +631,6 @@ int hook(hook_t *h, void *module_handle)
         h->module_handle = module_handle;
         if(h->module_handle == NULL) {
             h->module_handle = GetModuleHandle(h->library);
-            if(h->module_handle == NULL) {
-                return 0;
-            }
         }
     }
 
@@ -654,6 +651,10 @@ int hook(hook_t *h, void *module_handle)
 
     // Try to obtain the address dynamically.
     if(h->addr == NULL) {
+        if(h->module_handle == NULL) {
+            return 0;
+        }
+
         h->addr = (uint8_t *) GetProcAddress(h->module_handle, h->funcname);
         if(h->addr == NULL) {
             if((h->report & HOOK_PRUNE_RESOLVERR) != HOOK_PRUNE_RESOLVERR) {
