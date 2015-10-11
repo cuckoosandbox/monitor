@@ -31,4 +31,6 @@ void ignored_object_add(HANDLE object_handle);
 void ignored_object_remove(HANDLE object_handle);
 int is_ignored_object_handle(HANDLE object_handle);
 
+int monitor_mode_should_propagate(const wchar_t *cmdline, uint32_t *mode);
+
 #endif

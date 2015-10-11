@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <windows.h>
+#include "hooking.h"
 #include "memory.h"
+#include "monitor.h"
+#include "misc.h"
 #include "ntapi.h"
 #include "pipe.h"
 
@@ -102,4 +105,40 @@ int is_ignored_object_handle(HANDLE object_handle)
     uintptr_t index = (uintptr_t) object_handle / 4;
 
     return array_get(&g_ignored_handles, index) != NULL;
+}
+
+// Determines whether a created process should be injected. And if injected,
+// what its monitoring mode should be.
+int monitor_mode_should_propagate(const wchar_t *cmdline, uint32_t *mode)
+{
+    // Monitor everything. This is the default.
+    if(cmdline == NULL || g_monitor_mode == HOOK_MODE_ALL) {
+        return 0;
+    }
+
+    uint32_t length = lstrlenW(cmdline) * sizeof(wchar_t);
+
+    // Assuming the following is a legitimate process in iexplore monitoring
+    // mode; "iexplore.exe SCODEF:1234 CREDAT:5678".
+    if((g_monitor_mode & HOOK_MODE_IEXPLORE) == HOOK_MODE_IEXPLORE &&
+            our_memmemW(cmdline, length, L"iexplore.exe", NULL) != NULL &&
+            our_memmemW(cmdline, length, L"SCODEF:", NULL) != NULL &&
+            our_memmemW(cmdline, length, L"CREDAT:", NULL) != NULL) {
+        *mode |= g_monitor_mode & (HOOK_MODE_IEXPLORE|HOOK_MODE_EXPLOIT);
+        pipe("DEBUG:Following legitimate iexplore process: %Z!", cmdline);
+        return 0;
+    }
+
+    // Ignoring the following process in iexplore monitoring;
+    // "ie4uinit.exe -ShowQLIcon".
+    if((g_monitor_mode & HOOK_MODE_IEXPLORE) == HOOK_MODE_IEXPLORE &&
+            our_memmemW(cmdline, length, L"ie4uinit.exe", NULL) != NULL &&
+            our_memmemW(cmdline, length, L"-ShowQLIcon", NULL) != NULL) {
+        pipe("DEBUG:Ignoring process %Z!", cmdline);
+        return -1;
+    }
+
+    pipe("CRITICAL:Encountered an unknown process while in "
+        "monitoring mode: %Z!", cmdline);
+    return 0;
 }

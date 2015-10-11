@@ -70,16 +70,19 @@ Post::
     if(ret != FALSE) {
         uint32_t mode = HOOK_MODE_ALL;
 
-        // In case it's required propagate the Internet Explorer monitoring
-        // mode.
-        if(iexplore_should_propagate_monitor_mode(lpCommandLine) != 0) {
-            mode |= g_monitor_mode & (HOOK_MODE_IEXPLORE|HOOK_MODE_EXPLOIT);
+        const wchar_t *command_line = lpCommandLine;
+        if(command_line == NULL) {
+            command_line = lpApplicationName;
         }
 
-        pipe("PROCESS2:%d,%d,%d",
-            lpProcessInformation->dwProcessId,
-            lpProcessInformation->dwThreadId,
-            mode);
+        // Let's ask nicely whether we want to propagate execution into this
+        // new process and if so, in what monitoring mode.
+        if(monitor_mode_should_propagate(command_line, &mode) == 0) {
+            pipe("PROCESS2:%d,%d,%d",
+                lpProcessInformation->dwProcessId,
+                lpProcessInformation->dwThreadId,
+                mode);
+        }
 
         // If the CREATE_SUSPENDED flag was not set then we have to resume
         // the main thread ourselves.
