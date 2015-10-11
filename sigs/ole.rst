@@ -3,14 +3,11 @@ Signature::
     * Calling convention: WINAPI
     * Category: ole
     * Library: ole32
+    * Return value: HRESULT
 
 
 CoCreateInstance
 ================
-
-Signature::
-
-    * Return value: HRESULT
 
 Parameters::
 
@@ -30,10 +27,6 @@ Interesting::
 OleInitialize
 =============
 
-Signature::
-
-    * Return value: HRESULT
-
 Parameters::
 
     *  LPVOID pvReserved
@@ -41,10 +34,6 @@ Parameters::
 
 CoInitializeEx
 ==============
-
-Signature::
-
-    * Return value: HRESULT
 
 Parameters::
 
@@ -54,10 +43,6 @@ Parameters::
 
 CoInitializeSecurity
 ====================
-
-Signature::
-
-    * Return value: HRESULT
 
 Parameters::
 
@@ -70,3 +55,28 @@ Parameters::
     *  void *pAuthList
     *  DWORD dwCapabilities
     *  void *pReserved3
+
+
+CoCreateInstanceEx
+==================
+
+Parameters::
+
+    ** REFCLSID rclsid
+    *  IUnknown *punkOuter
+    ** DWORD dwClsCtx class_context
+    *  COSERVERINFO *pServerInfo
+    ** DWORD dwCount
+    *  MULTI_QI *pResults
+
+
+CoGetClassObject
+================
+
+Parameters::
+
+    ** REFCLSID rclsid
+    ** DWORD dwClsContext class_context
+    *  COSERVERINFO *pServerInfo
+    ** REFIID riid
+    *  LPVOID *ppv
