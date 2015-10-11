@@ -366,27 +366,6 @@ Parameters::
     *  int cLength
 
 
-CoInitializeSecurity
-====================
-
-Signature::
-
-    * Library: ole32
-    * Return value: HRESULT
-
-Parameters::
-
-    *  PSECURITY_DESCRIPTOR pSecDesc
-    *  LONG cAuthSvc
-    *  SOLE_AUTHENTICATION_SERVICE *asAuthSvc
-    *  void *pReserved1
-    *  DWORD dwAuthnLevel
-    *  DWORD dwImpLevel
-    *  void *pAuthList
-    *  DWORD dwCapabilities
-    *  void *pReserved3
-
-
 UuidCreate
 ==========
 
