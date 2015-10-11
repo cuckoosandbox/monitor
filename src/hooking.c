@@ -627,20 +627,18 @@ int hook(hook_t *h, void *module_handle)
         return 0;
     }
 
+    h->module_handle = module_handle;
     if(h->module_handle == NULL) {
-        h->module_handle = module_handle;
-        if(h->module_handle == NULL) {
-            h->module_handle = GetModuleHandle(h->library);
+        h->module_handle = GetModuleHandle(h->library);
 
-            // There is only one case in which a nullptr module handle is
-            // allowed and that's when there is an address callback and the
-            // library starts as well as ends with two underscores.
-            const char *end = h->library + strlen(h->library);
-            if(h->module_handle == NULL &&
-                    (h->library[0] == '_' && h->library[1] == '_' &&
-                    end[-1] == '_' && end[-2] == '_') == 0) {
-                return 0;
-            }
+        // There is only one case in which a nullptr module handle is
+        // allowed and that's when there is an address callback and the
+        // library starts as well as ends with two underscores.
+        const char *end = h->library + strlen(h->library);
+        if(h->module_handle == NULL &&
+                (h->library[0] == '_' && h->library[1] == '_' &&
+                end[-1] == '_' && end[-2] == '_') == 0) {
+            return 0;
         }
     }
 
