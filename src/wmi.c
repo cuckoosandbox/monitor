@@ -64,11 +64,16 @@ uint8_t *hook_addrcb_IWbemServices_ExecQuery(hook_t *h,
     }
 
     IWbemLocator *wbem_locator = NULL;
-    if(SUCCEEDED(pCoCreateInstance(&our_CLSID_WbemLocator, NULL,
-            CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER, &our_IID_IUnknown,
-            (void **) &wbem_locator)) == FALSE) {
+    HRESULT res = pCoCreateInstance(&our_CLSID_WbemLocator, NULL,
+        CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER, &our_IID_IUnknown,
+        (void **) &wbem_locator);
+    if(res == CO_E_NOTINITIALIZED) {
+        h->is_hooked = 0;
+        return NULL;
+    }
+    if(SUCCEEDED(res) == FALSE) {
         pipe("WARNING:IWbemServices::ExecQuery error creating "
-            "instance [aborting hook]");
+            "instance error=0x%x [aborting hook]", res);
         h->is_hooked = 0;
         return NULL;
     }
@@ -102,11 +107,16 @@ uint8_t *hook_addrcb_IWbemServices_ExecQueryAsync(hook_t *h,
     }
 
     IWbemLocator *wbem_locator = NULL;
-    if(SUCCEEDED(pCoCreateInstance(&our_CLSID_WbemLocator, NULL,
-            CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER, &our_IID_IUnknown,
-            (void **) &wbem_locator)) == FALSE) {
+    HRESULT res = pCoCreateInstance(&our_CLSID_WbemLocator, NULL,
+        CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER, &our_IID_IUnknown,
+        (void **) &wbem_locator);
+    if(res == CO_E_NOTINITIALIZED) {
+        h->is_hooked = 0;
+        return NULL;
+    }
+    if(SUCCEEDED(res) == FALSE) {
         pipe("WARNING:IWbemServices::ExecQueryAsync error creating "
-            "instance [aborting hook]");
+            "instance error=0x%x [aborting hook]", res);
         h->is_hooked = 0;
         return NULL;
     }
