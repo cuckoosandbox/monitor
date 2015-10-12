@@ -5,6 +5,7 @@ Signature::
     * Category: misc
     * Library: __wmi__
     * Mode: iexplore
+    * Prune: resolve
     * Return value: HRESULT
 
 
