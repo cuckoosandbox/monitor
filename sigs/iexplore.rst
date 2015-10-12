@@ -105,11 +105,11 @@ Middle::
 
     bson b;
     bson_init_size(&b, mem_suggested_size(1024));
-    bson_append_start_array(&b, "attributed");
+    bson_append_start_object(&b, "attributes");
 
     chtmtag_attrs(chtmtag, &b);
 
-    bson_append_finish_array(&b);
+    bson_append_finish_object(&b);
     bson_finish(&b);
 
 Logging::

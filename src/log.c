@@ -571,7 +571,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
                 bson_iterator i;
                 bson_iterator_init(&i, value);
                 bson_iterator_next(&i);
-                bson_append_element(&b, NULL, &i);
+                bson_append_element(&b, idx, &i);
             }
         }
         else if(*fmt == 'c') {
@@ -642,12 +642,16 @@ void log_anomaly(const char *subcategory,
 void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
     uintptr_t *return_addresses, uint32_t count)
 {
-    char buf[128]; bson b, s, e;
+    char buf[128]; bson e, r, s;
     static int exception_count;
 
-    bson_init(&b);
-    bson_init(&s);
     bson_init(&e);
+    bson_init(&r);
+    bson_init(&s);
+
+    bson_append_start_object(&e, "exception");
+    bson_append_start_object(&r, "registers");
+    bson_append_start_array(&s, "stacktrace");
 
     if(exception_count++ == EXCEPTION_MAXCOUNT) {
         our_snprintf(buf, sizeof(buf), "Encountered %d exceptions, quitting.",
@@ -692,7 +696,7 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
 #endif
 
     for (uint32_t idx = 0; regnames[idx] != NULL; idx++) {
-        bson_append_long(&b, regnames[idx], regvalues[idx]);
+        bson_append_long(&r, regnames[idx], regvalues[idx]);
     }
 
     char sym[512], number[20];
@@ -734,15 +738,19 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
         bson_append_string(&s, number, sym);
     }
 
-    bson_finish(&e);
-    bson_finish(&s);
-    bson_finish(&b);
+    bson_append_finish_object(&e);
+    bson_append_finish_object(&r);
+    bson_append_finish_array(&s);
 
-    log_api(sig_index_exception(), 1, 0, 0, NULL, &e, &b, &s);
+    bson_finish(&e);
+    bson_finish(&r);
+    bson_finish(&s);
+
+    log_api(sig_index_exception(), 1, 0, 0, NULL, &e, &r, &s);
 
     bson_destroy(&e);
+    bson_destroy(&r);
     bson_destroy(&s);
-    bson_destroy(&b);
 }
 
 static void *_bson_malloc(size_t length)
