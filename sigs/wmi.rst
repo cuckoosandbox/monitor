@@ -1,17 +1,15 @@
 Signature::
 
+    * Callback: addr
     * Calling convention: WINAPI
     * Category: misc
+    * Library: __wmi__
+    * Mode: iexplore
+    * Return value: HRESULT
 
 
 IWbemServices_ExecQuery
 =======================
-
-Signature::
-
-    * Callback: addr
-    * Library: __wmi__
-    * Return value: HRESULT
 
 Parameters::
 
@@ -25,12 +23,6 @@ Parameters::
 
 IWbemServices_ExecQueryAsync
 ============================
-
-Signature::
-
-    * Callback: addr
-    * Library: __wmi__
-    * Return value: HRESULT
 
 Parameters::
 

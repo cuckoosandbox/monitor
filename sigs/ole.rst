@@ -3,6 +3,7 @@ Signature::
     * Calling convention: WINAPI
     * Category: ole
     * Library: ole32
+    * Mode: iexplore
     * Return value: HRESULT
 
 
@@ -70,7 +71,7 @@ Parameters::
     *  IUnknown *punkOuter
     ** DWORD dwClsCtx class_context
     *  COSERVERINFO *pServerInfo
-    ** DWORD dwCount count
+    *  DWORD dwCount
     *  MULTI_QI *pResults
 
 Pre::
