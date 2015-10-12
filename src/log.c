@@ -122,7 +122,7 @@ static void log_intptr(bson *b, const char *idx, intptr_t value)
 #endif
 }
 
-static void log_string(bson *b, const char *idx, const char *str, int length)
+void log_string(bson *b, const char *idx, const char *str, int length)
 {
     if(str == NULL) {
         bson_append_string_n(b, idx, "", 0);
@@ -568,7 +568,10 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
                 bson_append_null(&b, idx);
             }
             else {
-                bson_append_bson(&b, idx, value);
+                bson_iterator i;
+                bson_iterator_init(&i, value);
+                bson_iterator_next(&i);
+                bson_append_element(&b, NULL, &i);
             }
         }
         else if(*fmt == 'c') {

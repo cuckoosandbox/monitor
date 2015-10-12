@@ -118,6 +118,7 @@ Middle::
 
     bson registers;
     bson_init(&registers);
+    bson_append_start_array(&registers, "registers");
 
     // TODO What about WOW64 processes?
     if(Context != NULL) {
@@ -152,6 +153,7 @@ Middle::
     #endif
     }
 
+    bson_append_finish_array(&registers);
     bson_finish(&registers);
 
 Logging::

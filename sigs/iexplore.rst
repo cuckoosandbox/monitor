@@ -47,6 +47,7 @@ Middle::
 
     bson b; char index[8];
     bson_init_size(&b, mem_suggested_size(4096));
+    bson_append_start_array(&b, "lines");
 
     VARIANT *elements = (VARIANT *) arr->pvData;
     for (uint32_t idx = 0, jdx = 0; idx < arr->rgsabound[0].cElements;
@@ -58,6 +59,7 @@ Middle::
         }
     }
 
+    bson_append_finish_array(&b);
     bson_finish(&b);
 
 Logging::
@@ -102,9 +104,12 @@ Parameters::
 Middle::
 
     bson b;
-
     bson_init_size(&b, mem_suggested_size(1024));
+    bson_append_start_array(&b, "attributed");
+
     chtmtag_attrs(chtmtag, &b);
+
+    bson_append_finish_array(&b);
     bson_finish(&b);
 
 Logging::

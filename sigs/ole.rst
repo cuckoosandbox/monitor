@@ -73,9 +73,30 @@ Parameters::
     ** DWORD dwCount count
     *  MULTI_QI *pResults
 
+Pre::
+
+    bson b; char index[8], clsid[64];
+    bson_init(&b);
+
+    bson_append_start_array(&b, "iid");
+
+    for (uint32_t idx = 0; idx < dwCount; idx++) {
+        our_snprintf(index, sizeof(index), "%d", idx++);
+        clsid_to_string(pResults->pIID, clsid);
+        log_string(&b, index, clsid, -1);
+    }
+
+    bson_append_finish_array(&b);
+    bson_finish(&b);
+
+Logging::
+
+    z iid &b
+
 Post::
 
     ole_enable_hooks(rclsid);
+    bson_destroy(&b);
 
 
 CoGetClassObject
