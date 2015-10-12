@@ -36,19 +36,20 @@ static CLSID our_IID_IUnknown = {
 static HRESULT (WINAPI *pCoCreateInstance)(REFCLSID rclsid,
     LPUNKNOWN pUnkOuter, DWORD dwClsContext, REFIID riid, LPVOID *ppv);
 
-void init_co_create_instance()
+int init_co_create_instance()
 {
     if(pCoCreateInstance != NULL) {
-        return;
+        return -1;
     }
 
     HANDLE module_handle = GetModuleHandle("ole32");
     if(module_handle == NULL) {
-        return;
+        return -1;
     }
 
     *(FARPROC *) &pCoCreateInstance =
         GetProcAddress(module_handle, "CoCreateInstance");
+    return 0;
 }
 
 uint8_t *hook_addrcb_IWbemServices_ExecQuery(hook_t *h,
@@ -58,7 +59,9 @@ uint8_t *hook_addrcb_IWbemServices_ExecQuery(hook_t *h,
 
     h->is_hooked = 1;
 
-    init_co_create_instance();
+    if(init_co_create_instance() < 0) {
+        return NULL;
+    }
 
     IWbemLocator *wbem_locator = NULL;
     if(SUCCEEDED(pCoCreateInstance(&our_CLSID_WbemLocator, NULL,
@@ -94,7 +97,9 @@ uint8_t *hook_addrcb_IWbemServices_ExecQueryAsync(hook_t *h,
 
     h->is_hooked = 1;
 
-    init_co_create_instance();
+    if(init_co_create_instance() < 0) {
+        return NULL;
+    }
 
     IWbemLocator *wbem_locator = NULL;
     if(SUCCEEDED(pCoCreateInstance(&our_CLSID_WbemLocator, NULL,
