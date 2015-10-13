@@ -606,7 +606,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
     bson_destroy(&b);
 }
 
-void log_new_process()
+void log_new_process(int track)
 {
     wchar_t *module_path = get_unicode_buffer();
     GetModuleFileNameW(NULL, module_path, MAX_PATH_W);
@@ -627,7 +627,8 @@ void log_new_process()
 
     log_api(sig_index_process(), 1, 0, 0, NULL, st.dwLowDateTime,
         st.dwHighDateTime, get_current_process_id(),
-        parent_process_identifier(), module_path, command_line, is_64bit);
+        parent_process_identifier(), module_path, command_line,
+        is_64bit, track);
 
     free_unicode_buffer(module_path);
 }
@@ -794,7 +795,7 @@ void WINAPI log_missing_hook(const char *funcname)
     // }
 }
 
-void log_init(const char *pipe_name)
+void log_init(const char *pipe_name, int track)
 {
     InitializeCriticalSection(&g_mutex);
 
@@ -813,5 +814,5 @@ void log_init(const char *pipe_name)
     open_handles();
 
     log_raw("BSON\n", 5);
-    log_new_process();
+    log_new_process(track);
 }
