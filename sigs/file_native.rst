@@ -290,7 +290,6 @@ Interesting::
 
 Logging::
 
-    b file_information IoStatusBlock->Information, FileInformation
     u dirpath dirpath
 
 Post::
@@ -325,10 +324,6 @@ Interesting::
 
     h file_handle
 
-Logging::
-
-    b file_information IoStatusBlock->Information, FileInformation
-
 
 NtSetInformationFile
 ====================
@@ -359,10 +354,6 @@ Pre::
 Interesting::
 
     h file_handle
-
-Logging::
-
-     b file_information Length, FileInformation
 
 
 NtOpenDirectoryObject
