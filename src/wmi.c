@@ -39,7 +39,7 @@ static HRESULT (WINAPI *pCoCreateInstance)(REFCLSID rclsid,
 int init_co_create_instance()
 {
     if(pCoCreateInstance != NULL) {
-        return -1;
+        return 0;
     }
 
     HANDLE module_handle = GetModuleHandle("ole32");
