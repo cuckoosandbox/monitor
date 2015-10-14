@@ -535,3 +535,69 @@ Logging::
     s client_random client_random_repr
     s server_random server_random_repr
     s master_secret master_secret_repr
+
+
+EncryptMessage
+==============
+
+Signature::
+
+    * Library: secur32
+    * Return value: SECURITY_STATUS
+
+Parameters::
+
+    ** PCtxtHandle phContext context_handle
+    ** ULONG fQOP qop
+    *  PSecBufferDesc pMessage
+    ** ULONG MessageSeqNo number
+
+Pre::
+
+    uint8_t *buf = NULL; uintptr_t length = 0;
+
+    if(pMessage != NULL && pMessage->pBuffers != NULL) {
+        secbuf_get_buffer(pMessage->cBuffers,
+            pMessage->pBuffers, &buf, &length);
+    }
+
+Logging::
+
+    !b buffer length, buf
+
+Post::
+
+    mem_free(buf);
+
+
+DecryptMessage
+==============
+
+Signature::
+
+    * Library: secur32
+    * Return value: SECURITY_STATUS
+
+Parameters::
+
+    ** PCtxtHandle phContext context_handle
+    *  PSecBufferDesc pMessage
+    ** ULONG MessageSeqNo number
+    ** PULONG pfQOP qop
+
+Middle::
+
+    uint8_t *buf = NULL; uintptr_t length = 0;
+
+    if(pMessage != NULL && pMessage->pBuffers != NULL) {
+        secbuf_get_buffer(pMessage->cBuffers,
+            pMessage->pBuffers, &buf, &length);
+    }
+
+Logging::
+
+    !b buffer length, buf
+
+Post::
+
+    mem_free(buf);

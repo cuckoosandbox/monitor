@@ -19,9 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MONITOR_NTAPI_H__
 #define MONITOR_NTAPI_H__
 
+#define SECURITY_WIN32
 #include <stdint.h>
 #include <windows.h>
 #include <wincrypt.h>
+#include <security.h>
 
 typedef LONG NTSTATUS;
 typedef void *PIO_APC_ROUTINE;
@@ -35,12 +37,6 @@ typedef struct _STRING {
     USHORT MaximumLength;
     PCHAR  Buffer;
 } ANSI_STRING, *PANSI_STRING;
-
-typedef struct _LSA_UNICODE_STRING {
-    USHORT Length;
-    USHORT MaximumLength;
-    PWSTR  Buffer;
-} LSA_UNICODE_STRING, *PLSA_UNICODE_STRING, UNICODE_STRING, *PUNICODE_STRING;
 
 typedef struct _IO_STATUS_BLOCK {
     union {
@@ -513,8 +509,6 @@ typedef struct _FILE_PIPE_INFORMATION {
     ULONG ReadMode;
     ULONG CompletionMode;
 } FILE_PIPE_INFORMATION, *PFILE_PIPE_INFORMATION;
-
-typedef int EXTENDED_NAME_FORMAT;
 
 typedef struct _LDR_DLL_UNLOADED_NOTIFICATION_DATA {
     ULONG Flags;

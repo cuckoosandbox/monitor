@@ -21,8 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <winsock2.h>
+#include <security.h>
 
 void wsabuf_get_buffer(uint32_t buffer_count, const WSABUF *buffers,
+    uint8_t **ptr, uintptr_t *length);
+
+void secbuf_get_buffer(uint32_t buffer_count, SecBuffer *buffers,
     uint8_t **ptr, uintptr_t *length);
 
 #endif
