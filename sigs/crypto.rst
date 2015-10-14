@@ -62,7 +62,7 @@ Ensure::
 
 Prelog::
 
-    b buffer (uintptr_t) pDataIn->cbData, pDataIn->pbData
+    !b buffer (uintptr_t) pDataIn->cbData, pDataIn->pbData
 
 
 CryptUnprotectData
@@ -92,7 +92,7 @@ Logging::
 
     u description ppszDataDescr != NULL ? *ppszDataDescr : NULL
     b entropy pOptionalEntropy->cbData, pOptionalEntropy->pbData
-    b buffer (uintptr_t) pDataOut->cbData, pDataOut->pbData
+    !b buffer (uintptr_t) pDataOut->cbData, pDataOut->pbData
 
 
 CryptProtectMemory
@@ -112,7 +112,7 @@ Parameters::
 
 Prelog::
 
-    b buffer (uintptr_t) cbData, pData
+    !b buffer (uintptr_t) cbData, pData
 
 
 CryptUnprotectMemory
@@ -132,7 +132,7 @@ Parameters::
 
 Logging::
 
-    b buffer (uintptr_t) cbData, pData
+    !b buffer (uintptr_t) cbData, pData
 
 
 CryptDecrypt
@@ -158,7 +158,7 @@ Ensure::
 
 Logging::
 
-    b buffer (uintptr_t) *pdwDataLen, pbData
+    !b buffer (uintptr_t) *pdwDataLen, pbData
 
 
 CryptEncrypt
@@ -181,7 +181,7 @@ Parameters::
 
 Logging::
 
-    b buffer (uintptr_t) dwBufLen, pbData
+    !b buffer (uintptr_t) dwBufLen, pbData
 
 
 CryptHashData
@@ -201,7 +201,7 @@ Parameters::
 
 Logging::
 
-    b buffer (uintptr_t) dwDataLen, pbData
+    !b buffer (uintptr_t) dwDataLen, pbData
 
 
 CryptDecodeMessage
@@ -234,7 +234,7 @@ Ensure::
 
 Logging::
 
-    b buffer (uintptr_t) *pcbDecoded, pbDecoded
+    !b buffer (uintptr_t) *pcbDecoded, pbDecoded
 
 
 CryptDecryptMessage
@@ -260,7 +260,7 @@ Ensure::
 
 Logging::
 
-    b buffer (uintptr_t) *pcbDecrypted, pbDecrypted
+    !b buffer (uintptr_t) *pcbDecrypted, pbDecrypted
 
 
 CryptEncryptMessage
@@ -283,7 +283,7 @@ Parameters::
 
 Prelog::
 
-    b buffer (uintptr_t) cbToBeEncrypted, pbToBeEncrypted
+    !b buffer (uintptr_t) cbToBeEncrypted, pbToBeEncrypted
 
 
 CryptHashMessage
@@ -323,7 +323,7 @@ Pre::
 
 Logging::
 
-    b buffer length, buf
+    !b buffer length, buf
 
 Post::
 
@@ -437,7 +437,7 @@ Middle::
 Logging::
 
     s struct_type struct_type
-    b buffer (uintptr_t) *pcbStructInfo, buf
+    !b buffer (uintptr_t) *pcbStructInfo, buf
 
 
 PRF
