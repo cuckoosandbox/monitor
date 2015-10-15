@@ -179,7 +179,7 @@ Parameters::
     *  DWORD *pdwDataLen
     *  DWORD dwBufLen
 
-Logging::
+Prelog::
 
     !b buffer (uintptr_t) dwBufLen, pbData
 
