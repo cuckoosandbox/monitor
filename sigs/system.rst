@@ -520,10 +520,6 @@ Prelog::
 
     !b uncompressed UncompressedBufferSize, UncompressedBuffer
 
-Logging::
-
-    !B compressed FinalCompressedSize, CompressedBuffer
-
 
 RtlDecompressBuffer
 ===================
@@ -541,10 +537,6 @@ Parameters::
     *  PUCHAR CompressedBuffer
     ** ULONG CompressedBufferSize input_size
     ** PULONG FinalUncompressedSize output_size
-
-Prelog::
-
-    !b compressed CompressedBufferSize, CompressedBuffer
 
 Logging::
 
@@ -569,10 +561,6 @@ Parameters::
     ** ULONG FragmentOffset offset
     ** PULONG FinalUncompressedSize output_size
     *  PVOID WorkSpace
-
-Prelog::
-
-    !b compressed CompressedBufferSize, CompressedBuffer
 
 Logging::
 
