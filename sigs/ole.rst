@@ -15,7 +15,7 @@ Parameters::
     ** REFCLSID rclsid clsid
     *  LPUNKNOWN pUnkOuter
     ** DWORD dwClsContext class_context
-    ** REFIID riid
+    ** REFIID riid iid
     *  LPVOID *ppv
 
 Interesting::
@@ -108,7 +108,7 @@ Parameters::
     ** REFCLSID rclsid clsid
     ** DWORD dwClsContext class_context
     *  COSERVERINFO *pServerInfo
-    ** REFIID riid
+    ** REFIID riid iid
     *  LPVOID *ppv
 
 Post::
