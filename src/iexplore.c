@@ -427,10 +427,11 @@ uint8_t *hook_addrcb_CWindow_AddTimeoutCode(
             continue;
         }
 
-        // Does this function call HeapAlloc at the very start?
+        // Does this function call HeapAlloc, an absolute function call,
+        // at the very start?
         for (uint32_t jdx = 0; jdx < 32; jdx++) {
 #if __x86_64__
-            if(asm_is_call_function(addr, L"ntdll", "RtlAllocateHeap") != 0) {
+            if(asm_is_abs_call(addr) != 0) {
                 return start;
             }
 #endif

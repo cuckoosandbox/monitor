@@ -82,5 +82,6 @@ uint8_t *asm_get_call_target(uint8_t *addr);
 
 int asm_is_call_function(uint8_t *addr,
     const wchar_t *library, const char *funcname);
+int asm_is_abs_call(uint8_t *addr);
 
 #endif
