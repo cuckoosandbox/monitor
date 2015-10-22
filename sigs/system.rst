@@ -201,6 +201,10 @@ Parameters::
     ** WORD Ordinal ordinal
     ** PVOID *FunctionAddress function_address
 
+Logging::
+
+    u module get_module_file_name(ModuleHandle)
+
 
 ExitWindowsEx
 =============

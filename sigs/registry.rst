@@ -13,7 +13,7 @@ RegOpenKeyExA
 Parameters::
 
     ** HKEY hKey base_handle
-    *  LPCTSTR lpSubKey
+    ** LPCTSTR lpSubKey regkey_r
     ** DWORD ulOptions options
     ** REGSAM samDesired access
     ** PHKEY phkResult key_handle
@@ -44,7 +44,7 @@ RegOpenKeyExW
 Parameters::
 
     ** HKEY hKey base_handle
-    *  LPWSTR lpSubKey
+    ** LPWSTR lpSubKey regkey_r
     ** DWORD ulOptions options
     ** REGSAM samDesired access
     ** PHKEY phkResult key_handle
@@ -75,7 +75,7 @@ RegCreateKeyExA
 Parameters::
 
     ** HKEY hKey base_handle
-    *  LPCTSTR lpSubKey
+    ** LPCTSTR lpSubKey regkey_r
     *  DWORD Reserved
     ** LPTSTR lpClass class
     ** DWORD dwOptions options
@@ -112,7 +112,7 @@ RegCreateKeyExW
 Parameters::
 
     ** HKEY hKey base_handle
-    *  LPWSTR lpSubKey
+    ** LPWSTR lpSubKey regkey_r
     *  DWORD Reserved
     ** LPWSTR lpClass class
     ** DWORD dwOptions options
@@ -149,7 +149,7 @@ RegDeleteKeyA
 Parameters::
 
     ** HKEY hKey key_handle
-    *  LPCTSTR lpSubKey
+    ** LPCTSTR lpSubKey regkey_r
 
 Pre::
 
@@ -175,7 +175,7 @@ RegDeleteKeyW
 Parameters::
 
     ** HKEY hKey key_handle
-    *  LPWSTR lpSubKey
+    ** LPWSTR lpSubKey regkey_r
 
 Pre::
 
@@ -297,7 +297,7 @@ Parameters::
 
     ** HKEY hKey key_handle
     ** DWORD dwIndex index
-    *  LPTSTR lpValueName
+    ** LPTSTR lpValueName regkey_r
     *  LPDWORD lpcchValueName
     *  LPDWORD lpReserved
     ** LPDWORD lpType reg_type
@@ -337,7 +337,7 @@ Parameters::
 
     ** HKEY hKey key_handle
     ** DWORD dwIndex index
-    *  LPWSTR lpValueName
+    ** LPWSTR lpValueName regkey_r
     *  LPDWORD lpcchValueName
     *  LPDWORD lpReserved
     ** LPDWORD lpType reg_type
@@ -376,7 +376,7 @@ RegSetValueExA
 Parameters::
 
     ** HKEY hKey key_handle
-    *  LPCTSTR lpValueName
+    ** LPCTSTR lpValueName regkey_r
     *  DWORD Reserved
     ** DWORD dwType reg_type
     *  const BYTE *lpData
@@ -413,7 +413,7 @@ RegSetValueExW
 Parameters::
 
     ** HKEY hKey key_handle
-    *  LPWSTR lpValueName
+    ** LPWSTR lpValueName regkey_r
     *  DWORD Reserved
     ** DWORD dwType reg_type
     *  const BYTE *lpData
@@ -450,7 +450,7 @@ RegQueryValueExA
 Parameters::
 
     ** HKEY hKey key_handle
-    *  LPCTSTR lpValueName
+    ** LPCTSTR lpValueName regkey_r
     *  LPDWORD lpReserved
     ** LPDWORD lpType reg_type
     *  LPBYTE lpData
@@ -492,7 +492,7 @@ RegQueryValueExW
 Parameters::
 
     ** HKEY hKey key_handle
-    *  LPWSTR lpValueName
+    ** LPWSTR lpValueName regkey_r
     *  LPDWORD lpReserved
     ** LPDWORD lpType reg_type
     *  LPBYTE lpData
@@ -534,7 +534,7 @@ RegDeleteValueA
 Parameters::
 
     ** HKEY hKey key_handle
-    *  LPCTSTR lpValueName
+    ** LPCTSTR lpValueName regkey_r
 
 Pre::
 
@@ -560,7 +560,7 @@ RegDeleteValueW
 Parameters::
 
     ** HKEY hKey key_handle
-    *  LPWSTR lpValueName
+    ** LPWSTR lpValueName regkey_r
 
 Pre::
 

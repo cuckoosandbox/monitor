@@ -496,6 +496,7 @@ TaskDialog
 Signature::
 
     * Library: comctl32
+    * Prune: resolve
     * Return value: HRESULT
 
 Parameters::
