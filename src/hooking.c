@@ -197,11 +197,13 @@ int hook_in_monitor()
     int inside_LdrLoadDll = 0, outside_ntdll = 0, inside_monitor = 0;
 
     count = stacktrace(NULL, addrs, RETADDRCNT);
-
+    if (count == 0) {
+        return 0;
+    }
     // If an address that lies within the monitor DLL is found in the
     // stacktrace then we consider this call not interesting. Except for some
     // edge cases, please keep reading.
-    for (uint32_t idx = count - 1; idx >= 2; idx--) {
+    for (uint32_t idx = count - 1; idx >= 2 && idx < RETADDRCNT; idx--) {
         if(addrs[idx] >= g_monitor_start && addrs[idx] < g_monitor_end) {
             // If this address belongs to New_LdrLoadDll, our hook handler,
             // then we increase the following flag and continue. This helps us
