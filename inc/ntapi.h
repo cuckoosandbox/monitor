@@ -393,6 +393,11 @@ static inline void writetls(uint32_t index, uintptr_t value)
 
 #endif
 
+static inline PEB *get_peb()
+{
+    return (PEB *) readtls(TLS_PEB);
+}
+
 typedef struct _SECTION_IMAGE_INFORMATION {
     PVOID               TransferAddress;
     uint32_t            ZeroBits;

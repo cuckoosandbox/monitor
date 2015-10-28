@@ -269,13 +269,7 @@ uint32_t parent_process_identifier()
 
 void hide_module_from_peb(HMODULE module_handle)
 {
-    LDR_MODULE *mod; PEB *peb;
-
-#if __x86_64__
-    peb = (PEB *) readtls(0x60);
-#else
-    peb = (PEB *) readtls(0x30);
-#endif
+    LDR_MODULE *mod; PEB *peb = get_peb();
 
     for (mod = (LDR_MODULE *) peb->LoaderData->InLoadOrderModuleList.Flink;
          mod->BaseAddress != NULL;
@@ -295,13 +289,7 @@ void hide_module_from_peb(HMODULE module_handle)
 
 const wchar_t *get_module_file_name(HMODULE module_handle)
 {
-    LDR_MODULE *mod, *first_mod; PEB *peb;
-
-#if __x86_64__
-    peb = (PEB *) readtls(0x60);
-#else
-    peb = (PEB *) readtls(0x30);
-#endif
+    LDR_MODULE *mod, *first_mod; PEB *peb = get_peb();
 
     first_mod = mod =
         (LDR_MODULE *) peb->LoaderData->InLoadOrderModuleList.Flink;
