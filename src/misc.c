@@ -1007,31 +1007,40 @@ void library_from_asciiz(const char *str, char *library, uint32_t length)
     }
 }
 
+void library_from_unicodez(const wchar_t *str, char *library, int32_t length)
+{
+    memset(library, 0, length);
+
+    if(str == NULL) {
+        return;
+    }
+
+    // Follow through all directories.
+    for (const wchar_t *ptr = str; *ptr != 0; ptr++) {
+        if(*ptr == '\\' || *ptr == '/') {
+            str = ptr + 1;
+        }
+    }
+
+    // Copy the library name into our ascii library buffer.
+    length = MIN(length - 1, lstrlenW(str));
+    for (int32_t idx = 0; idx < length; idx++) {
+        library[idx] = (char) str[idx];
+    }
+
+    // Strip off any remaining ".dll".
+    if(stricmp(&library[length - 4], ".dll") == 0) {
+        library[length - 4] = 0;
+    }
+}
+
 void library_from_unicode_string(const UNICODE_STRING *us,
     char *library, int32_t length)
 {
     memset(library, 0, length);
 
-    if(us != NULL && us->Buffer != NULL) {
-        const wchar_t *libname = us->Buffer;
-
-        // Follow through all directories.
-        for (const wchar_t *ptr = libname; *ptr != 0; ptr++) {
-            if(*ptr == '\\' || *ptr == '/') {
-                libname = ptr + 1;
-            }
-        }
-
-        // Copy the library name into our ascii library buffer.
-        length = MIN(length - 1, lstrlenW(libname));
-        for (int32_t idx = 0; idx < length; idx++) {
-            library[idx] = (char) libname[idx];
-        }
-
-        // Strip off any remaining ".dll".
-        if(stricmp(&library[length - 4], ".dll") == 0) {
-            library[length - 4] = 0;
-        }
+    if(us != NULL) {
+        return library_from_unicodez(us->Buffer, library, length);
     }
 }
 

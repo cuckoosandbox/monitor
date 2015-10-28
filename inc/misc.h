@@ -91,6 +91,7 @@ void get_ip_port(const struct sockaddr *addr, const char **ip, int *port);
 int is_shutting_down();
 
 void library_from_asciiz(const char *str, char *library, uint32_t length);
+void library_from_unicodez(const wchar_t *str, char *library, int32_t length);
 void library_from_unicode_string(const UNICODE_STRING *us,
     char *library, int32_t length);
 

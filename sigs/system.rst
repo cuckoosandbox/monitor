@@ -201,9 +201,16 @@ Parameters::
     ** WORD Ordinal ordinal
     ** PVOID *FunctionAddress function_address
 
+Pre::
+
+    char library[MAX_PATH+1];
+
+    library_from_unicodez(get_module_file_name(ModuleHandle),
+        library, sizeof(library));
+
 Logging::
 
-    u module get_module_file_name(ModuleHandle)
+    s module library
 
 
 ExitWindowsEx
