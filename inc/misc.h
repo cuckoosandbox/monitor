@@ -136,7 +136,10 @@ uint8_t *our_memmemW(
 
 uint32_t sys_string_length(const BSTR bstr);
 
+extern uint32_t g_extra_virtual_memory;
+
 void set_processor_count(uint32_t processor_count);
+void add_virtual_memory(uint64_t length);
 
 #define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
     OBJECT_ATTRIBUTES local_name; UNICODE_STRING local_name##_unistr; \

@@ -70,7 +70,11 @@ void monitor_init(HMODULE module_handle)
     hide_module_from_peb(module_handle);
 
     if(cfg.disguise != 0) {
+        // Set the processor count to two.
         set_processor_count(2);
+
+        // Pretend like we have two extra gigabytes of memory.
+        add_virtual_memory(2 * 1024 * 1024 * 1024ull);
     }
 
     symbol_init(module_handle);

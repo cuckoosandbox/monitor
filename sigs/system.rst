@@ -592,3 +592,39 @@ Parameters::
 Logging::
 
     !B uncompressed FinalUncompressedSize, UncompressedFragment
+
+
+GlobalMemoryStatus
+==================
+
+Signature::
+
+    * Library: kernel32
+    * Return value: BOOL
+
+Parameters::
+
+    *  LPMEMORYSTATUS lpBuffer
+
+Middle::
+
+    lpBuffer->dwTotalPhys += g_extra_virtual_memory;
+    lpBuffer->dwTotalVirtual += g_extra_virtual_memory;
+
+
+GlobalMemoryStatusEx
+====================
+
+Signature::
+
+    * Library: kernel32
+    * Return value: BOOL
+
+Parameters::
+
+    *  LPMEMORYSTATUSEX lpBuffer
+
+Middle::
+
+    lpBuffer->ullTotalPhys += g_extra_virtual_memory;
+    lpBuffer->ullTotalVirtual += g_extra_virtual_memory;

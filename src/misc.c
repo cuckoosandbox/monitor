@@ -1462,8 +1462,3 @@ uint32_t sys_string_length(const BSTR bstr)
     }
     return 0;
 }
-
-void set_processor_count(uint32_t processor_count)
-{
-    get_peb()->NumberOfProcessors = processor_count;
-}
