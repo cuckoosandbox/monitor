@@ -122,6 +122,9 @@ void config_read(config_t *cfg)
         else if(strcmp(key, "mode") == 0) {
             cfg->mode = _parse_mode(value);
         }
+        else if(strcmp(key, "disguise") == 0) {
+            cfg->disguise = value[0] == '1';
+        }
     }
     fclose(fp);
     DeleteFile(config_fname);

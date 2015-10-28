@@ -69,6 +69,10 @@ void monitor_init(HMODULE module_handle)
 
     hide_module_from_peb(module_handle);
 
+    if(cfg.disguise != 0) {
+        set_processor_count(2);
+    }
+
     symbol_init(module_handle);
 
     // Should be the last as some of the other initialization routines extract

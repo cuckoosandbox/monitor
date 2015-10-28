@@ -50,6 +50,10 @@ typedef struct _config_t {
 
     // Monitoring mode.
     int mode;
+
+    // Disguise the VM in an attempt to fool samples into thinking it's a
+    // real machine?
+    int disguise;
 } config_t;
 
 void config_read(config_t *cfg);

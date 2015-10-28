@@ -136,6 +136,8 @@ uint8_t *our_memmemW(
 
 uint32_t sys_string_length(const BSTR bstr);
 
+void set_processor_count(uint32_t processor_count);
+
 #define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
     OBJECT_ATTRIBUTES local_name; UNICODE_STRING local_name##_unistr; \
     wchar_t *local_name##_buffer = get_unicode_buffer(); \
