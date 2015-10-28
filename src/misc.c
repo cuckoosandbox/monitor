@@ -499,6 +499,16 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
         }
     }
 
+    // If a path starts with \??\ and doesn't have any further backslashes in
+    // it, then we're looking at something like \??\hgfs or \??\vmci, and we
+    // don't want to normalize that any further.
+    if(wcsncmp(pathi, L"\\??\\", 4) == 0 && wcschr(pathi + 4, '\\') == NULL) {
+        wcscpy(out, pathi);
+        free_unicode_buffer(buf1);
+        free_unicode_buffer(buf2);
+        return lstrlenW(out);
+    }
+
     // Normalize the input file path.
     if(wcsncmp(pathi, L"\\??\\", 4) == 0 ||
             wcsncmp(pathi, L"\\\\?\\", 4) == 0) {
