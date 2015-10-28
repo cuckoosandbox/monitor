@@ -321,9 +321,17 @@ Parameters::
 
     *  LPSYSTEM_INFO lpSystemInfo
 
+Middle::
+
+    uint32_t processor_count = lpSystemInfo->dwNumberOfProcessors;
+
+    // The PEB either contains the real number of processors or the number
+    // of processors that we spoofed into it.
+    lpSystemInfo->dwNumberOfProcessors = get_peb()->NumberOfProcessors;
+
 Logging::
 
-    i processor_count lpSystemInfo->dwNumberOfProcessors
+    i processor_count processor_count
 
 
 GetNativeSystemInfo
@@ -338,9 +346,17 @@ Parameters::
 
     *  LPSYSTEM_INFO lpSystemInfo
 
+Middle::
+
+    uint32_t processor_count = lpSystemInfo->dwNumberOfProcessors;
+
+    // The PEB either contains the real number of processors or the number
+    // of processors that we spoofed into it.
+    lpSystemInfo->dwNumberOfProcessors = get_peb()->NumberOfProcessors;
+
 Logging::
 
-    i processor_count lpSystemInfo->dwNumberOfProcessors
+    i processor_count processor_count
 
 
 SetErrorMode
