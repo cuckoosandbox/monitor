@@ -134,7 +134,7 @@ void log_string(bson *b, const char *idx, const char *str, int length)
     if(range_is_readable(str, length) != 0) {
         char *utf8s = utf8_string(str, length);
         utf8len = *(int *) utf8s;
-        ret = bson_append_binary(b, idx, BSON_BIN_BINARY, utf8s+4, utf8len);
+        ret = bson_append_string_n(b, idx, utf8s+4, utf8len);
         if(ret == BSON_ERROR) {
             pipe("CRITICAL:Error creating bson string, error, %x utf8len %d.",
                 b->err, utf8len);
@@ -157,7 +157,7 @@ void log_wstring(bson *b, const char *idx, const wchar_t *str, int length)
         int ret, utf8len;
         char *utf8s = utf8_wstring(str, length);
         utf8len = *(int *) utf8s;
-        ret = bson_append_binary(b, idx, BSON_BIN_BINARY, utf8s+4, utf8len);
+        ret = bson_append_string_n(b, idx, utf8s+4, utf8len);
         if(ret == BSON_ERROR) {
             pipe("CRITICAL:Error creating bson wstring, error %x, utf8len %d.",
                 b->err, utf8len);
