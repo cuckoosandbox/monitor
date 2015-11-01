@@ -46,6 +46,10 @@ Parameters::
     ** DWORD dwCoInit options
 
 
+CoUnitialize
+============
+
+
 CoInitializeSecurity
 ====================
 
