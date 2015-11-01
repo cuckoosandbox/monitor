@@ -30,8 +30,10 @@ int misc_init(HMODULE module_handle, const char *shutdown_mutex);
 
 // Call functions from monitor.c indirectly so that we don't have to include
 // it by default when doing unittests.
-void misc_set_hook_library(monitor_hook_t monitor_hook);
+void misc_set_hook_library(monitor_hook_t monitor_hook,
+    monitor_hook_t monitor_unhook);
 void hook_library(const char *library, void *module_handle);
+void unhook_library(const char *library, void *module_handle);
 
 void misc_set_monitor_options(uint32_t track, uint32_t mode);
 

@@ -140,6 +140,10 @@ Pre::
 
     unhook_detect_disable();
 
+    char library[MAX_PATH+1];
+    library_from_unicodez(get_module_file_name(ModuleHandle),
+        library, sizeof(library));
+
 Middle::
 
     // If the module address is not readable anymore then the module got
@@ -150,6 +154,16 @@ Middle::
     }
 
     unhook_detect_enable();
+
+Logging::
+
+   s library library
+
+Post::
+
+    if(range_is_readable(ModuleHandle, 0x1000) == 0) {
+        monitor_unhook(library, ModuleHandle);
+    }
 
 
 LdrGetDllHandle

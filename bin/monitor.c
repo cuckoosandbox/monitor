@@ -56,7 +56,7 @@ void monitor_init(HMODULE module_handle)
     hook_init2();
 
     misc_init(module_handle, cfg.shutdown_mutex);
-    misc_set_hook_library(&monitor_hook);
+    misc_set_hook_library(&monitor_hook, &monitor_unhook);
     diffing_init(cfg.hashes_path, cfg.diffing_enable);
 
     log_init(cfg.logpipe, cfg.track);
@@ -109,6 +109,27 @@ void monitor_hook(const char *library, void *module_handle)
         // forwarder right away. (Note that the library member of the hook
         // object is updated in the case of retrying).
         while (hook(h, module_handle) == 1);
+    }
+}
+
+void monitor_unhook(const char *library, void *module_handle)
+{
+    (void) library;
+
+    for (hook_t *h = sig_hooks(); h->funcname != NULL; h++) {
+        // This module was unloaded.
+        if(h->module_handle == module_handle) {
+            h->is_hooked = 0;
+            h->addr = NULL;
+        }
+
+        // This is a hooked function which doesn't belong to a particular DLL.
+        // Therefore the module handle is a nullptr and we simply check
+        // whether the address of the original function is still in-memory.
+        if(h->module_handle == NULL && range_is_readable(h->addr, 16) == 0) {
+            h->is_hooked = 0;
+            h->addr = NULL;
+        }
     }
 }
 
