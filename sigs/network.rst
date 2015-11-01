@@ -828,3 +828,27 @@ Parameters::
 
     *  struct sockaddr *pDestAddr
     *  PDWORD pdwBestIfIndex
+
+
+WNetGetProviderNameW
+====================
+
+Signature::
+
+    * Is success: ret == NO_ERROR
+    * Library: mpr
+    * Return value: DWORD
+
+Parameters::
+
+    *  DWORD dwNetType
+    *  LPTSTR lpProviderName
+    *  LPDWORD lpBufferSize
+
+Ensure::
+
+    lpBufferSize
+
+Logging::
+
+    x net_type dwNetType
