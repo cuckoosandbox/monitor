@@ -800,10 +800,6 @@ Ensure::
 
     cbSize
 
-Pre::
-
-    int length = *cbSize;
-
 Middle::
 
     if(ret != S_OK) {
@@ -812,7 +808,7 @@ Middle::
 
 Logging::
 
-    S user_agent length, pcszUAOut
+    S user_agent (int) *cbSize, pcszUAOut
 
 
 GetBestInterfaceEx
