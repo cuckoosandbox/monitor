@@ -642,3 +642,23 @@ Middle::
 
     lpBuffer->ullTotalPhys += g_extra_virtual_memory;
     lpBuffer->ullTotalVirtual += g_extra_virtual_memory;
+
+
+NtQuerySystemInformation
+========================
+
+Signature::
+
+    * Library: ntdll
+    * Return value: NTSTATUS
+
+Parameters::
+
+    ** SYSTEM_INFORMATION_CLASS SystemInformationClass information_class
+    *  PVOID SystemInformation
+    *  ULONG SystemInformationLength
+    *  PULONG ReturnLength
+
+Flags::
+
+    information_class

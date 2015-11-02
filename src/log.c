@@ -710,10 +710,19 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
     our_snprintf(buf, sizeof(buf), "%p", exception_address);
     bson_append_string(&e, "address", buf);
 
-    char insn[DISASM_BUFSIZ];
-    if(range_is_readable(exception_address, 16) != 0 &&
-            disasm(exception_address, insn) == 0) {
-        bson_append_string(&e, "instruction", insn);
+    char insn[DISASM_BUFSIZ], insn_r[128];
+    if(range_is_readable(exception_address, 16) != 0) {
+        if(disasm(exception_address, insn) == 0) {
+            bson_append_string(&e, "instruction", insn);
+        }
+
+        for (uint32_t idx = 0; idx < 16; idx++) {
+            our_snprintf(insn_r + 3*idx, sizeof(insn_r), "%x ",
+                exception_address[idx]);
+        }
+        insn_r[3*16-1] = 0;
+
+        bson_append_string(&e, "instruction_r", insn_r);
     }
 
     symbol(exception_address, sym, sizeof(sym));
