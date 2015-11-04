@@ -803,7 +803,7 @@ Ensure::
 Middle::
 
     if(ret != S_OK) {
-        length = 0;
+        *cbSize = 0;
     }
 
 Logging::

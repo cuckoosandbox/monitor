@@ -162,7 +162,7 @@ Logging::
 Post::
 
     if(range_is_readable(ModuleHandle, 0x1000) == 0) {
-        monitor_unhook(library, ModuleHandle);
+        unhook_library(library, ModuleHandle);
     }
 
 
