@@ -3,7 +3,6 @@ Signature::
     * Calling convention: WINAPI
     * Category: network
     * Library: ws2_32
-    * Mode: iexplore
 
 
 WSAStartup

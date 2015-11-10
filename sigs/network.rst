@@ -2,7 +2,6 @@ Signature::
 
     * Calling convention: WINAPI
     * Category: network
-    * Mode: iexplore
 
 
 URLDownloadToFileW
