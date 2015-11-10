@@ -21,29 +21,57 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "memory.h"
 #include "utf8.h"
 
-int utf8_encode(unsigned short c, unsigned char *out)
+int utf8_encode(uint32_t c, unsigned char *out)
 {
     if(c < 0x80) {
         *out = c & 0x7f;
         return 1;
     }
-    else if(c < 0x800) {
-        out[0] = 0xc0 + ((c >> 6) & 0x1f);
-        out[1] = 0x80 + (c & 0x3f);
+    if(c < 0x800) {
+        out[0] = 0xc0 + ((c >>  6) & 0x1f);
+        out[1] = 0x80 + ((c >>  0) & 0x3f);
         return 2;
     }
-    else {
+    if(c < 0x10000) {
         out[0] = 0xe0 + ((c >> 12) & 0x0f);
-        out[1] = 0x80 + ((c >> 6) & 0x3f);
+        out[1] = 0x80 + ((c >>  6) & 0x3f);
         out[2] = 0x80 + (c & 0x3f);
         return 3;
     }
+    if(c < 0x200000) {
+        out[0] = 0xf0 + ((c >> 18) & 0x07);
+        out[1] = 0x80 + ((c >> 12) & 0x3f);
+        out[2] = 0x80 + ((c >>  6) & 0x3f);
+        out[3] = 0x80 + ((c >>  0) & 0x3f);
+        return 4;
+    }
+
+    // The following two we won't be needing for UTF-16 encoding,
+    // but while we're at it anyway..
+    if(c < 0x4000000) {
+        out[0] = 0xf8 + ((c >> 24) & 0x03);
+        out[1] = 0x80 + ((c >> 18) & 0x3f);
+        out[2] = 0x80 + ((c >> 12) & 0x3f);
+        out[3] = 0x80 + ((c >>  6) & 0x3f);
+        out[4] = 0x80 + ((c >>  0) & 0x3f);
+        return 5;
+    }
+    if(c < 0x80000000) {
+        out[0] = 0xfc + ((c >> 30) & 0x01);
+        out[1] = 0x80 + ((c >> 24) & 0x3f);
+        out[2] = 0x80 + ((c >> 18) & 0x3f);
+        out[3] = 0x80 + ((c >> 12) & 0x3f);
+        out[4] = 0x80 + ((c >>  6) & 0x3f);
+        out[5] = 0x80 + ((c >>  0) & 0x3f);
+        return 6;
+    }
+    return -1;
 }
 
-int utf8_length(unsigned short x)
+int utf8_length(uint32_t c)
 {
-    unsigned char buf[3];
-    return utf8_encode(x, buf);
+    uint8_t buf[6];
+    return utf8_encode(c, buf);
 }
 
 int utf8_bytecnt_ascii(const char *s, int len)
@@ -63,7 +91,26 @@ int utf8_bytecnt_unicode(const wchar_t *s, int len)
 
     int ret = 0;
     while (len-- != 0) {
-        ret += utf8_length(*s++);
+        // Handle Supplementary Planes.
+        if((uint16_t) *s >= 0xd800 && (uint16_t) *s < 0xdc00) {
+            // No remaining space? Prevent possibly reading out of bounds.
+            if(len == 0) {
+                break;
+            }
+
+            uint32_t ch = ((uint32_t)(uint16_t) *s - 0xd800) << 10;
+
+            // We'll just ignore invalid low surrogates..
+            if((uint16_t) s[1] >= 0xdc00 && (uint16_t) s[1] < 0xe000) {
+                ch += (uint16_t) s[1] - 0xdc00;
+            }
+
+            ret += utf8_length(ch);
+            s += 2, len--;
+        }
+        else {
+            ret += utf8_length(*s++);
+        }
     }
     return ret;
 }
@@ -93,7 +140,26 @@ char *utf8_wstring(const wchar_t *s, int len)
     int pos = 4;
 
     while (len-- != 0) {
-        pos += utf8_encode(*s++, (unsigned char *) &utf8string[pos]);
+        // Handle Supplementary Planes.
+        if((uint16_t) *s >= 0xd800 && (uint16_t) *s < 0xdc00) {
+            // No remaining space? Prevent possibly reading out of bounds.
+            if(len == 0) {
+                break;
+            }
+
+            uint32_t ch = ((uint32_t)(uint16_t) *s - 0xd800) << 10;
+
+            // We'll just ignore invalid low surrogates..
+            if((uint16_t) s[1] >= 0xdc00 && (uint16_t) s[1] < 0xe000) {
+                ch += (uint16_t) s[1] - 0xdc00;
+            }
+
+            pos += utf8_encode(ch, (unsigned char *) &utf8string[pos]);
+            s += 2, len--;
+        }
+        else {
+            pos += utf8_encode(*s++, (unsigned char *) &utf8string[pos]);
+        }
     }
     return utf8string;
 }
