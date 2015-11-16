@@ -91,7 +91,7 @@ Interesting::
 Logging::
 
     u dirpath dirpath
-    u dirpath_r lpPathName
+    s dirpath_r lpPathName
 
 Post::
 
