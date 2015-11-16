@@ -137,7 +137,7 @@ Parameters::
 Logging::
 
     i sent ret
-    b buffer (uintptr_t) len, buf
+    !b buffer (uintptr_t)(ret > 0 ? ret : 0), buf
 
 
 sendto
@@ -167,7 +167,7 @@ Logging::
     s ip_address ip
     i port port
     i sent ret
-    b buffer (uintptr_t) len, buf
+    !b buffer (uintptr_t)(ret > 0 ? ret : 0), buf
 
 
 recv
@@ -187,7 +187,8 @@ Parameters::
 
 Logging::
 
-    b buffer (uintptr_t)(ret > 0 ? ret : 0), buf
+    i received ret
+    !b buffer (uintptr_t)(ret > 0 ? ret : 0), buf
 
 
 recvfrom
@@ -216,7 +217,7 @@ Logging::
 
     s ip_address ip
     i port port
-    b buffer (uintptr_t)(ret > 0 ? ret : 0), buf
+    !b buffer (uintptr_t)(ret > 0 ? ret : 0), buf
 
 
 accept
@@ -425,7 +426,7 @@ Middle::
 
 Logging::
 
-    b buffer length, buf
+    !b buffer length, buf
 
 Post::
 
@@ -468,7 +469,7 @@ Logging::
 
     s ip_address ip
     i port port
-    b buffer length, buf
+    !b buffer length, buf
 
 Post::
 
@@ -504,7 +505,7 @@ Middle::
 
 Logging::
 
-    b buffer length, buf
+    !b buffer length, buf
 
 Post::
 
@@ -549,7 +550,7 @@ Logging::
 
     s ip_address ip
     i port port
-    b buffer length, buf
+    !b buffer length, buf
 
 Post::
 
