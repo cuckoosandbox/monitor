@@ -113,7 +113,7 @@ static void log_int64(bson *b, const char *idx, int64_t value)
     bson_append_long(b, idx, value);
 }
 
-static void log_intptr(bson *b, const char *idx, intptr_t value)
+void log_intptr(bson *b, const char *idx, intptr_t value)
 {
 #if __x86_64__
     bson_append_long(b, idx, value);
