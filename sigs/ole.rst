@@ -89,7 +89,7 @@ Pre::
     for (uint32_t idx = 0; idx < dwCount; idx++, multi_qi++) {
         our_snprintf(index, sizeof(index), "%d", idx++);
         clsid_to_string(multi_qi->pIID, clsid);
-        log_string(&b, index, clsid, -1);
+        log_string(&b, index, clsid, strlen(clsid));
     }
 
     bson_append_finish_array(&b);

@@ -576,7 +576,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             char buf[64];
             REFCLSID rclsid = va_arg(args, REFCLSID);
             clsid_to_string(rclsid, buf);
-            log_string(&b, idx, buf, -1);
+            log_string(&b, idx, buf, strlen(buf));
         }
         else if(*fmt == 't') {
             const BSTR bstr = va_arg(args, const BSTR);

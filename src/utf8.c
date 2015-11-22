@@ -76,8 +76,6 @@ int utf8_length(uint32_t c)
 
 int utf8_bytecnt_ascii(const char *s, int len)
 {
-    if(len < 0) len = strlen(s);
-
     int ret = 0;
     while (len-- != 0) {
         ret += utf8_length(*s++);
@@ -87,8 +85,6 @@ int utf8_bytecnt_ascii(const char *s, int len)
 
 int utf8_bytecnt_unicode(const wchar_t *s, int len)
 {
-    if(len < 0) len = lstrlenW(s);
-
     int ret = 0;
     while (len-- != 0) {
         // Handle Supplementary Planes.
@@ -117,8 +113,6 @@ int utf8_bytecnt_unicode(const wchar_t *s, int len)
 
 char *utf8_string(const char *s, int len)
 {
-    if(len < 0) len = strlen(s);
-
     int encoded_length = utf8_bytecnt_ascii(s, len);
     char *utf8string = (char *) mem_alloc(encoded_length+4);
     *((int *) utf8string) = encoded_length;
@@ -132,8 +126,6 @@ char *utf8_string(const char *s, int len)
 
 char *utf8_wstring(const wchar_t *s, int len)
 {
-    if(len < 0) len = lstrlenW(s);
-
     int encoded_length = utf8_bytecnt_unicode(s, len);
     char *utf8string = (char *) mem_alloc(encoded_length+4);
     *((int *) utf8string) = encoded_length;
