@@ -526,3 +526,22 @@ Logging::
     u description description
     u content content
     u icon icon
+
+
+CreateActCtxW
+=============
+
+Signature::
+
+    * Library: kernel32
+    * Return value: HANDLE
+
+Parameters::
+
+    *  PACTCTX pActCtx
+
+Logging::
+
+    u resource_name pActCtx != NULL ? pActCtx->lpResourceName : NULL
+    u application_name pActCtx != NULL ? pActCtx->lpApplicationName : NULL
+    p module_handle pActCtx != NULL ? pActCtx->hModule : NULL
