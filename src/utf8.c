@@ -114,20 +114,21 @@ int utf8_bytecnt_unicode(const wchar_t *s, int len)
 char *utf8_string(const char *s, int len)
 {
     int encoded_length = utf8_bytecnt_ascii(s, len);
-    char *utf8string = (char *) mem_alloc(encoded_length+4);
+    char *utf8string = (char *) mem_alloc(encoded_length+5);
     *((int *) utf8string) = encoded_length;
     int pos = 4;
 
     while (len-- != 0) {
         pos += utf8_encode(*s++, (unsigned char *) &utf8string[pos]);
     }
+    utf8string[pos] = 0;
     return utf8string;
 }
 
 char *utf8_wstring(const wchar_t *s, int len)
 {
     int encoded_length = utf8_bytecnt_unicode(s, len);
-    char *utf8string = (char *) mem_alloc(encoded_length+4);
+    char *utf8string = (char *) mem_alloc(encoded_length+5);
     *((int *) utf8string) = encoded_length;
     int pos = 4;
 
@@ -153,5 +154,6 @@ char *utf8_wstring(const wchar_t *s, int len)
             pos += utf8_encode(*s++, (unsigned char *) &utf8string[pos]);
         }
     }
+    utf8string[pos] = 0;
     return utf8string;
 }
