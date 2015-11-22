@@ -390,7 +390,9 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
     }
 
 #if DEBUG
-    _log_stacktrace(&b);
+    if(index != sig_index_exception()) {
+        _log_stacktrace(&b);
+    }
 #endif
 
     bson_append_start_array(&b, "args");
