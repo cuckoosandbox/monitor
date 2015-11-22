@@ -1161,6 +1161,54 @@ int range_is_readable(const void *addr, uintptr_t size)
     return 1;
 }
 
+int strlen_safe(const char *str)
+{
+    if(str == NULL) {
+        return 0;
+    }
+
+    int ret = 0;
+    while (1) {
+        if(page_is_readable(str) == 0) {
+            return ret;
+        }
+
+        do {
+            if(*str == 0) {
+                return ret;
+            }
+
+            str++, ret++;
+        } while ((((uintptr_t) str) & 0xfff) != 0);
+    }
+}
+
+int strlen_safeW(const wchar_t *str)
+{
+    if(str == NULL) {
+        return 0;
+    }
+
+    int ret = 0;
+    while (1) {
+        if(page_is_readable(str) == 0 ||
+                page_is_readable((const uint8_t *) str + 1) == 0) {
+            return ret;
+        }
+
+        do {
+            if(*str == 0) {
+                return ret;
+            }
+
+            str++, ret++;
+        } while (
+            (((uintptr_t) str) & 0xfff) != 0 &&
+            (((uintptr_t) str + 1) & 0xfff) != 0
+        );
+    }
+}
+
 void clsid_to_string(REFCLSID rclsid, char *buf)
 {
     const uint8_t *ptr = (const uint8_t *) rclsid;

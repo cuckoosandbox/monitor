@@ -124,7 +124,7 @@ static void log_intptr(bson *b, const char *idx, intptr_t value)
 
 void log_string(bson *b, const char *idx, const char *str, int length)
 {
-    if(str == NULL) {
+    if(str == NULL || length == 0) {
         bson_append_string_n(b, idx, "", 0);
         return;
     }
@@ -148,7 +148,7 @@ void log_string(bson *b, const char *idx, const char *str, int length)
 
 void log_wstring(bson *b, const char *idx, const wchar_t *str, int length)
 {
-    if(str == NULL) {
+    if(str == NULL || length == 0) {
         bson_append_string_n(b, idx, "", 0);
         return;
     }
@@ -176,7 +176,7 @@ static void log_argv(bson *b, const char *idx, int argc, const char **argv)
 
     for (int i = 0; i < argc; i++) {
         ultostr(i, index, 10);
-        log_string(b, index, argv[i], -1);
+        log_string(b, index, argv[i], strlen_safe(argv[i]));
     }
     bson_append_finish_array(b);
 }
@@ -189,7 +189,7 @@ static void log_wargv(bson *b, const char *idx,
 
     for (int i = 0; i < argc; i++) {
         ultostr(i, index, 10);
-        log_wstring(b, index, argv[i], -1);
+        log_wstring(b, index, argv[i], strlen_safeW(argv[i]));
     }
 
     bson_append_finish_array(b);
@@ -414,24 +414,20 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
 
         if(*fmt == 's') {
             const char *s = va_arg(args, const char *);
-            if(s == NULL) s = "";
-            log_string(&b, idx, s, -1);
+            log_string(&b, idx, s, strlen_safe(s));
         }
         else if(*fmt == 'S') {
             int len = va_arg(args, int);
             const char *s = va_arg(args, const char *);
-            if(s == NULL) s = "", len = 0;
             log_string(&b, idx, s, len);
         }
         else if(*fmt == 'u') {
             const wchar_t *s = va_arg(args, const wchar_t *);
-            if(s == NULL) s = L"";
-            log_wstring(&b, idx, s, -1);
+            log_wstring(&b, idx, s, strlen_safeW(s));
         }
         else if(*fmt == 'U') {
             int len = va_arg(args, int);
             const wchar_t *s = va_arg(args, const wchar_t *);
-            if(s == NULL) s = L"", len = 0;
             log_wstring(&b, idx, s, len);
         }
         else if(*fmt == 'b') {
