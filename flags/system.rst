@@ -209,3 +209,13 @@ Value::
     SystemProcessorFeaturesInformation
     SystemRegistryReconciliationInformation
     SystemEdidInformation
+
+
+NtShutdownSystem_Action
+=======================
+
+Value::
+
+    ShutdownNoReboot
+    ShutdownReboot
+    ShutdownPowerOff

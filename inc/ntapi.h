@@ -711,6 +711,12 @@ typedef enum _TASKDIALOG_COMMON_BUTTON_FLAGS {
     TDCBF_CLOSE_BUTTON      = 0x0020
 } TASKDIALOG_COMMON_BUTTON_FLAGS;
 
+typedef enum _SHUTDOWN_ACTION {
+    ShutdownNoReboot,
+    ShutdownReboot,
+    ShutdownPowerOff
+} SHUTDOWN_ACTION, *PSHUTDOWN_ACTION;
+
 static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
 {
     return obj != NULL ? obj->ObjectName : NULL;

@@ -662,3 +662,21 @@ Parameters::
 Flags::
 
     information_class
+
+
+NtShutdownSystem
+================
+
+Signature::
+
+    * Library: ntdll
+    * Prelog: instant
+    * Return value: NTSTATUS
+
+Parameters::
+
+    ** SHUTDOWN_ACTION Action action
+
+Flags::
+
+    action
