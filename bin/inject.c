@@ -29,12 +29,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define INJECT_FREE 3
 
 #define MAX_PATH_W 0x7fff
-
-#define DPRINTF(fmt, ...) if(verbose != 0) fprintf(stderr, fmt, ##__VA_ARGS__)
-
 #define NOINLINE __attribute__((noinline))
 
 static int verbose = 0;
+
+void error(const char *fmt, ...)
+{
+    char buf[2048];
+
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    MessageBox(NULL, fmt, "inject error", 0);
+    va_end(args);
+
+    exit(1);
+}
 
 uint32_t strsizeW(const wchar_t *s)
 {
@@ -45,8 +55,7 @@ FARPROC resolve_symbol(const char *library, const char *funcname)
 {
     FARPROC ret = GetProcAddress(LoadLibrary(library), funcname);
     if(ret == NULL) {
-        fprintf(stderr, "[-] Error resolving %s!%s?!\n", library, funcname);
-        exit(1);
+        error("[-] Error resolving %s!%s?!\n", library, funcname);
     }
 
     return ret;
@@ -56,9 +65,7 @@ HANDLE open_process(uint32_t pid)
 {
     HANDLE process_handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
     if(process_handle == NULL) {
-        fprintf(stderr, "[-] Error getting access to process: %ld!\n",
-            GetLastError());
-        exit(1);
+        error("[-] Error getting access to process: %ld!\n", GetLastError());
     }
 
     return process_handle;
@@ -68,9 +75,7 @@ HANDLE open_thread(uint32_t tid)
 {
     HANDLE thread_handle = OpenThread(THREAD_ALL_ACCESS, FALSE, tid);
     if(thread_handle == NULL) {
-        fprintf(stderr, "[-] Error getting access to thread: %ld!\n",
-            GetLastError());
-        exit(1);
+        error("[-] Error getting access to thread: %ld!\n", GetLastError());
     }
 
     return thread_handle;
@@ -83,9 +88,7 @@ void read_data(uint32_t pid, void *addr, void *data, uint32_t length)
     DWORD_PTR bytes_read;
     if(ReadProcessMemory(process_handle, addr, data, length,
             &bytes_read) == FALSE || bytes_read != length) {
-        fprintf(stderr, "[-] Error reading data from process: %ld\n",
-            GetLastError());
-        exit(1);
+        error("[-] Error reading data from process: %ld\n", GetLastError());
     }
 
     CloseHandle(process_handle);
@@ -98,17 +101,14 @@ void *write_data(uint32_t pid, const void *data, uint32_t length)
     void *addr = VirtualAllocEx(process_handle, NULL, length,
         MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
     if(addr == NULL) {
-        fprintf(stderr, "[-] Error allocating memory in process: %ld!\n",
+        error("[-] Error allocating memory in process: %ld!\n",
             GetLastError());
-        exit(1);
     }
 
     DWORD_PTR bytes_written;
     if(WriteProcessMemory(process_handle, addr, data, length,
             &bytes_written) == FALSE || bytes_written != length) {
-        fprintf(stderr, "[-] Error writing data to process: %ld\n",
-            GetLastError());
-        exit(1);
+        error("[-] Error writing data to process: %ld\n", GetLastError());
     }
 
     CloseHandle(process_handle);
@@ -202,9 +202,8 @@ uint32_t create_thread_and_wait(uint32_t pid, void *addr, void *arg)
     }
 
     if(thread_handle == NULL) {
-        fprintf(stderr, "[-] Error injecting remote thread in process: %d\n",
+        error("[-] Error injecting remote thread in process: %d\n",
             return_value);
-        exit(1);
     }
 
     WaitForSingleObject(thread_handle, INFINITE);
@@ -272,8 +271,7 @@ uint32_t start_app(uint32_t from, const wchar_t *path,
     uint32_t last_error =
         create_thread_and_wait(from, shellcode_addr, settings_addr);
     if(last_error != 0) {
-        fprintf(stderr, "[-] Error launching process: %d\n", last_error);
-        exit(1);
+        error("[-] Error launching process: %d\n", last_error);
     }
 
     read_data(from, settings_addr, &s, sizeof(s));
@@ -342,9 +340,7 @@ void load_dll_crt(uint32_t pid, const wchar_t *dll_path)
     uint32_t last_error =
         create_thread_and_wait(pid, shellcode_addr, settings_addr);
     if(last_error != 0) {
-        fprintf(stderr, "[-] Error loading monitor into process: %d\n",
-            last_error);
-        exit(1);
+        error("[-] Error loading monitor into process: %d\n", last_error);
     }
 
     free_data(pid, s.filepath.Buffer, strsizeW(dll_path));
@@ -372,9 +368,7 @@ void load_dll_apc(uint32_t pid, uint32_t tid, const wchar_t *dll_path)
     // Add LdrLoadDll(..., dll_path, ...) to the APC queue.
     if(QueueUserAPC((PAPCFUNC) shellcode_addr, thread_handle,
             (ULONG_PTR) settings_addr) == 0) {
-        fprintf(stderr, "[-] Error adding task to APC queue: %ld\n",
-            GetLastError());
-        exit(1);
+        error("[-] Error adding task to APC queue: %ld\n", GetLastError());
     }
 
     // TODO Come up with a way to deallocate dll_addr.
@@ -394,16 +388,12 @@ void grant_debug_privileges(uint32_t pid)
 
     if(OpenProcessToken(process_handle, TOKEN_ALL_ACCESS,
             &token_handle) == 0) {
-        fprintf(stderr, "[-] Error obtaining process token: %ld\n",
-            GetLastError());
-        exit(1);
+        error("[-] Error obtaining process token: %ld\n", GetLastError());
     }
 
     LUID original_luid;
     if(LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &original_luid) == 0) {
-        fprintf(stderr, "[-] Error obtaining original luid: %ld\n",
-            GetLastError());
-        exit(1);
+        error("[-] Error obtaining original luid: %ld\n", GetLastError());
     }
 
     TOKEN_PRIVILEGES token_privileges;
@@ -413,9 +403,7 @@ void grant_debug_privileges(uint32_t pid)
 
     if(AdjustTokenPrivileges(token_handle, FALSE, &token_privileges, 0, NULL,
             NULL) == 0) {
-        fprintf(stderr, "[-] Error adjusting token privileges: %ld\n",
-            GetLastError());
-        exit(1);
+        error("[-] Error adjusting token privileges: %ld\n", GetLastError());
     }
 
     CloseHandle(token_handle);
@@ -428,16 +416,13 @@ uint32_t pid_from_process_name(const wchar_t *process_name)
 
     snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if(snapshot_handle == INVALID_HANDLE_VALUE) {
-        fprintf(stderr, "[-] Error obtaining snapshot handle: %ld\n",
-            GetLastError());
-        exit(1);
+        error("[-] Error obtaining snapshot handle: %ld\n", GetLastError());
     }
 
     row.dwSize = sizeof(row);
     if(Process32FirstW(snapshot_handle, &row) == FALSE) {
-        fprintf(stderr, "[-] Error enumerating the first process: %ld\n",
+        error("[-] Error enumerating the first process: %ld\n",
             GetLastError());
-        exit(1);
     }
 
     do {
@@ -449,8 +434,8 @@ uint32_t pid_from_process_name(const wchar_t *process_name)
 
     CloseHandle(snapshot_handle);
 
-    fprintf(stderr, "[-] Error finding process by name: %S\n", process_name);
-    exit(1);
+    error("[-] Error finding process by name: %S\n", process_name);
+    return 0;
 }
 
 int main()
@@ -459,38 +444,39 @@ int main()
 
     argv = CommandLineToArgvW(GetCommandLineW(), &argc);
     if(argv == NULL) {
-        printf("Error parsing commandline options!\n");
-        return 1;
+        error("Error parsing commandline options!\n");
     }
 
     if(argc < 4) {
-        printf("Usage: %S <options..>\n", argv[0]);
-        printf("Options:\n");
-        printf("  --crt                  CreateRemoteThread injection\n");
-        printf("  --apc                  QueueUserAPC injection\n");
-        printf("  --free                 Do not inject our monitor\n");
-        printf("  --dll <dll>            DLL to inject\n");
-        printf("  --app <app>            Path to application to start\n");
-        printf("  --args <args>          Command-line arguments\n");
-        printf("                         Excluding the application path!\n");
-        printf("  --curdir <dirpath>     Current working directory\n");
-        printf("  --maximize             Maximize the newly created GUI\n");
-        printf("  --pid <pid>            Process identifier to inject\n");
-        printf("  --process-name <name>  Process name to inject\n");
-        printf("  --tid <tid>            Thread identifier to inject\n");
-        printf("  --from <pid>           Inject from another process\n");
-        printf("  --from-process <name>  "
-            "Inject from another process, resolves pid\n");
-        printf("  --only-start           "
-            "Start the application and print pid/tid\n");
-        printf("  --resume-thread        "
-            "Resume the thread of the pid/tid target\n");
-        printf("  --config <path>        "
-            "Configuration file for the monitor\n");
-        printf("  --dbg <path>           "
-            "Attach debugger to target process\n");
-        printf("  --verbose              Verbose switch\n");
-        return 1;
+        error(
+            "Usage: %S <options..>\n"
+            "Options:\n"
+            "  --crt                  CreateRemoteThread injection\n"
+            "  --apc                  QueueUserAPC injection\n"
+            "  --free                 Do not inject our monitor\n"
+            "  --dll <dll>            DLL to inject\n"
+            "  --app <app>            Path to application to start\n"
+            "  --args <args>          Command-line arguments\n"
+            "                         Excluding the application path!\n"
+            "  --curdir <dirpath>     Current working directory\n"
+            "  --maximize             Maximize the newly created GUI\n"
+            "  --pid <pid>            Process identifier to inject\n"
+            "  --process-name <name>  Process name to inject\n"
+            "  --tid <tid>            Thread identifier to inject\n"
+            "  --from <pid>           Inject from another process\n"
+            "  --from-process <name>  "
+            "Inject from another process, resolves pid\n"
+            "  --only-start           "
+            "Start the application and print pid/tid\n"
+            "  --resume-thread        "
+            "Resume the thread of the pid/tid target\n"
+            "  --config <path>        "
+            "Configuration file for the monitor\n"
+            "  --dbg <path>           "
+            "Attach debugger to target process\n"
+            "  --verbose              Verbose switch\n",
+            argv[0]
+        );
     }
 
     const wchar_t *dll_path = NULL, *app_path = NULL, *arguments = L"";
@@ -590,67 +576,56 @@ int main()
             continue;
         }
 
-        fprintf(stderr, "[-] Found unsupported argument: %S\n", argv[idx]);
+        error("[-] Found unsupported argument: %S\n", argv[idx]);
         return 1;
     }
 
     if(inj_mode == INJECT_NONE) {
-        fprintf(stderr, "[-] No injection method has been provided!\n");
-        return 1;
+        error("[-] No injection method has been provided!\n");
     }
 
     if(inj_mode == INJECT_CRT && pid == 0 && process_name == NULL &&
             app_path == NULL) {
-        fprintf(stderr, "[-] No injection target has been provided!\n");
-        return 1;
+        error("[-] No injection target has been provided!\n");
     }
 
     if(inj_mode == INJECT_APC && tid == 0 && process_name == NULL &&
             app_path == NULL) {
-        fprintf(stderr, "[-] No injection target has been provided!\n");
-        return 1;
+        error("[-] No injection target has been provided!\n");
     }
 
     if(inj_mode == INJECT_FREE && app_path == NULL) {
-        fprintf(stderr, "[-] An app path is required when not injecting!\n");
-        return 1;
+        error("[-] An app path is required when not injecting!\n");
     }
 
     if(pid != 0 && process_name != NULL) {
-        fprintf(stderr, "[-] Both pid and process-name were set!\n");
-        return 1;
+        error("[-] Both pid and process-name were set!\n");
     }
 
     static wchar_t dllpath[MAX_PATH_W];
 
     if(inj_mode == INJECT_FREE) {
         if(dll_path != NULL || tid != 0 || pid != 0) {
-            fprintf(stderr,
-                "[-] Unused --tid/--pid/--dll provided in --free mode!\n");
-            return 1;
+            error("[-] Unused --tid/--pid/--dll provided in --free mode!\n");
         }
     }
 
     if(inj_mode != INJECT_FREE) {
         if(PathFileExistsW(dll_path) == FALSE) {
-            fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
-            return 1;
+            error("[-] Invalid DLL filepath has been provided\n");
         }
 
         if(GetFullPathNameW(dll_path, MAX_PATH_W, dllpath, NULL) == 0) {
-            fprintf(stderr, "[-] Invalid DLL filepath has been provided\n");
-            return 1;
+            error("[-] Invalid DLL filepath has been provided\n");
         }
 
         if(GetLongPathNameW(dllpath, dllpath, MAX_PATH_W) == 0) {
-            fprintf(stderr, "[-] Error obtaining the dll long path name\n");
-            return 1;
+            error("[-] Error obtaining the dll long path name\n");
         }
     }
 
     if(from != 0 && from_process != NULL) {
-        fprintf(stderr, "[-] Both --from and --from-process are specified\n");
-        return 1;
+        error("[-] Both --from and --from-process are specified\n");
     }
 
     grant_debug_privileges(GetCurrentProcessId());
@@ -665,13 +640,11 @@ int main()
         // If no source process has been specified, then we use our
         // own process.
         if(from == 0) {
-            DPRINTF("[x] Starting process from our own process\n");
             from = GetCurrentProcessId();
         }
 
         if(PathFileExistsW(app_path) == FALSE) {
-            fprintf(stderr, "[-] Invalid app filepath has been provided\n");
-            return 1;
+            error("[-] Invalid app filepath has been provided\n");
         }
 
         static wchar_t dirpath[MAX_PATH_W], filepath[MAX_PATH_W];
@@ -682,8 +655,7 @@ int main()
             // Allow the current working directory to be
             // specified as, e.g., %TEMP%.
             if(ExpandEnvironmentStringsW(curdir, dirpath, MAX_PATH_W) == 0) {
-                fprintf(stderr, "[-] Error expanding environment variables\n");
-                return 1;
+                error("[-] Error expanding environment variables\n");
             }
 
             curdir = dirpath;
@@ -695,18 +667,15 @@ int main()
         }
 
         if(GetLongPathNameW(dirpath, dirpath, MAX_PATH_W) == 0) {
-            fprintf(stderr, "[-] Error obtaining the curdir long path name\n");
-            return 1;
+            error("[-] Error obtaining the curdir long path name\n");
         }
 
         if(GetFullPathNameW(app_path, MAX_PATH_W, filepath, NULL) == 0) {
-            fprintf(stderr, "[-] Invalid app filepath has been provided\n");
-            return 1;
+            error("[-] Invalid app filepath has been provided\n");
         }
 
         if(GetLongPathNameW(filepath, filepath, MAX_PATH_W) == 0) {
-            fprintf(stderr, "[-] Error obtaining the app long path name\n");
-            return 1;
+            error("[-] Error obtaining the app long path name\n");
         }
 
         pid = start_app(from, filepath, arguments, curdir, &tid, show_window);
@@ -722,9 +691,8 @@ int main()
 
         wsprintfW(filepath, L"C:\\cuckoo_%d.ini", pid);
         if(MoveFileW(config_file, filepath) == FALSE) {
-            fprintf(stderr, "[-] Error dropping configuration file: %ld\n",
+            error("[-] Error dropping configuration file: %ld\n",
                 GetLastError());
-            return 1;
         }
     }
 
@@ -747,11 +715,8 @@ int main()
         break;
 
     default:
-        fprintf(stderr, "[-] Unhandled injection mode: %d\n", inj_mode);
-        return 1;
+        error("[-] Unhandled injection mode: %d\n", inj_mode);
     }
-
-    DPRINTF("[+] Injected successfully!\n");
 
     if(dbg_path != NULL) {
         wchar_t buf[1024];

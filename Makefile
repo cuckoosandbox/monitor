@@ -2,7 +2,7 @@ CC32 = i686-w64-mingw32-gcc -m32
 CC64 = x86_64-w64-mingw32-gcc -m64
 AR = ar
 CFLAGS = -Wall -Wextra -std=c99 -static -Wno-missing-field-initializers \
-		 -I inc/ -I objects/code/ -I src/bson/ -I src/sha1/
+		 -I inc/ -I objects/code/ -I src/bson/ -I src/sha1/ -mwindows
 LDFLAGS = -lshlwapi
 MAKEFLAGS = -j8
 
