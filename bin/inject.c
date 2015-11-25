@@ -31,6 +31,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MAX_PATH_W 0x7fff
 #define NOINLINE __attribute__((noinline))
 
+typedef struct _dump_t {
+    uint64_t addr;
+    uint32_t size;
+    uint32_t state;
+    uint32_t type;
+    uint32_t protect;
+} dump_t;
+
 static int verbose = 0;
 
 void error(const char *fmt, ...)
@@ -438,6 +446,59 @@ uint32_t pid_from_process_name(const wchar_t *process_name)
     return 0;
 }
 
+int dump(uint32_t pid, const wchar_t *filepath)
+{
+    SYSTEM_INFO si; MEMORY_BASIC_INFORMATION mbi; DWORD written_bytes;
+    HANDLE process_handle, file_handle; DWORD_PTR read_bytes;
+    uint8_t buf[0x1000]; dump_t d;
+
+    GetSystemInfo(&si);
+
+    file_handle = CreateFileW(filepath, GENERIC_WRITE, 0,
+        NULL, CREATE_ALWAYS, 0, NULL);
+    if(file_handle == NULL) {
+        error("[-] Error opening dump filepath: %S\n", filepath);
+    }
+
+    process_handle = open_process(pid);
+
+    uint8_t *ptr = si.lpMinimumApplicationAddress;
+
+    while (ptr < (uint8_t *) si.lpMaximumApplicationAddress) {
+        if(VirtualQueryEx(process_handle, ptr, &mbi, sizeof(mbi)) == FALSE) {
+            ptr += 0x1000;
+            continue;
+        }
+
+        if((mbi.State & MEM_COMMIT) == 0 || (mbi.Protect & PAGE_GUARD) != 0 ||
+                (mbi.Type & (MEM_IMAGE | MEM_MAPPED | MEM_PRIVATE)) == 0) {
+            ptr += mbi.RegionSize;
+            continue;
+        }
+
+        d.addr = (uintptr_t) ptr;
+        d.size = mbi.RegionSize;
+        d.state = mbi.State;
+        d.type = mbi.Type;
+        d.protect = mbi.Protect;
+
+        WriteFile(file_handle, &d, sizeof(d), &written_bytes, NULL);
+
+        for (uint8_t *end = ptr + mbi.RegionSize; ptr < end; ptr += 0x1000) {
+            if(ReadProcessMemory(process_handle, ptr, buf, sizeof(buf),
+                    &read_bytes) == FALSE || read_bytes != sizeof(buf)) {
+                error("[-] Unable to read a full page?!");
+            }
+
+            WriteFile(file_handle, buf, sizeof(buf), &written_bytes, NULL);
+        }
+    }
+
+    CloseHandle(process_handle);
+    CloseHandle(file_handle);
+    return 0;
+}
+
 int main()
 {
     LPWSTR *argv; int argc;
@@ -474,6 +535,8 @@ int main()
             "Configuration file for the monitor\n"
             "  --dbg <path>           "
             "Attach debugger to target process\n"
+            "  --dump <filepath>      "
+            "Dump process memory with --pid to filepath\n"
             "  --verbose              Verbose switch\n",
             argv[0]
         );
@@ -481,7 +544,7 @@ int main()
 
     const wchar_t *dll_path = NULL, *app_path = NULL, *arguments = L"";
     const wchar_t *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
-    const wchar_t *curdir = NULL, *process_name = NULL;
+    const wchar_t *curdir = NULL, *process_name = NULL, *dump_path = NULL;
     uint32_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
     uint32_t show_window = SW_SHOWNORMAL, only_start = 0, resume_thread_ = 0;
 
@@ -571,6 +634,11 @@ int main()
             continue;
         }
 
+        if(wcscmp(argv[idx], L"--dump") == 0) {
+            dump_path = argv[++idx];
+            continue;
+        }
+
         if(wcscmp(argv[idx], L"--verbose") == 0) {
             verbose = 1;
             continue;
@@ -578,6 +646,12 @@ int main()
 
         error("[-] Found unsupported argument: %S\n", argv[idx]);
         return 1;
+    }
+
+    // Dump memory of a process.
+    if(dump_path != NULL && pid != 0) {
+        dump(pid, dump_path);
+        return 0;
     }
 
     if(inj_mode == INJECT_NONE) {
