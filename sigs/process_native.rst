@@ -266,6 +266,15 @@ Parameters::
     ** HANDLE ProcessHandle process_handle
     ** NTSTATUS ExitStatus status_code
 
+Pre::
+
+    // If the process handle is a nullptr then it will kill all threads in
+    // the current process except for the current one. TODO Should we have
+    // any special handling for that? Perhaps the unhook detection logic?
+    if(ProcessHandle != NULL) {
+        pipe("KILL:%d", pid_from_process_handle(ProcessHandle));
+    }
+
 
 NtCreateSection
 ===============
