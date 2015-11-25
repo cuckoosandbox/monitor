@@ -67,6 +67,14 @@ Inherits::
     MemoryProtectionFlags
 
 
+NtMapViewOfSection_Win32Protect
+===============================
+
+Inherits::
+
+    MemoryProtectionFlags
+
+
 AllocationType
 ==============
 

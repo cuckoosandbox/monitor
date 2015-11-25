@@ -488,6 +488,7 @@ Parameters::
 Flags::
 
     allocation_type
+    win32_protect
 
 Middle::
 
