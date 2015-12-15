@@ -470,7 +470,8 @@ Middle::
     uint8_t *master_secret = NULL, *client_random = NULL;
     uint8_t *server_random = NULL;
 
-    char server_random_repr[32*2+1] = {}, client_random_repr[32*2+1] = {};
+    char client_random_repr[32*2+1] = {};
+    char server_random_repr[32*2+1] = {};
     char master_secret_repr[48*2+1] = {};
 
     if(type_length == 13 && strcmp(type, "key expansion") == 0 &&
@@ -482,8 +483,8 @@ Middle::
         server_random = buf2;
         client_random = buf2 + random_length;
 
-        hexencode(server_random_repr, server_random, random_length);
         hexencode(client_random_repr, client_random, random_length);
+        hexencode(server_random_repr, server_random, random_length);
         hexencode(master_secret_repr, master_secret, master_secret_length);
     }
 
@@ -521,12 +522,13 @@ Middle::
     uint8_t *client_random = seed;
     uint8_t *server_random = seed + random_length;
 
-    char server_random_repr[32*2+1] = {}, client_random_repr[32*2+1] = {};
+    char client_random_repr[32*2+1] = {};
+    char server_random_repr[32*2+1] = {};
     char master_secret_repr[48*2+1] = {};
 
     if(seed_length == 64 && secret_length == 48) {
-        hexencode(server_random_repr, server_random, random_length);
         hexencode(client_random_repr, client_random, random_length);
+        hexencode(server_random_repr, server_random, random_length);
         hexencode(master_secret_repr, secret, secret_length);
     }
 
