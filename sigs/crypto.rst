@@ -518,8 +518,8 @@ Parameters::
 Middle::
 
     uintptr_t random_length = 32;
-    uint8_t *server_random = seed;
-    uint8_t *client_random = seed + random_length;
+    uint8_t *client_random = seed;
+    uint8_t *server_random = seed + random_length;
 
     char server_random_repr[32*2+1] = {}, client_random_repr[32*2+1] = {};
     char master_secret_repr[48*2+1] = {};
