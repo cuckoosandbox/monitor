@@ -830,3 +830,18 @@ Parameters::
 Logging::
 
     u filepath lpBuffer
+
+
+SetFileTime
+===========
+
+Signature::
+
+    * Return value: BOOL
+
+Parameters::
+
+    ** HANDLE hFile file_handle
+    *  FILETIME *lpCreationTime
+    *  FILETIME *lpLastAccessTime
+    *  FILETIME *lpLastWriteTime
