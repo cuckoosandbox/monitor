@@ -260,10 +260,9 @@ void log_explain(uint32_t index)
     for (uint32_t argnum = 2; *fmt != 0; argnum++, fmt++) {
         ultostr(argnum, argidx, 10);
 
-        // Ignore buffers, they are sent over separately.
+        // Handle overrides.
         if(*fmt == '!') {
             argnum--;
-            fmt++;
             continue;
         }
 
@@ -433,20 +432,22 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
         else if(*fmt == 'b') {
             uintptr_t len = va_arg(args, uintptr_t);
             const uint8_t *s = va_arg(args, const uint8_t *);
-            if(override == 0) {
+            if(override == 0 || len < BUFFER_LOG_MAX) {
                 log_buffer(&b, idx, s, len);
             }
             else {
+                log_buffer(&b, idx, NULL, 0);
                 log_buffer_notrunc(s, len);
             }
         }
         else if(*fmt == 'B') {
             uintptr_t *len = va_arg(args, uintptr_t *);
             const uint8_t *s = va_arg(args, const uint8_t *);
-            if(override == 0) {
+            if(override == 0 || (len != NULL && *len < BUFFER_LOG_MAX)) {
                 log_buffer(&b, idx, s, len == NULL ? 0 : *len);
             }
             else {
+                log_buffer(&b, idx, NULL, 0);
                 log_buffer_notrunc(s, len == NULL ? 0 : *len);
             }
         }
