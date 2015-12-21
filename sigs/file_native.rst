@@ -30,9 +30,15 @@ Flags::
     share_access
     create_disposition
     create_options
+    status_info IoStatusBlock->Information NtCreateFile_IoStatusBlock_Information
+
+Ensure::
+
+    IoStatusBlock
 
 Pre::
 
+    memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
     uint32_t share_access = ShareAccess;
     ShareAccess |= FILE_SHARE_READ;
 
@@ -51,6 +57,7 @@ Logging::
     i share_access share_access
     u filepath filepath
     u filepath_r filepath_r
+    l status_info IoStatusBlock->Information
 
 Post::
 

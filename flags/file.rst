@@ -181,6 +181,17 @@ Value::
     FILE_OVERWRITE
     FILE_OVERWRITE_IF
 
+NtCreateFile_IoStatusBlock_Information
+======================================
+
+Value::
+
+    FILE_CREATED
+    FILE_OPENED
+    FILE_OVERWRITTEN
+    FILE_SUPERSEDED
+    FILE_EXISTS
+    FILE_DOES_NOT_EXIST
 
 FileOptions
 ===========

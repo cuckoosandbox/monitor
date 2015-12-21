@@ -746,4 +746,11 @@ static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
 #define LDR_DLL_NOTIFICATION_REASON_LOADED 1
 #define LDR_DLL_NOTIFICATION_REASON_UNLOADED 2
 
+#define FILE_SUPERSEDED                   0x00000000
+#define FILE_OPENED                       0x00000001
+#define FILE_CREATED                      0x00000002
+#define FILE_OVERWRITTEN                  0x00000003
+#define FILE_EXISTS                       0x00000004
+#define FILE_DOES_NOT_EXIST               0x00000005
+
 #endif
