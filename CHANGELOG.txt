@@ -1,3 +1,18 @@
+- New: Proper process memory dump support from inject.exe
+- New: Function hooks for intercepting WMI queries.
+- New: Also dump raw filepaths/regkeys in related functions.
+- Tweak: Use DLL notifications to hook functions of new DLLs.
+- Tweak: Dump memory injected into other processes.
+- New: Dumped buffer support with unrestricted length.
+- New: Monitoring mode to restrict amount of API hooks for certain processes.
+- Tweak: Allow injection of service processes (thanks Accuvant).
+- Tweak: Ensure that any buffers we log are pointing to valid memory.
+- Tweak: Got rid of various imported DLLs by our monitor.
+- Bugfix: Properly handle delay-loaded DLLs (thanks Accuvant).
+- Tweak: Lower-level exception logging to see all userspace exceptions.
+- New: Hooking and logging of various private Internet Explorer functions.
+- New: Custom methods for retrieving addresses of private functions.
+- Tweak: Allow functions in different modules with the same name to be hooked.
 - Tweak: Use LdrLoadDll instead of LoadLibraryW for injection so processes
   without kernel32 loaded can be injected as well (thanks Accuvant).
 - Tweak: Log module+offset in the stacktrace.
