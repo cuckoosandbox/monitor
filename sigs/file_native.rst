@@ -32,13 +32,9 @@ Flags::
     create_options
     status_info IoStatusBlock->Information NtCreateFile_IoStatusBlock_Information
 
-Ensure::
-
-    IoStatusBlock
-
 Pre::
 
-    memset(IoStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
+    IoStatusBlock->Information = 6;
     uint32_t share_access = ShareAccess;
     ShareAccess |= FILE_SHARE_READ;
 
