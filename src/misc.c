@@ -570,7 +570,9 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
             *ptr = 0;
         }
 
-        if(GetLongPathNameW(pathi, patho, MAX_PATH_W+1) != 0) {
+        // if(GetLongPathNameW(pathi, patho, MAX_PATH_W+1) != 0) {
+        uint32_t length = GetFullPathNameW(pathi, MAX_PATH_W + 1, patho, NULL);
+        if (length != 0) {
             // Copy the first part except for the "\\\\?\\" part.
             if(wcsnicmp(patho, L"\\\\?\\", 4) == 0) {
                 wcscpy(out, patho + 4);
@@ -589,6 +591,12 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
             free_unicode_buffer(buf1);
             free_unicode_buffer(buf2);
             return lstrlenW(out);
+        }
+        else {
+            *out = 0;
+            free_unicode_buffer(buf1);
+            free_unicode_buffer(buf2);
+            return 0;
         }
 
         last_ptr = ptr;

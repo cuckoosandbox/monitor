@@ -33,6 +33,7 @@ Pre::
     if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
         filepath_r = ObjectAttributes->ObjectName->Buffer;
     }
+    BOOL bStackPivot = stackPivotDetection();
 
 Interesting::
 
@@ -44,6 +45,7 @@ Logging::
 
     u filepath filepath
     u filepath_r filepath_r
+    i StackPivot bStackPivot
 
 Post::
 
@@ -83,6 +85,7 @@ Pre::
     if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
         filepath_r = ObjectAttributes->ObjectName->Buffer;
     }
+    BOOL bStackPivot = stackPivotDetection();
 
 Interesting::
 
@@ -94,6 +97,7 @@ Logging::
 
     u filepath filepath
     u filepath_r filepath_r
+    i StackPivot bStackPivot
 
 Post::
 
@@ -155,6 +159,7 @@ Pre::
         extract_unicode_string(&ProcessParameters->ImagePathName);
     wchar_t *command_line =
         extract_unicode_string(&ProcessParameters->CommandLine);
+    BOOL bStackPivot = stackPivotDetection();
 
 Logging::
 
@@ -164,6 +169,7 @@ Logging::
     u thread_name_r thread_name_r
     u filepath filepath
     u command_line command_line
+    i StackPivot bStackPivot
 
 Post::
 
@@ -206,6 +212,7 @@ Pre::
     if(ImagePath != NULL) {
         filepath_r = ImagePath->Buffer;
     }
+    BOOL bStackPivot = stackPivotDetection();
 
 Interesting::
 
@@ -217,6 +224,7 @@ Logging::
 
     u filepath filepath
     u filepath_r filepath_r
+    i StackPivot bStackPivot
 
 Post::
 
@@ -401,6 +409,19 @@ Flags::
     protection
     allocation_type
 
+Pre::
+
+    PVOID BaseAddress_orig = *BaseAddress;
+    BOOL bStackPivotDetected = stackPivotDetection();
+    BOOL bStackDEPBypass = isAddressInStack(BaseAddress_orig);
+    BOOL bHeapDEPBypass = heapDEPBypass(ProcessHandle, BaseAddress_orig, Protect);
+
+Logging::
+
+    i StackPivot bStackPivotDetected
+    i StackDEPBypass bStackDEPBypass
+    i HeapDEPBypass bHeapDEPBypass
+
 
 NtReadVirtualMemory
 ===================
@@ -457,6 +478,18 @@ Flags::
 
     protection
 
+Pre::
+
+    PVOID BaseAddress_orig = *BaseAddress;
+    BOOL bStackPivotDetected = stackPivotDetection();
+    BOOL bStackDEPBypass = isAddressInStack(BaseAddress_orig);
+    BOOL bHeapDEPBypass = heapDEPBypass(ProcessHandle, BaseAddress_orig, NewAccessProtection);
+
+Logging::
+
+    i StackPivot bStackPivotDetected
+    i StackDEPBypass bStackDEPBypass
+    i HeapDEPBypass bHeapDEPBypass
 
 NtFreeVirtualMemory
 ===================

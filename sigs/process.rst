@@ -46,6 +46,7 @@ Pre::
 
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_pathW(lpApplicationName, filepath);
+    BOOL bStackPivot = stackPivotDetection();
 
 Interesting::
 
@@ -64,6 +65,7 @@ Logging::
     i thread_identifier lpProcessInformation->dwThreadId
     p process_handle lpProcessInformation->hProcess
     p thread_handle lpProcessInformation->hThread
+    i StackPivot bStackPivot
 
 Post::
 
