@@ -3,11 +3,14 @@ Signature::
     * Calling convention: WINAPI
     * Category: ui
     * Library: user32
-    * Return value: HWND
 
 
 FindWindowA
 ===========
+
+Signature::
+
+    * Return value: HWND
 
 Parameters::
 
@@ -33,6 +36,10 @@ Logging::
 FindWindowW
 ===========
 
+Signature::
+
+    * Return value: HWND
+
 Parameters::
 
     *  LPWSTR lpClassName
@@ -56,6 +63,10 @@ Logging::
 
 FindWindowExA
 =============
+
+Signature::
+
+    * Return value: HWND
 
 Parameters::
 
@@ -83,6 +94,10 @@ Logging::
 FindWindowExW
 =============
 
+Signature::
+
+    * Return value: HWND
+
 Parameters::
 
     ** HWND hwndParent parent_hwnd
@@ -109,9 +124,18 @@ Logging::
 GetForegroundWindow
 ===================
 
+Signature::
+
+    * Return value: HWND
+
 
 MessageBoxTimeoutA
 ==================
+
+Signature::
+
+    * Is success: ret != 0
+    * Return value: int
 
 Parameters::
 
@@ -133,6 +157,11 @@ Interesting::
 MessageBoxTimeoutW
 ==================
 
+Signature::
+
+    * Is success: ret != 0
+    * Return value: int
+
 Parameters::
 
     ** HWND hWnd window_handle
@@ -152,6 +181,11 @@ Interesting::
 
 DrawTextExA
 ===========
+
+Signature::
+
+    * Is success: ret != 0
+    * Return value: int
 
 Parameters::
 
@@ -176,6 +210,11 @@ Logging::
 DrawTextExW
 ===========
 
+Signature::
+
+    * Is success: ret != 0
+    * Return value: int
+
 Parameters::
 
     *  HDC hdc
@@ -199,6 +238,11 @@ Logging::
 LoadStringA
 ===========
 
+Signature::
+
+    * Is success: ret != 0
+    * Return value: int
+
 Parameters::
 
     ** HINSTANCE hInstance module_handle
@@ -221,6 +265,11 @@ Logging::
 LoadStringW
 ===========
 
+Signature::
+
+    * Is success: ret != 0
+    * Return value: int
+
 Parameters::
 
     ** HINSTANCE hInstance module_handle
@@ -242,6 +291,10 @@ Logging::
 
 _CreateWindowExA
 ================
+
+Signature::
+
+    * Return value: HWND
 
 Parameters::
 
@@ -266,6 +319,10 @@ Flags::
 
 _CreateWindowExW
 ================
+
+Signature::
+
+    * Return value: HWND
 
 Parameters::
 
