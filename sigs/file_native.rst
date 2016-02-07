@@ -32,9 +32,15 @@ Flags::
     create_options
     status_info IoStatusBlock->Information NtCreateFile_IoStatusBlock_Information
 
+Ensure::
+
+    IoStatusBlock
+
 Pre::
 
-    IoStatusBlock->Information = 6;
+    // Not sure what other value we could be handing out here (in any case
+    // this value should always be overwritten by the kernel anyway).
+    IoStatusBlock->Information = 0xffffffff;
     uint32_t share_access = ShareAccess;
     ShareAccess |= FILE_SHARE_READ;
 
@@ -117,9 +123,15 @@ Flags::
     open_options
     status_info IoStatusBlock->Information NtCreateFile_IoStatusBlock_Information
 
+Ensure::
+
+    IoStatusBlock
+
 Pre::
 
-    IoStatusBlock->Information = 6;
+    // Not sure what other value we could be handing out here (in any case
+    // this value should always be overwritten by the kernel anyway).
+    IoStatusBlock->Information = 0xffffffff;
     uint32_t share_access = ShareAccess;
     ShareAccess |= FILE_SHARE_READ;
 
