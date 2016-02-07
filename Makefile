@@ -59,7 +59,7 @@ objects/:
 	mkdir -p objects/x86/src/sha1/ objects/x64/src/sha1/
 
 $(HOOKSRC): $(SIGS) $(FLAGS) $(JINJA2) $(HOOKREQ)
-	python utils/process.py $(RELMODE) --apis=$(APIS)
+	python2  utils/process.py $(RELMODE) --apis=$(APIS)
 
 $(FLAGSRC): $(HOOKSRC)
 
@@ -69,12 +69,12 @@ src/capstone/config.mk:
 
 $(LIBCAPSTONE32): src/capstone/config.mk
 	cd src/capstone/ && \
-	BUILDDIR=../../objects/x86/capstone/ ./make.sh cross-win32 && \
+	CAPSTONE_ARCHS="x86" BUILDDIR=../../objects/x86/capstone/ ./make.sh cross-win32 && \
 	cp ../../objects/x86/capstone/capstone.lib capstone-x86.lib
 
 $(LIBCAPSTONE64): src/capstone/config.mk
 	cd src/capstone/ && \
-	BUILDDIR=../../objects/x64/capstone/ ./make.sh cross-win64 && \
+	CAPSTONE_ARCHS="x86" BUILDDIR=../../objects/x64/capstone/ ./make.sh cross-win64 && \
 	cp ../../objects/x64/capstone/capstone.lib capstone-x64.lib
 
 objects/x86/%.o: %.c $(HEADER) Makefile
