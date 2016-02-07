@@ -48,7 +48,7 @@ void error(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
-    MessageBox(NULL, fmt, "inject error", 0);
+    MessageBox(NULL, buf, "inject error", 0);
     va_end(args);
 
     exit(1);
