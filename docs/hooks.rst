@@ -161,6 +161,28 @@ given, then this indicates the ``alias``. In the reports you'll see the
 consistency it is recommended to use the original variable names as described
 in the API prototypes and to use lowercase aliases as Cuckoo-specific names.
 
+.. _hook-block-flags:
+
+Flags Block
+-----------
+
+This block describes values which are flags and that we would like the string
+representation.
+Its syntax should be as follows::
+
+    <name> <value> <flag-type>
+
+The ``name`` should be either :
+ - ``variable_name`` (or ``VariableName`` if no alias was given)
+   (see :ref:`hook-block-parameters`). In this case, you will get meaning of
+   the specified parameter arg as described in flag file. (See :ref:`flag-format`)
+   ``value`` and ``flag-type`` will be overwritten as follows:
+    - ``value``  =  ``VariableName`` 
+    - ``flag-type``  =  ``<apiname>_<VariableName>``
+ - A unique name alias. Here it's mandatory to provide :
+    - ``value`` : any C expression which is a flag
+    - ``flag-type`` : Flag type block in flag file. (See :ref:`flag-format`)
+
 .. _hook-block-ensure:
 
 Ensure Block
@@ -329,3 +351,74 @@ Following is a list of all currently supported format specifiers:
 * ``Q``: pointer to 64-bit integer (e.g., pointer to ``LARGE_INTEGER``)
 * ``z``: bson object
 * ``c``: REFCLSID object
+
+.. _flag-format:
+
+Flag Format
+===========
+
+The ``flag format`` is a very basic ``reStructuredText``-based way to
+describe meaning of bit flag argument in Windows API.
+It is found in ``flags/``
+This flag is pre-processed by ``utils/process.py`` to emit C code
+which is in turn compiled into the Monitor.
+
+General Syntax
+--------------
+
+Each flag starts with a small header containing the flag type.
+
+.. code-block:: rst
+
+    FlagType
+    ========
+
+Followed is at least one block. Each block has the block name followed
+by two colons, followed by one or more indented lines according to the
+blocks' syntax.
+
+.. code-block:: rst
+
+    FlagType
+    ========
+
+    Block::
+
+        <value>
+        <value1>
+        <value2>
+        ...
+
+    Block2::
+
+        <value1>
+        <value2>
+
+It is recommended to keep flags clean and standard:
+
+* One blank line between the Flag type header and the first block.
+* One blank line between a block name and its contents.
+* One blank line between blocks.
+* Two lines between each flag type.
+
+Available Blocks
+================
+
+.. _flag-block-inherits:
+
+Inherits Block
+--------------
+
+.. _flag-block-value:
+
+Value Block
+-----------
+
+This block defines possible values when only one flag could be set.
+
+.. _flag-block-enum:
+
+Enum block
+----------
+
+This block defines possible values in a bitwise manner.
