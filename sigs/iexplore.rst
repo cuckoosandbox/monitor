@@ -145,10 +145,23 @@ Pre::
         code = data->bstrVal;
     }
 
+    VARIANT v; v.vt = VT_EMPTY;
+    if(data != NULL && data->vt == VT_DISPATCH) {
+        if(SUCCEEDED(variant_change_type(&v, data, 0, VT_BSTR)) != FALSE) {
+            code = v.bstrVal;
+        }
+    }
+
 Logging::
 
     u code code
     i repeat repeat != 0
+
+Post::
+
+    if(v.vt != VT_EMPTY) {
+        variant_clear(&v);
+    }
 
 
 CScriptElement_put_src

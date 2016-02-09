@@ -140,6 +140,10 @@ uint8_t *our_memmemW(
 
 uint32_t sys_string_length(const BSTR bstr);
 
+HRESULT variant_change_type(
+    VARIANTARG *dst, const VARIANTARG *src, USHORT flags, VARTYPE vt);
+HRESULT variant_clear(VARIANTARG *arg);
+
 extern uint32_t g_extra_virtual_memory;
 
 void set_processor_count(uint32_t processor_count);

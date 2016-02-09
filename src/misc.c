@@ -1518,3 +1518,39 @@ uint32_t sys_string_length(const BSTR bstr)
     }
     return 0;
 }
+
+HRESULT variant_change_type(
+    VARIANTARG *dst, const VARIANTARG *src, USHORT flags, VARTYPE vt)
+{
+    static FARPROC pVariantChangeType;
+
+    if(pVariantChangeType == NULL) {
+        HMODULE module_handle = GetModuleHandle("oleaut32");
+        if(module_handle != NULL) {
+            pVariantChangeType =
+                GetProcAddress(module_handle, "VariantChangeType");
+        }
+        if(pVariantChangeType == NULL) {
+            return E_INVALIDARG;
+        }
+    }
+
+    return pVariantChangeType(dst, src, flags, vt);
+}
+
+HRESULT variant_clear(VARIANTARG *arg)
+{
+    static FARPROC pVariantClear;
+
+    if(pVariantClear == NULL) {
+        HMODULE module_handle = GetModuleHandle("oleaut32");
+        if(module_handle != NULL) {
+            pVariantClear = GetProcAddress(module_handle, "VariantClear");
+        }
+        if(pVariantClear == NULL) {
+            return E_INVALIDARG;
+        }
+    }
+
+    return pVariantClear(arg);
+}
