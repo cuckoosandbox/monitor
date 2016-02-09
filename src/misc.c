@@ -1240,19 +1240,11 @@ void wsabuf_get_buffer(uint32_t buffer_count, const WSABUF *buffers,
 void secbuf_get_buffer(uint32_t buffer_count, SecBuffer *buffers,
     uint8_t **ptr, uintptr_t *length)
 {
-    *length = 0;
     for (uint32_t idx = 0; idx < buffer_count; idx++) {
-        *length += buffers[idx].cbBuffer;
-    }
-
-    *ptr = (uint8_t *) mem_alloc(*length);
-    if(*ptr != NULL) {
-        for (uint32_t idx = 0, offset = 0; idx < buffer_count; idx++) {
-            if(buffers[idx].pvBuffer != NULL && buffers[idx].cbBuffer != 0) {
-                memcpy(&(*ptr)[offset], buffers[idx].pvBuffer,
-                    buffers[idx].cbBuffer);
-                offset += buffers[idx].cbBuffer;
-            }
+        if(buffers[idx].BufferType == SECBUFFER_DATA) {
+            *ptr = buffers[idx].pvBuffer;
+            *length = buffers[idx].cbBuffer;
+            return;
         }
     }
 }

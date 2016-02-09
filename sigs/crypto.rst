@@ -561,6 +561,7 @@ Pre::
     if(pMessage != NULL && pMessage->pBuffers != NULL) {
         secbuf_get_buffer(pMessage->cBuffers,
             pMessage->pBuffers, &buf, &length);
+        buf = memdup(buf, length);
     }
 
 Logging::
@@ -599,7 +600,3 @@ Middle::
 Logging::
 
     !b buffer length, buf
-
-Post::
-
-    mem_free(buf);
