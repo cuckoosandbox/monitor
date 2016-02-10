@@ -1546,3 +1546,20 @@ HRESULT variant_clear(VARIANTARG *arg)
 
     return pVariantClear(arg);
 }
+
+static NTSTATUS g_exception_whitelist[] = {
+    DBG_PRINTEXCEPTION_C,
+    RPC_S_SERVER_UNAVAILABLE,
+    RPC_S_CALL_CANCELLED,
+};
+
+int is_exception_code_whitelisted(NTSTATUS exception_code)
+{
+    for (uint32_t idx = 0;
+            idx < sizeof(g_exception_whitelist)/sizeof(NTSTATUS); idx++) {
+        if(exception_code == g_exception_whitelist[idx]) {
+            return 1;
+        }
+    }
+    return 0;
+}

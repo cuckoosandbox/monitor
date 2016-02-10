@@ -144,6 +144,8 @@ HRESULT variant_change_type(
     VARIANTARG *dst, const VARIANTARG *src, USHORT flags, VARTYPE vt);
 HRESULT variant_clear(VARIANTARG *arg);
 
+int is_exception_code_whitelisted(NTSTATUS exception_code);
+
 extern uint32_t g_extra_virtual_memory;
 
 void set_processor_count(uint32_t processor_count);
