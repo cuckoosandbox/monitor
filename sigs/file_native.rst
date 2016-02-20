@@ -9,6 +9,10 @@ Signature::
 NtCreateFile
 ============
 
+Signature::
+
+    * Mode: iexplore
+
 Parameters::
 
     ** PHANDLE FileHandle file_handle
@@ -107,6 +111,10 @@ Post::
 NtOpenFile
 ==========
 
+Signature::
+
+    * Mode: iexplore
+
 Parameters::
 
     ** PHANDLE FileHandle file_handle
@@ -197,6 +205,10 @@ Logging::
 
 NtWriteFile
 ===========
+
+Signature::
+
+    * Mode: iexplore
 
 Parameters::
 
