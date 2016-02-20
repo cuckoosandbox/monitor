@@ -132,8 +132,10 @@ uint8_t *hook_addrcb_IWbemServices_ExecQuery(
 uint8_t *hook_addrcb_IWbemServices_ExecQueryAsync(hook_t *h,
     uint8_t *module_address, uint32_t module_size);
 
-void ole_enable_hooks(REFCLSID refclsid);
-
 typedef void VAR;
+
+VAR *iexplore_var_getvalue(VAR *value, void *session);
+
+void ole_enable_hooks(REFCLSID refclsid);
 
 #endif

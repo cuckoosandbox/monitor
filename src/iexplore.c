@@ -663,11 +663,28 @@ static funcoff_t _activexobject_construct[] = {
     {0, 0},
 };
 
+static FARPROC _var_getvalue;
+
+static funcoff_t _var_getvalue_ts[] = {
+    {0x4ce7c6df, 0x107e0},
+    {0, 0},
+};
+
 uint8_t *hook_addrcb_ActiveXObjectFncObj_Construct(
     hook_t *h, uint8_t *module_address, uint32_t module_size)
 {
     (void) h;
 
+    _var_getvalue = (FARPROC) module_addr_timestamp(
+        module_address, module_size, _var_getvalue_ts);
+
     return module_addr_timestamp(module_address, module_size,
         _activexobject_construct);
+}
+
+VAR *iexplore_var_getvalue(VAR *value, void *session)
+{
+    uintptr_t out;
+    _var_getvalue(value, session, &value, &out, 0);
+    return value;
 }

@@ -223,21 +223,13 @@ Parameters::
 
 Pre::
 
-    BSTR objname = NULL;
+    wchar_t *objname = NULL; void *session = ((void **) this)[3];
 
-    VAR *v = (VAR *) args;
-    if(v != NULL) {
-        uint16_t t = *(uint16_t *) v;
-        if(t == 0x80) {
-            v = *((VAR **) v + 1);
-        }
-
-        t = *(uint16_t *) v;
-        if(t == 0x82) {
-            objname = *((BSTR *) v + 1);
-        }
+    VAR *value = iexplore_var_getvalue(args, session);
+    if(value != NULL) {
+        objname = *((wchar_t **) value + 1);
     }
 
 Logging::
 
-    t objname objname
+    u objname objname
