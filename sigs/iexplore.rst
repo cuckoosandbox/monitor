@@ -190,3 +190,17 @@ Parameters::
 
     *  void *celement
     ** const wchar_t *html
+
+
+CImgElement_put_src
+===================
+
+Signature::
+
+    * Library: mshtml
+    * Return value: HRESULT
+
+Parameters::
+
+    *  void *celement
+    ** const wchar_t *src

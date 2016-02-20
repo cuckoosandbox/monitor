@@ -28,6 +28,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "symbol.h"
 #include "utf8.h"
 
+typedef struct _funcoff_t {
+    uint32_t timestamp;
+    uint32_t offset;
+} funcoff_t;
+
 #if __x86_64__
 
 static uint8_t *_addr_colescript_compile(
@@ -643,4 +648,27 @@ void chtmtag_attrs(const void *chtmtag, bson *b)
 
         ptr += 40 / sizeof(uintptr_t);
     }
+}
+
+static funcoff_t _image_put_src[] = {
+    {0x4ce7c7f0, 0x4158e0},
+    {0, 0},
+};
+
+uint8_t *hook_addrcb_CImgElement_put_src(
+    hook_t *h, uint8_t *module_address, uint32_t module_size)
+{
+    (void) h; (void) module_size;
+
+    IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) module_address;
+    IMAGE_NT_HEADERS_CROSS *image_nt_headers = (IMAGE_NT_HEADERS_CROSS *)(
+        module_address + image_dos_header->e_lfanew);
+
+    for (uint32_t idx = 0; _image_put_src[idx].timestamp != 0; idx++) {
+        if(image_nt_headers->FileHeader.TimeDateStamp ==
+                _image_put_src[idx].timestamp) {
+            return module_address + _image_put_src[idx].offset;
+        }
+    }
+    return NULL;
 }
