@@ -125,11 +125,15 @@ uint8_t *hook_addrcb_Ssl3GenerateKeyMaterial(
     hook_t *h, uint8_t *module_address, uint32_t module_size);
 uint8_t *hook_addrcb_CImgElement_put_src(
     hook_t *h, uint8_t *module_address, uint32_t module_size);
+uint8_t *hook_addrcb_ActiveXObjectFncObj_Construct(
+    hook_t *h, uint8_t *module_address, uint32_t module_size);
 uint8_t *hook_addrcb_IWbemServices_ExecQuery(
     hook_t *h, uint8_t *module_address, uint32_t module_size);
 uint8_t *hook_addrcb_IWbemServices_ExecQueryAsync(hook_t *h,
     uint8_t *module_address, uint32_t module_size);
 
 void ole_enable_hooks(REFCLSID refclsid);
+
+typedef void VAR;
 
 #endif

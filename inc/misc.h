@@ -146,6 +146,14 @@ HRESULT variant_clear(VARIANTARG *arg);
 
 int is_exception_code_whitelisted(NTSTATUS exception_code);
 
+typedef struct _funcoff_t {
+    uint32_t timestamp;
+    uint32_t offset;
+} funcoff_t;
+
+uint8_t *module_addr_timestamp(
+    uint8_t *module_address, uint32_t module_size, funcoff_t *fo);
+
 extern uint32_t g_extra_virtual_memory;
 
 void set_processor_count(uint32_t processor_count);

@@ -1563,3 +1563,27 @@ int is_exception_code_whitelisted(NTSTATUS exception_code)
     }
     return 0;
 }
+
+uint8_t *module_addr_timestamp(
+    uint8_t *module_address, uint32_t module_size, funcoff_t *fo)
+{
+    (void) module_size;
+
+    IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) module_address;
+    if(image_dos_header->e_magic != IMAGE_DOS_SIGNATURE) {
+        return NULL;
+    }
+
+    IMAGE_NT_HEADERS_CROSS *image_nt_headers = (IMAGE_NT_HEADERS_CROSS *)(
+        module_address + image_dos_header->e_lfanew);
+    if(image_nt_headers->Signature != IMAGE_NT_SIGNATURE) {
+        return NULL;
+    }
+
+    for (; fo->timestamp != 0; fo++) {
+        if(image_nt_headers->FileHeader.TimeDateStamp == fo->timestamp) {
+            return module_address + fo->offset;
+        }
+    }
+    return NULL;
+}

@@ -204,3 +204,40 @@ Parameters::
 
     *  void *celement
     ** const wchar_t *src
+
+
+ActiveXObjectFncObj_Construct
+=============================
+
+Signature::
+
+    * Library: jscript
+    * Return value: HRESULT
+
+Parameters::
+
+    *  void *this
+    *  VAR *unk1
+    *  int unk2
+    *  VAR *args
+
+Pre::
+
+    BSTR objname = NULL;
+
+    VAR *v = (VAR *) args;
+    if(v != NULL) {
+        uint16_t t = *(uint16_t *) v;
+        if(t == 0x80) {
+            v = *((VAR **) v + 1);
+        }
+
+        t = *(uint16_t *) v;
+        if(t == 0x82) {
+            objname = *((BSTR *) v + 1);
+        }
+    }
+
+Logging::
+
+    t objname objname
