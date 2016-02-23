@@ -1549,12 +1549,18 @@ HRESULT variant_clear(VARIANTARG *arg)
 
 static NTSTATUS g_exception_whitelist[] = {
     DBG_PRINTEXCEPTION_C,
-    RPC_S_SERVER_UNAVAILABLE,
-    RPC_S_CALL_CANCELLED,
 };
 
 int is_exception_code_whitelisted(NTSTATUS exception_code)
 {
+    // There appears to be a soft limit of 16000 exceptions. We are not
+    // interested in all of these exceptions as they are mostly used for
+    // passing around information within Windows libraries. See also;
+    // https://msdn.microsoft.com/en-us/library/windows/desktop/ms681382%28v=vs.85%29.aspx
+    if(exception_code < 16000) {
+        return 1;
+    }
+
     for (uint32_t idx = 0;
             idx < sizeof(g_exception_whitelist)/sizeof(NTSTATUS); idx++) {
         if(exception_code == g_exception_whitelist[idx]) {
