@@ -1557,7 +1557,7 @@ int is_exception_code_whitelisted(NTSTATUS exception_code)
     // interested in all of these exceptions as they are mostly used for
     // passing around information within Windows libraries. See also;
     // https://msdn.microsoft.com/en-us/library/windows/desktop/ms681382%28v=vs.85%29.aspx
-    if(exception_code < 16000) {
+    if((uint32_t) exception_code < 16000) {
         return 1;
     }
 
