@@ -1591,5 +1591,8 @@ uint8_t *module_addr_timestamp(
             return module_address + fo->offset;
         }
     }
+
+    pipe("WARNING:Unable to find the correct offsets for functions of: %Z",
+        get_module_file_name((HMODULE) module_address));
     return NULL;
 }
