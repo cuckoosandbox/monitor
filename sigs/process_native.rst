@@ -40,15 +40,20 @@ Interesting::
     i desired_access
     i inherit_handles
 
+Middle::
+
+    uint32_t pid = pid_from_process_handle(*ProcessHandle);
+
 Logging::
 
+    i process_identifier pid
     u filepath filepath
     u filepath_r filepath_r
 
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        pipe("PROCESS:%d", pid_from_process_handle(*ProcessHandle));
+        pipe("PROCESS:%d", pid);
         sleep_skip_disable();
     }
 
@@ -90,15 +95,20 @@ Interesting::
     i desired_access
     i flags
 
+Middle::
+
+    uint32_t pid = pid_from_process_handle(*ProcessHandle);
+
 Logging::
 
+    i process_identifier pid
     u filepath filepath
     u filepath_r filepath_r
 
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        pipe("PROCESS:%d", pid_from_process_handle(*ProcessHandle));
+        pipe("PROCESS:%d", pid);
         sleep_skip_disable();
     }
 
@@ -156,8 +166,15 @@ Pre::
     wchar_t *command_line =
         extract_unicode_string(&ProcessParameters->CommandLine);
 
+Middle::
+
+    uint32_t pid = pid_from_process_handle(*ProcessHandle);
+    uint32_t tid = tid_from_thread_handle(*ThreadHandle);
+
 Logging::
 
+    i process_identifier pid
+    i thread_identifier tid
     u process_name process_name
     u process_name_r process_name_r
     u thread_name thread_name
@@ -168,10 +185,7 @@ Logging::
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        pipe("PROCESS2:%d,%d,%d",
-            pid_from_process_handle(*ProcessHandle),
-            tid_from_thread_handle(*ThreadHandle),
-            HOOK_MODE_ALL);
+        pipe("PROCESS2:%d,%d,%d", pid, tid, HOOK_MODE_ALL);
         sleep_skip_disable();
     }
 
@@ -213,18 +227,22 @@ Interesting::
     i flags
     i inherit_handles
 
+Middle::
+
+    uint32_t pid = pid_from_process_handle(ProcessInformation->ProcessHandle);
+    uint32_t tid = tid_from_thread_handle(ProcessInformation->ThreadHandle);
+
 Logging::
 
+    i process_identifier pid
+    i thread_identifier tid
     u filepath filepath
     u filepath_r filepath_r
 
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        pipe("PROCESS2:%d,%d,%d",
-            pid_from_process_handle(ProcessInformation->ProcessHandle),
-            tid_from_thread_handle(ProcessInformation->ThreadHandle),
-            HOOK_MODE_ALL);
+        pipe("PROCESS2:%d,%d,%d", pid, tid, HOOK_MODE_ALL);
         sleep_skip_disable();
     }
 
@@ -268,12 +286,18 @@ Parameters::
 
 Pre::
 
+    uint32_t pid = pid_from_process_handle(ProcessHandle);
+
     // If the process handle is a nullptr then it will kill all threads in
     // the current process except for the current one. TODO Should we have
     // any special handling for that? Perhaps the unhook detection logic?
     if(ProcessHandle != NULL) {
-        pipe("KILL:%d", pid_from_process_handle(ProcessHandle));
+        pipe("KILL:%d", pid);
     }
+
+Logging::
+
+    i process_identifier pid
 
 
 NtCreateSection
@@ -381,6 +405,7 @@ Pre::
 
 Logging::
 
+    i process_identifier pid_from_process_handle(ProcessHandle)
     l region_size region_size
 
 
@@ -400,6 +425,10 @@ Flags::
 
     protection
     allocation_type
+
+Logging::
+
+    i process_identifier pid_from_process_handle(ProcessHandle)
 
 
 NtReadVirtualMemory
@@ -439,6 +468,7 @@ Ensure::
 
 Logging::
 
+    i process_identifier pid_from_process_handle(ProcessHandle)
     !B buffer NumberOfBytesWritten, Buffer
 
 
@@ -457,6 +487,10 @@ Flags::
 
     protection
 
+Logging::
+
+    i process_identifier pid_from_process_handle(ProcessHandle)
+
 
 NtFreeVirtualMemory
 ===================
@@ -467,6 +501,10 @@ Parameters::
     ** PVOID *BaseAddress base_address
     ** PSIZE_T RegionSize size
     ** ULONG FreeType free_type
+
+Logging::
+
+    i process_identifier pid_from_process_handle(ProcessHandle)
 
 
 NtMapViewOfSection
@@ -494,8 +532,9 @@ Middle::
 
     uintptr_t buflen = 0; uint8_t *buffer = NULL;
 
-    if(NT_SUCCESS(ret) != FALSE &&
-            pid_from_process_handle(ProcessHandle) != get_current_process_id()) {
+    uint32_t pid = pid_from_process_handle(ProcessHandle);
+
+    if(NT_SUCCESS(ret) != FALSE && pid != get_current_process_id()) {
 
         // The actual size of the mapped view.
         buflen = *ViewSize;
@@ -511,12 +550,13 @@ Middle::
 
 Logging::
 
+    i process_identifier pid
     !b buffer buflen, buffer
 
 Post::
 
     if(NT_SUCCESS(ret) != FALSE) {
-        pipe("PROCESS:%d", pid_from_process_handle(ProcessHandle));
+        pipe("PROCESS:%d", pid);
         sleep_skip_disable();
     }
 
