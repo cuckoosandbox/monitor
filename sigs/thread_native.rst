@@ -156,13 +156,16 @@ Middle::
     bson_append_finish_object(&registers);
     bson_finish(&registers);
 
+    uint32_t pid = pid_from_thread_handle(ThreadHandle);
+
 Logging::
 
+    i process_identifier pid
     z registers &registers
 
 Post::
 
-    pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
+    pipe("PROCESS:%d", pid);
     sleep_skip_disable();
     bson_destroy(&registers);
 
@@ -194,7 +197,15 @@ Ensure::
 
 Pre::
 
-    pipe("PROCESS:%d", pid_from_thread_handle(ThreadHandle));
+    uint32_t pid = pid_from_thread_handle(ThreadHandle);
+    if(pid != get_current_process_id()) {
+        pipe("PROCESS:%d", pid);
+        pipe("DUMPMEM:%d", pid);
+    }
+
+Logging::
+
+    i process_identifier pid
 
 Post::
 
