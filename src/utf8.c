@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "memory.h"
 #include "utf8.h"
 
-int utf8_encode(uint32_t c, unsigned char *out)
+int utf8_encode(uint32_t c, uint8_t *out)
 {
     if(c < 0x80) {
         *out = c & 0x7f;
@@ -78,7 +78,7 @@ int utf8_bytecnt_ascii(const char *s, int len)
 {
     int ret = 0;
     while (len-- != 0) {
-        ret += utf8_length(*s++);
+        ret += utf8_length((uint8_t) *s++);
     }
     return ret;
 }
@@ -105,7 +105,7 @@ int utf8_bytecnt_unicode(const wchar_t *s, int len)
             s += 2, len--;
         }
         else {
-            ret += utf8_length(*s++);
+            ret += utf8_length((uint16_t) *s++);
         }
     }
     return ret;
@@ -119,7 +119,7 @@ char *utf8_string(const char *s, int len)
     int pos = 4;
 
     while (len-- != 0) {
-        pos += utf8_encode(*s++, (unsigned char *) &utf8string[pos]);
+        pos += utf8_encode((uint8_t) *s++, (uint8_t *) &utf8string[pos]);
     }
     utf8string[pos] = 0;
     return utf8string;
@@ -147,11 +147,11 @@ char *utf8_wstring(const wchar_t *s, int len)
                 ch += (uint16_t) s[1] - 0xdc00;
             }
 
-            pos += utf8_encode(ch, (unsigned char *) &utf8string[pos]);
+            pos += utf8_encode(ch, (uint8_t *) &utf8string[pos]);
             s += 2, len--;
         }
         else {
-            pos += utf8_encode(*s++, (unsigned char *) &utf8string[pos]);
+            pos += utf8_encode((uint16_t) *s++, (uint8_t *) &utf8string[pos]);
         }
     }
     utf8string[pos] = 0;
