@@ -607,6 +607,19 @@ Ensure::
     lpcMaxValueNameLen
     lpcMaxValueLen
 
+Pre::
+
+    wchar_t *regkey = get_unicode_buffer();
+    reg_get_key(hKey, regkey);
+
+Logging::
+
+    u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
+
 
 RegQueryInfoKeyW
 ================
@@ -634,6 +647,19 @@ Ensure::
     lpcValues
     lpcMaxValueNameLen
     lpcMaxValueLen
+
+Pre::
+
+    wchar_t *regkey = get_unicode_buffer();
+    reg_get_key(hKey, regkey);
+
+Logging::
+
+    u regkey regkey
+
+Post::
+
+    free_unicode_buffer(regkey);
 
 
 RegCloseKey
