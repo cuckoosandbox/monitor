@@ -158,7 +158,7 @@ static int _prepend_pid(char *buf, ...)
 {
     va_list args;
     va_start(args, buf);
-    int ret = _pipe_sprintf(buf, "%x:", args);
+    int ret = _pipe_sprintf(buf, "%d:", args);
     va_end(args);
     return ret;
 }
@@ -177,7 +177,7 @@ int pipe(const char *fmt, ...)
     EnterCriticalSection(&g_cs);
 
     if(g_pipe_pid != 0) {
-        len = _prepend_pid(buf);
+        len = _prepend_pid(buf, get_current_process_id());
     }
 
     va_start(args, fmt);
@@ -208,7 +208,7 @@ int32_t pipe2(void *out, uint32_t outlen, const char *fmt, ...)
     EnterCriticalSection(&g_cs);
 
     if(g_pipe_pid != 0) {
-        len = _prepend_pid(buf);
+        len = _prepend_pid(buf, get_current_process_id());
     }
 
     va_start(args, fmt);
