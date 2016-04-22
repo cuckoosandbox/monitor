@@ -545,3 +545,19 @@ Logging::
     u resource_name pActCtx != NULL ? pActCtx->lpResourceName : NULL
     u application_name pActCtx != NULL ? pActCtx->lpApplicationName : NULL
     p module_handle pActCtx != NULL ? pActCtx->hModule : NULL
+
+
+RegisterHotKey
+==============
+
+Signature::
+
+    * Library: user32
+    * Return value: BOOL
+
+Parameters::
+
+    ** HWND hWnd window_handle
+    ** int id id
+    ** UINT fsModifiers modifiers
+    ** UINT vk vk
