@@ -125,6 +125,9 @@ void config_read(config_t *cfg)
         else if(strcmp(key, "disguise") == 0) {
             cfg->disguise = value[0] == '1';
         }
+        else if(strcmp(key, "pipe-pid") == 0) {
+            cfg->pipe_pid = value[0] == '1';
+        }
     }
     fclose(fp);
     DeleteFile(config_fname);

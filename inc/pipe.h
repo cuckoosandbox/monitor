@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 
-void pipe_init(const char *pipe_name);
+void pipe_init(const char *pipe_name, int pipe_pid);
 
 int pipe(const char *fmt, ...);
 int32_t pipe2(void *out, uint32_t outlen, const char *fmt, ...);

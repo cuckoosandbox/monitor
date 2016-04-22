@@ -54,6 +54,10 @@ typedef struct _config_t {
     // Disguise the VM in an attempt to fool samples into thinking it's a
     // real machine?
     int disguise;
+
+    // If we should prepend each pipe message with our pid (requires the
+    // latest version on the Analyzer side).
+    int pipe_pid;
 } config_t;
 
 void config_read(config_t *cfg);

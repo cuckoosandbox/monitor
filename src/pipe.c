@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static CRITICAL_SECTION g_cs;
 static wchar_t g_pipe_name[MAX_PATH];
 static HANDLE g_pipe_handle;
+static int g_pipe_pid;
 
 static int _pipe_utf8x(char **out, unsigned short x)
 {
@@ -144,11 +145,22 @@ static void open_pipe_handle()
     set_named_pipe_handle_mode(g_pipe_handle, pipe_mode);
 }
 
-void pipe_init(const char *pipe_name)
+void pipe_init(const char *pipe_name, int pipe_pid)
 {
     InitializeCriticalSection(&g_cs);
     wcsncpyA(g_pipe_name, pipe_name, MAX_PATH);
     g_pipe_handle = INVALID_HANDLE_VALUE;
+    g_pipe_pid = pipe_pid;
+}
+
+// Hack because _pipe_sprintf() works with va_list.
+static int _prepend_pid(char *buf, ...)
+{
+    va_list args;
+    va_start(args, buf);
+    int ret = _pipe_sprintf(buf, "%x:", args);
+    va_end(args);
+    return ret;
 }
 
 int pipe(const char *fmt, ...)
@@ -160,12 +172,16 @@ int pipe(const char *fmt, ...)
 
     open_pipe_handle();
 
-    static char buf[0x10000]; va_list args; int ret = -1, len;
+    static char buf[0x10000]; va_list args; int ret = -1, len = 0;
 
     EnterCriticalSection(&g_cs);
 
+    if(g_pipe_pid != 0) {
+        len = _prepend_pid(buf);
+    }
+
     va_start(args, fmt);
-    len = _pipe_sprintf(buf, fmt, args);
+    len += _pipe_sprintf(buf+len, fmt, args);
     va_end(args);
 
     if(len > 0) {
@@ -187,12 +203,16 @@ int32_t pipe2(void *out, uint32_t outlen, const char *fmt, ...)
     open_pipe_handle();
 
     static char buf[0x10000]; va_list args;
-    int32_t ret = -1, len; uintptr_t written;
+    int32_t ret = -1, len = 0; uintptr_t written;
 
     EnterCriticalSection(&g_cs);
 
+    if(g_pipe_pid != 0) {
+        len = _prepend_pid(buf);
+    }
+
     va_start(args, fmt);
-    len = _pipe_sprintf(buf, fmt, args);
+    len += _pipe_sprintf(buf+len, fmt, args);
     va_end(args);
 
     if(len > 0) {
