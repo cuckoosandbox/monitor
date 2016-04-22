@@ -753,4 +753,6 @@ static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
 #define FILE_EXISTS                       0x00000004
 #define FILE_DOES_NOT_EXIST               0x00000005
 
+#define MOD_NOREPEAT 0x4000
+
 #endif
