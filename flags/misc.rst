@@ -106,3 +106,15 @@ Enum::
     TDCBF_CANCEL_BUTTON
     TDCBF_RETRY_BUTTON
     TDCBF_CLOSE_BUTTON
+
+
+RegisterHotKey_fsModifiers
+==========================
+
+Enum::
+
+    MOD_ALT
+    MOD_CONTROL
+    MOD_NOREPEAT
+    MOD_SHIFT
+    MOD_WIN

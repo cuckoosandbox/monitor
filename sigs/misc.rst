@@ -561,3 +561,7 @@ Parameters::
     ** int id id
     ** UINT fsModifiers modifiers
     ** UINT vk vk
+
+Flags::
+
+    modifiers
