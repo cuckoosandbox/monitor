@@ -87,6 +87,7 @@ Interesting::
 
 Logging::
 
+    p service_handle ret
     u filepath filepath
     s filepath_r lpBinaryPathName
 
@@ -137,6 +138,7 @@ Interesting::
 
 Logging::
 
+    p service_handle ret
     u filepath filepath
     u filepath_r lpBinaryPathName
 
@@ -163,6 +165,10 @@ Interesting::
     s service_name
     i desired_access
 
+Logging::
+
+    p service_handle ret
+
 
 OpenServiceW
 ============
@@ -181,6 +187,10 @@ Interesting::
 
     u service_name
     i desired_access
+
+Logging::
+
+    p service_handle ret
 
 
 StartServiceA
