@@ -20,8 +20,8 @@ Parameters::
 
     *  void *this
     *  VARIANT *dst
-    *  VARIANT *src1
     *  VARIANT *src2
+    *  VARIANT *src1
 
 Logging::
 
