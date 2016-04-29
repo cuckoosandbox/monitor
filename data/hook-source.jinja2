@@ -280,6 +280,7 @@ static hook_t g_hooks[] = {
         .mode = {% if 'mode' in hook.signature %}{{ hook.signature.mode }}{% else %}HOOK_MODE_ALL{% endif %},
         {% if 'init' in hook.signature.callback %}.initcb = &hook_initcb_{{ hook.apiname }},{% endif %}
         {% if 'addr' in hook.signature.callback %}.addrcb = &hook_addrcb_{{ hook.apiname }},{% endif %}
+        {% if 'module' in hook.signature.callback %}.addrcb = &hook_modulecb_{{ hook.signature.library }},{% endif %}
     },
     {%- endif %}
 {%- endfor %}

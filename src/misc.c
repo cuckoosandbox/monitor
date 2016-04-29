@@ -1571,7 +1571,8 @@ int is_exception_code_whitelisted(NTSTATUS exception_code)
 }
 
 uint8_t *module_addr_timestamp(
-    uint8_t *module_address, uint32_t module_size, funcoff_t *fo)
+    uint8_t *module_address, uint32_t module_size, funcoff_t *fo,
+    uint32_t *cconv)
 {
     (void) module_size;
 
@@ -1588,11 +1589,74 @@ uint8_t *module_addr_timestamp(
 
     for (; fo->timestamp != 0; fo++) {
         if(image_nt_headers->FileHeader.TimeDateStamp == fo->timestamp) {
+            if(cconv != NULL) {
+                *cconv = fo->cconv;
+            }
             return module_address + fo->offset;
         }
     }
 
-    pipe("WARNING:Unable to find the correct offsets for functions of: %Z",
-        get_module_file_name((HMODULE) module_address));
+    pipe("WARNING:Unable to find the correct offsets for functions "
+        "of: %Z (with timestamp 0x%x)",
+        get_module_file_name((HMODULE) module_address),
+        image_nt_headers->FileHeader.TimeDateStamp
+    );
     return NULL;
+}
+
+uint8_t *module_addr_timestamp_mod(
+    uint8_t *module_address, uint32_t module_size,
+    mod2funcoff_t *mf, const char *funcname, uint32_t *cconv
+) {
+    for (; mf->funcname != NULL; mf++) {
+        if(strcmp(mf->funcname, funcname) == 0) {
+            return module_addr_timestamp(
+                module_address, module_size, mf->funcoff, cconv
+            );
+        }
+    }
+    return NULL;
+}
+
+int variant_to_bson(bson *b, const char *name, const VARIANT *v)
+{
+    if(v == NULL) {
+        return -1;
+    }
+
+    char msg[64];
+
+    if((v->vt & VT_BYREF) == VT_BYREF && v->pvarVal != NULL) {
+        v = v->pvarVal;
+    }
+
+    switch (v->vt) {
+    case VT_EMPTY:
+    case VT_NULL:
+        bson_append_null(b, name);
+        break;
+
+    case VT_I2:
+        bson_append_int(b, name, v->iVal);
+        break;
+
+    case VT_I4:
+        bson_append_int(b, name, v->intVal);
+        break;
+
+    case VT_BSTR:
+        log_wstring(b, name, v->bstrVal, sys_string_length(v->bstrVal));
+        break;
+
+    case VT_BOOL:
+        bson_append_bool(b, name, v->boolVal != 0);
+        break;
+
+    default:
+        our_snprintf(msg, sizeof(msg), "Unsupported vt=%d", v->vt);
+        log_string(b, name, msg, strlen(msg));
+        break;
+    }
+
+    return 0;
 }

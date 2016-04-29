@@ -54,6 +54,12 @@ static uint32_t _parse_mode(const char *mode)
             continue;
         }
 
+        if(strnicmp(mode, "office", 6) == 0) {
+            ret |= HOOK_MODE_OFFICE;
+            mode += 6;
+            continue;
+        }
+
         // Report.. find a more proper way? At this point the pipe has not
         // yet been initialized, so.
         MessageBox(NULL, "Invalid Monitor Mode", mode, 0);

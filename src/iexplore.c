@@ -647,7 +647,7 @@ void chtmtag_attrs(const void *chtmtag, bson *b)
 
 static funcoff_t _image_put_src[] = {
     {0x4ce7c7f0, 0x4158e0},
-    {0, 0},
+    {0, 0, 0},
 };
 
 uint8_t *hook_addrcb_CImgElement_put_src(
@@ -655,19 +655,21 @@ uint8_t *hook_addrcb_CImgElement_put_src(
 {
     (void) h;
 
-    return module_addr_timestamp(module_address, module_size, _image_put_src);
+    return module_addr_timestamp(
+        module_address, module_size, _image_put_src, NULL
+    );
 }
 
 static funcoff_t _activexobject_construct[] = {
-    {0x4ce7c6df, 0x17d10},
-    {0, 0},
+    {0x4ce7c6df, 0x17d10, 0},
+    {0, 0, 0},
 };
 
 static FARPROC _var_getvalue;
 
 static funcoff_t _var_getvalue_ts[] = {
-    {0x4ce7c6df, 0x107e0},
-    {0, 0},
+    {0x4ce7c6df, 0x107e0, 0},
+    {0, 0, 0},
 };
 
 uint8_t *hook_addrcb_ActiveXObjectFncObj_Construct(
@@ -676,10 +678,10 @@ uint8_t *hook_addrcb_ActiveXObjectFncObj_Construct(
     (void) h;
 
     _var_getvalue = (FARPROC) module_addr_timestamp(
-        module_address, module_size, _var_getvalue_ts);
+        module_address, module_size, _var_getvalue_ts, NULL);
 
     return module_addr_timestamp(module_address, module_size,
-        _activexobject_construct);
+        _activexobject_construct, NULL);
 }
 
 VAR *iexplore_var_getvalue(VAR *value, void *session)

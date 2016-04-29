@@ -57,6 +57,7 @@ class SignatureProcessor(object):
     CALLING_CONVENTIONS = {
         'WINAPI': 'WINAPI',
         '__cdecl': '',
+        '__thiscall': '__thiscall',
     }
 
     def __init__(self, data_dir, out_dir, sig_dirpath, flags):
@@ -340,8 +341,10 @@ class SignatureProcessor(object):
             # Check the calling convention.
             cconv = row['signature'].get('calling_convention')
             if cconv not in self.CALLING_CONVENTIONS:
-                raise Exception('Calling convention of %r must be WINAPI or '
-                                '__cdecl.' % row['apiname'])
+                raise Exception(
+                    'Calling convention of %r must be WINAPI, __cdecl, or '
+                    '__thiscall.' % row['apiname']
+                )
 
             row['signature']['calling_convention'] = \
                 self.CALLING_CONVENTIONS[cconv]

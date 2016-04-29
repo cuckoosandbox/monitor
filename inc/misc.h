@@ -149,10 +149,26 @@ int is_exception_code_whitelisted(NTSTATUS exception_code);
 typedef struct _funcoff_t {
     uint32_t timestamp;
     uint32_t offset;
+    uint32_t cconv;
 } funcoff_t;
 
+typedef struct _mod2funcoff_t {
+    const char *funcname;
+    funcoff_t *funcoff;
+} mod2funcoff_t;
+
 uint8_t *module_addr_timestamp(
-    uint8_t *module_address, uint32_t module_size, funcoff_t *fo);
+    uint8_t *module_address, uint32_t module_size,
+    funcoff_t *fo, uint32_t *cconv
+);
+
+uint8_t *module_addr_timestamp_mod(
+    uint8_t *module_address, uint32_t module_size,
+    mod2funcoff_t *mf, const char *funcname, uint32_t *cconv
+);
+
+int variant_to_bson(bson *b, const char *name, const VARIANT *v);
+int vbe6_invoke_extract_args(uint8_t *addr, bson *b);
 
 extern uint32_t g_extra_virtual_memory;
 

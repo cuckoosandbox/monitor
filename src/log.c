@@ -582,9 +582,22 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
         else if(*fmt == 't') {
             const BSTR bstr = va_arg(args, const BSTR);
             const wchar_t *s = L""; uint32_t len = 0;
+
             if(bstr != NULL) {
                 s = (const wchar_t *) bstr;
                 len = sys_string_length(bstr);
+            }
+
+            log_wstring(&b, idx, s, len);
+        }
+        else if(*fmt == 'v') {
+            const VARIANT *v = va_arg(args, const VARIANT *);
+            const wchar_t *s = L""; uint32_t len = 0;
+
+            // TODO Support other VARIANT types as needed.
+            if(v != NULL && v->vt == VT_BSTR && v->bstrVal != NULL) {
+                s = (const wchar_t *) v->bstrVal;
+                len = sys_string_length(v->bstrVal);
             }
 
             log_wstring(&b, idx, s, len);
