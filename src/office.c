@@ -79,6 +79,12 @@ int vbe6_invoke_extract_args(uint8_t *addr, bson *b)
     // invocations of this function.
     uint32_t count = *(uint32_t *)(addr + 8);
     const VARIANT *va = *(const VARIANT **) addr;
+
+    // There are no arguments.
+    if(count == 0 || va == NULL) {
+        return 0;
+    }
+
     if(count >= 0x1000 || va[count].vt != VT_EMPTY) {
         pipe(
             "WARNING:Incorrect SAFEARRAY length found for "
