@@ -1626,10 +1626,6 @@ int variant_to_bson(bson *b, const char *name, const VARIANT *v)
 
     char msg[64];
 
-    if((v->vt & VT_BYREF) == VT_BYREF && v->pvarVal != NULL) {
-        v = v->pvarVal;
-    }
-
     switch (v->vt) {
     case VT_EMPTY:
     case VT_NULL:
@@ -1646,6 +1642,10 @@ int variant_to_bson(bson *b, const char *name, const VARIANT *v)
 
     case VT_BSTR:
         log_wstring(b, name, v->bstrVal, sys_string_length(v->bstrVal));
+        break;
+
+    case VT_BSTR | VT_BYREF:
+        log_wstring(b, name, *v->pbstrVal, sys_string_length(*v->pbstrVal));
         break;
 
     case VT_BOOL:
