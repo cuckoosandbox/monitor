@@ -140,3 +140,16 @@ Post::
 
     bson_destroy(&b);
     bson_destroy(&b2);
+
+
+vbe6_Shell
+==========
+
+Signature::
+
+    * Calling convention: WINAPI
+
+Parameters::
+
+    ** const VARIANT *command_line
+    ** int show_type

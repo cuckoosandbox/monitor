@@ -44,14 +44,20 @@ static funcoff_t _vbe6_GetObject[] = {
 };
 
 // Object method to call Invoke function.
-static funcoff_t _vbe6_invoke[] = {
+static funcoff_t _vbe6_Invoke[] = {
     {0x45187577, 0x1f92d4, 0},
     {0, 0, 0},
 };
 
 // Object method to call GetIDsFromNames function.
-static funcoff_t _vbe6_getidfromname[] = {
+static funcoff_t _vbe6_GetIDFromName[] = {
     {0x45187577, 0x22c67f, 0},
+    {0, 0, 0},
+};
+
+// We should probably rename this one to rtcShell.
+static funcoff_t _vbe6_Shell[] = {
+    {0x45187577, 0x167c0e, 0},
     {0, 0, 0},
 };
 
@@ -59,8 +65,9 @@ static mod2funcoff_t _vbe6[] = {
     {"vbe6_StringConcat", _vbe6_StringConcat},
     {"vbe6_CreateObject", _vbe6_CreateObject},
     {"vbe6_GetObject", _vbe6_GetObject},
-    {"vbe6_Invoke", _vbe6_invoke},
-    {"vbe6_GetIDFromName", _vbe6_getidfromname},
+    {"vbe6_Invoke", _vbe6_Invoke},
+    {"vbe6_GetIDFromName", _vbe6_GetIDFromName},
+    {"vbe6_Shell", _vbe6_Shell},
     {NULL, NULL},
 };
 
