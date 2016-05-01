@@ -83,6 +83,32 @@ Logging::
     l funcidx ret
 
 
+vbe6_CallByName
+===============
+
+Signature::
+
+    * Calling convention: WINAPI
+
+Parameters::
+
+    *  void *result
+    ** void *this
+    ** const wchar_t *funcname
+    *  void *unk1
+    *  SAFEARRAY **args
+    *  void *unk3
+
+Pre::
+
+    uint32_t funcidx = (uintptr_t)
+        Old_vbe6_vbe6_GetIDFromName(funcname, this);
+
+Logging::
+
+    i funcidx funcidx
+
+
 vbe6_Invoke
 ===========
 

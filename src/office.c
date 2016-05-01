@@ -55,6 +55,12 @@ static funcoff_t _vbe6_GetIDFromName[] = {
     {0, 0, 0},
 };
 
+// Object method to call CallByName function.
+static funcoff_t _vbe6_CallByName[] = {
+    {0x45187577, 0x1cbb8a, 0},
+    {0, 0, 0},
+};
+
 // We should probably rename this one to rtcShell.
 static funcoff_t _vbe6_Shell[] = {
     {0x45187577, 0x167c0e, 0},
@@ -67,6 +73,7 @@ static mod2funcoff_t _vbe6[] = {
     {"vbe6_GetObject", _vbe6_GetObject},
     {"vbe6_Invoke", _vbe6_Invoke},
     {"vbe6_GetIDFromName", _vbe6_GetIDFromName},
+    {"vbe6_CallByName", _vbe6_CallByName},
     {"vbe6_Shell", _vbe6_Shell},
     {NULL, NULL},
 };
