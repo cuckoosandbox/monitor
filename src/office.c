@@ -92,7 +92,7 @@ int vbe6_invoke_extract_args(uint8_t *addr, bson *b)
         return 0;
     }
 
-    if(count >= 0x1000 || va[count].vt != VT_EMPTY) {
+    if(count >= 16) {
         pipe(
             "WARNING:Incorrect SAFEARRAY length found for "
             "vbe6_Invoke, skipping hook."
