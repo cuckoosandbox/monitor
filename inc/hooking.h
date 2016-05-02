@@ -140,6 +140,18 @@ uint8_t *hook_modulecb_vbe6(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );
 
+uint8_t *hook_modulecb_jscript(
+    hook_t *h, uint8_t *module_address, uint32_t module_size
+);
+
+uint8_t *hook_modulecb_mshtml(
+    hook_t *h, uint8_t *module_address, uint32_t module_size
+);
+
+uint8_t *hook_modulecb_ncrypt(
+    hook_t *h, uint8_t *module_address, uint32_t module_size
+);
+
 typedef void VAR;
 
 VAR *iexplore_var_getvalue(VAR *value, void *session);

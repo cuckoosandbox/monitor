@@ -1,6 +1,6 @@
 Signature::
 
-    * Callback: addr
+    * Callback: module
     * Calling convention: WINAPI
     * Category: iexplore
     * Logging: always

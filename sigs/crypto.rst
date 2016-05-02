@@ -445,7 +445,7 @@ PRF
 
 Signature::
 
-    * Callback: addr
+    * Callback: module
     * Library: ncrypt
     * Mode: dumptls
     * Prune: resolve
@@ -500,7 +500,7 @@ Ssl3GenerateKeyMaterial
 
 Signature::
 
-    * Callback: addr
+    * Callback: module
     * Library: ncrypt
     * Mode: dumptls
     * Prune: resolve
