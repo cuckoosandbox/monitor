@@ -1626,6 +1626,11 @@ int variant_to_bson(bson *b, const char *name, const VARIANT *v)
 
     char buf[128];
 
+    // Dereference an embedded VARIANT pointer.
+    if(v->vt == (VT_VARIANT | VT_BYREF)) {
+        v = v->pvarVal;
+    }
+
     switch (v->vt) {
     case VT_EMPTY:
     case VT_NULL:
