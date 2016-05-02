@@ -67,6 +67,11 @@ static funcoff_t _vbe6_Shell[] = {
     {0, 0, 0},
 };
 
+static funcoff_t _vbe6_Import[] = {
+    {0x45187577, 0x3aba, 0},
+    {0, 0, 0},
+};
+
 static mod2funcoff_t _vbe6[] = {
     {"vbe6_StringConcat", _vbe6_StringConcat},
     {"vbe6_CreateObject", _vbe6_CreateObject},
@@ -75,6 +80,7 @@ static mod2funcoff_t _vbe6[] = {
     {"vbe6_GetIDFromName", _vbe6_GetIDFromName},
     {"vbe6_CallByName", _vbe6_CallByName},
     {"vbe6_Shell", _vbe6_Shell},
+    {"vbe6_Import", _vbe6_Import},
     {NULL, NULL},
 };
 

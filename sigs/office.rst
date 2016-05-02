@@ -179,3 +179,24 @@ Parameters::
 
     ** const VARIANT *command_line
     ** int show_type
+
+
+vbe6_Import
+===========
+
+Signature::
+
+    * Calling convention: WINAPI
+
+Parameters::
+
+    *  void **args
+    *  void *unk1
+    *  void *unk2
+    *  void *unk3
+    *  void *unk4
+
+Logging::
+
+    s library args[0]
+    s function args[1]
