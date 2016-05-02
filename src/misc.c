@@ -1624,7 +1624,7 @@ int variant_to_bson(bson *b, const char *name, const VARIANT *v)
         return -1;
     }
 
-    char msg[64];
+    char buf[128];
 
     switch (v->vt) {
     case VT_EMPTY:
@@ -1652,9 +1652,19 @@ int variant_to_bson(bson *b, const char *name, const VARIANT *v)
         bson_append_bool(b, name, v->boolVal != 0);
         break;
 
+    case VT_DISPATCH:
+        our_snprintf(buf, sizeof(buf), "<IDispatch @ 0x%x>", v->pdispVal);
+        log_string(b, name, buf, strlen(buf));
+        break;
+
+    case VT_UNKNOWN:
+        our_snprintf(buf, sizeof(buf), "<IUnknown @ 0x%x>", v->punkVal);
+        log_string(b, name, buf, strlen(buf));
+        break;
+
     default:
-        our_snprintf(msg, sizeof(msg), "Unsupported vt=%d", v->vt);
-        log_string(b, name, msg, strlen(msg));
+        our_snprintf(buf, sizeof(buf), "Unsupported vt=%d", v->vt);
+        log_string(b, name, buf, strlen(buf));
         break;
     }
 
