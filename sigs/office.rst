@@ -200,3 +200,50 @@ Logging::
 
     s library args[0]
     s function args[1]
+
+
+vbe6_Open
+=========
+
+Signature::
+
+    * Calling convention: WINAPI
+
+Parameters::
+
+    ** int mode
+    *  void *unk1
+    ** int fd
+    ** const wchar_t *filename filename
+
+
+vbe6_Print
+==========
+
+Signature::
+
+    * Calling convention: WINAPI
+
+Parameters::
+
+    *  void *unk1
+    *  void *unk2
+    ** const VARIANT *buf
+    *  void *unk4
+
+Pre::
+
+    // TODO Figure out where to locate the fd.
+
+
+vbe6_Close
+==========
+
+Signature::
+
+    * Calling convention: __thiscall
+
+Parameters::
+
+    *  void *this
+    ** int fd

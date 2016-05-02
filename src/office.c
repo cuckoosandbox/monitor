@@ -72,6 +72,21 @@ static funcoff_t _vbe6_Import[] = {
     {0, 0, 0},
 };
 
+static funcoff_t _vbe6_Open[] = {
+    {0x45187577, 0x1a2897, 0},
+    {0, 0, 0},
+};
+
+static funcoff_t _vbe6_Print[] = {
+    {0x45187577, 0x1a32d3, 0},
+    {0, 0, 0},
+};
+
+static funcoff_t _vbe6_Close[] = {
+    {0x45187577, 0x1a2d94, 0},
+    {0, 0, 0},
+};
+
 static mod2funcoff_t _vbe6[] = {
     {"vbe6_StringConcat", _vbe6_StringConcat},
     {"vbe6_CreateObject", _vbe6_CreateObject},
@@ -81,6 +96,9 @@ static mod2funcoff_t _vbe6[] = {
     {"vbe6_CallByName", _vbe6_CallByName},
     {"vbe6_Shell", _vbe6_Shell},
     {"vbe6_Import", _vbe6_Import},
+    {"vbe6_Open", _vbe6_Open},
+    {"vbe6_Print", _vbe6_Print},
+    {"vbe6_Close", _vbe6_Close},
     {NULL, NULL},
 };
 
