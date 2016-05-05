@@ -1495,12 +1495,12 @@ uint8_t *our_memmem(
     return NULL;
 }
 
-uint8_t *our_memmemW(
+wchar_t *our_memmemW(
     const void *haystack, uint32_t haylength,
     const wchar_t *needle, uint32_t *idx)
 {
-    return our_memmem((uint8_t *) haystack, haylength, needle,
-        lstrlenW(needle) * sizeof(wchar_t), idx);
+    return (wchar_t *) our_memmem((uint8_t *) haystack, haylength,
+        needle, lstrlenW(needle) * sizeof(wchar_t), idx);
 }
 
 uint32_t sys_string_length(const BSTR bstr)

@@ -134,7 +134,7 @@ uint8_t *our_memmem(
     uint8_t *haystack, uint32_t haylength,
     const void *needle, uint32_t needlength,
     uint32_t *idx);
-uint8_t *our_memmemW(
+wchar_t *our_memmemW(
     const void *haystack, uint32_t haylength,
     const wchar_t *needle, uint32_t *idx);
 

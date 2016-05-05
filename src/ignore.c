@@ -138,6 +138,17 @@ int monitor_mode_should_propagate(const wchar_t *cmdline, uint32_t *mode)
         return -1;
     }
 
+    // Ignore the first "splwow.exe flag" process in office monitoring.
+    static int g_office_splwow = 1;
+    if((g_monitor_mode & HOOK_MODE_OFFICE) == HOOK_MODE_OFFICE &&
+            our_memmemW(cmdline, length, L"C:\\Windows\\splwow64.exe ",
+                NULL) == cmdline &&
+            g_office_splwow != 0) {
+        pipe("DEBUG:Ignoring Office process %Z!", cmdline);
+        g_office_splwow = 0;
+        return -1;
+    }
+
     pipe("CRITICAL:Encountered an unknown process while in "
         "monitoring mode: %Z!", cmdline);
     return 0;
