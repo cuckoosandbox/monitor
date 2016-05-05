@@ -140,3 +140,17 @@ int vbe6_invoke_extract_args(uint8_t *addr, bson *b)
 
     return 0;
 }
+
+static wchar_t *g_funcname;
+
+void vbe6_set_funcname(const wchar_t *funcname)
+{
+    g_funcname = wcsdup(funcname);
+}
+
+wchar_t *vbe6_get_funcname()
+{
+    wchar_t *ret = g_funcname;
+    g_funcname = NULL;
+    return ret;
+}

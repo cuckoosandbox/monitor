@@ -170,6 +170,9 @@ uint8_t *module_addr_timestamp_mod(
 int variant_to_bson(bson *b, const char *name, const VARIANT *v);
 int vbe6_invoke_extract_args(uint8_t *addr, bson *b);
 
+void vbe6_set_funcname(const wchar_t *funcname);
+wchar_t *vbe6_get_funcname();
+
 extern uint32_t g_extra_virtual_memory;
 
 void set_processor_count(uint32_t processor_count);

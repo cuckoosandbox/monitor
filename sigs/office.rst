@@ -93,20 +93,15 @@ Signature::
 Parameters::
 
     *  void *result
-    ** void *this
-    ** const wchar_t *funcname
+    *  void *this
+    *  const wchar_t *funcname
     *  void *unk1
     *  SAFEARRAY **args
     *  void *unk3
 
 Pre::
 
-    uint32_t funcidx = (uintptr_t)
-        Old_vbe6_vbe6_GetIDFromName(funcname, this);
-
-Logging::
-
-    i funcidx funcidx
+    vbe6_set_funcname(funcname);
 
 
 vbe6_Invoke
@@ -142,6 +137,8 @@ Pre::
     bson_append_finish_array(&b);
     bson_finish(&b);
 
+    wchar_t *funcname = vbe6_get_funcname();
+
 Middle::
 
     bson b2;
@@ -159,6 +156,7 @@ Middle::
 
 Logging::
 
+    u funcname funcname
     z args &b
     z result &b2
 
@@ -166,6 +164,7 @@ Post::
 
     bson_destroy(&b);
     bson_destroy(&b2);
+    mem_free(funcname);
 
 
 vbe6_Shell
