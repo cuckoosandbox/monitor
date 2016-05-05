@@ -10,6 +10,7 @@ CreateProcessInternalW
 Signature::
 
     * Library: kernel32
+    * Logging: always
     * Mode: exploit
     * Return value: BOOL
     * Special: true
@@ -55,17 +56,9 @@ Interesting::
     i creation_flags
     u current_directory
 
-Logging::
+Middle::
 
-    u filepath filepath
-    u filepath_r lpApplicationName
-    i creation_flags creation_flags
-    i process_identifier lpProcessInformation->dwProcessId
-    i thread_identifier lpProcessInformation->dwThreadId
-    p process_handle lpProcessInformation->hProcess
-    p thread_handle lpProcessInformation->hThread
-
-Post::
+    int track = 0;
 
     if(ret != FALSE) {
         uint32_t mode = HOOK_MODE_ALL;
@@ -82,8 +75,24 @@ Post::
                 lpProcessInformation->dwProcessId,
                 lpProcessInformation->dwThreadId,
                 mode);
+            track = 1;
         }
+    }
 
+Logging::
+
+    u filepath filepath
+    u filepath_r lpApplicationName
+    i creation_flags creation_flags
+    i process_identifier lpProcessInformation->dwProcessId
+    i thread_identifier lpProcessInformation->dwThreadId
+    p process_handle lpProcessInformation->hProcess
+    p thread_handle lpProcessInformation->hThread
+    i track track
+
+Post::
+
+    if(ret != FALSE) {
         // If the CREATE_SUSPENDED flag was not set then we have to resume
         // the main thread ourselves.
         if((creation_flags & CREATE_SUSPENDED) == 0) {
