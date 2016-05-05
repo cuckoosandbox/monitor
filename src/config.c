@@ -43,20 +43,20 @@ static uint32_t _parse_mode(const char *mode)
         }
 
         if(strnicmp(mode, "iexplore", 8) == 0) {
-            ret |= HOOK_MODE_IEXPLORE;
+            ret |= HOOK_MODE_IEXPLORE | HOOK_MODE_EXPLOIT;
             mode += 8;
+            continue;
+        }
+
+        if(strnicmp(mode, "office", 6) == 0) {
+            ret |= HOOK_MODE_OFFICE | HOOK_MODE_EXPLOIT;
+            mode += 6;
             continue;
         }
 
         if(strnicmp(mode, "exploit", 7) == 0) {
             ret |= HOOK_MODE_EXPLOIT;
             mode += 7;
-            continue;
-        }
-
-        if(strnicmp(mode, "office", 6) == 0) {
-            ret |= HOOK_MODE_OFFICE;
-            mode += 6;
             continue;
         }
 

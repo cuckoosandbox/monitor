@@ -107,6 +107,7 @@ Signature::
 
     * Callback: addr
     * Is success: 1
+    * Mode: exploit
     * Library: ntdll
     * Logging: no
     * Return value: void *

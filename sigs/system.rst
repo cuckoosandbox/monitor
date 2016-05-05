@@ -87,7 +87,7 @@ Signature::
 
     * Callback: init
     * Library: ntdll
-    * Mode: iexplore
+    * Mode: exploit
     * Return value: NTSTATUS
     * Special: true
 

@@ -11,7 +11,7 @@ NtCreateFile
 
 Signature::
 
-    * Mode: iexplore
+    * Mode: exploit
 
 Parameters::
 
@@ -113,7 +113,7 @@ NtOpenFile
 
 Signature::
 
-    * Mode: iexplore
+    * Mode: exploit
 
 Parameters::
 
@@ -208,7 +208,7 @@ NtWriteFile
 
 Signature::
 
-    * Mode: iexplore
+    * Mode: exploit
 
 Parameters::
 

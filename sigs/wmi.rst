@@ -4,7 +4,7 @@ Signature::
     * Calling convention: WINAPI
     * Category: misc
     * Library: __wmi__
-    * Mode: iexplore
+    * Mode: exploit
     * Prune: resolve
     * Return value: HRESULT
 

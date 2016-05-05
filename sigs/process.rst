@@ -10,7 +10,7 @@ CreateProcessInternalW
 Signature::
 
     * Library: kernel32
-    * Mode: iexplore
+    * Mode: exploit
     * Return value: BOOL
     * Special: true
 
@@ -102,6 +102,7 @@ ShellExecuteExW
 Signature::
 
     * Library: shell32
+    * Mode: exploit
     * Return value: BOOL
 
 Parameters::
