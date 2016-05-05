@@ -100,7 +100,7 @@ void library_from_unicode_string(const UNICODE_STRING *us,
 int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length);
 
 void *memdup(const void *addr, uint32_t length);
-wchar_t *wcsdup(const wchar_t *s);
+wchar_t *our_wcsdup(const wchar_t *s);
 int page_is_readable(const void *addr);
 int range_is_readable(const void *addr, uintptr_t size);
 int strlen_safe(const char *str);

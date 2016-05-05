@@ -1127,7 +1127,7 @@ void *memdup(const void *addr, uint32_t length)
     return NULL;
 }
 
-wchar_t *wcsdup(const wchar_t *s)
+wchar_t *our_wcsdup(const wchar_t *s)
 {
     if(s != NULL) {
         return memdup(s, (lstrlenW(s) + 1) * sizeof(wchar_t));

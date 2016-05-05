@@ -145,7 +145,7 @@ static wchar_t *g_funcname;
 
 void vbe6_set_funcname(const wchar_t *funcname)
 {
-    g_funcname = wcsdup(funcname);
+    g_funcname = our_wcsdup(funcname);
 }
 
 wchar_t *vbe6_get_funcname()
