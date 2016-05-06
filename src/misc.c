@@ -1549,6 +1549,7 @@ HRESULT variant_clear(VARIANTARG *arg)
 
 static NTSTATUS g_exception_whitelist[] = {
     DBG_PRINTEXCEPTION_C,
+    RPC_E_DISCONNECTED,
 };
 
 int is_exception_code_whitelisted(NTSTATUS exception_code)
