@@ -169,7 +169,7 @@ uint8_t binary[] = {
 
 int main()
 {
-    pipe_init("\\\\.\\PIPE\\cuckoo");
+    pipe_init("\\\\.\\PIPE\\cuckoo", 0);
 
     char tempdir[MAX_PATH], filepath[MAX_PATH], filepath2[MAX_PATH];
 

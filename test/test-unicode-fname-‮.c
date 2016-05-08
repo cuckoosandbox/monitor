@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 int main()
 {
-    pipe_init("\\\\.\\PIPE\\cuckoo");
+    pipe_init("\\\\.\\PIPE\\cuckoo", 0);
 
     wchar_t filename[MAX_PATH]; const wchar_t *ptr;
     GetModuleFileNameW(NULL, filename, MAX_PATH);

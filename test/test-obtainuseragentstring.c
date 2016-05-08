@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 int main()
 {
-    pipe_init("\\\\.\\PIPE\\cuckoo");
+    pipe_init("\\\\.\\PIPE\\cuckoo", 0);
 
     FARPROC pObtainUserAgentString =
         GetProcAddress(LoadLibrary("urlmon"), "ObtainUserAgentString");

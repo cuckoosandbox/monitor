@@ -52,7 +52,7 @@ void msgbox(const char *arg)
 
 int main(int argc, char *argv[])
 {
-    pipe_init("\\\\.\\PIPE\\cuckoo");
+    pipe_init("\\\\.\\PIPE\\cuckoo", 0);
 
     if(argc == 1) {
         inject(argv[0]);
