@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 typedef void (*monitor_hook_t)(const char *library, void *module_handle);
 
-int misc_init(HMODULE module_handle, const char *shutdown_mutex);
+int misc_init(const char *shutdown_mutex);
 
 // Call functions from monitor.c indirectly so that we don't have to include
 // it by default when doing unittests.

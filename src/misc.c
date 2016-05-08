@@ -37,9 +37,6 @@ static char g_shutdown_mutex[MAX_PATH];
 static array_t g_unicode_buffer_ptr_array;
 static array_t g_unicode_buffer_use_array;
 
-static uintptr_t g_monitor_start;
-static uintptr_t g_monitor_end;
-
 static monitor_hook_t g_hook_library;
 static monitor_hook_t g_unhook_library;
 
@@ -62,12 +59,8 @@ uint32_t g_monitor_mode = HOOK_MODE_ALL;
     wcscpy(g_aliases[g_alias_index][1], after); \
     g_alias_index++;
 
-int misc_init(HMODULE module_handle, const char *shutdown_mutex)
+int misc_init(const char *shutdown_mutex)
 {
-    g_monitor_start = (uintptr_t) module_handle;
-    g_monitor_end = g_monitor_start +
-        module_image_size((const uint8_t *) module_handle);
-
     strncpy(g_shutdown_mutex, shutdown_mutex, sizeof(g_shutdown_mutex));
 
     // TODO Replace custom unicode buffer logic by implementing free() support

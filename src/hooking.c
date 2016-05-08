@@ -42,8 +42,8 @@ static csh g_capstone;
 
 static slab_t g_function_stubs;
 
-static uintptr_t g_monitor_start;
-static uintptr_t g_monitor_end;
+uintptr_t g_monitor_start;
+uintptr_t g_monitor_end;
 
 static uintptr_t g_ntdll_start;
 static uintptr_t g_ntdll_end;

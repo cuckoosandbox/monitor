@@ -158,4 +158,7 @@ VAR *iexplore_var_getvalue(VAR *value, void *session);
 
 void ole_enable_hooks(REFCLSID refclsid);
 
+extern uintptr_t g_monitor_start;
+extern uintptr_t g_monitor_end;
+
 #endif

@@ -55,7 +55,7 @@ void monitor_init(HMODULE module_handle)
     // accessible after native_init().
     hook_init2();
 
-    misc_init(module_handle, cfg.shutdown_mutex);
+    misc_init(cfg.shutdown_mutex);
     misc_set_hook_library(&monitor_hook, &monitor_unhook);
     diffing_init(cfg.hashes_path, cfg.diffing_enable);
 
