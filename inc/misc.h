@@ -58,14 +58,7 @@ void hide_module_from_peb(HMODULE module_handle);
 const wchar_t *get_module_file_name(HMODULE module_handle);
 void destroy_pe_header(HANDLE module_handle);
 
-int copy_unicode_string(const UNICODE_STRING *in,
-    UNICODE_STRING *out, wchar_t *buffer, uint32_t length);
-
 wchar_t *extract_unicode_string(const UNICODE_STRING *unistr);
-
-int copy_object_attributes(const OBJECT_ATTRIBUTES *in,
-    OBJECT_ATTRIBUTES *out, UNICODE_STRING *unistr,
-    wchar_t *buffer, uint32_t length);
 
 uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey);
 uint32_t reg_get_key_ascii(HANDLE key_handle,
@@ -177,12 +170,6 @@ extern uint32_t g_extra_virtual_memory;
 
 void set_processor_count(uint32_t processor_count);
 void add_virtual_memory(uint64_t length);
-
-#define COPY_OBJECT_ATTRIBUTES(local_name, param_name) \
-    OBJECT_ATTRIBUTES local_name; UNICODE_STRING local_name##_unistr; \
-    wchar_t *local_name##_buffer = get_unicode_buffer(); \
-    copy_object_attributes(param_name, &local_name, &local_name##_unistr, \
-        local_name##_buffer, sizeof(local_name##_buffer));
 
 #define OBJECT_NAME_INFORMATION_REQUIRED_SIZE \
     sizeof(OBJECT_NAME_INFORMATION) + sizeof(wchar_t) * MAX_PATH_W
