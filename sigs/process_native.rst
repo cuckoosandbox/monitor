@@ -39,7 +39,7 @@ Interesting::
 
 Middle::
 
-    uint32_t pid = pid_from_process_handle(*ProcessHandle);
+    uint32_t pid = pid_from_process_handle(copy_ptr(ProcessHandle));
 
 Logging::
 
@@ -92,7 +92,7 @@ Interesting::
 
 Middle::
 
-    uint32_t pid = pid_from_process_handle(*ProcessHandle);
+    uint32_t pid = pid_from_process_handle(copy_ptr(ProcessHandle));
 
 Logging::
 
@@ -158,8 +158,8 @@ Pre::
 
 Middle::
 
-    uint32_t pid = pid_from_process_handle(*ProcessHandle);
-    uint32_t tid = tid_from_thread_handle(*ThreadHandle);
+    uint32_t pid = pid_from_process_handle(copy_ptr(ProcessHandle));
+    uint32_t tid = tid_from_thread_handle(copy_ptr(ThreadHandle));
 
 Logging::
 
@@ -218,8 +218,11 @@ Interesting::
 
 Middle::
 
-    uint32_t pid = pid_from_process_handle(ProcessInformation->ProcessHandle);
-    uint32_t tid = tid_from_thread_handle(ProcessInformation->ThreadHandle);
+    uint32_t pid = 0, tid = 0;
+    if(ProcessInformation != NULL) {
+        pid = pid_from_process_handle(copy_ptr(&ProcessInformation->ProcessHandle));
+        tid = tid_from_thread_handle(copy_ptr(&ProcessInformation->ThreadHandle));
+    }
 
 Logging::
 
@@ -259,7 +262,7 @@ Ensure::
 
 Logging::
 
-    i process_identifier (uint32_t) (uintptr_t) ClientId->UniqueProcess
+    i process_identifier copy_uint32(&ClientId->UniqueProcess)
 
 
 NtTerminateProcess

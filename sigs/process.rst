@@ -124,36 +124,41 @@ Ensure::
 
 Pre::
 
+    SHELLEXECUTEINFOW sei;
+    memset(&sei, 0, sizeof(SHELLEXECUTEINFOW));
+
     wchar_t *filepath = get_unicode_buffer();
-    if(pExecInfo->lpFile != NULL) {
+    if(pExecInfo != NULL &&
+            copy_bytes(&sei, pExecInfo, sizeof(SHELLEXECUTEINFOW)) == 0 &&
+            sei.lpFile != NULL) {
         // In case it's a relative path we'll just stick to it.
-        wcsncpy(filepath, pExecInfo->lpFile, MAX_PATH_W);
+        copy_unicodez(filepath, sei.lpFile);
 
         // If this is not a relative path then we resolve the full path.
-        if(lstrlenW(pExecInfo->lpFile) > 2 && pExecInfo->lpFile[1] == ':' &&
-                pExecInfo->lpFile[2] == '\\') {
-            path_get_full_pathW(pExecInfo->lpFile, filepath);
+        if(lstrlenW(filepath) > 2 && filepath[1] == ':' &&
+                filepath[2] == '\\') {
+            path_get_full_pathW(sei.lpFile, filepath);
         }
     }
 
 Interesting::
 
     u filepath
-    i pExecInfo->fMask
-    u pExecInfo->lpVerb
-    u pExecInfo->lpFile
-    u pExecInfo->lpParameters
-    u pExecInfo->lpDirectory
-    i pExecInfo->nShow
-    u pExecInfo->lpClass
-    i pExecInfo->dwHotKey
+    i sei.fMask
+    u sei.lpVerb
+    u sei.lpFile
+    u sei.lpParameters
+    u sei.lpDirectory
+    i sei.nShow
+    u sei.lpClass
+    i sei.dwHotKey
 
 Logging::
 
     u filepath filepath
-    u filepath_r pExecInfo->lpFile
-    u parameters pExecInfo->lpParameters
-    i show_type pExecInfo->nShow
+    u filepath_r sei.lpFile
+    u parameters sei.lpParameters
+    i show_type sei.nShow
 
 Post::
 
