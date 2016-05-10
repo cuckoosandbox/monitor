@@ -58,7 +58,8 @@ void hide_module_from_peb(HMODULE module_handle);
 const wchar_t *get_module_file_name(HMODULE module_handle);
 void destroy_pe_header(HANDLE module_handle);
 
-wchar_t *extract_unicode_string(const UNICODE_STRING *unistr);
+wchar_t *extract_unicode_string_unistr(const UNICODE_STRING *unistr);
+wchar_t *extract_unicode_string_objattr(const OBJECT_ATTRIBUTES *objattr);
 
 uint32_t reg_get_key(HANDLE key_handle, wchar_t *regkey);
 uint32_t reg_get_key_ascii(HANDLE key_handle,

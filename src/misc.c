@@ -330,7 +330,7 @@ void wcsncpyA(wchar_t *dst, const char *src, uint32_t length)
     *dst = 0;
 }
 
-wchar_t *extract_unicode_string(const UNICODE_STRING *unistr)
+wchar_t *extract_unicode_string_unistr(const UNICODE_STRING *unistr)
 {
     wchar_t *ret = get_unicode_buffer();
 
@@ -342,6 +342,15 @@ wchar_t *extract_unicode_string(const UNICODE_STRING *unistr)
 
     free_unicode_buffer(ret);
     return NULL;
+}
+
+wchar_t *extract_unicode_string_objattr(const OBJECT_ATTRIBUTES *objattr)
+{
+    if(objattr == NULL) {
+        return NULL;
+    }
+
+    return extract_unicode_string_unistr(objattr->ObjectName);
 }
 
 static uint32_t _path_from_handle(HANDLE handle, wchar_t *path)

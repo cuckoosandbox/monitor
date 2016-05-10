@@ -101,7 +101,7 @@ Parameters::
 Pre::
 
     char library[MAX_PATH];
-    wchar_t *module_name = extract_unicode_string(ModuleFileName);
+    wchar_t *module_name = extract_unicode_string_unistr(ModuleFileName);
     library_from_unicode_string(ModuleFileName, library, sizeof(library));
 
 Logging::
@@ -183,7 +183,7 @@ Parameters::
 
 Pre::
 
-    wchar_t *module_name = extract_unicode_string(ModuleFileName);
+    wchar_t *module_name = extract_unicode_string_unistr(ModuleFileName);
 
 Middle::
 
@@ -405,7 +405,8 @@ Parameters::
 
 Pre::
 
-    wchar_t *driver_service_name = extract_unicode_string(DriverServiceName);
+    wchar_t *driver_service_name =
+        extract_unicode_string_unistr(DriverServiceName);
 
 Logging::
 
@@ -430,7 +431,8 @@ Parameters::
 
 Pre::
 
-    wchar_t *driver_service_name = extract_unicode_string(DriverServiceName);
+    wchar_t *driver_service_name =
+        extract_unicode_string_unistr(DriverServiceName);
 
 Logging::
 

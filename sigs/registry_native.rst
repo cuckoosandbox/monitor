@@ -25,7 +25,7 @@ Flags::
 
 Pre::
 
-    wchar_t *class = extract_unicode_string(Class);
+    wchar_t *class = extract_unicode_string_unistr(Class);
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(ObjectAttributes, regkey);
@@ -128,7 +128,7 @@ Parameters::
 
 Pre::
 
-    wchar_t *new_name = extract_unicode_string(NewName);
+    wchar_t *new_name = extract_unicode_string_unistr(NewName);
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key(KeyHandle, regkey);

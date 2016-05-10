@@ -53,10 +53,7 @@ Middle::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
-    wchar_t *filepath_r = NULL;
-    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
-        filepath_r = ObjectAttributes->ObjectName->Buffer;
-    }
+    wchar_t *filepath_r = extract_unicode_string_objattr(ObjectAttributes);
 
 Logging::
 
@@ -74,6 +71,7 @@ Post::
     }
 
     free_unicode_buffer(filepath);
+    free_unicode_buffer(filepath_r);
 
 
 NtDeleteFile
@@ -89,10 +87,7 @@ Pre::
     path_get_full_path_objattr(ObjectAttributes, filepath);
     pipe("FILE_DEL:%Z", filepath);
 
-    wchar_t *filepath_r = NULL;
-    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
-        filepath_r = ObjectAttributes->ObjectName->Buffer;
-    }
+    wchar_t *filepath_r = extract_unicode_string_objattr(ObjectAttributes);
 
 Interesting::
 
@@ -106,6 +101,7 @@ Logging::
 Post::
 
     free_unicode_buffer(filepath);
+    free_unicode_buffer(filepath_r);
 
 
 NtOpenFile
@@ -148,10 +144,7 @@ Middle::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
-    wchar_t *filepath_r = NULL;
-    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
-        filepath_r = ObjectAttributes->ObjectName->Buffer;
-    }
+    wchar_t *filepath_r = extract_unicode_string_objattr(ObjectAttributes);
 
 Logging::
 
@@ -169,6 +162,7 @@ Post::
     }
 
     free_unicode_buffer(filepath);
+    free_unicode_buffer(filepath_r);
 
 
 NtReadFile
@@ -404,10 +398,7 @@ Pre::
     wchar_t *dirpath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, dirpath);
 
-    wchar_t *dirpath_r = NULL;
-    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
-        dirpath_r = ObjectAttributes->ObjectName->Buffer;
-    }
+    wchar_t *dirpath_r = extract_unicode_string_objattr(ObjectAttributes);
 
 Interesting::
 
@@ -422,6 +413,7 @@ Logging::
 Post::
 
     free_unicode_buffer(dirpath);
+    free_unicode_buffer(dirpath_r);
 
 
 NtCreateDirectoryObject
@@ -442,10 +434,7 @@ Pre::
     wchar_t *dirpath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, dirpath);
 
-    wchar_t *dirpath_r = NULL;
-    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
-        dirpath_r = ObjectAttributes->ObjectName->Buffer;
-    }
+    wchar_t *dirpath_r = extract_unicode_string_objattr(ObjectAttributes);
 
 Interesting::
 
@@ -460,6 +449,7 @@ Logging::
 Post::
 
     free_unicode_buffer(dirpath);
+    free_unicode_buffer(dirpath_r);
 
 
 NtQueryAttributesFile
@@ -475,10 +465,7 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
-    wchar_t *filepath_r = NULL;
-    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
-        filepath_r = ObjectAttributes->ObjectName->Buffer;
-    }
+    wchar_t *filepath_r = extract_unicode_string_objattr(ObjectAttributes);
 
 Logging::
 
@@ -488,6 +475,7 @@ Logging::
 Post::
 
     free_unicode_buffer(filepath);
+    free_unicode_buffer(filepath_r);
 
 
 NtQueryFullAttributesFile
@@ -503,10 +491,7 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
-    wchar_t *filepath_r = NULL;
-    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
-        filepath_r = ObjectAttributes->ObjectName->Buffer;
-    }
+    wchar_t *filepath_r = extract_unicode_string_objattr(ObjectAttributes);
 
 Logging::
 
@@ -516,3 +501,4 @@ Logging::
 Post::
 
     free_unicode_buffer(filepath);
+    free_unicode_buffer(filepath_r);

@@ -29,10 +29,7 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
-    wchar_t *filepath_r = NULL;
-    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
-        filepath_r = ObjectAttributes->ObjectName->Buffer;
-    }
+    wchar_t *filepath_r = extract_unicode_string_objattr(ObjectAttributes);
 
 Interesting::
 
@@ -58,6 +55,7 @@ Post::
     }
 
     free_unicode_buffer(filepath);
+    free_unicode_buffer(filepath_r);
 
 
 NtCreateProcessEx
@@ -84,10 +82,7 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
-    wchar_t *filepath_r = NULL;
-    if(ObjectAttributes != NULL && ObjectAttributes->ObjectName != NULL) {
-        filepath_r = ObjectAttributes->ObjectName->Buffer;
-    }
+    wchar_t *filepath_r = extract_unicode_string_objattr(ObjectAttributes);
 
 Interesting::
 
@@ -113,6 +108,7 @@ Post::
     }
 
     free_unicode_buffer(filepath);
+    free_unicode_buffer(filepath_r);
 
 
 NtCreateUserProcess
@@ -146,25 +142,19 @@ Pre::
     wchar_t *process_name = get_unicode_buffer();
     path_get_full_path_objattr(ProcessObjectAttributes, process_name);
 
-    wchar_t *process_name_r = NULL;
-    if(ProcessObjectAttributes != NULL &&
-            ProcessObjectAttributes->ObjectName != NULL) {
-        process_name_r = ProcessObjectAttributes->ObjectName->Buffer;
-    }
+    wchar_t *process_name_r =
+        extract_unicode_string_objattr(ProcessObjectAttributes);
 
     wchar_t *thread_name = get_unicode_buffer();
     path_get_full_path_objattr(ThreadObjectAttributes, thread_name);
 
-    wchar_t *thread_name_r = NULL;
-    if(ThreadObjectAttributes != NULL &&
-            ThreadObjectAttributes->ObjectName != NULL) {
-        thread_name_r = ThreadObjectAttributes->ObjectName->Buffer;
-    }
+    wchar_t *thread_name_r =
+        extract_unicode_string_objattr(ThreadObjectAttributes);
 
     wchar_t *filepath =
-        extract_unicode_string(&ProcessParameters->ImagePathName);
+        extract_unicode_string_unistr(&ProcessParameters->ImagePathName);
     wchar_t *command_line =
-        extract_unicode_string(&ProcessParameters->CommandLine);
+        extract_unicode_string_unistr(&ProcessParameters->CommandLine);
 
 Middle::
 
@@ -190,7 +180,9 @@ Post::
     }
 
     free_unicode_buffer(process_name);
+    free_unicode_buffer(process_name_r);
     free_unicode_buffer(thread_name);
+    free_unicode_buffer(thread_name_r);
     free_unicode_buffer(filepath);
     free_unicode_buffer(command_line);
 
@@ -216,10 +208,7 @@ Pre::
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_path_unistr(ImagePath, filepath);
 
-    wchar_t *filepath_r = NULL;
-    if(ImagePath != NULL) {
-        filepath_r = ImagePath->Buffer;
-    }
+    wchar_t *filepath_r = extract_unicode_string_unistr(ImagePath);
 
 Interesting::
 
@@ -247,6 +236,7 @@ Post::
     }
 
     free_unicode_buffer(filepath);
+    free_unicode_buffer(filepath_r);
 
 
 NtOpenProcess
@@ -319,10 +309,7 @@ Flags::
 
 Pre::
 
-    wchar_t *section_name = NULL;
-    if(ObjectAttributes != NULL) {
-        section_name = extract_unicode_string(ObjectAttributes->ObjectName);
-    }
+    wchar_t *section_name = extract_unicode_string_objattr(ObjectAttributes);
 
     HANDLE object_handle = NULL;
     if(ObjectAttributes != NULL) {
@@ -372,10 +359,7 @@ Flags::
 
 Pre::
 
-    wchar_t *section_name = NULL;
-    if(ObjectAttributes != NULL) {
-        section_name = extract_unicode_string(ObjectAttributes->ObjectName);
-    }
+    wchar_t *section_name = extract_unicode_string_objattr(ObjectAttributes);
 
 Logging::
 

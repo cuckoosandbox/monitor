@@ -27,7 +27,7 @@ Pre::
 
     wchar_t *mutant_name = NULL;
     if(ObjectAttributes != NULL) {
-        mutant_name = extract_unicode_string(ObjectAttributes->ObjectName);
+        mutant_name = extract_unicode_string_unistr(ObjectAttributes->ObjectName);
     }
 
 Logging::
@@ -63,7 +63,7 @@ Pre::
 
     wchar_t *mutant_name = NULL;
     if(ObjectAttributes != NULL) {
-        mutant_name = extract_unicode_string(ObjectAttributes->ObjectName);
+        mutant_name = extract_unicode_string_unistr(ObjectAttributes->ObjectName);
     }
 
 Logging::
