@@ -38,6 +38,7 @@ Flags::
 
 Ensure::
 
+    FileHandle
     IoStatusBlock
 
 Pre::
@@ -64,10 +65,8 @@ Logging::
 
 Post::
 
-    if(NT_SUCCESS(ret) != FALSE) {
-        if(hook_in_monitor() != 0) {
-            ignored_object_add(*FileHandle);
-        }
+    if(NT_SUCCESS(ret) != FALSE && hook_in_monitor() != 0) {
+        ignored_object_add(*FileHandle);
     }
 
     free_unicode_buffer(filepath);
@@ -129,6 +128,7 @@ Flags::
 
 Ensure::
 
+    FileHandle
     IoStatusBlock
 
 Pre::
@@ -155,10 +155,8 @@ Logging::
 
 Post::
 
-    if(NT_SUCCESS(ret) != FALSE) {
-        if(hook_in_monitor() != 0) {
-            ignored_object_add(*FileHandle);
-        }
+    if(NT_SUCCESS(ret) != FALSE && hook_in_monitor() != 0) {
+        ignored_object_add(*FileHandle);
     }
 
     free_unicode_buffer(filepath);

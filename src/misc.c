@@ -161,6 +161,10 @@ wchar_t *get_unicode_buffer()
 
 void free_unicode_buffer(wchar_t *ptr)
 {
+    if(ptr == NULL) {
+        return;
+    }
+
     uint8_t *used = (uint8_t *)
         array_get(&g_unicode_buffer_use_array, get_current_thread_id());
 

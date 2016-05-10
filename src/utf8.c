@@ -115,6 +115,10 @@ char *utf8_string(const char *s, int len)
 {
     int encoded_length = utf8_bytecnt_ascii(s, len);
     char *utf8string = (char *) mem_alloc(encoded_length+5);
+    if(utf8string == NULL) {
+        return NULL;
+    }
+
     *((int *) utf8string) = encoded_length;
     int pos = 4;
 

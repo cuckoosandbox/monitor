@@ -58,6 +58,10 @@ void mem_init()
 
 void *mem_alloc(uint32_t length)
 {
+    if(length == 0) {
+        return NULL;
+    }
+
     void *ptr = virtual_alloc(NULL, length + sizeof(uintptr_t),
         MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
     if(ptr == NULL) {

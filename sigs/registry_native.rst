@@ -270,9 +270,7 @@ Logging::
 Post::
 
     free_unicode_buffer(regkey);
-    if(key_name != NULL) {
-        free_unicode_buffer(key_name);
-    }
+    free_unicode_buffer(key_name);
 
 
 NtSetValueKey
@@ -367,9 +365,7 @@ Logging::
 Post::
 
     free_unicode_buffer(regkey);
-    if(key_name != NULL) {
-        free_unicode_buffer(key_name);
-    }
+    free_unicode_buffer(key_name);
 
 
 NtQueryMultipleValueKey

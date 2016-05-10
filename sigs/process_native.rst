@@ -320,14 +320,12 @@ Pre::
 
 Logging::
 
-    l object_handle (uintptr_t) object_handle
+    p object_handle object_handle
     u section_name section_name
 
 Post::
 
-    if(section_name != NULL) {
-        free_unicode_buffer(section_name);
-    }
+    free_unicode_buffer(section_name);
 
 
 NtMakeTemporaryObject
@@ -369,9 +367,7 @@ Logging::
 
 Post::
 
-    if(section_name != NULL) {
-        free_unicode_buffer(section_name);
-    }
+    free_unicode_buffer(section_name);
 
 
 NtUnmapViewOfSection

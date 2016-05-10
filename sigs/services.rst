@@ -203,8 +203,8 @@ Signature::
 Parameters::
 
     ** SC_HANDLE hService service_handle
-    * DWORD dwNumServiceArgs
-    * LPCTSTR *lpServiceArgVectors
+    *  DWORD dwNumServiceArgs
+    *  LPCTSTR *lpServiceArgVectors
 
 Logging::
 

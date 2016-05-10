@@ -238,7 +238,7 @@ Interesting::
 
 Logging::
 
-    b headers headers_length, lpszHeaders
+    b headers (uintptr_t) headers_length, lpszHeaders
 
 
 InternetOpenUrlW
@@ -273,7 +273,7 @@ Interesting::
 
 Logging::
 
-    b headers headers_length, lpszHeaders
+    b headers (uintptr_t) headers_length, lpszHeaders
 
 
 InternetQueryOptionA
@@ -403,7 +403,7 @@ Interesting::
 Logging::
 
     S headers headers_length, lpszHeaders
-    b post_data dwOptionalLength, lpOptional
+    b post_data (uintptr_t) dwOptionalLength, lpOptional
 
 
 HttpSendRequestW
@@ -437,7 +437,7 @@ Interesting::
 Logging::
 
     U headers headers_length, lpszHeaders
-    b post_data dwOptionalLength, lpOptional
+    b post_data (uintptr_t) dwOptionalLength, lpOptional
 
 
 InternetReadFile

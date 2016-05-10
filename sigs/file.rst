@@ -739,6 +739,10 @@ Logging::
     u filepath filepath
     u filepath_r lpFileName
 
+Post::
+
+    free_unicode_buffer(filepath);
+
 
 SetEndOfFile
 ============

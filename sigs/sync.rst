@@ -36,9 +36,7 @@ Logging::
 
 Post::
 
-    if(mutant_name != NULL) {
-        free_unicode_buffer(mutant_name);
-    }
+    free_unicode_buffer(mutant_name);
 
 
 NtOpenMutant
@@ -72,6 +70,4 @@ Logging::
 
 Post::
 
-    if(mutant_name != NULL) {
-        free_unicode_buffer(mutant_name);
-    }
+    free_unicode_buffer(mutant_name);
