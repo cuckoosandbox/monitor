@@ -489,7 +489,7 @@ Pre::
 
     uint64_t offset = lDistanceToMove;
     if(lpDistanceToMoveHigh != NULL) {
-        offset += (uint64_t) *lpDistanceToMoveHigh << 32;
+        offset += (uint64_t) copy_uint32(lpDistanceToMoveHigh) << 32;
     }
 
 Logging::
@@ -564,7 +564,7 @@ Prelog::
 
 Logging::
 
-    b output_buffer (uintptr_t) *lpBytesReturned, lpOutBuffer
+    b output_buffer (uintptr_t) copy_uint32(lpBytesReturned), lpOutBuffer
 
 
 GetSystemDirectoryA

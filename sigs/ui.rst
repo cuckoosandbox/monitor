@@ -199,7 +199,7 @@ Parameters::
 Middle::
 
     if(cchText == -1) {
-        cchText = strlen(lpchText);
+        cchText = copy_strlen(lpchText);
     }
 
 Logging::
@@ -227,7 +227,7 @@ Parameters::
 Middle::
 
     if(cchText == -1) {
-        cchText = lstrlenW(lpchText);
+        cchText = copy_strlenW(lpchText);
     }
 
 Logging::

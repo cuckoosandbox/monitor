@@ -129,13 +129,10 @@ void log_string(bson *b, const char *idx, const char *str, int length)
         return;
     }
 
-    int ret, utf8len;
-
-    if(range_is_readable(str, length) != 0) {
-        char *utf8s = utf8_string(str, length);
-        utf8len = *(int *) utf8s;
-        ret = bson_append_string_n(b, idx, utf8s+4, utf8len);
-        if(ret == BSON_ERROR) {
+    char *utf8s = copy_utf8_string(str, length);
+    if(utf8s != NULL) {
+        int utf8len = *(int *) utf8s;
+        if(bson_append_string_n(b, idx, utf8s+4, utf8len) == BSON_ERROR) {
             pipe("CRITICAL:Error creating bson string, error, %x utf8len %d.",
                 b->err, utf8len);
         }
@@ -153,12 +150,10 @@ void log_wstring(bson *b, const char *idx, const wchar_t *str, int length)
         return;
     }
 
-    if(range_is_readable(str, length) != 0) {
-        int ret, utf8len;
-        char *utf8s = utf8_wstring(str, length);
-        utf8len = *(int *) utf8s;
-        ret = bson_append_string_n(b, idx, utf8s+4, utf8len);
-        if(ret == BSON_ERROR) {
+    char *utf8s = copy_utf8_wstring(str, length);
+    if(utf8s != NULL) {
+        int utf8len = *(int *) utf8s;
+        if(bson_append_string_n(b, idx, utf8s+4, utf8len) == BSON_ERROR) {
             pipe("CRITICAL:Error creating bson wstring, error %x, utf8len %d.",
                 b->err, utf8len);
         }
@@ -172,11 +167,13 @@ void log_wstring(bson *b, const char *idx, const wchar_t *str, int length)
 static void log_argv(bson *b, const char *idx, int argc, const char **argv)
 {
     bson_append_start_array(b, idx);
-    char index[5];
+    char index[5]; char *value;
 
     for (int i = 0; i < argc; i++) {
-        ultostr(i, index, 10);
-        log_string(b, index, argv[i], strlen_safe(argv[i]));
+        if(copy_bytes(&value, &argv[i], sizeof(char *)) == 0) {
+            ultostr(i, index, 10);
+            log_string(b, index, value, copy_strlen(value));
+        }
     }
     bson_append_finish_array(b);
 }
@@ -185,11 +182,13 @@ static void log_wargv(bson *b, const char *idx,
     int argc, const wchar_t **argv)
 {
     bson_append_start_array(b, idx);
-    char index[5];
+    char index[5]; wchar_t *value;
 
     for (int i = 0; i < argc; i++) {
-        ultostr(i, index, 10);
-        log_wstring(b, index, argv[i], strlen_safeW(argv[i]));
+        if(copy_bytes(&value, &argv[i], sizeof(wchar_t *)) == 0) {
+            ultostr(i, index, 10);
+            log_wstring(b, index, value, copy_strlenW(value));
+        }
     }
 
     bson_append_finish_array(b);
@@ -413,7 +412,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
 
         if(*fmt == 's') {
             const char *s = va_arg(args, const char *);
-            log_string(&b, idx, s, strlen_safe(s));
+            log_string(&b, idx, s, copy_strlen(s));
         }
         else if(*fmt == 'S') {
             int len = va_arg(args, int);
@@ -422,7 +421,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
         }
         else if(*fmt == 'u') {
             const wchar_t *s = va_arg(args, const wchar_t *);
-            log_wstring(&b, idx, s, strlen_safeW(s));
+            log_wstring(&b, idx, s, copy_strlenW(s));
         }
         else if(*fmt == 'U') {
             int len = va_arg(args, int);
@@ -441,14 +440,15 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             }
         }
         else if(*fmt == 'B') {
-            uintptr_t *len = va_arg(args, uintptr_t *);
+            uintptr_t len = 0;
+            copy_bytes(&len, va_arg(args, uintptr_t *), sizeof(uintptr_t));
             const uint8_t *s = va_arg(args, const uint8_t *);
-            if(override == 0 || (len != NULL && *len < BUFFER_LOG_MAX)) {
-                log_buffer(&b, idx, s, len == NULL ? 0 : *len);
+            if(override == 0 || len < BUFFER_LOG_MAX) {
+                log_buffer(&b, idx, s, len);
             }
             else {
                 log_buffer(&b, idx, NULL, 0);
-                log_buffer_notrunc(s, len == NULL ? 0 : *len);
+                log_buffer_notrunc(s, len);
             }
         }
         else if(*fmt == 'i' || *fmt == 'x') {
@@ -456,24 +456,27 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             log_int32(&b, idx, value);
         }
         else if(*fmt == 'I') {
-            int *value = va_arg(args, int *);
-            log_int32(&b, idx, value != NULL ? *value : 0);
+            int value = 0;
+            copy_bytes(&value, va_arg(args, int *), sizeof(value));
+            log_int32(&b, idx, value);
         }
         else if(*fmt == 'l' || *fmt == 'p') {
             uintptr_t value = va_arg(args, uintptr_t);
             log_intptr(&b, idx, value);
         }
         else if(*fmt == 'L' || *fmt == 'P') {
-            uintptr_t *ptr = va_arg(args, uintptr_t *);
-            log_intptr(&b, idx, ptr != NULL ? *ptr : 0);
+            uintptr_t value = 0;
+            copy_bytes(&value, va_arg(args, uintptr_t *), sizeof(uintptr_t));
+            log_intptr(&b, idx, value);
         }
         else if(*fmt == 'o') {
-            ANSI_STRING *str = va_arg(args, ANSI_STRING *);
-            if(str == NULL) {
-                log_string(&b, idx, "", 0);
+            ANSI_STRING *str = va_arg(args, ANSI_STRING *), str_;
+            if(str != NULL &&
+                    copy_bytes(&str_, str, sizeof(ANSI_STRING)) == 0) {
+                log_string(&b, idx, str_.Buffer, str_.Length);
             }
             else {
-                log_string(&b, idx, str->Buffer, str->Length);
+                log_string(&b, idx, "", 0);
             }
         }
         else if(*fmt == 'a') {
@@ -500,57 +503,51 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
                 size = &_size;
             }
 
-            if(*type == REG_NONE) {
+            switch (copy_uint32(type)) {
+            case REG_NONE:
                 log_string(&b, idx, NULL, 0);
-            }
-            else if(*type == REG_DWORD || *type == REG_DWORD_LITTLE_ENDIAN) {
-                uint32_t value = 0;
-                if(data != NULL) {
-                    value = *(uint32_t *) data;
-                }
-                log_int32(&b, idx, value);
-            }
-            else if(*type == REG_DWORD_BIG_ENDIAN) {
-                uint32_t value = 0;
-                if(data != NULL) {
-                    value = *(uint32_t *) data;
-                }
-                log_int32(&b, idx, our_htonl(value));
-            }
-            else if(*type == REG_EXPAND_SZ || *type == REG_SZ ||
-                    *type == REG_MULTI_SZ) {
+                break;
+
+            case REG_DWORD:
+                log_int32(&b, idx, copy_uint32(data));
+                break;
+
+            case REG_DWORD_BIG_ENDIAN:
+                log_int32(&b, idx, our_htonl(copy_uint32(data)));
+                break;
+
+            case REG_EXPAND_SZ: case REG_SZ: case REG_MULTI_SZ:
                 if(*fmt == 'r') {
-                    uint32_t length = *size;
+                    uint32_t length = copy_uint32(size);
                     // Strings tend to be zero-terminated twice, so check for
                     // that and if that's the case, then ignore the trailing
                     // nullbyte.
                     if(data != NULL &&
-                            our_strlen((const char *) data) == length - 1) {
+                            copy_strlen((const char *) data) == length - 1) {
                         length--;
                     }
                     log_string(&b, idx, (const char *) data, length);
                 }
                 else {
-                    int32_t length = *size / sizeof(wchar_t);
+                    uint32_t length = copy_uint32(size) / sizeof(wchar_t);
                     // Strings tend to be zero-terminated twice, so check for
                     // that and if that's the case, then ignore the trailing
                     // nullbyte.
-                    if(data != NULL &&
-                            lstrlenW((const wchar_t *) data) == length - 1) {
+                    if(data != NULL && copy_strlenW(
+                            (const wchar_t *) data) == length - 1) {
                         length--;
                     }
                     log_wstring(&b, idx, (const wchar_t *) data, length);
                 }
-            }
-            else if(*type == REG_QWORD || *type == REG_QWORD_LITTLE_ENDIAN) {
-                uint64_t value = 0;
-                if(data != NULL) {
-                    value = *(uint64_t *) data;
-                }
-                log_int64(&b, idx, value);
-            }
-            else {
-                log_buffer(&b, idx, data, *size);
+                break;
+
+            case REG_QWORD:
+                log_int64(&b, idx, copy_uint64(data));
+                break;
+
+            default:
+                log_buffer(&b, idx, data, copy_uint32(size));
+                break;
             }
         }
         else if(*fmt == 'q') {
@@ -559,7 +556,8 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
         }
         else if(*fmt == 'Q') {
             LARGE_INTEGER *value = va_arg(args, LARGE_INTEGER *);
-            log_int64(&b, idx, value != NULL ? value->QuadPart : 0);
+            log_int64(&b, idx,
+                value != NULL ? copy_uint64(&value->QuadPart) : 0);
         }
         else if(*fmt == 'z') {
             bson *value = va_arg(args, bson *);

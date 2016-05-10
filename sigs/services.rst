@@ -306,20 +306,23 @@ Parameters::
 
 Pre::
 
-    bson b, a; char index[10]; int idx = 0;
+    bson b, a; char index[10]; int idx = 0; SERVICE_TABLE_ENTRYW entry;
     bson_init(&b);
     bson_init(&a);
 
     bson_append_start_array(&b, "services");
     bson_append_start_array(&a, "addresses");
 
-    for (const SERVICE_TABLE_ENTRYW *ptr = lpServiceTable;
-            ptr != NULL && ptr->lpServiceProc != NULL; ptr++, idx++) {
+    const SERVICE_TABLE_ENTRYW *ptr = lpServiceTable;
+    while (
+        copy_bytes(&entry, ptr, sizeof(SERVICE_TABLE_ENTRYW)) == 0 &&
+        entry.lpServiceProc != NULL
+    ) {
         our_snprintf(index, sizeof(index), "%d", idx++);
-        log_wstring(&b, index, ptr->lpServiceName,
-            strlen_safeW(ptr->lpServiceName));
+        log_wstring(&b, index, entry.lpServiceName,
+            copy_strlenW(entry.lpServiceName));
 
-        log_intptr(&a, index, (intptr_t)(uintptr_t) ptr->lpServiceProc);
+        log_intptr(&a, index, (intptr_t)(uintptr_t) entry.lpServiceProc);
     }
 
     bson_append_finish_array(&a);

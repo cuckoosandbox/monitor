@@ -63,7 +63,7 @@ Pre::
 
     uint32_t length = dwUrlLength;
     if(length == 0 && lpszUrl != NULL) {
-        length = strlen(lpszUrl);
+        length = copy_strlen(lpszUrl);
     }
 
 Logging::
@@ -90,7 +90,7 @@ Pre::
 
     uint32_t length = dwUrlLength;
     if(length == 0 && lpszUrl != NULL) {
-        length = lstrlenW(lpszUrl);
+        length = copy_strlenW(lpszUrl);
     }
 
 Logging::
@@ -227,7 +227,7 @@ Pre::
 
     int headers_length = dwHeadersLength;
     if(lpszHeaders != NULL && headers_length == -1) {
-        headers_length = strlen(lpszHeaders);
+        headers_length = copy_strlen(lpszHeaders);
     }
 
 Interesting::
@@ -262,7 +262,7 @@ Pre::
 
     int headers_length = dwHeadersLength;
     if(lpszHeaders != NULL && headers_length == -1) {
-        headers_length = lstrlenW(lpszHeaders);
+        headers_length = copy_strlenW(lpszHeaders);
     }
 
 Interesting::
@@ -426,7 +426,7 @@ Pre::
 
     int headers_length = dwHeadersLength;
     if(lpszHeaders != NULL && headers_length == -1) {
-        headers_length = lstrlenW(lpszHeaders);
+        headers_length = copy_strlenW(lpszHeaders);
     }
 
 Interesting::
@@ -461,7 +461,7 @@ Ensure::
 
 Logging::
 
-    b buffer (uintptr_t) *lpdwNumberOfBytesRead, lpBuffer
+    b buffer (uintptr_t) copy_uint32(lpdwNumberOfBytesRead), lpBuffer
 
 
 InternetWriteFile
@@ -485,7 +485,7 @@ Ensure::
 
 Logging::
 
-    b buffer (uintptr_t) *lpdwNumberOfBytesWritten, lpBuffer
+    b buffer (uintptr_t) copy_uint32(lpdwNumberOfBytesWritten), lpBuffer
 
 
 InternetCloseHandle
@@ -778,7 +778,7 @@ Ensure::
 
 Logging::
 
-    b buffer (uintptr_t) *lpdwBufferLength, lpvBuffer
+    b buffer (uintptr_t) copy_uint32(lpdwBufferLength), lpvBuffer
 
 
 ObtainUserAgentString
@@ -801,13 +801,11 @@ Ensure::
 
 Middle::
 
-    if(ret != S_OK) {
-        *cbSize = 0;
-    }
+    uint32_t length = ret == S_OK ? copy_uint32(cbSize) : 0;
 
 Logging::
 
-    S user_agent (int) *cbSize, pcszUAOut
+    S user_agent length, pcszUAOut
 
 
 GetBestInterfaceEx

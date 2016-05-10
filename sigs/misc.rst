@@ -40,8 +40,8 @@ Parameters::
 
 Logging::
 
-    l x lpPoint != NULL ? lpPoint->x : 0
-    l y lpPoint != NULL ? lpPoint->y : 0
+    I x lpPoint != NULL ? &lpPoint->x : 0
+    I y lpPoint != NULL ? &lpPoint->y : 0
 
 
 GetComputerNameA
@@ -64,7 +64,7 @@ Ensure::
 
 Logging::
 
-    S computer_name *lpnSize, lpBuffer
+    S computer_name copy_uint32(lpnSize), lpBuffer
 
 
 GetComputerNameW
@@ -87,7 +87,7 @@ Ensure::
 
 Logging::
 
-    U computer_name *lpnSize / sizeof(wchar_t), lpBuffer
+    U computer_name copy_uint32(lpnSize) / sizeof(wchar_t), lpBuffer
 
 
 GetUserNameA
@@ -110,7 +110,7 @@ Ensure::
 
 Logging::
 
-    S user_name *lpnSize-1, lpBuffer
+    S user_name copy_uint32(lpnSize)-1, lpBuffer
 
 
 GetUserNameW
@@ -157,7 +157,7 @@ Ensure::
 
 Logging::
 
-    S name *lpnSize, lpNameBuffer
+    S name copy_uint32(lpnSize), lpNameBuffer
 
 
 GetUserNameExW
@@ -181,7 +181,7 @@ Ensure::
 
 Logging::
 
-    U name *lpnSize, lpNameBuffer
+    U name copy_uint32(lpnSize), lpNameBuffer
 
 
 EnumWindows
@@ -255,7 +255,7 @@ Ensure::
 
 Logging::
 
-    S buffer *lpNumberOfCharsWritten, lpBuffer
+    S buffer copy_uint32(lpNumberOfCharsWritten), lpBuffer
 
 
 WriteConsoleW
@@ -280,7 +280,7 @@ Ensure::
 
 Logging::
 
-    U buffer *lpNumberOfCharsWritten, lpBuffer
+    U buffer copy_uint32(lpNumberOfCharsWritten), lpBuffer
 
 
 SHGetSpecialFolderLocation
@@ -542,9 +542,9 @@ Parameters::
 
 Logging::
 
-    u resource_name pActCtx != NULL ? pActCtx->lpResourceName : NULL
-    u application_name pActCtx != NULL ? pActCtx->lpApplicationName : NULL
-    p module_handle pActCtx != NULL ? pActCtx->hModule : NULL
+    u resource_name pActCtx != NULL ? copy_ptr(&pActCtx->lpResourceName) : NULL
+    u application_name pActCtx != NULL ? copy_ptr(&pActCtx->lpApplicationName) : NULL
+    p module_handle pActCtx != NULL ? copy_ptr(&pActCtx->hModule) : NULL
 
 
 RegisterHotKey

@@ -97,8 +97,6 @@ void *memdup(const void *addr, uint32_t length);
 wchar_t *our_wcsdup(const wchar_t *s);
 int page_is_readable(const void *addr);
 int range_is_readable(const void *addr, uintptr_t size);
-int strlen_safe(const char *str);
-int strlen_safeW(const wchar_t *str);
 void clsid_to_string(REFCLSID rclsid, char *buf);
 
 uint64_t hash_buffer(const void *buf, uint32_t length);
@@ -171,6 +169,18 @@ extern uint32_t g_extra_virtual_memory;
 
 void set_processor_count(uint32_t processor_count);
 void add_virtual_memory(uint64_t length);
+
+int copy_bytes(void *to, const void *from, uint32_t length);
+int copy_unicodez(wchar_t *to, const wchar_t *from);
+int copy_wcsncpyA(wchar_t *to, const char *from, uint32_t length);
+uint32_t copy_strlen(const char *value);
+uint32_t copy_strlenW(const wchar_t *value);
+char *copy_utf8_string(const char *str, uint32_t length);
+char *copy_utf8_wstring(const wchar_t *str, uint32_t length);
+uint32_t copy_uint32(const void *value);
+uint64_t copy_uint64(const void *value);
+void *copy_ptr(const void *ptr);
+void copy_return();
 
 #define OBJECT_NAME_INFORMATION_REQUIRED_SIZE \
     sizeof(OBJECT_NAME_INFORMATION) + sizeof(wchar_t) * MAX_PATH_W

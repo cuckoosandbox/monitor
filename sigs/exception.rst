@@ -125,6 +125,19 @@ Pre::
         exception_code = ExceptionRecord->ExceptionCode;
     }
 
+    uintptr_t pc = 0;
+    #if __x86_64__
+    pc = Context->Rip;
+    #else
+    pc = Context->Eip;
+    #endif
+
+    // Is this exception within our monitor?
+    if(exception_code == STATUS_ACCESS_VIOLATION &&
+            pc >= g_monitor_start && pc < g_monitor_end) {
+        copy_return();
+    }
+
     // Ignore exceptions that are caused by calling OutputDebugString().
     if(is_exception_code_whitelisted(exception_code) == 0) {
         uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;

@@ -262,8 +262,8 @@ Parameters::
 
 Logging::
 
-    u process_name lppe->szExeFile
-    i process_identifier lppe->th32ProcessID
+    u process_name copy_ptr(&lppe->szExeFile)
+    i process_identifier copy_uint32(&lppe->th32ProcessID)
 
 
 Process32NextW
@@ -281,8 +281,8 @@ Parameters::
 
 Logging::
 
-    u process_name lppe->szExeFile
-    i process_identifier lppe->th32ProcessID
+    u process_name copy_ptr(&lppe->szExeFile)
+    i process_identifier copy_uint32(&lppe->th32ProcessID)
 
 
 Module32FirstW

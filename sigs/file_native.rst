@@ -270,7 +270,7 @@ Prelog::
 
 Logging::
 
-    b output_buffer IoStatusBlock->Information, OutputBuffer
+    b output_buffer (uintptr_t) copy_uint32(&IoStatusBlock->Information), OutputBuffer
 
 
 NtQueryDirectoryFile
@@ -366,9 +366,11 @@ Flags::
 
 Pre::
 
+    BOOLEAN value = FALSE;
     if(FileInformation != NULL && Length == sizeof(BOOLEAN) &&
             FileInformationClass == FileDispositionInformation &&
-            *(BOOLEAN *) FileInformation != FALSE) {
+            copy_bytes(&value, FileInformation, sizeof(BOOLEAN)) == 0 &&
+            value != FALSE) {
         wchar_t *filepath = get_unicode_buffer();
         path_get_full_path_handle(FileHandle, filepath);
         pipe("FILE_DEL:%Z", filepath);

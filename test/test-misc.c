@@ -74,12 +74,15 @@ int main()
     assert((wcsncpyA(bufW, "hello", 6), wcscmp(bufW, L"hello") == 0));
     assert((wcsncpyA(bufW, "hello", 64), wcscmp(bufW, L"hello") == 0));
 
-    UNICODE_STRING unistr2, unistr = {
+    UNICODE_STRING unistr = {
         .Length = 10, .MaximumLength = 10, .Buffer = L"HELLO",
     };
+    OBJECT_ATTRIBUTES objattr = {
+        .ObjectName = &unistr,
+    };
 
-    assert(copy_unicode_string(&unistr, &unistr2, bufW, sizeof(bufW)) == 0 && wcsncmp(bufW, unistr.Buffer, unistr.Length) == 0 && wcscmp(bufW, L"HELLO") == 0);
-    assert(wcscmp(extract_unicode_string(&unistr), L"HELLO") == 0);
+    assert(wcscmp(extract_unicode_string_unistr(&unistr), L"HELLO") == 0);
+    assert(wcscmp(extract_unicode_string_objattr(&objattr), L"HELLO") == 0);
 
     struct sockaddr_in addr; const char *ip; int port;
     addr.sin_family = AF_INET;

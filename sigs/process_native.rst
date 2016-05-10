@@ -311,9 +311,11 @@ Pre::
 
     wchar_t *section_name = extract_unicode_string_objattr(ObjectAttributes);
 
-    HANDLE object_handle = NULL;
-    if(ObjectAttributes != NULL) {
-        object_handle = ObjectAttributes->RootDirectory;
+    HANDLE object_handle = NULL; OBJECT_ATTRIBUTES objattr;
+
+    if(ObjectAttributes != NULL && copy_bytes(
+            &objattr, ObjectAttributes, sizeof(OBJECT_ATTRIBUTES)) == 0) {
+        object_handle = objattr.RootDirectory;
     }
 
 Logging::

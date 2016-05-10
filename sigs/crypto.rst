@@ -62,7 +62,7 @@ Ensure::
 
 Prelog::
 
-    !b buffer (uintptr_t) pDataIn->cbData, pDataIn->pbData
+    !b buffer (uintptr_t) copy_uint32(&pDataIn->cbData), copy_ptr(&pDataIn->pbData)
 
 
 CryptUnprotectData
@@ -90,9 +90,9 @@ Ensure::
 
 Logging::
 
-    u description ppszDataDescr != NULL ? *ppszDataDescr : NULL
-    b entropy pOptionalEntropy->cbData, pOptionalEntropy->pbData
-    !b buffer (uintptr_t) pDataOut->cbData, pDataOut->pbData
+    u description ppszDataDescr != NULL ? copy_ptr(ppszDataDescr) : NULL
+    b entropy (uintptr_t) copy_uint32(&pOptionalEntropy->cbData), copy_ptr(&pOptionalEntropy->pbData)
+    !b buffer (uintptr_t) copy_uint32(&pDataOut->cbData), copy_ptr(&pDataOut->pbData)
 
 
 CryptProtectMemory
@@ -158,7 +158,7 @@ Ensure::
 
 Logging::
 
-    !b buffer (uintptr_t) *pdwDataLen, pbData
+    !b buffer (uintptr_t) copy_uint32(pdwDataLen), pbData
 
 
 CryptEncrypt
@@ -234,7 +234,7 @@ Ensure::
 
 Logging::
 
-    !b buffer (uintptr_t) *pcbDecoded, pbDecoded
+    !b buffer (uintptr_t) copy_uint32(pcbDecoded), pbDecoded
 
 
 CryptDecryptMessage
@@ -260,7 +260,7 @@ Ensure::
 
 Logging::
 
-    !b buffer (uintptr_t) *pcbDecrypted, pbDecrypted
+    !b buffer (uintptr_t) copy_uint32(pcbDecrypted), pbDecrypted
 
 
 CryptEncryptMessage
@@ -310,14 +310,17 @@ Pre::
 
     uintptr_t length = 0;
     for (uint32_t idx = 0; idx < cToBeHashed; idx++) {
-        length += rgcbToBeHashed[idx];
+        length += copy_uint32(&rgcbToBeHashed[idx]);
     }
 
     uint8_t *buf = mem_alloc(length);
     if(buf != NULL) {
         for (uint32_t idx = 0, offset = 0; idx < cToBeHashed; idx++) {
-            memcpy(&buf[offset], rgpbToBeHashed[idx], rgcbToBeHashed[idx]);
-            offset += rgcbToBeHashed[idx];
+            copy_bytes(
+                &buf[offset], copy_ptr(&rgpbToBeHashed[idx]),
+                copy_uint32(&rgcbToBeHashed[idx])
+            );
+            offset += copy_uint32(&rgcbToBeHashed[idx]);
         }
     }
 
@@ -353,7 +356,7 @@ Ensure::
 
 Logging::
 
-    b buffer (uintptr_t) *pdwDataLen, pbData
+    b buffer (uintptr_t) copy_uint32(pdwDataLen), pbData
 
 
 CryptGenKey
@@ -431,13 +434,13 @@ Middle::
     void *buf = pvStructInfo;
 
     if((dwFlags & CRYPT_ENCODE_ALLOC_FLAG) != 0) {
-        buf = *(void **) pvStructInfo;
+        buf = copy_ptr(pvStructInfo);
     }
 
 Logging::
 
     s struct_type struct_type
-    !b buffer (uintptr_t) *pcbStructInfo, buf
+    !b buffer (uintptr_t) copy_uint32(pcbStructInfo), buf
 
 
 PRF

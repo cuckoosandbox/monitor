@@ -346,11 +346,13 @@ wchar_t *extract_unicode_string_unistr(const UNICODE_STRING *unistr)
 
 wchar_t *extract_unicode_string_objattr(const OBJECT_ATTRIBUTES *objattr)
 {
-    if(objattr == NULL) {
+    OBJECT_ATTRIBUTES obj;
+
+    if(objattr == NULL || copy_bytes(&obj, objattr, sizeof(obj)) < 0) {
         return NULL;
     }
 
-    return extract_unicode_string_unistr(objattr->ObjectName);
+    return extract_unicode_string_unistr(obj.ObjectName);
 }
 
 static uint32_t _path_from_handle(HANDLE handle, wchar_t *path)
@@ -379,7 +381,7 @@ static uint32_t _path_from_unicode_string(const UNICODE_STRING *unistr,
     if(unistr != NULL && unistr->Buffer != NULL && unistr->Length != 0) {
         length = MIN(unistr->Length / sizeof(wchar_t), length);
 
-        memcpy(path, unistr->Buffer, length * sizeof(wchar_t));
+        copy_bytes(path, unistr->Buffer, length * sizeof(wchar_t));
         path[length] = 0;
         return length;
     }
@@ -387,23 +389,33 @@ static uint32_t _path_from_unicode_string(const UNICODE_STRING *unistr,
 }
 
 static uint32_t _path_from_object_attributes(
-    const OBJECT_ATTRIBUTES *obj, wchar_t *path)
+    const OBJECT_ATTRIBUTES *objattr, wchar_t *path)
 {
-    if(obj == NULL) {
+    OBJECT_ATTRIBUTES obj; UNICODE_STRING us;
+
+    if(objattr == NULL) {
         return 0;
     }
 
-    uint32_t offset = _path_from_handle(obj->RootDirectory, path);
-
-    // Only append the backslash if both root directory and object name have
-    // been set.
-    if(offset != 0 && obj->ObjectName != NULL &&
-            obj->ObjectName->Buffer != NULL && obj->ObjectName->Length != 0) {
-        path[offset++] = '\\';
+    if(copy_bytes(&obj, objattr, sizeof(OBJECT_ATTRIBUTES)) < 0) {
+        return 0;
     }
 
-    return offset + _path_from_unicode_string(obj->ObjectName,
-        &path[offset], MAX_PATH_W - offset);
+    uint32_t offset = _path_from_handle(obj.RootDirectory, path);
+
+    if(obj.ObjectName != NULL) {
+        if(copy_bytes(&us, obj.ObjectName, sizeof(UNICODE_STRING)) < 0) {
+            return offset;
+        }
+
+        if(offset != 0 && us.Buffer != NULL && us.Length != 0) {
+            path[offset++] = '\\';
+        }
+
+        return offset + _path_from_unicode_string(&us,
+            &path[offset], MAX_PATH_W - offset);
+    }
+    return offset;
 }
 
 uint32_t path_get_full_pathA(const char *in, wchar_t *out)
@@ -415,7 +427,7 @@ uint32_t path_get_full_pathA(const char *in, wchar_t *out)
         return 0;
     }
 
-    wcsncpyA(input, in, MAX_PATH+1);
+    copy_wcsncpyA(input, in, MAX_PATH+1);
     return path_get_full_pathW(input, out);
 }
 
@@ -436,7 +448,11 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
     wchar_t *buf1 = get_unicode_buffer(), *buf2 = get_unicode_buffer();
     wchar_t *pathi, *patho, *last_ptr = NULL;
 
-    wcscpy(buf1, in);
+    if(copy_unicodez(buf1, in) < 0) {
+        out[0] = 0;
+        return 0;
+    }
+
     pathi = buf1, patho = buf2;
 
     // Globalroot is an optional prefix that can be skipped.
@@ -574,10 +590,13 @@ uint32_t path_get_full_path_handle(HANDLE file_handle, wchar_t *out)
 uint32_t path_get_full_path_unistr(const UNICODE_STRING *in, wchar_t *out)
 {
     wchar_t *input = get_unicode_buffer(); uint32_t ret = 0;
+    UNICODE_STRING us;
 
-    if(in != NULL && in->Buffer != NULL) {
-        memcpy(input, in->Buffer, in->Length);
-        input[in->Length / sizeof(wchar_t)] = 0;
+    if(in != NULL && copy_bytes(&us, in, sizeof(UNICODE_STRING)) == 0) {
+        if(us.Buffer != NULL && us.Length != 0) {
+            copy_bytes(input, us.Buffer, us.Length);
+        }
+        input[us.Length / sizeof(wchar_t)] = 0;
         ret = path_get_full_pathW(input, out);
     }
     else {
@@ -776,7 +795,7 @@ uint32_t reg_get_key_ascii(HANDLE key_handle,
     regkey[offset++] = '\\';
 
     length = MIN(length+1, MAX_PATH_W+1 - offset);
-    wcsncpyA(&regkey[offset], subkey, length);
+    copy_wcsncpyA(&regkey[offset], subkey, length);
     return _reg_key_normalize(regkey);
 }
 
@@ -784,7 +803,7 @@ uint32_t reg_get_key_asciiz(HANDLE key_handle,
     const char *subkey, wchar_t *regkey)
 {
     return reg_get_key_ascii(key_handle, subkey,
-        subkey != NULL ? strlen(subkey) : 0, regkey);
+        subkey != NULL ? copy_strlen(subkey) : 0, regkey);
 }
 
 uint32_t reg_get_key_uni(HANDLE key_handle,
@@ -800,7 +819,7 @@ uint32_t reg_get_key_uni(HANDLE key_handle,
     length = MIN(length, MAX_PATH_W - offset);
 
     regkey[offset++] = '\\';
-    memmove(&regkey[offset], subkey, length * sizeof(wchar_t));
+    copy_bytes(&regkey[offset], subkey, length * sizeof(wchar_t));
     regkey[offset + length] = 0;
     return _reg_key_normalize(regkey);
 }
@@ -809,29 +828,34 @@ uint32_t reg_get_key_uniz(HANDLE key_handle,
     const wchar_t *subkey, wchar_t *regkey)
 {
     return reg_get_key_uni(key_handle, subkey,
-        subkey != NULL ? lstrlenW(subkey) : 0, regkey);
+        subkey != NULL ? copy_strlenW(subkey) : 0, regkey);
 }
 
 uint32_t reg_get_key_unistr(HANDLE key_handle,
     const UNICODE_STRING *unistr, wchar_t *regkey)
 {
-    const wchar_t *ptr = NULL; uint32_t length = 0;
+    const wchar_t *ptr = NULL; uint32_t length = 0; UNICODE_STRING us;
 
-    if(unistr != NULL && unistr->Buffer != NULL && unistr->Length != 0) {
-        ptr = unistr->Buffer;
-        length = unistr->Length / sizeof(wchar_t);
+    if(unistr != NULL &&
+            copy_bytes(&us, unistr, sizeof(UNICODE_STRING)) == 0) {
+        ptr = us.Buffer;
+        length = us.Length / sizeof(wchar_t);
     }
 
     return reg_get_key_uni(key_handle, ptr, length, regkey);
 }
 
-uint32_t reg_get_key_objattr(const OBJECT_ATTRIBUTES *obj, wchar_t *regkey)
+uint32_t reg_get_key_objattr(
+    const OBJECT_ATTRIBUTES *objattr, wchar_t *regkey)
 {
-    if(obj != NULL) {
-        return reg_get_key_unistr(obj->RootDirectory,
-            obj->ObjectName, regkey);
+    OBJECT_ATTRIBUTES obj;
+
+    if(objattr == NULL ||
+            copy_bytes(&obj, objattr, sizeof(OBJECT_ATTRIBUTES)) < 0) {
+        return 0;
     }
-    return 0;
+
+    return reg_get_key_unistr(obj.RootDirectory, obj.ObjectName, regkey);
 }
 
 void reg_get_info_from_keyvalue(const void *buf, uint32_t length,
@@ -845,6 +869,7 @@ void reg_get_info_from_keyvalue(const void *buf, uint32_t length,
         return;
     }
 
+    // TODO Use the copy functions.
     switch (information_class) {
     case KeyValueBasicInformation: {
         KEY_VALUE_BASIC_INFORMATION *basic =
@@ -1120,54 +1145,6 @@ int range_is_readable(const void *addr, uintptr_t size)
         ptr = (const uint8_t *) mbi.BaseAddress + mbi.RegionSize;
     }
     return 1;
-}
-
-int strlen_safe(const char *str)
-{
-    if(str == NULL) {
-        return 0;
-    }
-
-    int ret = 0;
-    while (1) {
-        if(page_is_readable(str) == 0) {
-            return ret;
-        }
-
-        do {
-            if(*str == 0) {
-                return ret;
-            }
-
-            str++, ret++;
-        } while ((((uintptr_t) str) & 0xfff) != 0);
-    }
-}
-
-int strlen_safeW(const wchar_t *str)
-{
-    if(str == NULL) {
-        return 0;
-    }
-
-    int ret = 0;
-    while (1) {
-        if(page_is_readable(str) == 0 ||
-                page_is_readable((const uint8_t *) str + 1) == 0) {
-            return ret;
-        }
-
-        do {
-            if(*str == 0) {
-                return ret;
-            }
-
-            str++, ret++;
-        } while (
-            (((uintptr_t) str) & 0xfff) != 0 &&
-            (((uintptr_t) str + 1) & 0xfff) != 0
-        );
-    }
 }
 
 void clsid_to_string(REFCLSID rclsid, char *buf)
