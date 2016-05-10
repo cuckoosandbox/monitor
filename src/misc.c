@@ -336,11 +336,16 @@ void wcsncpyA(wchar_t *dst, const char *src, uint32_t length)
 
 wchar_t *extract_unicode_string_unistr(const UNICODE_STRING *unistr)
 {
-    wchar_t *ret = get_unicode_buffer();
+    wchar_t *ret = get_unicode_buffer(); UNICODE_STRING us;
 
-    if(unistr != NULL && unistr->Buffer != NULL) {
-        memcpy(ret, unistr->Buffer, unistr->Length);
-        ret[unistr->Length / sizeof(wchar_t)] = 0;
+    if(unistr == NULL || copy_bytes(&us, unistr, sizeof(us)) < 0) {
+        free_unicode_buffer(ret);
+        return NULL;
+    }
+
+    if(us.Buffer != NULL) {
+        copy_bytes(ret, us.Buffer, us.Length);
+        ret[us.Length / sizeof(wchar_t)] = 0;
         return ret;
     }
 
