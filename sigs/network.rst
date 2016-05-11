@@ -392,7 +392,7 @@ Pre::
 
     int headers_length = dwHeadersLength;
     if(lpszHeaders != NULL && headers_length == -1) {
-        headers_length = strlen(lpszHeaders);
+        headers_length = copy_strlen(lpszHeaders);
     }
 
 Interesting::

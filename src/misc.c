@@ -1158,7 +1158,12 @@ int range_is_readable(const void *addr, uintptr_t size)
 
 void clsid_to_string(REFCLSID rclsid, char *buf)
 {
-    const uint8_t *ptr = (const uint8_t *) rclsid;
+    uint8_t ptr[16];
+
+    if(copy_bytes(ptr, rclsid, 16) < 0) {
+        *buf = 0;
+        return;
+    }
 
     our_snprintf(buf, 64, "{%x%x%x%x-%x%x-%x%x-%x%x-%x%x%x%x%x%x}",
         ptr[3], ptr[2], ptr[1], ptr[0], ptr[5], ptr[4], ptr[7], ptr[6],
