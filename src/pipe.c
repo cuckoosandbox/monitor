@@ -166,7 +166,7 @@ static int _prepend_pid(char *buf, ...)
 int pipe(const char *fmt, ...)
 {
     if(g_pipe_name[0] == 0) {
-        MessageBox(NULL, "Pipe has not been initialized yet!", "Error", 0);
+        message_box(NULL, "Pipe has not been initialized yet!", "Error", 0);
         return -1;
     }
 
@@ -196,7 +196,7 @@ int pipe(const char *fmt, ...)
 int32_t pipe2(void *out, uint32_t outlen, const char *fmt, ...)
 {
     if(g_pipe_name[0] == 0) {
-        MessageBox(NULL, "Pipe has not been initialized yet!", "Error", 0);
+        message_box(NULL, "Pipe has not been initialized yet!", "Error", 0);
         return -1;
     }
 

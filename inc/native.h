@@ -104,4 +104,7 @@ uint32_t get_current_process_id();
 HANDLE get_current_thread();
 uint32_t get_current_thread_id();
 
+uint32_t get_window_thread_process_id(HWND hwnd, uint32_t *pid);
+int message_box(HWND hwnd, const char *body, const char *title, int flags);
+
 #endif

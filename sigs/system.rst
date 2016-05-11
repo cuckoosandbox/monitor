@@ -501,15 +501,15 @@ Parameters::
 
 Pre::
 
-    unsigned long pid = 0, tid;
+    uint32_t pid = 0, tid;
 
     // TODO Will this still happen before the notify message is executed?
-    tid = GetWindowThreadProcessId(hWnd, &pid);
+    tid = get_window_thread_process_id(hWnd, &pid);
     pipe("PROCESS2:%d,%d,%d", pid, tid, HOOK_MODE_ALL);
 
 Logging::
 
-    l process_identifier (uintptr_t) pid
+    i process_identifier pid
 
 
 SendNotifyMessageW
@@ -529,15 +529,15 @@ Parameters::
 
 Pre::
 
-    unsigned long pid = 0, tid;
+    uint32_t pid = 0, tid;
 
     // TODO Will this still happen before the notify message is executed?
-    tid = GetWindowThreadProcessId(hWnd, &pid);
+    tid = get_window_thread_process_id(hWnd, &pid);
     pipe("PROCESS2:%d,%d,%d", pid, tid, HOOK_MODE_ALL);
 
 Logging::
 
-    l process_identifier (uintptr_t) pid
+    i process_identifier pid
 
 
 RtlCompressBuffer

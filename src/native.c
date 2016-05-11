@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define assert(expression, message, return_value) \
     if((expression) == 0) { \
-        MessageBox(NULL, message, "Error", 0); \
+        message_box(NULL, message, "Error", 0); \
         return return_value; \
     }
 
@@ -105,6 +105,12 @@ static DWORD (WINAPI *pGetTickCount)();
 static NTSTATUS (WINAPI *pLdrRegisterDllNotification)(ULONG Flags,
     LDR_DLL_NOTIFICATION_FUNCTION LdrDllNotificationFunction,
     VOID *Context, VOID **Cookie);
+
+static DWORD (WINAPI *pGetWindowThreadProcessId)(
+    HWND hWnd, DWORD *lpdwProcessId);
+
+static int (WINAPI *pMessageBoxA)(
+    HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType);
 
 static const char *g_funcnames[] = {
     "NtQueryVirtualMemory",
@@ -573,4 +579,34 @@ uint32_t get_current_thread_id()
 {
     assert(g_current_thread != NULL, "Current thread handle is NULL!", 0);
     return tid_from_thread_handle(g_current_thread);
+}
+
+uint32_t get_window_thread_process_id(HWND hwnd, uint32_t *pid)
+{
+    if(pGetWindowThreadProcessId == NULL) {
+        *(FARPROC *) &pGetWindowThreadProcessId = GetProcAddress(
+            LoadLibrary("user32"), "GetWindowThreadProcessId");
+    }
+
+    uint32_t tid = 0; DWORD _pid = 0;
+    if(pGetWindowThreadProcessId != NULL) {
+        tid = pGetWindowThreadProcessId(hwnd, &_pid);
+        *pid = _pid;
+    }
+
+    return tid;
+}
+
+int message_box(HWND hwnd, const char *body, const char *title, int flags)
+{
+    if(pMessageBoxA == NULL) {
+        *(FARPROC *) &pMessageBoxA = GetProcAddress(
+            LoadLibrary("user32"), "MessageBoxA");
+    }
+
+    if(pMessageBoxA != NULL) {
+        return pMessageBoxA(hwnd, body, title, flags);
+    }
+
+    return 0;
 }

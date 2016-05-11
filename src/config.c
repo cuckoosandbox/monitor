@@ -62,7 +62,7 @@ static uint32_t _parse_mode(const char *mode)
 
         // Report.. find a more proper way? At this point the pipe has not
         // yet been initialized, so.
-        MessageBox(NULL, "Invalid Monitor Mode", mode, 0);
+        message_box(NULL, "Invalid Monitor Mode", mode, 0);
     }
     return ret;
 }
@@ -76,7 +76,7 @@ void config_read(config_t *cfg)
 
     FILE *fp = fopen(config_fname, "rb");
     if(fp == NULL) {
-        MessageBox(NULL, "Error fetching configuration file! This is a "
+        message_box(NULL, "Error fetching configuration file! This is a "
             "serious error. If encountered, please notify the Cuckoo "
             "Developers as this error prevents analysis.", "Cuckoo Error", 0);
         return;
