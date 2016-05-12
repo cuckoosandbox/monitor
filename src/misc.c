@@ -315,6 +315,35 @@ const wchar_t *get_module_file_name(HMODULE module_handle)
     return NULL;
 }
 
+void loaded_modules_enumerate(bson *b)
+{
+    LDR_MODULE *mod, *first_mod; char index[8], buf[32]; PEB *peb = get_peb();
+
+    first_mod = mod =
+        (LDR_MODULE *) peb->LoaderData->InLoadOrderModuleList.Flink;
+
+    for (uint32_t idx = 0; idx < 0x1000 && mod->BaseAddress != NULL; idx++) {
+        our_snprintf(index, sizeof(index), "%d", idx);
+        bson_append_start_object(b, index);
+
+        log_wstring(b, "filepath", mod->FullDllName.Buffer,
+            mod->FullDllName.Length / sizeof(wchar_t));
+
+        log_wstring(b, "basename", mod->BaseDllName.Buffer,
+            mod->BaseDllName.Length / sizeof(wchar_t));
+
+        our_snprintf(buf, sizeof(buf), "%p", mod->BaseAddress);
+        log_string(b, "baseaddress", buf, strlen(buf));
+
+        bson_append_finish_object(b);
+
+        mod = (LDR_MODULE *) mod->InLoadOrderModuleList.Flink;
+        if(mod == first_mod) {
+            break;
+        }
+    }
+}
+
 void destroy_pe_header(HANDLE module_handle)
 {
     DWORD old_protect;

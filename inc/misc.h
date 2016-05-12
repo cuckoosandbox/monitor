@@ -56,6 +56,7 @@ void wcsncpyA(wchar_t *dst, const char *src, uint32_t length);
 
 void hide_module_from_peb(HMODULE module_handle);
 const wchar_t *get_module_file_name(HMODULE module_handle);
+void loaded_modules_enumerate(bson *b);
 void destroy_pe_header(HANDLE module_handle);
 
 wchar_t *extract_unicode_string_unistr(const UNICODE_STRING *unistr);

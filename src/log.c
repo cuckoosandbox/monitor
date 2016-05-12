@@ -635,11 +635,19 @@ void log_new_process(int track)
     int is_64bit = 0;
 #endif
 
+    bson modules;
+    bson_init_size(&modules, mem_suggested_size(4096));
+    bson_append_start_array(&modules, "modules");
+    loaded_modules_enumerate(&modules);
+    bson_append_finish_array(&modules);
+    bson_finish(&modules);
+
     log_api(sig_index_process(), 1, 0, 0, NULL, st.dwLowDateTime,
         st.dwHighDateTime, get_current_process_id(),
         parent_process_identifier(), module_path, command_line,
-        is_64bit, track);
+        is_64bit, track, &modules);
 
+    bson_destroy(&modules);
     free_unicode_buffer(module_path);
 }
 
