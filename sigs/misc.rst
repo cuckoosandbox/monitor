@@ -110,7 +110,7 @@ Ensure::
 
 Logging::
 
-    S user_name copy_uint32(lpnSize)-1, lpBuffer
+    S username copy_uint32(lpnSize)-1, lpBuffer
 
 
 GetUserNameW
@@ -133,7 +133,7 @@ Ensure::
 
 Logging::
 
-    U user_name *lpnSize-1, lpBuffer
+    U username copy_uint32(lpnSize)-1, lpBuffer
 
 
 GetUserNameExA
@@ -157,7 +157,7 @@ Ensure::
 
 Logging::
 
-    S name copy_uint32(lpnSize), lpNameBuffer
+    S username copy_uint32(lpnSize)-1, lpNameBuffer
 
 
 GetUserNameExW
@@ -181,7 +181,7 @@ Ensure::
 
 Logging::
 
-    U name copy_uint32(lpnSize), lpNameBuffer
+    U username copy_uint32(lpnSize)-1, lpNameBuffer
 
 
 EnumWindows
