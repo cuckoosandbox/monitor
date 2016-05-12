@@ -1531,6 +1531,9 @@ HRESULT variant_clear(VARIANTARG *arg)
 static NTSTATUS g_exception_whitelist[] = {
     DBG_PRINTEXCEPTION_C,
     RPC_E_DISCONNECTED,
+    0xe06d7363, // MSVC C++ Exception (0xe0000000 | "msc")
+    0xe0000001, // STATUS_INSUFFICIENT_MEM
+    0xe0000002, // STATUS_FILE_BAD_FORMAT
 };
 
 int is_exception_code_whitelisted(NTSTATUS exception_code)
