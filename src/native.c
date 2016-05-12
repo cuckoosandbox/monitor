@@ -177,7 +177,7 @@ static void _native_copy_function(uint8_t *dst, const uint8_t *src)
         memcpy(dst, src, len);
 
 #if !__x86_64__
-        if(*dst == 0xe8) {
+        if(*dst == 0xe8 || *dst == 0xe9) {
             *(uint32_t *)(dst + 1) += src - dst;
         }
 #endif
