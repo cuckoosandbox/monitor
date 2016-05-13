@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "config.h"
 #include "hooking.h"
+#include "native.h"
 #include "ntapi.h"
 
 static uint32_t _parse_mode(const char *mode)

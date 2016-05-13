@@ -54,7 +54,7 @@ Pre::
     uint32_t pid = pid_from_process_handle(hProcess);
     pipe("PROCESS:%d", pid);
 
-Middle::
+Logging::
 
     i process_identifier pid
 
