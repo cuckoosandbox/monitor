@@ -51,7 +51,12 @@ Parameters::
 
 Pre::
 
-    pipe("PROCESS:%d", pid_from_process_handle(hProcess));
+    uint32_t pid = pid_from_process_handle(hProcess);
+    pipe("PROCESS:%d", pid);
+
+Middle::
+
+    i process_identifier pid
 
 Post::
 

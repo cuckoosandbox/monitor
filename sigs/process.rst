@@ -212,6 +212,7 @@ Ensure::
 
 Logging::
 
+    i process_identifier pid_from_process_handle(hProcess)
     !B buffer lpNumberOfBytesWritten, lpBuffer
 
 
@@ -267,7 +268,7 @@ Parameters::
 
 Logging::
 
-    u process_name copy_ptr(&lppe->szExeFile)
+    u process_name lppe->szExeFile
     i process_identifier copy_uint32(&lppe->th32ProcessID)
 
 
@@ -286,7 +287,7 @@ Parameters::
 
 Logging::
 
-    u process_name copy_ptr(&lppe->szExeFile)
+    u process_name lppe->szExeFile
     i process_identifier copy_uint32(&lppe->th32ProcessID)
 
 
