@@ -317,6 +317,8 @@ class SignatureProcessor(object):
                     raise Exception('Error parsing node of api %r: %s' %
                                     (apiname, e.message))
 
+            row['library'] = row['signature']['library'].replace('.', '_')
+
             # By default hooks are not "special". Special hooks are those
             # hooks that are executed also when already inside another hook.
             # Note that it doesn't really matter what value is specified for

@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "unhook.h"
 
 {% macro log_api(hook, ret='') -%}
-    log_api(SIG_{{ hook.signature.library}}_{{ hook.apiname }},
+    log_api(SIG_{{ hook.library }}_{{ hook.apiname }},
         {{ ret or hook.signature.is_success }},
         {%- if hook.signature.return_value != 'void' %}
         {% if ret %}{{ ret }}{% else %}(uintptr_t) ret{% endif %},
@@ -66,9 +66,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% macro call_old(hook, replace_args=True, lasterr=True) -%}
     set_last_error(&lasterror);
     {%- if hook.signature.return_value != 'void' %}
-    {{ hook.signature.return_value }} ret = Old_{{ hook.signature.library }}_{{ hook.apiname }}(
+    {{ hook.signature.return_value }} ret = Old_{{ hook.library }}_{{ hook.apiname }}(
     {%- else %}
-    Old_{{ hook.signature.library }}_{{ hook.apiname }}(
+    Old_{{ hook.library }}_{{ hook.apiname }}(
     {%- endif %}
     {%- for param in hook.parameters: %}
         {% if replace_args and param.argname in hook.replace -%}
@@ -87,7 +87,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {%- for hook in sigs if hook.is_hook and not hook.ignore: %}
 
 
-static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }} *Old_{{ hook.signature.library }}_{{ hook.apiname }})(
+static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }} *Old_{{ hook.library }}_{{ hook.apiname }})(
 {%- for param in hook.parameters: %}
     {{ param.argtype }}
     {%- if not param.argtype.endswith('*') %} {% endif -%}
@@ -99,7 +99,7 @@ static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }
 {% endfor %}
 {%- for hook in sigs if hook.is_hook and not hook.ignore: %}
 
-{{ hook.signature.return_value }} {{ hook.signature.calling_convention }} New_{{ hook.signature.library }}_{{ hook.apiname }}(
+{{ hook.signature.return_value }} {{ hook.signature.calling_convention }} New_{{ hook.library }}_{{ hook.apiname }}(
 {%- for param in hook.parameters: %}
     {{ param.argtype }}
     {%- if not param.argtype.endswith('*') %} {% endif -%}
@@ -276,14 +276,14 @@ static hook_t g_hooks[] = {
     {
         "{{ hook.signature.library }}",
         "{{ hook.apiname }}",
-        (FARPROC) New_{{ hook.signature.library }}_{{ hook.apiname }},
-        (FARPROC *) &Old_{{ hook.signature.library }}_{{ hook.apiname }},
+        (FARPROC) New_{{ hook.library }}_{{ hook.apiname }},
+        (FARPROC *) &Old_{{ hook.library }}_{{ hook.apiname }},
         .special = {{ hook.signature.special.__int__() }},
         .report = {% if 'resolve' in hook.signature.prune %}HOOK_PRUNE_RESOLVERR{% else %}0{% endif %},
         .mode = {% if 'mode' in hook.signature %}{{ hook.signature.mode }}{% else %}HOOK_MODE_ALL{% endif %},
         {% if 'init' in hook.signature.callback %}.initcb = &hook_initcb_{{ hook.apiname }},{% endif %}
         {% if 'addr' in hook.signature.callback %}.addrcb = &hook_addrcb_{{ hook.apiname }},{% endif %}
-        {% if 'module' in hook.signature.callback %}.addrcb = &hook_modulecb_{{ hook.signature.library }},{% endif %}
+        {% if 'module' in hook.signature.callback %}.addrcb = &hook_modulecb_{{ hook.library }},{% endif %}
     },
     {%- endif %}
 {%- endfor %}
@@ -292,7 +292,7 @@ static hook_t g_hooks[] = {
 
 static const flag_t g_api_flags[MONITOR_HOOKCNT][8] = {
 {%- for hook in sigs if not hook.ignore: %}
-    [SIG_{{ hook.signature.library }}_{{ hook.apiname }}] = {
+    [SIG_{{ hook.library }}_{{ hook.apiname }}] = {
         {%- for flag in hook.flags: %}
         FLAG_{{ flag.flagname }},
         {%- endfor %}
@@ -303,7 +303,7 @@ static const flag_t g_api_flags[MONITOR_HOOKCNT][8] = {
 
 static const char *g_api_flagnames[MONITOR_HOOKCNT][8] = {
 {%- for hook in sigs if not hook.ignore: %}
-    [SIG_{{ hook.signature.library }}_{{ hook.apiname }}] = {
+    [SIG_{{ hook.library }}_{{ hook.apiname }}] = {
         {%- for flag in hook.flags: %}
         "{{ flag.name }}",
         {%- endfor %}
