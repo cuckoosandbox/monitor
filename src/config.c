@@ -55,6 +55,12 @@ static uint32_t _parse_mode(const char *mode)
             continue;
         }
 
+        if(strnicmp(mode, "pdf", 3) == 0) {
+            ret |= HOOK_MODE_PDF | HOOK_MODE_EXPLOIT;
+            mode += 3;
+            continue;
+        }
+
         if(strnicmp(mode, "exploit", 7) == 0) {
             ret |= HOOK_MODE_EXPLOIT;
             mode += 7;

@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define HOOK_MODE_IEXPLORE 2
 #define HOOK_MODE_EXPLOIT  4
 #define HOOK_MODE_OFFICE   8
+#define HOOK_MODE_PDF      16
 
 typedef struct _hook_t {
     // Library and function name.
@@ -137,6 +138,10 @@ uint8_t *hook_addrcb_IWbemServices_ExecQueryAsync(hook_t *h,
     uint8_t *module_address, uint32_t module_size);
 
 uint8_t *hook_modulecb_vbe6(
+    hook_t *h, uint8_t *module_address, uint32_t module_size
+);
+
+uint8_t *hook_modulecb_escript_api(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );
 
