@@ -132,6 +132,7 @@ wchar_t *our_memmemW(
     const wchar_t *needle, uint32_t *idx);
 
 uint32_t sys_string_length(const BSTR bstr);
+BSTR sys_alloc_string_len(const OLECHAR *sz, UINT ui);
 
 HRESULT variant_change_type(
     VARIANTARG *dst, const VARIANTARG *src, USHORT flags, VARTYPE vt);
@@ -165,6 +166,8 @@ int vbe6_invoke_extract_args(uint8_t *addr, bson *b);
 
 void vbe6_set_funcname(const wchar_t *funcname);
 wchar_t *vbe6_get_funcname();
+
+void hexdump(char *out, void *ptr, uint32_t length);
 
 extern uint32_t g_extra_virtual_memory;
 

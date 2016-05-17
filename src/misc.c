@@ -1492,6 +1492,24 @@ uint32_t sys_string_length(const BSTR bstr)
     return 0;
 }
 
+BSTR sys_alloc_string_len(const OLECHAR *sz, UINT ui)
+{
+    static FARPROC pSysAllocStringLen;
+
+    if(pSysAllocStringLen == NULL) {
+        HMODULE module_handle = GetModuleHandle("oleaut32");
+        if(module_handle != NULL) {
+            pSysAllocStringLen =
+                GetProcAddress(module_handle, "SysAllocStringLen");
+        }
+        if(pSysAllocStringLen == NULL) {
+            return NULL;
+        }
+    }
+
+    return (BSTR) pSysAllocStringLen(sz, ui);
+}
+
 HRESULT variant_change_type(
     VARIANTARG *dst, const VARIANTARG *src, USHORT flags, VARTYPE vt)
 {
@@ -1659,4 +1677,13 @@ int variant_to_bson(bson *b, const char *name, const VARIANT *v)
     }
 
     return 0;
+}
+
+void hexdump(char *out, void *ptr, uint32_t length)
+{
+    uint8_t *p = (uint8_t *) ptr;
+    while (length-- != 0) {
+        out += our_snprintf(out, 10, "%x", *p++);
+    }
+    *out = 0;
 }

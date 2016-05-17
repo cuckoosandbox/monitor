@@ -167,10 +167,11 @@ void log_wstring(bson *b, const char *idx, const wchar_t *str, int length)
 static void log_argv(bson *b, const char *idx, int argc, const char **argv)
 {
     bson_append_start_array(b, idx);
-    char index[5]; char *value;
+    char index[5];
 
     for (int i = 0; i < argc; i++) {
-        if(copy_bytes(&value, &argv[i], sizeof(char *)) == 0) {
+        char *value = copy_ptr(&argv[i]);
+        if(value != NULL) {
             ultostr(i, index, 10);
             log_string(b, index, value, copy_strlen(value));
         }
@@ -182,10 +183,11 @@ static void log_wargv(bson *b, const char *idx,
     int argc, const wchar_t **argv)
 {
     bson_append_start_array(b, idx);
-    char index[5]; wchar_t *value;
+    char index[5];
 
     for (int i = 0; i < argc; i++) {
-        if(copy_bytes(&value, &argv[i], sizeof(wchar_t *)) == 0) {
+        wchar_t *value = copy_ptr(&argv[i]);
+        if(value != NULL) {
             ultostr(i, index, 10);
             log_wstring(b, index, value, copy_strlenW(value));
         }
@@ -440,8 +442,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             }
         }
         else if(*fmt == 'B') {
-            uintptr_t len = 0;
-            copy_bytes(&len, va_arg(args, uintptr_t *), sizeof(uintptr_t));
+            uintptr_t len = copy_uintptr(va_arg(args, uintptr_t *));
             const uint8_t *s = va_arg(args, const uint8_t *);
             if(override == 0 || len < BUFFER_LOG_MAX) {
                 log_buffer(&b, idx, s, len);
@@ -456,18 +457,16 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             log_int32(&b, idx, value);
         }
         else if(*fmt == 'I') {
-            int value = 0;
-            copy_bytes(&value, va_arg(args, int *), sizeof(value));
-            log_int32(&b, idx, value);
+            uint32_t *value = va_arg(args, int *);
+            log_int32(&b, idx, value != NULL ? copy_uint32(value) : 0);
         }
         else if(*fmt == 'l' || *fmt == 'p') {
             uintptr_t value = va_arg(args, uintptr_t);
             log_intptr(&b, idx, value);
         }
         else if(*fmt == 'L' || *fmt == 'P') {
-            uintptr_t value = 0;
-            copy_bytes(&value, va_arg(args, uintptr_t *), sizeof(uintptr_t));
-            log_intptr(&b, idx, value);
+            uintptr_t *value = va_arg(args, uintptr_t *);
+            log_intptr(&b, idx, value != NULL ? copy_uintptr(value) : 0);
         }
         else if(*fmt == 'o') {
             ANSI_STRING *str = va_arg(args, ANSI_STRING *), str_;
