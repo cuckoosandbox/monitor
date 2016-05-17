@@ -171,6 +171,7 @@ extern uint32_t g_extra_virtual_memory;
 void set_processor_count(uint32_t processor_count);
 void add_virtual_memory(uint64_t length);
 
+void copy_init();
 int copy_bytes(void *to, const void *from, uint32_t length);
 int copy_unicodez(wchar_t *to, const wchar_t *from);
 int copy_wcsncpyA(wchar_t *to, const char *from, uint32_t length);
@@ -180,6 +181,7 @@ char *copy_utf8_string(const char *str, uint32_t length);
 char *copy_utf8_wstring(const wchar_t *str, uint32_t length);
 uint32_t copy_uint32(const void *value);
 uint64_t copy_uint64(const void *value);
+uintptr_t copy_uintptr(const void *value);
 void *copy_ptr(const void *ptr);
 void copy_return();
 

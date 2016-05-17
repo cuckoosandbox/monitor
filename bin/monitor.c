@@ -59,6 +59,7 @@ void monitor_init(HMODULE module_handle)
     misc_set_hook_library(&monitor_hook, &monitor_unhook);
     diffing_init(cfg.hashes_path, cfg.diffing_enable);
 
+    copy_init();
     log_init(cfg.logpipe, cfg.track);
     ignore_init();
 
