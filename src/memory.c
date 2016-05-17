@@ -62,11 +62,23 @@ void *mem_alloc(uint32_t length)
         return NULL;
     }
 
-    void *ptr = virtual_alloc(NULL, length + sizeof(uintptr_t),
+    uint32_t real_length = length + sizeof(uintptr_t);
+
+#if DEBUG_HEAPCORRUPTION
+    real_length = (real_length + 0x1fff) / 0x1000 * 0x1000;
+#endif
+
+    void *ptr = virtual_alloc(NULL, real_length,
         MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
     if(ptr == NULL) {
         return NULL;
     }
+
+#if DEBUG_HEAPCORRUPTION
+    // gflags.exe-like heap corruption functionality.
+    virtual_protect(ptr + real_length - 0x1000, 0x1000, PAGE_READONLY);
+    ptr += real_length - 0x1000 - length - sizeof(uintptr_t);
+#endif
 
     memset(ptr, 0, length + sizeof(uintptr_t));
 
