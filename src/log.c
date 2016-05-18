@@ -442,7 +442,8 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             }
         }
         else if(*fmt == 'B') {
-            uintptr_t len = copy_uintptr(va_arg(args, uintptr_t *));
+            uintptr_t *ptr = va_arg(args, uintptr_t *);
+            uintptr_t len = ptr != NULL ? copy_uintptr(ptr) : 0;
             const uint8_t *s = va_arg(args, const uint8_t *);
             if(override == 0 || len < BUFFER_LOG_MAX) {
                 log_buffer(&b, idx, s, len);
