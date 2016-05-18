@@ -10,8 +10,13 @@ Signature::
     * Return value: void *
     * Special: true
 
+
 pdf_eval
 ========
+
+Signature::
+
+    * Prelog: instant
 
 Parameters::
 
@@ -24,6 +29,7 @@ Parameters::
 Logging::
 
     u script copy_ptr(copy_ptr(args))
+
 
 pdf_unescape
 ============
