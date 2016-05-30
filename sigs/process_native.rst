@@ -14,7 +14,7 @@ Parameters::
     ** PHANDLE ProcessHandle process_handle
     ** ACCESS_MASK DesiredAccess desired_access
     *  POBJECT_ATTRIBUTES ObjectAttributes
-    *  HANDLE ParentProcess
+    ** HANDLE ParentProcess parent_process_handle
     ** BOOLEAN InheritObjectTable inherit_handles
     *  HANDLE SectionHandle
     *  HANDLE DebugPort
@@ -66,7 +66,7 @@ Parameters::
     ** PHANDLE ProcessHandle process_handle
     ** ACCESS_MASK DesiredAccess desired_access
     *  POBJECT_ATTRIBUTES ObjectAttributes
-    *  HANDLE ParentProcess
+    ** HANDLE ParentProcess parent_process_handle
     ** ULONG Flags flags
     *  HANDLE SectionHandle
     *  HANDLE DebugPort
@@ -197,7 +197,7 @@ Parameters::
     *  PRTL_USER_PROCESS_PARAMETERS ProcessParameters
     *  PSECURITY_DESCRIPTOR ProcessSecurityDescriptor
     *  PSECURITY_DESCRIPTOR ThreadSecurityDescriptor
-    *  HANDLE ParentProcess
+    ** HANDLE ParentProcess parent_process_handle
     ** BOOLEAN InheritHandles inherit_handles
     *  HANDLE DebugPort
     *  HANDLE ExceptionPort
