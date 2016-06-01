@@ -63,16 +63,12 @@ $(HOOKSRC): $(SIGS) $(FLAGS) $(JINJA2) $(HOOKREQ)
 
 $(FLAGSRC): $(HOOKSRC)
 
-src/capstone/config.mk:
-	git submodule update --init
-	cp data/capstone-config.mk src/capstone/config.mk
-
-$(LIBCAPSTONE32): src/capstone/config.mk
+$(LIBCAPSTONE32):
 	cd src/capstone/ && \
 	CAPSTONE_ARCHS="x86" BUILDDIR=../../objects/x86/capstone/ ./make.sh cross-win32 && \
 	cp ../../objects/x86/capstone/capstone.lib capstone-x86.lib
 
-$(LIBCAPSTONE64): src/capstone/config.mk
+$(LIBCAPSTONE64):
 	cd src/capstone/ && \
 	CAPSTONE_ARCHS="x86" BUILDDIR=../../objects/x64/capstone/ ./make.sh cross-win64 && \
 	cp ../../objects/x64/capstone/capstone.lib capstone-x64.lib
