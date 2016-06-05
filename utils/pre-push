@@ -1,0 +1,13 @@
+#!/bin/sh
+# This file should be copied to .git/hooks/ and the executable bit should be
+# set (i.e., chmod +x .git/hooks/pre-push). This file simply checks if the
+# code that is about to be pushed properly compiles.
+set -e
+
+dirpath=$(mktemp -d)
+mkdir $dirpath/.git
+
+GIT_WORK_TREE=$dirpath git checkout master
+make -C $dirpath
+
+rm -rf $dirpath
