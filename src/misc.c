@@ -333,7 +333,7 @@ void loaded_modules_enumerate(bson *b)
             mod->BaseDllName.Length / sizeof(wchar_t));
 
         our_snprintf(buf, sizeof(buf), "%p", mod->BaseAddress);
-        log_string(b, "baseaddress", buf, strlen(buf));
+        log_string(b, "baseaddr", buf, strlen(buf));
 
         bson_append_finish_object(b);
 
