@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define INJECT_CRT  1
 #define INJECT_APC  2
 #define INJECT_FREE 3
+#define INJECT_PART 4
 
 #define MAX_PATH_W 0x7fff
 #define NOINLINE __attribute__((noinline))
@@ -627,11 +628,13 @@ int main()
         }
 
         if(wcscmp(argv[idx], L"--only-start") == 0) {
+            inj_mode = INJECT_PART;
             only_start = 1;
             continue;
         }
 
         if(wcscmp(argv[idx], L"--resume-thread") == 0) {
+            inj_mode = INJECT_PART;
             resume_thread_ = 1;
             continue;
         }
@@ -702,7 +705,7 @@ int main()
         }
     }
 
-    if(inj_mode != INJECT_FREE) {
+    if(inj_mode != INJECT_PART && inj_mode != INJECT_FREE) {
         if(PathFileExistsW(dll_path) == FALSE) {
             error("[-] Invalid DLL filepath has been provided\n");
         }
