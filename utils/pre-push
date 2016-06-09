@@ -7,7 +7,7 @@ set -e
 dirpath=$(mktemp -d)
 mkdir $dirpath/.git
 
-GIT_WORK_TREE=$dirpath git checkout master
+GIT_WORK_TREE=$dirpath git checkout -f master
 make -C $dirpath
 
 rm -rf $dirpath
