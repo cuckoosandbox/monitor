@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
+#include <wchar.h>
 #include <inttypes.h>
 #include <windows.h>
 #include <tlhelp32.h>
@@ -446,7 +447,8 @@ uint32_t pid_from_process_name(const wchar_t *process_name)
     return 0;
 }
 
-int dump(uint32_t pid, const wchar_t *filepath)
+int dump(uint32_t pid, const wchar_t *filepath,
+    uintptr_t addr, uint32_t length)
 {
     SYSTEM_INFO si; MEMORY_BASIC_INFORMATION mbi; DWORD written_bytes;
     HANDLE process_handle, file_handle; DWORD_PTR read_bytes;
@@ -481,6 +483,13 @@ int dump(uint32_t pid, const wchar_t *filepath)
         d.state = mbi.State;
         d.type = mbi.Type;
         d.protect = mbi.Protect;
+
+        // If --dump-block is specified, restrict to a particular block.
+        if(addr != 0 && length != 0 && (
+                d.addr < addr || d.addr > addr + length)) {
+            ptr += 0x1000;
+            continue;
+        }
 
         WriteFile(file_handle, &d, sizeof(d), &written_bytes, NULL);
 
@@ -537,6 +546,8 @@ int main()
             "Attach debugger to target process\n"
             "  --dump <filepath>      "
             "Dump process memory with --pid to filepath\n"
+            "  --dump-block <addr> <length> "
+            "Restrict process memory dump to a particular block\n"
             "  --verbose              Verbose switch\n",
             argv[0]
         );
@@ -547,6 +558,7 @@ int main()
     const wchar_t *curdir = NULL, *process_name = NULL, *dump_path = NULL;
     uint32_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
     uint32_t show_window = SW_SHOWNORMAL, only_start = 0, resume_thread_ = 0;
+    uintptr_t dump_addr = 0, dump_length = 0;
 
     for (int idx = 1; idx < argc; idx++) {
         if(wcscmp(argv[idx], L"--crt") == 0) {
@@ -639,6 +651,12 @@ int main()
             continue;
         }
 
+        if(wcscmp(argv[idx], L"--dump-block") == 0) {
+            dump_addr = wcstoull(argv[++idx], NULL, 16);
+            dump_length = wcstoull(argv[++idx], NULL, 10);
+            continue;
+        }
+
         if(wcscmp(argv[idx], L"--verbose") == 0) {
             verbose = 1;
             continue;
@@ -650,7 +668,7 @@ int main()
 
     // Dump memory of a process.
     if(dump_path != NULL && pid != 0) {
-        dump(pid, dump_path);
+        dump(pid, dump_path, dump_addr, dump_length);
         return 0;
     }
 
