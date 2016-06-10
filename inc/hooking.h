@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <windows.h>
+#include <wbemidl.h>
 #include "monitor.h"
 
 #define RETADDRCNT 64
@@ -136,6 +137,10 @@ uint8_t *hook_addrcb_IWbemServices_ExecQuery(
     hook_t *h, uint8_t *module_address, uint32_t module_size);
 uint8_t *hook_addrcb_IWbemServices_ExecQueryAsync(hook_t *h,
     uint8_t *module_address, uint32_t module_size);
+uint8_t *hook_addrcb_IWbemServices_ExecMethod(hook_t *h,
+    uint8_t *module_address, uint32_t module_size);
+uint8_t *hook_addrcb_IWbemServices_ExecMethodAsync(hook_t *h,
+    uint8_t *module_address, uint32_t module_size);
 
 uint8_t *hook_modulecb_vbe6(
     hook_t *h, uint8_t *module_address, uint32_t module_size
@@ -161,6 +166,9 @@ typedef void VAR;
 
 VAR *iexplore_var_getvalue(VAR *value, void *session);
 
+int wmi_win32_process_create_pre(
+    IWbemServices *services, IWbemClassObject *args, uint32_t *creation_flags
+);
 void ole_enable_hooks(REFCLSID refclsid);
 
 extern uintptr_t g_monitor_start;

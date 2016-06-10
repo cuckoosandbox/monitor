@@ -33,3 +33,70 @@ Parameters::
     ** long lFlags flags
     *  IWbemContext *pCtx
     *  IWbemObjectSink *pResponseHandler
+
+
+IWbemServices_ExecMethod
+========================
+
+Parameters::
+
+    *  IWbemServices *This
+    ** const BSTR strObjectPath class
+    ** const BSTR strMethodName method
+    ** long lFlags flags
+    *  IWbemContext *pCtx
+    *  IWbemClassObject *pInParams
+    *  IWbemClassObject **ppOutParams
+    *  IWbemCallResult **ppCallResult
+
+Pre::
+
+    int adjusted = -1; uint32_t creation_flags = 0;
+
+    // We adjust some parameters for Win32_Process::Create so we can follow
+    // the newly created process cleanly.
+    if(sys_string_cmp(strObjectPath, L"Win32_Process") == 0 &&
+            sys_string_cmp(strMethodName, L"Create") == 0) {
+        adjusted = wmi_win32_process_create_pre(
+            This, pInParams, &creation_flags
+        );
+    }
+
+Post::
+
+    HRESULT hr; VARIANT vt; uint32_t pid = 0, tid = 0;
+
+    if(adjusted == 0 && SUCCEEDED(ret) != FALSE) {
+        vt.vt = VT_EMPTY;
+        hr = (*ppOutParams)->lpVtbl->Get(
+            *ppOutParams, L"ProcessId", 0, &vt, NULL, NULL
+        );
+        if(SUCCEEDED(hr) != FALSE && vt.vt == VT_I4) {
+            pid = vt.uintVal; tid = first_tid_from_pid(pid);
+            pipe("PROCESS2:%d,%d,%d", pid, tid, HOOK_MODE_ALL);
+        }
+
+        if((creation_flags & CREATE_SUSPENDED) == 0 && tid != 0) {
+            resume_thread_identifier(tid);
+        }
+
+        sleep_skip_disable();
+    }
+
+
+IWbemServices_ExecMethodAsync
+=============================
+
+Parameters::
+
+    *  IWbemServices *This
+    ** const BSTR strObjectPath class
+    ** const BSTR strMethodName method
+    ** long lFlags flags
+    *  IWbemContext *pCtx
+    *  IWbemClassObject *pInParams
+    *  IWbemObjectSink *pResponseHandler
+
+Pre::
+
+    // TODO Implement process following functionality.

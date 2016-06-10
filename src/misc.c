@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <winsock2.h>
 #include <windows.h>
 #include <shlwapi.h>
+#include <tlhelp32.h>
 #include "bson/bson.h"
 #include "hooking.h"
 #include "ignore.h"
@@ -1510,6 +1511,15 @@ BSTR sys_alloc_string_len(const OLECHAR *sz, UINT ui)
     return (BSTR) pSysAllocStringLen(sz, ui);
 }
 
+int sys_string_cmp(const BSTR bstr, const wchar_t *value)
+{
+    if((intptr_t) sys_string_length(bstr) != lstrlenW(value)) {
+        return -1;
+    }
+
+    return wcsncmp(bstr, value, sys_string_length(bstr));
+}
+
 HRESULT variant_change_type(
     VARIANTARG *dst, const VARIANTARG *src, USHORT flags, VARTYPE vt)
 {
@@ -1687,4 +1697,44 @@ void hexdump(char *out, void *ptr, uint32_t length)
         out += our_snprintf(out, 10, "%x", *p++);
     }
     *out = 0;
+}
+
+uint32_t first_tid_from_pid(uint32_t process_identifier)
+{
+    HANDLE snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if(snapshot_handle == INVALID_HANDLE_VALUE) {
+        pipe("WARNING:Error getting snapshot handle to enumerate threads.");
+        return 0;
+    }
+
+    THREADENTRY32 te; te.dwSize = sizeof(THREADENTRY32);
+    if(Thread32First(snapshot_handle, &te) == FALSE) {
+        pipe("WARNING:Error enumerating thread identifiers.");
+        return 0;
+    }
+
+    uint32_t thread_identifier = 0;
+
+    do {
+        if(te.th32OwnerProcessID == process_identifier) {
+            thread_identifier = te.th32ThreadID;
+            break;
+        }
+    } while (Thread32Next(snapshot_handle, &te) != FALSE);
+
+    CloseHandle(snapshot_handle);
+    return thread_identifier;
+}
+
+
+int resume_thread_identifier(uint32_t thread_identifier)
+{
+    HANDLE thread_handle =
+        open_thread(THREAD_SUSPEND_RESUME, thread_identifier);
+    if(thread_handle != NULL) {
+        resume_thread(thread_handle);
+        close_handle(thread_handle);
+        return 0;
+    }
+    return -1;
 }

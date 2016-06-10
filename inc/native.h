@@ -107,4 +107,7 @@ uint32_t get_current_thread_id();
 uint32_t get_window_thread_process_id(HWND hwnd, uint32_t *pid);
 int message_box(HWND hwnd, const char *body, const char *title, int flags);
 
+HANDLE open_thread(uint32_t desired_mask, uint32_t thread_identifier);
+uint32_t resume_thread(HANDLE thread_handle);
+
 #endif

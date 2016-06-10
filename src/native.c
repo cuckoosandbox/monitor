@@ -100,6 +100,13 @@ static NTSTATUS (WINAPI *pNtDelayExecution)(BOOLEAN Alertable,
 static NTSTATUS (WINAPI *pNtWaitForSingleObject)(HANDLE Object,
     BOOLEAN Alertable, PLARGE_INTEGER Timeout);
 
+static NTSTATUS (WINAPI *pNtOpenThread)(PHANDLE ThreadHandle,
+    ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes,
+    PCLIENT_ID ClientId);
+
+static NTSTATUS (WINAPI *pNtResumeThread)(
+    HANDLE ThreadHandle, PULONG SuspendCount);
+
 static DWORD (WINAPI *pGetTickCount)();
 
 static NTSTATUS (WINAPI *pLdrRegisterDllNotification)(ULONG Flags,
@@ -129,6 +136,8 @@ static const char *g_funcnames[] = {
     "NtClose",
     "NtDelayExecution",
     "NtWaitForSingleObject",
+    "NtOpenThread",
+    "NtResumeThread",
     NULL,
 };
 
@@ -149,6 +158,8 @@ static void **g_pointers[] = {
     (void **) &pNtClose,
     (void **) &pNtDelayExecution,
     (void **) &pNtWaitForSingleObject,
+    (void **) &pNtOpenThread,
+    (void **) &pNtResumeThread,
 };
 
 // Extract the immediate offset from the first "mov eax, dword [eax+imm]" or
@@ -608,5 +619,38 @@ int message_box(HWND hwnd, const char *body, const char *title, int flags)
         return pMessageBoxA(hwnd, body, title, flags);
     }
 
+    return 0;
+}
+
+HANDLE open_thread(uint32_t desired_access, uint32_t thread_identifier)
+{
+    assert(pNtOpenThread != NULL, "pNtOpenThread is NULL!", NULL);
+
+    HANDLE thread_handle; OBJECT_ATTRIBUTES objattr; CLIENT_ID cid;
+
+    InitializeObjectAttributes(&objattr, NULL, 0, NULL, NULL);
+
+    cid.UniqueProcess = NULL;
+    cid.UniqueThread = (HANDLE)(uintptr_t) thread_identifier;
+
+    NTSTATUS ret = pNtOpenThread(
+        &thread_handle, desired_access, &objattr, &cid
+    );
+
+    if(NT_SUCCESS(ret) != FALSE) {
+        return thread_handle;
+    }
+    return NULL;
+}
+
+uint32_t resume_thread(HANDLE thread_handle)
+{
+    assert(pNtResumeThread != NULL, "pNtResumeThread is NULL!", 0);
+
+    DWORD suspend_count = 0;
+    NTSTATUS ret = pNtResumeThread(thread_handle, &suspend_count);
+    if(NT_SUCCESS(ret) != FALSE) {
+        return suspend_count;
+    }
     return 0;
 }
