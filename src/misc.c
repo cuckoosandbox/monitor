@@ -1726,11 +1726,11 @@ uint32_t first_tid_from_pid(uint32_t process_identifier)
     return thread_identifier;
 }
 
-
 int resume_thread_identifier(uint32_t thread_identifier)
 {
-    HANDLE thread_handle =
-        open_thread(THREAD_SUSPEND_RESUME, thread_identifier);
+    HANDLE thread_handle = open_thread(
+        THREAD_SUSPEND_RESUME, thread_identifier
+    );
     if(thread_handle != NULL) {
         resume_thread(thread_handle);
         close_handle(thread_handle);
