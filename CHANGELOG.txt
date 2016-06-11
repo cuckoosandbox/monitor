@@ -1,3 +1,24 @@
+- New: Process follow logic for Win32_Process::Create functionality.
+- New: Integrate memory block dumping with the inject utility.
+- Tweak: Embed Capstone Engine directly rather than using Git submodules.
+- New: Optional gflags-like heap corruption detection.
+- New: Hooks for Adobe PDF Reader.
+- New: Report information about the environment at process launch.
+- Bugfix: 32-bit Office 2016 support.
+- Tweak: Get rid of user32 imports by locating them on-demand dynamically.
+- New: Correctly handle invalid pointers by not crashing when passed along.
+- New: Add a "track" variable to CreateProcessInternalW indicating if a
+  process was followed.
+- Tweak: Move some generic functionality from "iexplore" mode to "exploit".
+- Tweak: Switch from finding magic code sequences for locating certain
+  internal functions of DLLs to simply hardcoding offsets
+- New: Add Office 2007 VBA macro related hooks.
+- New: Pass along the process identifier when issuing commands through pipe().
+- Bugfix: Sign extension bug in utf8 encoding (thanks knifeyspoony).
+- Tweak: Dump process memory when ResumeThread is called.
+- Tweak: Ignore all Windows library related exceptions.
+- New: More 64-bit IE8 hooks.
+- Tweak: Don't use dropped buffers for buffers under 4k.
 - New: Proper process memory dump support from inject.exe
 - New: Function hooks for intercepting WMI queries.
 - New: Also dump raw filepaths/regkeys in related functions.
