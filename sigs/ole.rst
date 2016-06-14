@@ -119,3 +119,28 @@ Parameters::
 Post::
 
     ole_enable_hooks(rclsid);
+
+
+OleConvertOLESTREAMToIStorage
+=============================
+
+Parameters::
+
+    *  LPOLESTREAM lpolestream
+    *  IStorage *pstg
+    *  const DVTARGETDEVICE *ptd
+
+Middle::
+
+    void *buf = NULL; uintptr_t len = 0;
+
+    #if !__x86_64__
+    if(lpolestream != NULL) {
+        buf = copy_ptr(copy_ptr((uint8_t *) lpolestream + 8));
+        len = copy_uint32((uint8_t *) lpolestream + 12);
+    }
+    #endif
+
+Logging::
+
+    !b ole2 len, buf
