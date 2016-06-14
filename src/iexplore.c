@@ -127,11 +127,13 @@ static mod2funcoff_t _mshtml[] = {
 
 static funcoff_t _PRF[] = {
     {0x4a5bdfd4, 0x4bc0, 0},
+    {0x4a5bda79, 0x81d5, 0},
     {0, 0, 0},
 };
 
 static funcoff_t _Ssl3GenerateKeyMaterial[] = {
     {0x4a5bdfd4, 0xe100, 0},
+    {0x4a5bda79, 0x255be, 0},
     {0, 0, 0},
 };
 
