@@ -41,8 +41,8 @@ IWbemServices_ExecMethod
 Parameters::
 
     *  IWbemServices *This
-    ** const BSTR strObjectPath class
-    ** const BSTR strMethodName method
+    ** const wchar_t *strObjectPath class
+    ** const wchar_t *strMethodName method
     ** long lFlags flags
     *  IWbemContext *pCtx
     *  IWbemClassObject *pInParams
@@ -55,8 +55,8 @@ Pre::
 
     // We adjust some parameters for Win32_Process::Create so we can follow
     // the newly created process cleanly.
-    if(sys_string_cmp(strObjectPath, L"Win32_Process") == 0 &&
-            sys_string_cmp(strMethodName, L"Create") == 0) {
+    if(wcscmp(strObjectPath, L"Win32_Process") == 0 &&
+            wcscmp(strMethodName, L"Create") == 0) {
         adjusted = wmi_win32_process_create_pre(
             This, pInParams, &creation_flags
         );

@@ -140,6 +140,7 @@ HRESULT variant_change_type(
 HRESULT variant_clear(VARIANTARG *arg);
 
 int is_exception_code_whitelisted(NTSTATUS exception_code);
+int is_exception_address_whitelisted(uintptr_t addr);
 
 typedef struct _funcoff_t {
     uint32_t timestamp;
