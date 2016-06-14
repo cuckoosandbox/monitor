@@ -138,8 +138,15 @@ Pre::
         copy_return();
     }
 
+    // Is this exception address whitelisted? This is the case for the
+    // IsBadReadPtr function where access violations are expected.
+    if(exception_code == STATUS_ACCESS_VIOLATION &&
+            is_exception_address_whitelisted(pc) == 0) {
+        // TODO Should we do something here?
+        // For now we'll just ignore this code path.
+    }
     // Ignore exceptions that are caused by calling OutputDebugString().
-    if(is_exception_code_whitelisted(exception_code) == 0) {
+    else if(is_exception_code_whitelisted(exception_code) == 0) {
         uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
         count = stacktrace(Context, addrs, RETADDRCNT);
         log_exception(Context, ExceptionRecord, addrs, count);

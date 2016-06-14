@@ -48,6 +48,11 @@ static monitor_hook_t g_unhook_library;
 static wchar_t g_aliases[64][2][MAX_PATH];
 static uint32_t g_alias_index;
 
+static uintptr_t g_exception_addrs[32];
+static uint32_t g_exception_addr_count;
+
+void find_exception_addresses(uintptr_t *addresses, uint32_t *count);
+
 uint32_t g_monitor_track = 1;
 uint32_t g_monitor_mode = HOOK_MODE_ALL;
 
@@ -86,6 +91,8 @@ int misc_init(const char *shutdown_mutex)
             ADD_ALIAS(target_path, device_name);
         }
     }
+
+    find_exception_addresses(g_exception_addrs, &g_exception_addr_count);
     return 0;
 }
 
@@ -1584,6 +1591,47 @@ int is_exception_code_whitelisted(NTSTATUS exception_code)
     return 0;
 }
 
+static funcoff_t _IsBadReadPtr1[] = {
+    {0x4ce7baf9, 0x3d0ac, 0},
+    {0, 0, 0},
+};
+
+static funcoff_t _IsBadReadPtr2[] = {
+    {0x4ce7baf9, 0x331e2, 0},
+    {0, 0, 0},
+};
+
+static mod2funcoff_t _kernel32[] = {
+    {"IsBadReadPtr1", _IsBadReadPtr1},
+    {"IsBadReadPtr2", _IsBadReadPtr2},
+    {NULL, NULL},
+};
+
+// Manually locates "mov al, byte [eax]" and "mov al, byte [ecx]" instructions
+// in the IsBadReadPtr function that cause false positive when executed as an
+// access violation is raised.
+void find_exception_addresses(uintptr_t *addresses, uint32_t *count)
+{
+    uint8_t *modaddr = (uint8_t *) GetModuleHandle("kernel32");
+    for (mod2funcoff_t *p = _kernel32; p->funcname != NULL; p++) {
+        uint8_t *ret = module_addr_timestamp(modaddr, 0, p->funcoff, NULL);
+        if(ret != NULL) {
+            addresses[*count] = (uintptr_t) ret;
+            *count += 1;
+        }
+    }
+}
+
+int is_exception_address_whitelisted(uintptr_t addr)
+{
+    for (uint32_t idx = 0; idx < g_exception_addr_count; idx++) {
+        if(g_exception_addrs[idx] == addr) {
+            return 0;
+        }
+    }
+    return -1;
+}
+
 uint8_t *module_addr_timestamp(
     uint8_t *module_address, uint32_t module_size, funcoff_t *fo,
     uint32_t *cconv)
@@ -1610,9 +1658,15 @@ uint8_t *module_addr_timestamp(
         }
     }
 
+#if __x86_64__
+    uint32_t bitsize = 64;
+#else
+    uint32_t bitsize = 32;
+#endif
+
     pipe("WARNING:Unable to find the correct offsets for functions "
-        "of: %Z (with timestamp 0x%x)",
-        get_module_file_name((HMODULE) module_address),
+        "of: %d-bit %Z (with timestamp 0x%x)",
+        bitsize, get_module_file_name((HMODULE) module_address),
         image_nt_headers->FileHeader.TimeDateStamp
     );
     return NULL;
