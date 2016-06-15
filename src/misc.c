@@ -1594,12 +1594,14 @@ int is_exception_code_whitelisted(NTSTATUS exception_code)
 }
 
 static funcoff_t _IsBadReadPtr1[] = {
+    {0x4a5bdaad, 0x3df2b, 0},
     {0x4ce7baf9, 0x3d0ac, 0},
     {0x4ce7c78b, 0x4cb73, 0},
     {0, 0, 0},
 };
 
 static funcoff_t _IsBadReadPtr2[] = {
+    {0x4a5bdaad, 0x685e9, 0},
     {0x4ce7baf9, 0x331e2, 0},
     {0x4ce7c78b, 0x4cba1, 0},
     {0, 0, 0},
