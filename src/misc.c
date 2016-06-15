@@ -343,6 +343,8 @@ void loaded_modules_enumerate(bson *b)
         our_snprintf(buf, sizeof(buf), "%p", mod->BaseAddress);
         log_string(b, "baseaddr", buf, strlen(buf));
 
+        log_intptr(b, "imgsize", module_image_size(mod->BaseAddress));
+
         bson_append_finish_object(b);
 
         mod = (LDR_MODULE *) mod->InLoadOrderModuleList.Flink;
