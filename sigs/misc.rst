@@ -87,7 +87,7 @@ Ensure::
 
 Logging::
 
-    U computer_name copy_uint32(lpnSize) / sizeof(wchar_t), lpBuffer
+    U computer_name copy_uint32(lpnSize), lpBuffer
 
 
 GetUserNameA
