@@ -28,7 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define INJECT_CRT  1
 #define INJECT_APC  2
 #define INJECT_FREE 3
-#define INJECT_PART 4
 
 #define MAX_PATH_W 0x7fff
 #define NOINLINE __attribute__((noinline))
@@ -557,7 +556,7 @@ int main()
     const wchar_t *dll_path = NULL, *app_path = NULL, *arguments = L"";
     const wchar_t *config_file = NULL, *from_process = NULL, *dbg_path = NULL;
     const wchar_t *curdir = NULL, *process_name = NULL, *dump_path = NULL;
-    uint32_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE;
+    uint32_t pid = 0, tid = 0, from = 0, inj_mode = INJECT_NONE, partial = 0;
     uint32_t show_window = SW_SHOWNORMAL, only_start = 0, resume_thread_ = 0;
     uintptr_t dump_addr = 0, dump_length = 0;
 
@@ -628,14 +627,12 @@ int main()
         }
 
         if(wcscmp(argv[idx], L"--only-start") == 0) {
-            inj_mode = INJECT_PART;
-            only_start = 1;
+            partial = only_start = 1;
             continue;
         }
 
         if(wcscmp(argv[idx], L"--resume-thread") == 0) {
-            inj_mode = INJECT_PART;
-            resume_thread_ = 1;
+            partial = resume_thread_ = 1;
             continue;
         }
 
@@ -675,7 +672,7 @@ int main()
         return 0;
     }
 
-    if(inj_mode == INJECT_NONE) {
+    if(inj_mode == INJECT_NONE && partial == 0) {
         error("[-] No injection method has been provided!\n");
     }
 
@@ -689,7 +686,7 @@ int main()
         error("[-] No injection target has been provided!\n");
     }
 
-    if(inj_mode == INJECT_FREE && app_path == NULL) {
+    if(inj_mode == INJECT_FREE && app_path == NULL && pid == 0) {
         error("[-] An app path is required when not injecting!\n");
     }
 
@@ -699,13 +696,13 @@ int main()
 
     static wchar_t dllpath[MAX_PATH_W];
 
-    if(inj_mode == INJECT_FREE) {
+    if(inj_mode == INJECT_FREE && partial == 0) {
         if(dll_path != NULL || tid != 0 || pid != 0) {
             error("[-] Unused --tid/--pid/--dll provided in --free mode!\n");
         }
     }
 
-    if(inj_mode != INJECT_PART && inj_mode != INJECT_FREE) {
+    if(inj_mode != INJECT_NONE && inj_mode != INJECT_FREE) {
         if(PathFileExistsW(dll_path) == FALSE) {
             error("[-] Invalid DLL filepath has been provided\n");
         }
@@ -827,7 +824,7 @@ int main()
         resume_thread(tid);
     }
 
-    // Report the process identifier.
-    printf("%d", pid);
+    // Report the process and thread identifiers.
+    printf("%d %d", pid, tid);
     return 0;
 }
