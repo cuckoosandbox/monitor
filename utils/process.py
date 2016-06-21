@@ -647,7 +647,7 @@ class InsnProcess(object):
                 idx, entries = 0, []
                 module = info.get("module", glob.get("module"))
                 category = info.get("category", glob.get("category"))
-                mode = info.get("mode", glob.get("mode"))
+                mode = info.get("mode", glob.get("mode", "all"))
                 for timestamp, entry in info["offsets"].items():
                     arguments = self.parse_arguments(entry)
                     logging = self.parse_logging(entry.get("logging"))
