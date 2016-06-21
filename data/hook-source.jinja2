@@ -84,7 +84,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {%- endif %}
 {%- endmacro %}
 
-{%- for hook in sigs if hook.is_hook and not hook.ignore: %}
+{%- for hook in sigs if hook.is_hook and not hook.ignore and not hook.is_insn: %}
 
 
 static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }} *Old_{{ hook.library }}_{{ hook.apiname }})(
@@ -97,7 +97,7 @@ static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }
 );
 
 {% endfor %}
-{%- for hook in sigs if hook.is_hook and not hook.ignore: %}
+{%- for hook in sigs if hook.is_hook and not hook.ignore and not hook.is_insn: %}
 
 {{ hook.signature.return_value }} {{ hook.signature.calling_convention }} New_{{ hook.library }}_{{ hook.apiname }}(
 {%- for param in hook.parameters: %}
@@ -276,11 +276,12 @@ static hook_t g_hooks[] = {
     {
         "{{ hook.signature.library }}",
         "{{ hook.apiname }}",
-        (FARPROC) New_{{ hook.library }}_{{ hook.apiname }},
-        (FARPROC *) &Old_{{ hook.library }}_{{ hook.apiname }},
+        {% if not hook.is_insn %}(FARPROC) New_{{ hook.library }}_{{ hook.apiname }}{% else %}NULL{% endif %},
+        {% if not hook.is_insn %}(FARPROC *) &Old_{{ hook.library }}_{{ hook.apiname }}{% else %}NULL{% endif %},
         .special = {{ hook.signature.special.__int__() }},
         .report = {% if 'resolve' in hook.signature.prune %}HOOK_PRUNE_RESOLVERR{% else %}0{% endif %},
         .mode = {% if 'mode' in hook.signature %}{{ hook.signature.mode }}{% else %}HOOK_MODE_ALL{% endif %},
+        .insn = {% if hook.is_insn %}1{% else %}0{% endif %},
         {% if 'init' in hook.signature.callback %}.initcb = &hook_initcb_{{ hook.apiname }},{% endif %}
         {% if 'addr' in hook.signature.callback %}.addrcb = &hook_addrcb_{{ hook.apiname }},{% endif %}
         {% if 'module' in hook.signature.callback %}.addrcb = &hook_modulecb_{{ hook.library }},{% endif %}

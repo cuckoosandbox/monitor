@@ -24,8 +24,9 @@ import docutils.utils
 import docutils.parsers.rst
 import jinja2
 import json
-import os.path
+import os
 import sys
+import yaml
 
 
 class DefinitionProcessor(object):
@@ -60,9 +61,10 @@ class SignatureProcessor(object):
         '__thiscall': '__thiscall',
     }
 
-    def __init__(self, data_dir, out_dir, sig_dirpath, flags):
+    def __init__(self, data_dir, out_dir, sig_dirpath, flags, insns):
         self.data_dir = data_dir
         self.flags = flags
+        self.insns = insns
 
         base_sigs_path = os.path.join(data_dir, 'base-sigs.json')
         types_path = os.path.join(data_dir, 'types.conf')
@@ -451,6 +453,35 @@ class SignatureProcessor(object):
         for library in sorted(siglibs.keys()):
             sigs.extend(sorted(siglibs[library], key=lambda x: x['apiname']))
 
+        # Add each instruction-level hook.
+        last = None
+        for insn in self.insns.methods:
+            logging = []
+
+            # We take the logging of the first entry.
+            for param in insn["entries"][0]["logging"]:
+                logging.append({
+                    "argtype": param["type"],
+                    "argname": param["name"],
+                })
+
+            sigs.append({
+                "library": insn["module_clean"],
+                "apiname": insn["funcname"],
+                "ignore": last == insn["funcname"],
+                "is_insn": True,
+                "is_hook": True,
+                "signature": {
+                    "category": insn["category"],
+                    "library": insn["module"],
+                    "special": False,
+                    "mode": "HOOK_MODE_%s" % insn["mode"].upper(),
+                    "callback": "module",
+                },
+                "logging": logging,
+            })
+            last = insn["funcname"]
+
         # Assign hook indices accordingly (in a sorted manner).
         for idx, sig in enumerate(sigs):
             sig['index'] = idx
@@ -567,6 +598,110 @@ class FlagsProcessor(object):
         dp.render('flags-source', self.flags_c, flags=self.flags)
         dp.render('flags-header', self.flags_h, flags=self.flags)
 
+class InsnProcess(object):
+    def __init__(self, outfile, insnfiles):
+        self.outfile = outfile
+        self.insnfiles = insnfiles
+
+    def parse_arguments(self, e):
+        r = []
+
+        if e.get("register"):
+            r.append(e["register"])
+
+        if e.get("registers"):
+            r.extend(e["registers"].split())
+
+        return r
+
+    def parse_logging(self, l):
+        if not l:
+            return []
+
+        if isinstance(l, basestring):
+            l = [l]
+
+        r = []
+        for x in l:
+            type_, name, value = x.split(None, 2)
+            r.append({
+                "type": type_,
+                "name": name,
+                "value": value,
+            })
+        return r
+
+    def make_signature(self, arguments):
+        r = []
+        for idx, arg in enumerate(arguments):
+            r.append("(HOOK_INSN_%s << %d)" % (arg.upper(), (3 - idx) * 8))
+        return " | ".join(r)
+
+    def process(self):
+        methods = []
+        for filepath in self.insnfiles:
+            doc = yaml.load(open(filepath, "rb"))
+            glob = doc.pop("global", {})
+
+            for funcname, info in doc.items():
+                idx, entries = 0, []
+                module = info.get("module", glob.get("module"))
+                category = info.get("category", glob.get("category"))
+                mode = info.get("mode", glob.get("mode"))
+                for timestamp, entry in info["offsets"].items():
+                    arguments = self.parse_arguments(entry)
+                    logging = self.parse_logging(entry.get("logging"))
+
+                    entries.append({
+                        "index": idx,
+                        "module": module,
+                        "funcname": funcname,
+                        "category": category,
+                        "mode": mode,
+                        "timestamp": timestamp,
+                        "offset": entry.get("offset"),
+                        "arguments": arguments,
+                        "signature": self.make_signature(arguments),
+                        "logging": logging,
+                    })
+                    idx += 1
+
+                methods.append({
+                    "module": module,
+                    "module_clean": module.replace(".", "_"),
+                    "funcname": funcname,
+                    "category": category,
+                    "mode": mode,
+                    "entries": entries,
+                })
+
+        modules = {}
+        for method in methods:
+            if method["module"] not in modules:
+                modules[method["module"]] = {
+                    "module": method["module"],
+                    "clean": method["module"].replace(".", "_"),
+                    "methods": [],
+                }
+
+            modules[method["module"]]["methods"].append(method)
+
+        self.methods = methods
+        self.modules = modules
+
+    def write(self):
+        content = self.render("insn", {
+            "methods": self.methods,
+            "modules": self.modules,
+        })
+        open(self.outfile, "wb").write(content)
+
+    def render(self, docname, variables, dirpath="data/"):
+        fs_loader = jinja2.FileSystemLoader(dirpath)
+        templ_env = jinja2.Environment(loader=fs_loader)
+        templ = templ_env.get_template("%s.jinja2" % docname)
+        return templ.render(**variables)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, help='Action to perform.')
@@ -577,11 +712,19 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--apis', type=str, help='If set, only hook these functions.')
     args = parser.parse_args()
 
+    insnfiles = []
+    for filename in os.listdir("insn"):
+        if filename.endswith(".yaml"):
+            insnfiles.append(os.path.join("insn", filename))
+
+    ip = InsnProcess("objects/code/insns.c", insnfiles)
+    ip.process()
+
     fp = FlagsProcessor(args.data_directory, args.output_directory)
     fp.process(args.flags_directory)
 
     dp = SignatureProcessor(args.data_directory, args.output_directory,
-                            args.signatures_directory, fp.flags.keys())
+                            args.signatures_directory, fp.flags.keys(), ip)
     dp.process()
 
     apis = []
@@ -593,9 +736,11 @@ if __name__ == '__main__':
     if args.action == 'release':
         fp.write()
         dp.render(apis=apis)
+        ip.write()
     elif args.action == 'debug':
         fp.write()
         dp.render(apis=apis, debug=True)
+        ip.write()
     elif args.action == 'list-categories':
         dp.list_categories()
     elif args.action == 'list-apis':

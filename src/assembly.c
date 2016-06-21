@@ -123,6 +123,44 @@ int asm_add_regimm(uint8_t *stub, register_t reg, uint32_t value)
     return 7;
 }
 
+int asm_add_esp_imm(uint8_t *stub, uint32_t value)
+{
+#if __x86_64__
+    return asm_add_regimm(stub, R_RSP, value);
+#else
+    return asm_add_regimm(stub, R_ESP, value);
+#endif
+}
+
+int asm_sub_regimm(uint8_t *stub, register_t reg, uint32_t value)
+{
+#if __x86_64__
+    if(reg >= R_R8) {
+        stub[0] = 0x49;
+        reg -= R_R8;
+    }
+    else {
+        stub[0] = 0x90;
+    }
+#else
+    stub[0] = 0x90;
+#endif
+
+    stub[1] = 0x81;
+    stub[2] = 0xe8 + reg;
+    *(uint32_t *)(stub + 3) = value;
+    return 7;
+}
+
+int asm_sub_esp_imm(uint8_t *stub, uint32_t value)
+{
+#if __x86_64__
+    return asm_sub_regimm(stub, R_RSP, value);
+#else
+    return asm_sub_regimm(stub, R_ESP, value);
+#endif
+}
+
 int asm_jump_32bit(uint8_t *stub, const void *addr)
 {
 #if DEBUG && !__x86_64__
@@ -173,6 +211,48 @@ int asm_return(uint8_t *stub, uint16_t value)
     *stub++ = 0xc2;
     *stub++ = value & 0xff;
     *stub++ = value >> 8;
+
+    return stub - base;
+}
+
+int asm_push_context(uint8_t *stub)
+{
+    uint8_t *base = stub;
+
+#if __x86_64__
+#else
+    // pushfd
+    *stub++ = 0x9c;
+    // pushad
+    *stub++ = 0x60;
+#endif
+
+    return stub - base;
+}
+
+int asm_pop_context(uint8_t *stub)
+{
+    uint8_t *base = stub;
+
+#if __x86_64__
+#else
+    // popad
+    *stub++ = 0x61;
+    // popfd
+    *stub++ = 0x9d;
+#endif
+
+    return stub - base;
+}
+
+int asm_push_stack_offset(uint8_t *stub, uint32_t offset)
+{
+    uint8_t *base = stub;
+
+    *stub++ = 0xff;
+    *stub++ = 0x74;
+    *stub++ = 0x24;
+    *stub++ = offset;
 
     return stub - base;
 }

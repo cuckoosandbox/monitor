@@ -625,6 +625,82 @@ static int _hook_determine_start(hook_t *h)
     return 0;
 }
 
+int hook_insn(hook_t *h, uint32_t signature)
+{
+    uint8_t *ptr = h->func_stub;
+
+    ptr += asm_sub_esp_imm(ptr, 0x1000);
+    ptr += asm_push_context(ptr);
+
+    for (uint32_t idx = 0; idx < 4; idx++) {
+        uint8_t arg = signature & 0xff; signature >>= 8;
+        if(arg >= HOOK_INSN_STK(0)) {
+            uint32_t offset = 36 + 4 * (arg - HOOK_INSN_STK(0));
+            if(offset >= 0x80) {
+                pipe(
+                    "ERROR:Stack offset is too high for instruction hook %z",
+                    h->funcname
+                );
+                return -1;
+            }
+
+            // push dword [esp+X]
+            ptr += asm_push_stack_offset(ptr, offset);
+        }
+        else if(arg >= HOOK_INSN_EAX) {
+            // push register
+            // ptr += asm_push_register(ptr, arg);
+            // TODO For some reason the above throws a linking error..
+            // TODO This obviously doesn't support r8-r15 in 64-bit mode.
+            *ptr++ = 0x50 + (arg - HOOK_INSN_EAX);
+        }
+        else {
+            // Push null "push 0".
+            *ptr++ = 0x6a;
+            *ptr++ = 0x00;
+        }
+    }
+
+    // We're cheating a little bit here. The hook() function will create a
+    // jump from the targeted instruction(s) to h->handler. Since normally
+    // this is a simple jump we will for now fake the handler thing and point
+    // it to the function stub which in turn points to the original handler.
+    ptr += asm_call(ptr, h->handler);
+    h->handler = (FARPROC) h->func_stub;
+
+    ptr += asm_pop_context(ptr);
+    ptr += asm_add_esp_imm(ptr, 0x1000);
+
+    uint8_t *addr = h->addr;
+    while (addr - h->addr < 5) {
+        if(*addr == 0xe8 || *addr == 0xe9 || *addr == 0xeb ||
+                (*addr >= 0x70 && *addr < 0x80)) {
+            pipe(
+                "ERROR:The instruction hook %z contains a pc-changing "
+                "instructions which we currently don't support", h->funcname
+            );
+            return -1;
+        }
+
+        uint32_t len = lde(addr);
+
+        memcpy(ptr, addr, len);
+        addr += len;
+        ptr += len;
+    }
+
+    ptr += asm_jump_32bit(ptr, addr);
+
+    if((uintptr_t)(ptr - h->func_stub) >= slab_size(&g_function_stubs)) {
+        pipe(
+            "ERROR:The stub created for hook %z used too much space, space "
+            "should be enlarged to accommodate such usage.", h->funcname
+        );
+        return -1;
+    }
+    return addr - h->addr;
+}
+
 int hook(hook_t *h, void *module_handle)
 {
     if(h->is_hooked != 0) {
@@ -752,13 +828,20 @@ int hook(hook_t *h, void *module_handle)
         *h->orig = (FARPROC) h->func_stub;
     }
 
-    // Create the original function stub.
-    h->stub_used = hook_create_stub(h->func_stub,
-        h->addr, ASM_JUMP_32BIT_SIZE + h->skip);
-    if(h->stub_used < 0) {
-        pipe("CRITICAL:Error creating function stub for %z!%z.",
-            h->library, h->funcname);
-        return -1;
+    if(h->insn == 0) {
+        // Create the original function stub.
+        h->stub_used = hook_create_stub(h->func_stub,
+            h->addr, ASM_JUMP_32BIT_SIZE + h->skip);
+        if(h->stub_used < 0) {
+            pipe(
+                "CRITICAL:Error creating function stub for %z!%z.",
+                h->library, h->funcname
+            );
+            return -1;
+        }
+    }
+    else {
+        h->stub_used = hook_insn(h, h->insn_signature);
     }
 
     uint8_t region_original[32];

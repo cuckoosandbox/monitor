@@ -1,0 +1,98 @@
+/*
+Cuckoo Sandbox - Automated Malware Analysis.
+Copyright (C) 2016 Cuckoo Foundation.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include <stdio.h>
+#include <stdint.h>
+#include "hooking.h"
+#include "hook-info.h"
+#include "log.h"
+#include "misc.h"
+#include "native.h"
+#include "pipe.h"
+
+{% for method in methods %}
+{% for entry in method.entries %}
+static void __stdcall _cb_{{ method.module_clean }}_{{ method.funcname }}_{{ entry.index }}(
+    uintptr_t {{ entry.arguments[0] or "arg1" }},
+    uintptr_t {{ entry.arguments[1] or "arg2" }},
+    uintptr_t {{ entry.arguments[2] or "arg3" }},
+    uintptr_t {{ entry.arguments[3] or "arg4" }}
+) {
+    {%- for x in [0, 1, 2, 3] -%}
+    {% if not entry.arguments[x] -%}
+    (void) arg{{ x+1 }};
+    {%- endif %}
+    {% endfor %}
+
+    last_error_t lasterror;
+    get_last_error(&lasterror);
+
+    log_api(
+        SIG_{{ method.module_clean }}_{{ method.funcname }},
+        1, 0, 0, &lasterror
+    {%- for arg in entry.logging -%}
+        ,
+        {{ arg.value }}
+    {%- endfor %}
+    );
+
+    set_last_error(&lasterror);
+}
+{% endfor %}
+{% endfor %}
+
+{% for method in methods %}
+static insnoff_t _{{ method.module_clean }}_{{ method.funcname }}[] = {
+    {%- for entry in method.entries %}
+    {{ "{" }}{{ entry.timestamp }}, {{ entry.offset }}, {{ entry.signature }}, &_cb_{{ method.module_clean }}_{{ entry.funcname }}_{{ entry.index }}{{ "}" }},
+    {%- endfor %}
+    {{ "{" }}0, 0, 0, NULL{{ "}" }},
+};
+{% endfor %}
+
+{% for module, info in modules.items() %}
+static mod2insnoff_t _{{ info.clean }}[] = {
+    {%- for func in info.methods %}
+    {{ "{" }}"{{ func.funcname }}", _{{ info.clean }}_{{ func.funcname }}{{ "}" }},
+    {%- endfor %}
+    {{ "{" }}NULL, NULL{{ "}" }},
+};
+
+uint8_t *hook_modulecb_{{ info.clean }}(
+    hook_t *h, uint8_t *module_address, uint32_t module_size)
+{
+    insnoff_t *io = module_addr_timestamp_modinsn(
+        module_address, module_size, _{{ info.clean }}, h->funcname
+    );
+    if(io == NULL) {
+        pipe("INFO:io=NULL");
+        return NULL;
+    }
+
+    h->insn_signature = io->signature;
+    h->addr = module_address + io->offset;
+    h->handler = (FARPROC) io->callback;
+
+    pipe(
+        "INFO:insn=%d, signature=0x%x, addr=0x%x, handler=0x%x",
+        h->insn, h->insn_signature, h->addr, h->handler
+    );
+
+    return h->addr;
+}
+{% endfor %}

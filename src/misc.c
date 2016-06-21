@@ -1638,25 +1638,32 @@ int is_exception_address_whitelisted(uintptr_t addr)
     return -1;
 }
 
+uint32_t module_timestamp(uint8_t *module_address)
+{
+    IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) module_address;
+    if(image_dos_header->e_magic != IMAGE_DOS_SIGNATURE) {
+        return 0;
+    }
+
+    IMAGE_NT_HEADERS_CROSS *image_nt_headers = (IMAGE_NT_HEADERS_CROSS *)(
+        module_address + image_dos_header->e_lfanew);
+    if(image_nt_headers->Signature != IMAGE_NT_SIGNATURE) {
+        return 0;
+    }
+
+    return image_nt_headers->FileHeader.TimeDateStamp;
+}
+
 uint8_t *module_addr_timestamp(
     uint8_t *module_address, uint32_t module_size, funcoff_t *fo,
     uint32_t *cconv)
 {
     (void) module_size;
 
-    IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) module_address;
-    if(image_dos_header->e_magic != IMAGE_DOS_SIGNATURE) {
-        return NULL;
-    }
-
-    IMAGE_NT_HEADERS_CROSS *image_nt_headers = (IMAGE_NT_HEADERS_CROSS *)(
-        module_address + image_dos_header->e_lfanew);
-    if(image_nt_headers->Signature != IMAGE_NT_SIGNATURE) {
-        return NULL;
-    }
+    uint32_t timestamp = module_timestamp(module_address);
 
     for (; fo->timestamp != 0; fo++) {
-        if(image_nt_headers->FileHeader.TimeDateStamp == fo->timestamp) {
+        if(timestamp == fo->timestamp) {
             if(cconv != NULL) {
                 *cconv = fo->cconv;
             }
@@ -1672,8 +1679,7 @@ uint8_t *module_addr_timestamp(
 
     pipe("WARNING:Unable to find the correct offsets for functions "
         "of: %d-bit %Z (with timestamp 0x%x)",
-        bitsize, get_module_file_name((HMODULE) module_address),
-        image_nt_headers->FileHeader.TimeDateStamp
+        bitsize, get_module_file_name((HMODULE) module_address), timestamp
     );
     return NULL;
 }
@@ -1687,6 +1693,43 @@ uint8_t *module_addr_timestamp_mod(
             return module_addr_timestamp(
                 module_address, module_size, mf->funcoff, cconv
             );
+        }
+    }
+    return NULL;
+}
+
+insnoff_t *module_addr_timestamp2(uint8_t *module_address, insnoff_t *io)
+{
+    uint32_t timestamp = module_timestamp(module_address);
+
+    for (; io->timestamp != 0; io++) {
+        if(timestamp == io->timestamp) {
+            return io;
+        }
+    }
+
+#if __x86_64__
+    uint32_t bitsize = 64;
+#else
+    uint32_t bitsize = 32;
+#endif
+
+    pipe("WARNING:Unable to find the correct offsets for functions "
+        "of: %d-bit %Z (with timestamp 0x%x)",
+        bitsize, get_module_file_name((HMODULE) module_address), timestamp
+    );
+    return NULL;
+}
+
+insnoff_t *module_addr_timestamp_modinsn(
+    uint8_t *module_address, uint32_t module_size,
+    mod2insnoff_t *mi, const char *funcname
+) {
+    (void) module_size;
+
+    for (; mi->funcname != NULL; mi++) {
+        if(strcmp(mi->funcname, funcname) == 0) {
+            return module_addr_timestamp2(module_address, mi->insnoff);
         }
     }
     return NULL;

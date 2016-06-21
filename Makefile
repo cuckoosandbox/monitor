@@ -9,6 +9,7 @@ MAKEFLAGS = -j8
 SIGS = $(wildcard sigs/*.rst)
 FLAGS = $(wildcard flags/*.rst)
 JINJA2 = $(wildcard data/*.jinja2)
+YAML = $(wildcard insn/*.yaml)
 
 # Dependencies for the auto-generated hook files.
 HOOKREQ = utils/process.py $(wildcard data/*.json) $(wildcard data/*.conf)
@@ -22,6 +23,9 @@ HOOKOBJ64 = objects/x64/code/hooks.o
 FLAGSRC = objects/code/flags.c
 FLAGOBJ32 = objects/x86/code/flags.o
 FLAGOBJ64 = objects/x64/code/flags.o
+INSNSSRC = objects/code/insns.c
+INSNSOBJ32 = objects/x86/code/insns.o
+INSNSOBJ64 = objects/x64/code/insns.o
 
 SRC = $(wildcard src/*.c)
 SRCOBJ32 = $(SRC:%.c=objects/x86/%.o)
@@ -58,10 +62,10 @@ objects/:
 	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
 	mkdir -p objects/x86/src/sha1/ objects/x64/src/sha1/
 
-$(HOOKSRC): $(SIGS) $(FLAGS) $(JINJA2) $(HOOKREQ)
+$(HOOKSRC): $(SIGS) $(FLAGS) $(JINJA2) $(HOOKREQ) $(YAML)
 	python2  utils/process.py $(RELMODE) --apis=$(APIS)
 
-$(FLAGSRC): $(HOOKSRC)
+$(INSNSSRC) $(FLAGSRC): $(HOOKSRC)
 
 $(LIBCAPSTONE32):
 	cd src/capstone/ && \
@@ -97,12 +101,18 @@ $(FLAGOBJ32): $(FLAGSRC) $(HEADER) Makefile
 $(FLAGOBJ64): $(FLAGSRC) $(HEADER) Makefile
 	$(CC64) -c -o $@ $< $(CFLAGS)
 
+$(INSNSOBJ32): $(INSNSSRC) $(HEADER) Makefile
+	$(CC32) -c -o $@ $< $(CFLAGS)
+
+$(INSNSOBJ64): $(INSNSSRC) $(HEADER) Makefile
+	$(CC64) -c -o $@ $< $(CFLAGS)
+
 bin/monitor-x86.dll: bin/monitor.c $(SRCOBJ32) $(HOOKOBJ32) $(FLAGOBJ32) \
-		$(BSONOBJ32) $(LIBCAPSTONE32) $(SHA1OBJ32)
+		$(INSNSOBJ32) $(BSONOBJ32) $(LIBCAPSTONE32) $(SHA1OBJ32)
 	$(CC32) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 bin/monitor-x64.dll: bin/monitor.c $(SRCOBJ64) $(HOOKOBJ64) $(FLAGOBJ64) \
-		$(BSONOBJ64) $(LIBCAPSTONE64) $(SHA1OBJ64)
+		$(INSNSOBJ64) $(BSONOBJ64) $(LIBCAPSTONE64) $(SHA1OBJ64)
 	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 bin/inject-x86.exe: bin/inject.c src/assembly.c

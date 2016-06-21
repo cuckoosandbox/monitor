@@ -153,6 +153,18 @@ typedef struct _mod2funcoff_t {
     funcoff_t *funcoff;
 } mod2funcoff_t;
 
+typedef struct _insnoff_t {
+    uint32_t timestamp;
+    uint32_t offset;
+    uint32_t signature;
+    void (__stdcall *callback)(uintptr_t, uintptr_t, uintptr_t, uintptr_t);
+} insnoff_t;
+
+typedef struct _mod2insnoff_t {
+    const char *funcname;
+    insnoff_t *insnoff;
+} mod2insnoff_t;
+
 uint8_t *module_addr_timestamp(
     uint8_t *module_address, uint32_t module_size,
     funcoff_t *fo, uint32_t *cconv
@@ -161,6 +173,11 @@ uint8_t *module_addr_timestamp(
 uint8_t *module_addr_timestamp_mod(
     uint8_t *module_address, uint32_t module_size,
     mod2funcoff_t *mf, const char *funcname, uint32_t *cconv
+);
+
+insnoff_t *module_addr_timestamp_modinsn(
+    uint8_t *module_address, uint32_t module_size,
+    mod2insnoff_t *mi, const char *funcname
 );
 
 int variant_to_bson(bson *b, const char *name, const VARIANT *v);

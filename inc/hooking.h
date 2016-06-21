@@ -35,6 +35,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define HOOK_MODE_OFFICE   8
 #define HOOK_MODE_PDF      16
 
+#define HOOK_INSN_EAX      1
+#define HOOK_INSN_ECX      2
+#define HOOK_INSN_EDX      3
+#define HOOK_INSN_EBX      4
+#define HOOK_INSN_ESP      5
+#define HOOK_INSN_EBP      6
+#define HOOK_INSN_ESI      7
+#define HOOK_INSN_EDI      8
+#define HOOK_INSN_STK(n)   (9+n)
+
 typedef struct _hook_t {
     // Library and function name.
     const char *library;
@@ -52,6 +62,10 @@ typedef struct _hook_t {
     // Various flags on limiting the amount of non-critical errors shown
     // related to API hooks.
     int report;
+
+    // Is this an instruction-level hook.
+    int insn;
+    uint32_t insn_signature;
 
     // Mode indicating in which monitor modes this hook should be enabled.
     int mode;
