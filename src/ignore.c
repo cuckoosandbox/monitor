@@ -116,15 +116,17 @@ int monitor_mode_should_propagate(const wchar_t *cmdline, uint32_t *mode)
         return 0;
     }
 
+#define MEMMEMW(value) our_memmemW(cmdline, length, value, NULL)
+
     uint32_t length = lstrlenW(cmdline) * sizeof(wchar_t);
 
     // Assuming the following is a legitimate process in iexplore monitoring
     // mode; "iexplore.exe SCODEF:1234 CREDAT:5678".
     if((g_monitor_mode & HOOK_MODE_IEXPLORE) == HOOK_MODE_IEXPLORE &&
-            our_memmemW(cmdline, length, L"iexplore.exe", NULL) != NULL &&
-            our_memmemW(cmdline, length, L"SCODEF:", NULL) != NULL &&
-            our_memmemW(cmdline, length, L"CREDAT:", NULL) != NULL) {
-        *mode |= g_monitor_mode & (HOOK_MODE_IEXPLORE|HOOK_MODE_EXPLOIT);
+            MEMMEMW(L"iexplore.exe") != NULL &&
+            MEMMEMW(L"SCODEF:") != NULL &&
+            MEMMEMW(L"CREDAT:") != NULL) {
+        *mode |= g_monitor_mode & HOOK_MODE_IEXPLORE;
         pipe("DEBUG:Following legitimate iexplore process: %Z!", cmdline);
         return 0;
     }
@@ -132,20 +134,19 @@ int monitor_mode_should_propagate(const wchar_t *cmdline, uint32_t *mode)
     // Ignoring the following process in iexplore monitoring;
     // "ie4uinit.exe -ShowQLIcon".
     if((g_monitor_mode & HOOK_MODE_IEXPLORE) == HOOK_MODE_IEXPLORE &&
-            our_memmemW(cmdline, length, L"ie4uinit.exe", NULL) != NULL &&
-            our_memmemW(cmdline, length, L"-ShowQLIcon", NULL) != NULL) {
+            MEMMEMW(L"ie4uinit.exe") != NULL &&
+            MEMMEMW(L"-ShowQLIcon") != NULL) {
         pipe("DEBUG:Ignoring process %Z!", cmdline);
         return -1;
     }
 
     // Ignore the first "splwow.exe flag" process in office monitoring.
-    static int g_office_splwow = 1;
+    static int office_splwow = 1;
     if((g_monitor_mode & HOOK_MODE_OFFICE) == HOOK_MODE_OFFICE &&
-            our_memmemW(cmdline, length, L"C:\\Windows\\splwow64.exe ",
-                NULL) == cmdline &&
-            g_office_splwow != 0) {
+            MEMMEMW(L"C:\\Windows\\splwow64.exe ") == cmdline &&
+            office_splwow != 0) {
         pipe("DEBUG:Ignoring Office process %Z!", cmdline);
-        g_office_splwow = 0;
+        office_splwow = 0;
         return -1;
     }
 
