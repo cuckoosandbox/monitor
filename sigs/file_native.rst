@@ -56,6 +56,8 @@ Middle::
 
     wchar_t *filepath_r = extract_unicode_string_objattr(ObjectAttributes);
 
+    logging_file_trigger(filepath);
+
 Logging::
 
     i share_access share_access
@@ -145,6 +147,8 @@ Middle::
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
     wchar_t *filepath_r = extract_unicode_string_objattr(ObjectAttributes);
+
+    logging_file_trigger(filepath);
 
 Logging::
 

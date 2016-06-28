@@ -84,7 +84,7 @@ void monitor_init(HMODULE module_handle)
     // the image size, EAT pointers, etc while the PE header is still intact.
     destroy_pe_header(module_handle);
 
-    misc_set_monitor_options(cfg.track, cfg.mode);
+    misc_set_monitor_options(cfg.track, cfg.mode, cfg.trigger);
 }
 
 void monitor_hook(const char *library, void *module_handle)

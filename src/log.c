@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "bson.h"
 #include "hooking.h"
+#include "hook-info.h"
 #include "memory.h"
 #include "misc.h"
 #include "native.h"
@@ -364,6 +365,12 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
     uint64_t hash, last_error_t *lasterr, ...)
 {
     va_list args; char idx[4];
+
+    // We haven't started logging yet.
+    if(index >= MONITOR_FIRSTHOOKIDX && g_monitor_logging == 0) {
+        return;
+    }
+
     va_start(args, lasterr);
 
     EnterCriticalSection(&g_mutex);

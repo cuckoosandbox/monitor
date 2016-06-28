@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "config.h"
 #include "hooking.h"
+#include "misc.h"
 #include "native.h"
 #include "ntapi.h"
 
@@ -140,6 +141,9 @@ void config_read(config_t *cfg)
         }
         else if(strcmp(key, "pipe-pid") == 0) {
             cfg->pipe_pid = value[0] == '1';
+        }
+        else if(strcmp(key, "trigger") == 0) {
+            strncpy(cfg->trigger, value, sizeof(cfg->trigger));
         }
     }
     fclose(fp);

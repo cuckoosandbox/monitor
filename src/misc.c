@@ -56,6 +56,10 @@ void find_exception_addresses(uintptr_t *addresses, uint32_t *count);
 uint32_t g_monitor_track = 1;
 uint32_t g_monitor_mode = HOOK_MODE_ALL;
 
+static uint32_t g_monitor_trigger_mode;
+static wchar_t g_monitor_trigger[MAX_PATH]; // TODO Switch to MAX_PATH_W?
+int g_monitor_logging;
+
 #define ADD_ALIAS(before, after) \
     if(g_alias_index == 64) { \
         pipe("CRITICAL:Too many aliases!"); \
@@ -113,10 +117,20 @@ void unhook_library(const char *library, void *module_handle)
     g_unhook_library(library, module_handle);
 }
 
-void misc_set_monitor_options(uint32_t track, uint32_t mode)
+void misc_set_monitor_options(uint32_t track, uint32_t mode,
+    const char *trigger)
 {
     g_monitor_track = track;
     g_monitor_mode = mode;
+    g_monitor_logging = 1;
+
+    g_monitor_trigger_mode = CONFIG_TRIGGER_NONE;
+
+    if(strncmp(trigger, "file:", 5) == 0) {
+        g_monitor_logging = 0;
+        g_monitor_trigger_mode = CONFIG_TRIGGER_FILE;
+        path_get_full_pathA(&trigger[5], g_monitor_trigger);
+    }
 }
 
 // Maximum number of buffers that we reuse.
@@ -1844,4 +1858,11 @@ int resume_thread_identifier(uint32_t thread_identifier)
         return 0;
     }
     return -1;
+}
+
+void logging_file_trigger(const wchar_t *filepath)
+{
+    if(g_monitor_logging == 0 && wcsicmp(filepath, g_monitor_trigger) == 0) {
+        g_monitor_logging = 1;
+    }
 }

@@ -58,6 +58,9 @@ typedef struct _config_t {
     // If we should prepend each pipe message with our pid (requires the
     // latest version on the Analyzer side).
     int pipe_pid;
+
+    // Dynamic triggers that start the logging for this analysis.
+    char trigger[MAX_PATH+16];
 } config_t;
 
 void config_read(config_t *cfg);

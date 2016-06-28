@@ -35,7 +35,8 @@ void misc_set_hook_library(monitor_hook_t monitor_hook,
 void hook_library(const char *library, void *module_handle);
 void unhook_library(const char *library, void *module_handle);
 
-void misc_set_monitor_options(uint32_t track, uint32_t mode);
+void misc_set_monitor_options(uint32_t track, uint32_t mode,
+    const char *trigger);
 
 wchar_t *get_unicode_buffer();
 void free_unicode_buffer(wchar_t *ptr);
@@ -190,6 +191,8 @@ void hexdump(char *out, void *ptr, uint32_t length);
 uint32_t first_tid_from_pid(uint32_t process_identifier);
 int resume_thread_identifier(uint32_t thread_identifier);
 
+void logging_file_trigger(const wchar_t *filepath);
+
 extern uint32_t g_extra_virtual_memory;
 
 void set_processor_count(uint32_t processor_count);
@@ -230,5 +233,9 @@ static inline uintptr_t get_ebp()
 
 extern uint32_t g_monitor_track;
 extern uint32_t g_monitor_mode;
+extern int g_monitor_logging;
+
+#define CONFIG_TRIGGER_NONE 0
+#define CONFIG_TRIGGER_FILE 1
 
 #endif
