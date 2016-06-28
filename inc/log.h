@@ -73,5 +73,6 @@ uint32_t sig_index_process();
 uint32_t sig_index_anomaly();
 uint32_t sig_index_exception();
 uint32_t sig_index_missing();
+uint32_t sig_index_firsthookidx();
 
 #endif

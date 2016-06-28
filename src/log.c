@@ -23,7 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "bson.h"
 #include "hooking.h"
-#include "hook-info.h"
 #include "memory.h"
 #include "misc.h"
 #include "native.h"
@@ -367,7 +366,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
     va_list args; char idx[4];
 
     // We haven't started logging yet.
-    if(index >= MONITOR_FIRSTHOOKIDX && g_monitor_logging == 0) {
+    if(index >= sig_index_firsthookidx() && g_monitor_logging == 0) {
         return;
     }
 
