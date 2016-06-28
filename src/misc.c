@@ -53,8 +53,8 @@ static uint32_t g_exception_addr_count;
 
 void find_exception_addresses(uintptr_t *addresses, uint32_t *count);
 
-uint32_t g_monitor_track = 1;
-uint32_t g_monitor_mode = HOOK_MODE_ALL;
+uint32_t g_monitor_track;
+uint32_t g_monitor_mode;
 
 static uint32_t g_monitor_trigger_mode;
 static wchar_t g_monitor_trigger[MAX_PATH]; // TODO Switch to MAX_PATH_W?
