@@ -106,13 +106,13 @@ void config_read(config_t *cfg)
         const char *key = buf, *value = p + 1;
 
         if(strcmp(key, "pipe") == 0) {
-            strcpy(cfg->pipe_name, value);
+            strncpy(cfg->pipe_name, value, sizeof(cfg->pipe_name));
         }
         else if(strcmp(key, "logpipe") == 0) {
-            strcpy(cfg->logpipe, value);
+            strncpy(cfg->logpipe, value, sizeof(cfg->logpipe));
         }
         else if(strcmp(key, "shutdown-mutex") == 0) {
-            strcpy(cfg->shutdown_mutex, value);
+            strncpy(cfg->shutdown_mutex, value, sizeof(cfg->shutdown_mutex));
         }
         else if(strcmp(key, "first-process") == 0) {
             cfg->first_process = value[0] == '1';
@@ -124,7 +124,7 @@ void config_read(config_t *cfg)
             cfg->force_sleep_skip = value[0] == '1';
         }
         else if(strcmp(key, "hashes-path") == 0) {
-            strcpy(cfg->hashes_path, value);
+            strncpy(cfg->hashes_path, value, sizeof(cfg->hashes_path));
         }
         else if(strcmp(key, "diffing-enable") == 0) {
             cfg->diffing_enable = value[0] == '1';
