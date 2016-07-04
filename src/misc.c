@@ -939,9 +939,10 @@ void reg_get_info_from_keyvalue(const void *buf, uint32_t length,
 
         *reg_name = get_unicode_buffer();
         uint32_t length = MIN(
-            basic->NameLength, MAX_PATH_W * sizeof(wchar_t));
+            basic->NameLength, MAX_PATH_W * sizeof(wchar_t)
+        );
         memcpy(*reg_name, basic->Name, length);
-        (*reg_name)[length] = 0;
+        (*reg_name)[length / sizeof(wchar_t)] = 0;
 
         *reg_type = basic->Type;
         break;
@@ -953,9 +954,10 @@ void reg_get_info_from_keyvalue(const void *buf, uint32_t length,
 
         *reg_name = get_unicode_buffer();
         uint32_t length = MIN(
-            full->NameLength, MAX_PATH_W * sizeof(wchar_t));
+            full->NameLength, MAX_PATH_W * sizeof(wchar_t)
+        );
         memcpy(*reg_name, full->Name, length);
-        (*reg_name)[length] = 0;
+        (*reg_name)[length / sizeof(wchar_t)] = 0;
 
         *reg_type = full->Type;
         *data_length = full->DataLength;
