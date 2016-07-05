@@ -1863,7 +1863,7 @@ void bstr_to_asciiz(const BSTR bstr, char *out, uint32_t length)
 {
     const wchar_t *ptr = (const wchar_t *) bstr;
 
-    length = MIN(sys_string_length(bstr), length);
+    length = MIN(sys_string_length(bstr), length-1);
     for (uint32_t idx = 0; idx < length; idx++) {
         *out++ = *ptr++;
     }
