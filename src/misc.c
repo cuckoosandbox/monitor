@@ -1581,6 +1581,25 @@ HRESULT variant_clear(VARIANTARG *arg)
     return pVariantClear(arg);
 }
 
+HRESULT safe_array_destroy(SAFEARRAY *sa)
+{
+    static FARPROC pSafeArrayDestroy;
+
+    if(pSafeArrayDestroy == NULL) {
+        HMODULE module_handle = GetModuleHandle("oleaut32");
+        if(module_handle != NULL) {
+            pSafeArrayDestroy = GetProcAddress(
+                module_handle, "SafeArrayDestroy"
+            );
+        }
+        if(pSafeArrayDestroy == NULL) {
+            return E_INVALIDARG;
+        }
+    }
+
+    return pSafeArrayDestroy(sa);
+}
+
 static NTSTATUS g_exception_whitelist[] = {
     DBG_PRINTEXCEPTION_C,
     RPC_E_DISCONNECTED,
@@ -1811,6 +1830,45 @@ int variant_to_bson(bson *b, const char *name, const VARIANT *v)
     }
 
     return 0;
+}
+
+int iwbem_class_object_to_bson(IWbemClassObject *obj, bson *b)
+{
+    SAFEARRAY *argnames = NULL; HRESULT hr; VARIANT vt;
+    BSTR name; char argname[MAX_PATH];
+
+    hr = obj->lpVtbl->GetNames(
+        obj, NULL, WBEM_FLAG_NONSYSTEM_ONLY, NULL, &argnames
+    );
+
+    if(SUCCEEDED(hr) == FALSE || argnames == NULL || argnames->cDims != 1 ||
+            (argnames->fFeatures & FADF_BSTR) == 0) {
+        return -1;
+    }
+
+    for (uint32_t idx = 0; idx < argnames->rgsabound[0].cElements; idx++) {
+        name = ((BSTR *) argnames->pvData)[idx];
+        hr = obj->lpVtbl->Get(obj, name, 0, &vt, NULL, NULL);
+        if(SUCCEEDED(hr) != FALSE) {
+            bstr_to_asciiz(name, argname, sizeof(argname));
+            variant_to_bson(b, argname, &vt);
+            variant_clear(&vt);
+        }
+    }
+    safe_array_destroy(argnames);
+    return 0;
+}
+
+void bstr_to_asciiz(const BSTR bstr, char *out, uint32_t length)
+{
+    const wchar_t *ptr = (const wchar_t *) bstr;
+
+    length = MIN(sys_string_length(bstr), length);
+    for (uint32_t idx = 0; idx < length; idx++) {
+        *out++ = *ptr++;
+    }
+
+    *out = 0;
 }
 
 void hexdump(char *out, void *ptr, uint32_t length)

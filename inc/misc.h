@@ -139,6 +139,7 @@ int sys_string_cmp(const BSTR bstr, const wchar_t *value);
 HRESULT variant_change_type(
     VARIANTARG *dst, const VARIANTARG *src, USHORT flags, VARTYPE vt);
 HRESULT variant_clear(VARIANTARG *arg);
+HRESULT safe_array_destroy(SAFEARRAY *sa);
 
 int is_exception_code_whitelisted(NTSTATUS exception_code);
 int is_exception_address_whitelisted(uintptr_t addr);
@@ -182,6 +183,8 @@ insnoff_t *module_addr_timestamp_modinsn(
 );
 
 int variant_to_bson(bson *b, const char *name, const VARIANT *v);
+int iwbem_class_object_to_bson(IWbemClassObject *obj, bson *b);
+void bstr_to_asciiz(const BSTR bstr, char *out, uint32_t length);
 int vbe6_invoke_extract_args(uint8_t *addr, bson *b);
 
 void vbe6_set_funcname(const wchar_t *funcname);
