@@ -146,7 +146,7 @@ Middle::
     bson_init_size(&b2, mem_suggested_size(4096));
 
     if(result != NULL) {
-        variant_to_bson(&b2, "0", result);
+        variant_to_bson(&b2, "0", result, NULL);
     }
     else {
         bson_append_null(&b2, "0");
