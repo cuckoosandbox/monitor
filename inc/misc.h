@@ -182,7 +182,8 @@ insnoff_t *module_addr_timestamp_modinsn(
     mod2insnoff_t *mi, const char *funcname
 );
 
-int variant_to_bson(bson *b, const char *name, const VARIANT *v);
+int variant_to_bson(bson *b, const char *name, const VARIANT *v,
+    void (*iunknown_callback)(bson *b, const char *name, IUnknown *unk));
 int iwbem_class_object_to_bson(IWbemClassObject *obj, bson *b);
 void bstr_to_asciiz(const BSTR bstr, char *out, uint32_t length);
 int vbe6_invoke_extract_args(uint8_t *addr, bson *b);

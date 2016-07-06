@@ -135,7 +135,7 @@ int vbe6_invoke_extract_args(uint8_t *addr, bson *b)
     for (uint32_t idx = 0; idx < count; idx++) {
         const VARIANT *v = &va[count - idx - 1];
         our_snprintf(index, sizeof(index), "%d", idx);
-        variant_to_bson(b, index, v);
+        variant_to_bson(b, index, v, NULL);
     }
 
     return 0;

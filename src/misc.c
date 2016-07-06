@@ -1774,7 +1774,8 @@ insnoff_t *module_addr_timestamp_modinsn(
     return NULL;
 }
 
-int variant_to_bson(bson *b, const char *name, const VARIANT *v)
+int variant_to_bson(bson *b, const char *name, const VARIANT *v,
+    void (*iunknown_callback)(bson *b, const char *name, IUnknown *unk))
 {
     if(v == NULL) {
         return -1;
@@ -1819,8 +1820,13 @@ int variant_to_bson(bson *b, const char *name, const VARIANT *v)
         break;
 
     case VT_UNKNOWN:
-        our_snprintf(buf, sizeof(buf), "<IUnknown @ 0x%x>", v->punkVal);
-        log_string(b, name, buf, strlen(buf));
+        if(iunknown_callback != NULL) {
+            iunknown_callback(b, name, v->punkVal);
+        }
+        else {
+            our_snprintf(buf, sizeof(buf), "<IUnknown @ 0x%x>", v->punkVal);
+            log_string(b, name, buf, strlen(buf));
+        }
         break;
 
     default:
@@ -1830,6 +1836,14 @@ int variant_to_bson(bson *b, const char *name, const VARIANT *v)
     }
 
     return 0;
+}
+
+void iwbem_class_object_to_bson_helper(
+    bson *b, const char *name, IUnknown *iunk)
+{
+    bson_append_start_object(b, name);
+    iwbem_class_object_to_bson((IWbemClassObject *) iunk, b);
+    bson_append_finish_object(b);
 }
 
 int iwbem_class_object_to_bson(IWbemClassObject *obj, bson *b)
@@ -1851,7 +1865,9 @@ int iwbem_class_object_to_bson(IWbemClassObject *obj, bson *b)
         hr = obj->lpVtbl->Get(obj, name, 0, &vt, NULL, NULL);
         if(SUCCEEDED(hr) != FALSE) {
             bstr_to_asciiz(name, argname, sizeof(argname));
-            variant_to_bson(b, argname, &vt);
+            variant_to_bson(
+                b, argname, &vt, &iwbem_class_object_to_bson_helper
+            );
             variant_clear(&vt);
         }
     }
