@@ -53,6 +53,14 @@ Pre::
 
     int adjusted = -1; uint32_t creation_flags = 0; bson inargs, outargs;
 
+    bson_init_size(&inargs, mem_suggested_size(4096));
+    bson_append_start_object(&inargs, "inargs");
+    if(pInParams != NULL) {
+        iwbem_class_object_to_bson(pInParams, &inargs);
+    }
+    bson_append_finish_object(&inargs);
+    bson_finish(&inargs);
+
     // We adjust some parameters for Win32_Process::Create so we can follow
     // the newly created process cleanly.
     if(wcscmp(strObjectPath, L"Win32_Process") == 0 &&
@@ -63,14 +71,6 @@ Pre::
     }
 
 Middle::
-
-    bson_init_size(&inargs, mem_suggested_size(4096));
-    bson_append_start_object(&inargs, "inargs");
-    if(pInParams != NULL) {
-        iwbem_class_object_to_bson(pInParams, &inargs);
-    }
-    bson_append_finish_object(&inargs);
-    bson_finish(&inargs);
 
     bson_init_size(&outargs, mem_suggested_size(4096));
     bson_append_start_object(&outargs, "outargs");
