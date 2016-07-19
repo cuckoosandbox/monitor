@@ -95,16 +95,16 @@ int misc_init(const char *shutdown_mutex)
             ADD_ALIAS(target_path, device_name);
         }
     }
-
-    find_exception_addresses(g_exception_addrs, &g_exception_addr_count);
     return 0;
 }
 
-void misc_set_hook_library(monitor_hook_t monitor_hook,
-    monitor_hook_t monitor_unhook)
+int misc_init2(monitor_hook_t monitor_hook, monitor_hook_t monitor_unhook)
 {
     g_hook_library = monitor_hook;
     g_unhook_library = monitor_unhook;
+
+    find_exception_addresses(g_exception_addrs, &g_exception_addr_count);
+    return 0;
 }
 
 void hook_library(const char *library, void *module_handle)
@@ -1724,6 +1724,7 @@ uint8_t *module_addr_timestamp(
         "of: %d-bit %Z (with timestamp 0x%x)",
         bitsize, get_module_file_name((HMODULE) module_address), timestamp
     );
+    log_action("gatherer");
     return NULL;
 }
 
@@ -1761,6 +1762,7 @@ insnoff_t *module_addr_timestamp2(uint8_t *module_address, insnoff_t *io)
         "of: %d-bit %Z (with timestamp 0x%x)",
         bitsize, get_module_file_name((HMODULE) module_address), timestamp
     );
+    log_action("gatherer");
     return NULL;
 }
 

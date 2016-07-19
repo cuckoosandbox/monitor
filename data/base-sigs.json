@@ -47,5 +47,14 @@
         "signature": {
             "category": "__notification__"
         }
+    },
+    {
+        "apiname": "__action__",
+        "parameters": [
+            {"argtype": "LPCSTR", "argname": "action"}
+        ],
+        "signature": {
+            "category": "__notification__"
+        }
     }
 ]

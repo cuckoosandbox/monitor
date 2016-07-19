@@ -787,6 +787,11 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
     bson_destroy(&s);
 }
 
+void log_action(const char *action)
+{
+    log_api(sig_index_action(), 1, 0, 0, NULL, action);
+}
+
 static void *_bson_malloc(size_t length)
 {
     return mem_alloc(length);

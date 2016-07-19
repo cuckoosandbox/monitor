@@ -27,11 +27,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef void (*monitor_hook_t)(const char *library, void *module_handle);
 
 int misc_init(const char *shutdown_mutex);
+int misc_init2(monitor_hook_t monitor_hook, monitor_hook_t monitor_unhook);
 
 // Call functions from monitor.c indirectly so that we don't have to include
 // it by default when doing unittests.
-void misc_set_hook_library(monitor_hook_t monitor_hook,
-    monitor_hook_t monitor_unhook);
 void hook_library(const char *library, void *module_handle);
 void unhook_library(const char *library, void *module_handle);
 
