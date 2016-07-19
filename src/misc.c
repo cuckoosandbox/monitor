@@ -1634,6 +1634,8 @@ static funcoff_t _IsBadReadPtr1[] = {
     {0x4ce7c78b, 0x4cb73, 0},
     {0x50b83c89, 0x3d09c, 0},
     {0x50b8479a, 0x4cb43, 0},
+    {0x5632d5aa, 0x1b6a9, 0},
+    {0x5632d9fd, 0x1256a, 0},
     {0, 0, 0},
 };
 
@@ -1643,6 +1645,8 @@ static funcoff_t _IsBadReadPtr2[] = {
     {0x4ce7c78b, 0x4cba1, 0},
     {0x50b83c89, 0x331ca, 0},
     {0x50b8479a, 0x4cb71, 0},
+    {0x5632d5aa, 0x1b6d7, 0},
+    {0x5632d9fd, 0x125a9, 0},
     {0, 0, 0},
 };
 
