@@ -30,6 +30,7 @@ Pre::
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
     wchar_t *filepath_r = extract_unicode_string_objattr(ObjectAttributes);
+    BOOL bStackPivot = stackPivotDetection();
 
 Interesting::
 
@@ -46,6 +47,7 @@ Logging::
     i process_identifier pid
     u filepath filepath
     u filepath_r filepath_r
+    i StackPivot bStackPivot
 
 Post::
 
@@ -83,6 +85,7 @@ Pre::
     path_get_full_path_objattr(ObjectAttributes, filepath);
 
     wchar_t *filepath_r = extract_unicode_string_objattr(ObjectAttributes);
+    BOOL bStackPivot = stackPivotDetection();
 
 Interesting::
 
@@ -99,6 +102,7 @@ Logging::
     i process_identifier pid
     u filepath filepath
     u filepath_r filepath_r
+    i StackPivot bStackPivot
 
 Post::
 
@@ -155,6 +159,7 @@ Pre::
         extract_unicode_string_unistr(&ProcessParameters->ImagePathName);
     wchar_t *command_line =
         extract_unicode_string_unistr(&ProcessParameters->CommandLine);
+    BOOL bStackPivot = stackPivotDetection();
 
 Middle::
 
@@ -171,6 +176,7 @@ Logging::
     u thread_name_r thread_name_r
     u filepath filepath
     u command_line command_line
+    i StackPivot bStackPivot
 
 Post::
 
@@ -209,6 +215,7 @@ Pre::
     path_get_full_path_unistr(ImagePath, filepath);
 
     wchar_t *filepath_r = extract_unicode_string_unistr(ImagePath);
+    BOOL bStackPivot = stackPivotDetection();
 
 Interesting::
 
@@ -230,6 +237,7 @@ Logging::
     i thread_identifier tid
     u filepath filepath
     u filepath_r filepath_r
+    i StackPivot bStackPivot
 
 Post::
 
@@ -411,8 +419,18 @@ Flags::
     protection
     allocation_type
 
+Pre::
+
+    PVOID BaseAddress_orig = *BaseAddress;
+    BOOL bStackPivotDetected = stackPivotDetection();
+    BOOL bStackDEPBypass = isAddressInStack(BaseAddress_orig);
+    BOOL bHeapDEPBypass = heapDEPBypass(ProcessHandle, BaseAddress_orig, Protect);
+
 Logging::
 
+    i StackPivot bStackPivotDetected
+    i StackDEPBypass bStackDEPBypass
+    i HeapDEPBypass bHeapDEPBypass
     i process_identifier pid_from_process_handle(ProcessHandle)
 
 
@@ -472,8 +490,18 @@ Flags::
 
     protection
 
+Pre::
+
+    PVOID BaseAddress_orig = *BaseAddress;
+    BOOL bStackPivotDetected = stackPivotDetection();
+    BOOL bStackDEPBypass = isAddressInStack(BaseAddress_orig);
+    BOOL bHeapDEPBypass = heapDEPBypass(ProcessHandle, BaseAddress_orig, NewAccessProtection);
+
 Logging::
 
+    i StackPivot bStackPivotDetected
+    i StackDEPBypass bStackDEPBypass
+    i HeapDEPBypass bHeapDEPBypass
     i process_identifier pid_from_process_handle(ProcessHandle)
 
 

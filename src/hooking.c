@@ -35,6 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "symbol.h"
 #include "unhook.h"
 
+#include "exploit_detection.h"
+
 #define MISSING_HANDLE_COUNT 128
 
 static SYSTEM_INFO g_si;
