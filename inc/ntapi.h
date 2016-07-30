@@ -717,11 +717,6 @@ typedef enum _SHUTDOWN_ACTION {
     ShutdownPowerOff
 } SHUTDOWN_ACTION, *PSHUTDOWN_ACTION;
 
-static inline UNICODE_STRING *unistr_from_objattr(OBJECT_ATTRIBUTES *obj)
-{
-    return obj != NULL ? obj->ObjectName : NULL;
-}
-
 #define InitializeObjectAttributes(p, n, a, r, s) { \
     (p)->Length = sizeof(OBJECT_ATTRIBUTES); \
     (p)->RootDirectory = r;                  \
