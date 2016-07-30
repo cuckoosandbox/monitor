@@ -401,6 +401,10 @@ Logging::
 NtAllocateVirtualMemory
 =======================
 
+Signature::
+
+    * Mode: exploit
+
 Parameters::
 
     ** HANDLE ProcessHandle process_handle
@@ -470,6 +474,10 @@ Logging::
 
 NtProtectVirtualMemory
 ======================
+
+Signature::
+
+    * Mode: exploit
 
 Parameters::
 
