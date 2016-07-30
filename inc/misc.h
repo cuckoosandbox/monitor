@@ -215,6 +215,12 @@ uintptr_t copy_uintptr(const void *value);
 void *copy_ptr(const void *ptr);
 void copy_return();
 
+int exploit_is_stack_pivoted();
+int exploit_makes_stack_executable(
+    HANDLE process_handle, PVOID addr, DWORD new_protection);
+int exploit_makes_heap_executable(
+    HANDLE process_handle, PVOID addr, DWORD new_protection);
+
 #define OBJECT_NAME_INFORMATION_REQUIRED_SIZE \
     sizeof(OBJECT_NAME_INFORMATION) + sizeof(wchar_t) * MAX_PATH_W
 
@@ -222,6 +228,10 @@ void copy_return();
     (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | \
      PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | \
      PAGE_EXECUTE_WRITECOPY)
+
+#define PAGE_EXECUTABLE \
+    (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | \
+    PAGE_EXECUTE_WRITECOPY)
 
 #if !__x86_64__
 

@@ -103,13 +103,12 @@ Pre::
     char library[MAX_PATH];
     wchar_t *module_name = extract_unicode_string_unistr(ModuleFileName);
     library_from_unicode_string(ModuleFileName, library, sizeof(library));
-    BOOL bStackPivot = stackPivotDetection();
 
 Logging::
 
     u module_name module_name
     s basename library
-    i StackPivot bStackPivot
+    i stack_pivoted exploit_is_stack_pivoted()
 
 Post::
 
@@ -186,7 +185,6 @@ Parameters::
 Pre::
 
     wchar_t *module_name = extract_unicode_string_unistr(ModuleFileName);
-    BOOL bStackPivot = stackPivotDetection();
 
 Middle::
 
@@ -197,7 +195,7 @@ Middle::
 Logging::
 
     u module_name module_name
-    i StackPivot bStackPivot
+    i stack_pivoted exploit_is_stack_pivoted()
 
 Post::
 

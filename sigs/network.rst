@@ -29,13 +29,12 @@ Pre::
 
     wchar_t *filepath = get_unicode_buffer();
     path_get_full_pathW(szFileName, filepath);
-    BOOL bStackPivot = stackPivotDetection();
 
 Logging::
 
     u filepath filepath
     u filepath_r szFileName
-    i StackPivot bStackPivot
+    i stack_pivoted exploit_is_stack_pivoted()
 
 Post::
 
