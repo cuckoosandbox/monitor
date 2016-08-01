@@ -53,11 +53,8 @@ int main()
     assert(ultostr(-42, buf, 10) == 3 && strcmp(buf, "-42") == 0);
     assert(ultostr(0x1337, buf, 16) == 4 && strcmp(buf, "1337") == 0);
 
-#if __x86_64__
+    assert(ultostr(0xffffffff, buf, 16) == 8 && strcmp(buf, "ffffffff") == 0);
     assert(ultostr(0xffffffffffffffff, buf, 16) == 16 && strcmp(buf, "ffffffffffffffff") == 0);
-#else
-    assert(ultostr(0xffffffff, buf, 16) == 8  && strcmp(buf, "ffffffff") == 0);
-#endif
 
     assert(our_snprintf(buf, 3, "hoi") == 2 && strcmp(buf, "ho") == 0);
     assert(our_snprintf(buf, 4, "hoi") == 3 && strcmp(buf, "hoi") == 0);

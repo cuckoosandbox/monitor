@@ -1318,7 +1318,7 @@ uint64_t hash_uint64(uint64_t value)
 }
 
 // http://stackoverflow.com/questions/9655202/how-to-convert-integer-to-string-in-c
-int ultostr(intptr_t value, char *str, int base)
+int ultostr(int64_t value, char *str, int base)
 {
     const char charset[] = "0123456789abcdef"; int length = 0;
 
@@ -1329,7 +1329,7 @@ int ultostr(intptr_t value, char *str, int base)
     }
 
     // Calculate the amount of numbers required.
-    uintptr_t shifter = value, uvalue = value;
+    uint64_t shifter = value, uvalue = value;
     do {
         str++, length++, shifter /= base;
     } while (shifter);

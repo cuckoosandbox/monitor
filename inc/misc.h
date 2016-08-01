@@ -105,7 +105,7 @@ uint64_t hash_string(const char *buf, int32_t length);
 uint64_t hash_stringW(const wchar_t *buf, int32_t length);
 uint64_t hash_uint64(uint64_t value);
 
-int ultostr(intptr_t value, char *str, int base);
+int ultostr(int64_t value, char *str, int base);
 
 int our_vsnprintf(char *buf, int length, const char *fmt, va_list args);
 int our_snprintf(char *buf, int length, const char *fmt, ...);
