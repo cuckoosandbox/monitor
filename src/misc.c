@@ -632,10 +632,10 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
             return lstrlenW(out);
         }
         else {
-            *out = 0;
-            free_unicode_buffer(buf1);
-            free_unicode_buffer(buf2);
-            return 0;
+            // *out = 0;
+            // free_unicode_buffer(buf1);
+            // free_unicode_buffer(buf2);
+            // return 0;
         }
 
         last_ptr = ptr;

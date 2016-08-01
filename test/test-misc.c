@@ -34,6 +34,84 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     else { \
         pipe("INFO:Test passed: %z", #expr); \
     }
+#define OBJ_CASE_INSENSITIVE 0x00000040
+#define OBJ_KERNEL_HANDLE 0x00000200
+
+#define InitializeObjectAttributes(p, n, a, r, s) { \
+    (p)->Length = sizeof(OBJECT_ATTRIBUTES);        \
+    (p)->RootDirectory = r;                         \
+    (p)->Attributes = a;                            \
+    (p)->ObjectName = n;                            \
+    (p)->SecurityDescriptor = s;                    \
+    (p)->SecurityQualityOfService = NULL;           \
+    }
+
+VOID (WINAPI *pRtlInitUnicodeString)(PUNICODE_STRING DestinationString,
+    PCWSTR SourceString);
+
+NTSTATUS (WINAPI *pZwDeleteFile)(POBJECT_ATTRIBUTES ObjectAttributes);
+
+NTSTATUS (WINAPI *pZwCreateFile)(PHANDLE FileHandle,
+    ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes,
+    PIO_STATUS_BLOCK IoStatusBlock, PVOID AllocationSize,
+    ULONG FileAttributes, ULONG ShareAccess, ULONG CreateDisposition,
+    ULONG CreateOptions, PVOID EaBuffer, ULONG EaLength);
+
+NTSTATUS (WINAPI *pZwSetInformationFile)(HANDLE FileHandle,
+    PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, ULONG Length,
+    FILE_INFORMATION_CLASS FileInformationClass);
+
+void test_path_native()
+{
+    UNICODE_STRING dir_fname, file_fname;
+    OBJECT_ATTRIBUTES obj_dir, obj_file;
+    IO_STATUS_BLOCK io_dir;
+    HANDLE dir_handle;
+
+    *(FARPROC *) &pRtlInitUnicodeString = GetProcAddress(
+        GetModuleHandle("ntdll"), "RtlInitUnicodeString");
+    *(FARPROC *) &pZwDeleteFile = GetProcAddress(
+        GetModuleHandle("ntdll"), "ZwDeleteFile");
+    *(FARPROC *) &pZwCreateFile = GetProcAddress(
+        GetModuleHandle("ntdll"), "ZwCreateFile");
+    *(FARPROC *) &pZwSetInformationFile = GetProcAddress(
+        GetModuleHandle("ntdll"), "ZwSetInformationFile");
+
+    wchar_t *path = get_unicode_buffer();
+
+    CreateDirectory("C:\\cuckoomonitor-native", NULL);
+    SetCurrentDirectory("C:\\cuckoomonitor-native");
+
+    pRtlInitUnicodeString(&dir_fname, L"\\??\\C:\\cuckoomonitor");
+    pRtlInitUnicodeString(&file_fname, L"abc.txt");
+
+    assert(path_get_full_path_unistr(&dir_fname, path) != 0);
+    assert(wcsicmp(path, L"C:\\cuckoomonitor") == 0);
+
+    InitializeObjectAttributes(&obj_dir, &dir_fname,
+        OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE, NULL, NULL);
+
+    memset(path, 0, MAX_PATH_W * sizeof(wchar_t));
+    assert(path_get_full_path_objattr(&obj_dir, path) != 0);
+    assert(wcsicmp(path, L"C:\\cuckoomonitor") == 0);
+
+    NTSTATUS ret = pZwCreateFile(&dir_handle, FILE_TRAVERSE, &obj_dir,
+        &io_dir, NULL, FILE_ATTRIBUTE_NORMAL, FILE_SHARE_READ, FILE_OPEN,
+        FILE_DIRECTORY_FILE, NULL, 0);
+    assert(NT_SUCCESS(ret));
+
+    memset(path, 0, MAX_PATH_W * sizeof(wchar_t));
+    assert(path_get_full_path_handle(dir_handle, path) != 0);
+    assert(wcsicmp(path, L"C:\\cuckoomonitor") == 0);
+
+    InitializeObjectAttributes(&obj_file, &file_fname,
+        OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE, dir_handle, NULL);
+
+    assert(path_get_full_path_objattr(&obj_file, path) != 0);
+    assert(wcsicmp(path, L"C:\\cuckoomonitor\\abc.txt") == 0);
+
+    free_unicode_buffer(path);
+}
 
 int main()
 {
@@ -95,5 +173,38 @@ int main()
     assert(strcmp(our_inet_ntoa(addr.sin_addr), "127.0.0.1") == 0);
     addr.sin_addr.s_addr = inet_addr("1.2.3.4");
     assert(strcmp(inet_ntoa(addr.sin_addr), our_inet_ntoa(addr.sin_addr)) == 0);
+
+    wchar_t *path = get_unicode_buffer();
+
+    assert(path_get_full_pathA("C:\\Windows\\System32\\kernel32.dll", path) != 0);
+    assert(wcsicmp(path, L"C:\\Windows\\System32\\kernel32.dll") == 0);
+
+    assert(QueryDosDeviceA("C:", buf, MAX_PATH) != 0);
+    strcat(buf, "\\Windows\\System32\\explorer.exe");
+    assert(path_get_full_pathA(buf, path) != 0);
+    assert(wcsicmp(path, L"C:\\Windows\\System32\\explorer.exe") == 0);
+
+    assert(path_get_full_pathA("\\Systemroot\\System32\\advapi32.dll", path) != 0);
+    assert(wcsicmp(path, L"C:\\Windows\\System32\\advapi32.dll") == 0);
+
+    assert(path_get_full_pathA("C:\\Windows\\404", path) != 0);
+    assert(wcsicmp(path, L"C:\\Windows\\404") == 0);
+
+    assert(path_get_full_pathA("C:\\Windows\\404\\404", path) != 0);
+    assert(wcsicmp(path, L"C:\\Windows\\404\\404") == 0);
+
+    assert(path_get_full_pathA("C:\\PROGRA~1\\INTERN~1\\iexplore.exe", path) != 0);
+    assert(wcsicmp(path, L"C:\\Program Files\\Internet Explorer\\iexplore.exe") == 0);
+
+    CreateDirectory("C:\\cuckoomonitor", NULL);
+    SetCurrentDirectory("C:\\cuckoomonitor");
+    assert(path_get_full_path_unistr(&unistr, path) != 0);
+    assert(wcsicmp(path, L"C:\\cuckoomonitor\\HELLO") == 0);
+
+    unistr.Buffer = L"HEY"; unistr.Length = unistr.MaximumLength = 6;
+    assert(path_get_full_path_objattr(&objattr, path) != 0);
+    assert(wcsicmp(path, L"C:\\cuckoomonitor\\HEY") == 0);
+
+    test_path_native();
     return 0;
 }
