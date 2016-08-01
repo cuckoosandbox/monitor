@@ -1,3 +1,4 @@
+- Tweak: Log filepath for NtWriteFile calls (thanks Kevin Ross).
 - New: Merged David Oren's "stack pivot" and DEP detection pull request.
 - New: Monitor is now capable of reporting feedback to the end user.
 - Tweak: Dump input and output parameters to WMI-based calls.

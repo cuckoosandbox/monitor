@@ -218,20 +218,23 @@ Parameters::
     ** PLARGE_INTEGER ByteOffset offset
     *  PULONG Key
 
-Logging::
-
-    b buffer (uintptr_t) Length, Buffer
-
 Interesting::
 
     h file_handle
 
-Post::
+Middle::
 
     wchar_t *filepath = get_unicode_buffer();
+    path_get_full_path_handle(FileHandle, filepath);
 
-    if(NT_SUCCESS(ret) != FALSE &&
-            path_get_full_path_handle(FileHandle, filepath) != 0) {
+Logging::
+
+    b buffer (uintptr_t) Length, Buffer
+    u filepath filepath
+
+Post::
+
+    if(NT_SUCCESS(ret) != FALSE) {
         pipe("FILE_NEW:%Z", filepath);
     }
 
