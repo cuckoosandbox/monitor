@@ -1,3 +1,10 @@
+- New: Merged David Oren's "stack pivot" and DEP detection pull request.
+- New: Monitor is now capable of reporting feedback to the end user.
+- Tweak: Dump input and output parameters to WMI-based calls.
+- New: Job-related API signatures.
+- Tweak: Added pdf-mode hooks to Adobe 11.
+- New: Implement instruction-level hooks for version-specific instrumentation.
+- Tweak: Whitelist certain access violations (thanks g0tmi1k).
 - New: Process follow logic for Win32_Process::Create functionality.
 - New: Integrate memory block dumping with the inject utility.
 - Tweak: Embed Capstone Engine directly rather than using Git submodules.
