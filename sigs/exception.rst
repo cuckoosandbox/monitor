@@ -149,7 +149,7 @@ Pre::
     else if(is_exception_code_whitelisted(exception_code) == 0) {
         uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
         count = stacktrace(Context, addrs, RETADDRCNT);
-        log_exception(Context, ExceptionRecord, addrs, count);
+        log_exception(Context, ExceptionRecord, addrs, count, 0);
     }
 
 
@@ -172,9 +172,9 @@ Pre::
 
     // uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
     // count = stacktrace(NULL, addrs, RETADDRCNT);
-    // log_exception(NULL, ExceptionRecord, addrs, count);
+    // log_exception(NULL, ExceptionRecord, addrs, count, 0);
 
-    log_exception(NULL, ExceptionRecord, NULL, 0);
+    log_exception(NULL, ExceptionRecord, NULL, 0, 0);
 
 
 _NtRaiseException
@@ -198,6 +198,6 @@ Pre::
 
     // uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
     // count = stacktrace(NULL, addrs, RETADDRCNT);
-    // log_exception(Context, ExceptionRecord, addrs, count);
+    // log_exception(Context, ExceptionRecord, addrs, count, 0);
 
-    log_exception(Context, ExceptionRecord, NULL, 0);
+    log_exception(Context, ExceptionRecord, NULL, 0, 0);

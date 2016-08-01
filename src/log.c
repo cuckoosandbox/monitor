@@ -665,7 +665,7 @@ void log_anomaly(const char *subcategory,
 }
 
 void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
-    uintptr_t *return_addresses, uint32_t count)
+    uintptr_t *return_addresses, uint32_t count, uint32_t flags)
 {
     char buf[128]; bson e, r, s;
     static int exception_count;
@@ -749,8 +749,10 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
         bson_append_string(&e, "instruction_r", insn_r);
     }
 
-    symbol(exception_address, sym, sizeof(sym));
-    bson_append_string(&e, "symbol", sym);
+    if((flags & LOG_EXC_NOSYMBOL) == 0) {
+        symbol(exception_address, sym, sizeof(sym));
+        bson_append_string(&e, "symbol", sym);
+    }
 
     our_snprintf(buf, sizeof(buf), "%p",
         rec != NULL ? (uintptr_t) rec->ExceptionCode : 0);
@@ -761,7 +763,13 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
 
         ultostr(idx, number, 10);
 
-        symbol((const uint8_t *) return_addresses[idx], sym, sizeof(sym)-32);
+        sym[0] = 0;
+        if((flags & LOG_EXC_NOSYMBOL) == 0) {
+            symbol(
+                (const uint8_t *) return_addresses[idx],
+                sym, sizeof(sym)-32
+            );
+        }
 
         if(sym[0] != 0) {
             strcat(sym, " @ ");

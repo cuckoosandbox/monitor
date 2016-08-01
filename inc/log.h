@@ -37,7 +37,7 @@ void log_anomaly(const char *subcategory,
     const char *funcname, const char *msg);
 
 void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
-    uintptr_t *return_addresses, uint32_t count);
+    uintptr_t *return_addresses, uint32_t count, uint32_t flags);
 
 void log_action(const char *action);
 
@@ -50,6 +50,8 @@ void log_debug(const char *fmt, ...);
 #if DEBUG == 0
 #define log_debug(fmt, ...) (void)0
 #endif
+
+#define LOG_EXC_NOSYMBOL 1
 
 // Following are function imports and declarations that are generated as part
 // of the automated code generation. However, as we don't want to recompile
