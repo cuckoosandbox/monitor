@@ -215,6 +215,12 @@ uintptr_t copy_uintptr(const void *value);
 void *copy_ptr(const void *ptr);
 void copy_return();
 
+void exploit_init();
+int exploit_set_guard_page(void *addr, uint32_t length);
+void *exploit_get_last_guard_page();
+void exploit_set_last_guard_page(void *addr);
+int exploit_is_guard_page_refer_whitelisted(uintptr_t *addrs, uint32_t count);
+
 int exploit_is_stack_pivoted();
 int exploit_makes_stack_executable(
     HANDLE process_handle, PVOID addr, DWORD new_protection);

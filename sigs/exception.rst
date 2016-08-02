@@ -106,11 +106,10 @@ RtlDispatchException
 Signature::
 
     * Callback: addr
-    * Is success: 1
     * Mode: exploit
     * Library: ntdll
     * Logging: no
-    * Return value: void *
+    * Return value: BOOL
     * Special: true
 
 Parameters::
@@ -138,6 +137,43 @@ Pre::
         copy_return();
     }
 
+    #if !__x86_64__
+
+    // Is this a guard page violation in one of our registered guard pages?
+    if(exception_code == STATUS_GUARD_PAGE_VIOLATION) {
+        uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
+        count = stacktrace(Context, addrs, RETADDRCNT);
+
+        uintptr_t memaddr = ExceptionRecord->ExceptionInformation[1];
+
+        if(Context->Dr7 == 0) {
+            Context->Dr0 = Context->Eip + lde((void *) pc);
+            Context->Dr7 = 1;
+
+            exploit_set_last_guard_page((void *)(memaddr & ~0xfff));
+        }
+
+        if(exploit_is_guard_page_refer_whitelisted(addrs, count) == 0) {
+            return TRUE;
+        }
+
+        log_exception(
+            Context, ExceptionRecord, addrs, count, LOG_EXC_NOSYMBOL
+        );
+        return TRUE;
+    }
+
+    // The hardware breakpoint triggers a single step exception.
+    if(exception_code == STATUS_SINGLE_STEP && pc == Context->Dr0) {
+        Context->Dr0 = 0;
+        Context->Dr7 = 0;
+
+        exploit_set_guard_page(exploit_get_last_guard_page(), 0x1000);
+        return TRUE;
+    }
+
+    #endif
+
     // Is this exception address whitelisted? This is the case for the
     // IsBadReadPtr function where access violations are expected.
     if(exception_code == STATUS_ACCESS_VIOLATION &&
@@ -145,7 +181,8 @@ Pre::
         // TODO Should we do something here?
         // For now we'll just ignore this code path.
     }
-    // Ignore exceptions that are caused by calling OutputDebugString().
+    // Ignore several exception codes such as the one caused by calling
+    // OutputDebugString().
     else if(is_exception_code_whitelisted(exception_code) == 0) {
         uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
         count = stacktrace(Context, addrs, RETADDRCNT);

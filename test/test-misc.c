@@ -34,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     else { \
         pipe("INFO:Test passed: %z", #expr); \
     }
+
 #define OBJ_CASE_INSENSITIVE 0x00000040
 #define OBJ_KERNEL_HANDLE 0x00000200
 

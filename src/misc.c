@@ -1954,5 +1954,10 @@ void logging_file_trigger(const wchar_t *filepath)
 {
     if(g_monitor_logging == 0 && wcsicmp(filepath, g_monitor_trigger) == 0) {
         g_monitor_logging = 1;
+
+        // Initialize extra exploit analysis functionality.
+        if((g_monitor_mode & HOOK_MODE_EXPLOIT) == HOOK_MODE_EXPLOIT) {
+            exploit_init();
+        }
     }
 }
