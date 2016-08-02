@@ -800,6 +800,11 @@ void log_action(const char *action)
     log_api(sig_index_action(), 1, 0, 0, NULL, action);
 }
 
+void log_guardrw(uintptr_t addr)
+{
+    log_api(sig_index_guardrw(), 1, 0, 0, NULL, addr);
+}
+
 static void *_bson_malloc(size_t length)
 {
     return mem_alloc(length);

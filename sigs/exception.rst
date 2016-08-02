@@ -157,9 +157,7 @@ Pre::
             return TRUE;
         }
 
-        log_exception(
-            Context, ExceptionRecord, addrs, count, LOG_EXC_NOSYMBOL
-        );
+        log_guardrw(memaddr);
         return TRUE;
     }
 

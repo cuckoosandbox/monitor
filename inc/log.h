@@ -40,6 +40,7 @@ void log_exception(CONTEXT *ctx, EXCEPTION_RECORD *rec,
     uintptr_t *return_addresses, uint32_t count, uint32_t flags);
 
 void log_action(const char *action);
+void log_guardrw(uintptr_t addr);
 
 void log_new_process();
 void WINAPI log_missing_hook(const char *funcname);
@@ -78,6 +79,7 @@ uint32_t sig_index_anomaly();
 uint32_t sig_index_exception();
 uint32_t sig_index_missing();
 uint32_t sig_index_action();
+uint32_t sig_index_guardrw();
 uint32_t sig_index_firsthookidx();
 
 #endif

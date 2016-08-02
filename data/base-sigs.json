@@ -56,5 +56,14 @@
         "signature": {
             "category": "__notification__"
         }
+    },
+    {
+        "apiname": "__guardrw__",
+        "parameters": [
+            {"argtype": "uintptr_t", "argname": "address"}
+        ],
+        "signature": {
+            "category": "__notification__"
+        }
     }
 ]
