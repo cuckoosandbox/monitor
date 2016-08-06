@@ -150,10 +150,13 @@ Pre::
             Context->Dr0 = Context->Eip + lde((void *) pc);
             Context->Dr7 = 1;
 
-            exploit_set_last_guard_page((void *)(memaddr & ~0xfff));
+            exploit_set_last_guard_page((void *) memaddr);
         }
 
-        if(exploit_is_guard_page_refer_whitelisted(addrs, count) == 0) {
+        if(exploit_is_guard_page_referer_whitelisted(addrs, count) == 0) {
+            if(exploit_hotpatch_guard_page_referer(memaddr, pc) == 0) {
+                Context->Dr0 = Context->Dr7 = 0;
+            }
             return TRUE;
         }
 
@@ -166,7 +169,7 @@ Pre::
         Context->Dr0 = 0;
         Context->Dr7 = 0;
 
-        exploit_set_guard_page(exploit_get_last_guard_page(), 0x1000);
+        exploit_set_guard_page(exploit_get_last_guard_page());
         return TRUE;
     }
 

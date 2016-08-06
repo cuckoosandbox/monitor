@@ -58,13 +58,18 @@ typedef enum _register_t {
 
 int asm_move_regimm(uint8_t *stub, register_t reg, uintptr_t value);
 int asm_push(uint8_t *stub, uintptr_t value);
+int asm_push32(uint8_t *stub, uintptr_t value);
 int asm_push_register(uint8_t *stub, register_t reg);
 int asm_jregz(uint8_t *stub, register_t reg, int8_t offset);
 int asm_jump_32bit(uint8_t *stub, const void *addr);
+int asm_jump_32bit_rel(uint8_t *stub, const void *addr, int relative);
 int asm_add_regimm(uint8_t *stub, register_t reg, uint32_t value);
 int asm_add_esp_imm(uint8_t *stub, uint32_t value);
 int asm_sub_regimm(uint8_t *stub, register_t reg, uint32_t value);
 int asm_sub_esp_imm(uint8_t *stub, uint32_t value);
+int asm_lea_regregimm(
+    uint8_t *stub, register_t dst, register_t src, uint32_t value
+);
 int asm_jump(uint8_t *stub, const void *addr);
 int asm_call(uint8_t *stub, const void *addr);
 int asm_return(uint8_t *stub, uint16_t value);

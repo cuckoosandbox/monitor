@@ -89,8 +89,8 @@ uint8_t *hook_modulecb_{{ info.clean }}(
     h->handler = (FARPROC) io->callback;
 
     pipe(
-        "INFO:insn=%d, signature=0x%x, addr=0x%x, handler=0x%x",
-        h->insn, h->insn_signature, h->addr, h->handler
+        "INFO:type=%d, signature=0x%x, addr=0x%x, handler=0x%x",
+        h->type, h->insn_signature, h->addr, h->handler
     );
 
     return h->addr;

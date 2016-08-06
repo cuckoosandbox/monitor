@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define HOOK_MODE_OFFICE   8
 #define HOOK_MODE_PDF      16
 
+#define HOOK_INSN_NONE     0
 #define HOOK_INSN_EAX      1
 #define HOOK_INSN_ECX      2
 #define HOOK_INSN_EDX      3
@@ -43,7 +44,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define HOOK_INSN_EBP      6
 #define HOOK_INSN_ESI      7
 #define HOOK_INSN_EDI      8
-#define HOOK_INSN_STK(n)   (9+n)
+#define HOOK_INSN_VAR32    9
+#define HOOK_INSN_STK(n)   (10+n)
+
+#define HOOK_TYPE_NORMAL   0
+#define HOOK_TYPE_INSN     1
+#define HOOK_TYPE_GUARD    2
+
+#define HOOK_INSN_WRAPPER(a, b, c, d, ...) ( \
+    ((HOOK_INSN_##a) << 24) | ((HOOK_INSN_##b) << 16) | \
+    ((HOOK_INSN_##c) << 8) | ((HOOK_INSN_##d) << 0))
+
+#define HOOK_INSN(...) \
+    HOOK_INSN_WRAPPER(__VA_ARGS__, NONE, NONE, NONE, NONE)
 
 typedef struct _hook_t {
     // Library and function name.
@@ -63,8 +76,10 @@ typedef struct _hook_t {
     // related to API hooks.
     int report;
 
-    // Is this an instruction-level hook.
-    int insn;
+    // Type of hook.
+    int type;
+
+    // Value for signature hook types.
     uint32_t insn_signature;
 
     // Mode indicating in which monitor modes this hook should be enabled.
@@ -112,6 +127,7 @@ int lde(const void *addr);
 int hook_in_monitor();
 
 int hook(hook_t *h, void *module_handle);
+int hook_insn(hook_t *h, uint32_t signature, ...);
 int hook_missing_hooks(HMODULE module_handle);
 
 #define DISASM_BUFSIZ 128

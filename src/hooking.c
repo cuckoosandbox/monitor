@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "unhook.h"
 
 #define MISSING_HANDLE_COUNT 128
+#define FUNCTIONSTUBSIZE 128
 
 static SYSTEM_INFO g_si;
 static csh g_capstone;
@@ -138,7 +139,9 @@ int hook_init2()
     _capstone_init();
 
     // Memory for function stubs of all the hooks.
-    slab_init(&g_function_stubs, 64, 128, PAGE_EXECUTE_READWRITE);
+    slab_init(
+        &g_function_stubs, FUNCTIONSTUBSIZE, 128, PAGE_EXECUTE_READWRITE
+    );
 
     // TODO At the moment this only works on Vista+, not on Windows XP. As
     // shown by Brad Spengler it's fairly trivial to achieve the same on
@@ -625,27 +628,26 @@ static int _hook_determine_start(hook_t *h)
     return 0;
 }
 
-int hook_insn(hook_t *h, uint32_t signature)
+static int _hook_call_method_arguments(
+    uint8_t *ptr, uint32_t signature, va_list args)
 {
-    uint8_t *ptr = h->func_stub;
-
-    ptr += asm_sub_esp_imm(ptr, 0x1000);
-    ptr += asm_push_context(ptr);
+    uint8_t *base = ptr;
 
     for (uint32_t idx = 0; idx < 4; idx++) {
         uint8_t arg = signature & 0xff; signature >>= 8;
         if(arg >= HOOK_INSN_STK(0)) {
             uint32_t offset = 36 + 4 * (arg - HOOK_INSN_STK(0));
             if(offset >= 0x80) {
-                pipe(
-                    "ERROR:Stack offset is too high for instruction hook %z",
-                    h->funcname
-                );
+                pipe("ERROR:Stack offset is too high");
                 return -1;
             }
 
             // push dword [esp+X]
             ptr += asm_push_stack_offset(ptr, offset);
+        }
+        else if(arg == HOOK_INSN_VAR32) {
+            // push dword value
+            ptr += asm_push32(ptr, va_arg(args, uint32_t));
         }
         else if(arg >= HOOK_INSN_EAX) {
             // push register
@@ -661,6 +663,89 @@ int hook_insn(hook_t *h, uint32_t signature)
         }
     }
 
+    va_end(args);
+    return ptr - base;
+}
+
+static int _hook_copy_insns(
+    hook_t *h, uint8_t **ptr, uintptr_t *jmpaddr, int *relative)
+{
+    uint8_t *addr = h->addr; *jmpaddr = *relative = 0;
+    while (addr - h->addr < 5) {
+        if(*addr == 0xe8) {
+            pipe("ERROR:call not yet supported");
+            // *relative = 0;
+            // *jmpaddr = (uintptr_t) addr + *(uint32_t *)(addr + 1) + 5;
+            return -1;
+        }
+        if(*addr == 0xe9) {
+            *relative = 0;
+            *jmpaddr = (uintptr_t) addr + *(int32_t *)(addr + 1) + 5;
+            addr += 5;
+            continue;
+        }
+        if(*addr == 0xeb) {
+            *relative = 0;
+            *jmpaddr = (uintptr_t) addr + *(int8_t *)(addr + 1) + 2;
+            addr += 2;
+            continue;
+        }
+        if(*addr >= 0x70 && *addr < 0x80) {
+            *relative = 1 + *addr - 0x70;
+            *jmpaddr = (uintptr_t) addr + *(int8_t *)(addr + 1) + 2;
+            addr += 2;
+            continue;
+        }
+        if(*addr == 0x0f && addr[1] >= 0x80 && addr[1] < 0x90) {
+            *relative = 1 + addr[1] - 0x80;
+            *jmpaddr = (uintptr_t) addr + *(int32_t *)(addr + 2) + 6;
+            addr += 6;
+            continue;
+        }
+
+        uint32_t len = lde(addr);
+
+        memcpy(*ptr, addr, len);
+        addr += len;
+        *ptr += len;
+    }
+    return addr - h->addr;
+}
+
+static int _hook_emit_jump(uint8_t *ptr, uintptr_t jmpaddr, int relative)
+{
+    if(jmpaddr == 0) {
+        return 0;
+    }
+
+    if(relative == 0) {
+        return asm_jump_32bit(ptr, (void *) jmpaddr);
+    }
+    else {
+        return asm_jump_32bit_rel(ptr, (void *) jmpaddr, relative - 1);
+    }
+}
+
+int hook_insn(hook_t *h, uint32_t signature, ...)
+{
+    uint8_t *ptr = h->func_stub; int r, relative; uintptr_t jmpaddr;
+
+    ptr += asm_sub_esp_imm(ptr, 0x1000);
+    ptr += asm_push_context(ptr);
+
+    va_list args;
+    va_start(args, signature);
+
+    r = _hook_call_method_arguments(ptr, signature, args);
+
+    va_end(args);
+
+    if(r < 0) {
+        return r;
+    }
+
+    ptr += r;
+
     // We're cheating a little bit here. The hook() function will create a
     // jump from the targeted instruction(s) to h->handler. Since normally
     // this is a simple jump we will for now fake the handler thing and point
@@ -671,25 +756,17 @@ int hook_insn(hook_t *h, uint32_t signature)
     ptr += asm_pop_context(ptr);
     ptr += asm_add_esp_imm(ptr, 0x1000);
 
-    uint8_t *addr = h->addr;
-    while (addr - h->addr < 5) {
-        if(*addr == 0xe8 || *addr == 0xe9 || *addr == 0xeb ||
-                (*addr >= 0x70 && *addr < 0x80)) {
-            pipe(
-                "ERROR:The instruction hook %z contains a pc-changing "
-                "instructions which we currently don't support", h->funcname
-            );
-            return -1;
-        }
-
-        uint32_t len = lde(addr);
-
-        memcpy(ptr, addr, len);
-        addr += len;
-        ptr += len;
+    r = _hook_copy_insns(h, &ptr, &jmpaddr, &relative);
+    if(r < 0) {
+        return r;
     }
 
-    ptr += asm_jump_32bit(ptr, addr);
+    if(jmpaddr != 0) {
+        pipe("ERROR:Instruction-level hooking does not yet support jumps");
+        return -1;
+    }
+
+    ptr += asm_jump_32bit(ptr, h->addr + r);
 
     if((uintptr_t)(ptr - h->func_stub) >= slab_size(&g_function_stubs)) {
         pipe(
@@ -698,7 +775,68 @@ int hook_insn(hook_t *h, uint32_t signature)
         );
         return -1;
     }
-    return addr - h->addr;
+    return r;
+}
+
+int hook_hotpatch_guardpage(hook_t *h, uint32_t signature, ...)
+{
+    uint8_t *ptr = h->func_stub; int r, relative; uintptr_t jmpaddr;
+
+    va_list args;
+    va_start(args, signature);
+
+    ptr += asm_sub_esp_imm(ptr, 0x1000);
+    ptr += asm_push_context(ptr);
+
+    r = _hook_call_method_arguments(ptr, signature, args);
+    if(r < 0) {
+        va_end(args);
+        return r;
+    }
+
+    ptr += r;
+    ptr += asm_call(ptr, &exploit_unset_guard_page_wrapper);
+
+    ptr += asm_pop_context(ptr);
+    ptr += asm_add_esp_imm(ptr, 0x1000);
+
+    h->stub_used = r = _hook_copy_insns(h, &ptr, &jmpaddr, &relative);
+    if(r < 0) {
+        va_end(args);
+        return r;
+    }
+
+    ptr += asm_sub_esp_imm(ptr, 0x1000);
+    ptr += asm_push_context(ptr);
+
+    r = _hook_call_method_arguments(ptr, signature, args);
+    if(r < 0) {
+        va_end(args);
+        return r;
+    }
+
+    ptr += r;
+    ptr += asm_call(ptr, &exploit_set_guard_page_wrapper);
+
+    ptr += asm_pop_context(ptr);
+    ptr += asm_add_esp_imm(ptr, 0x1000);
+
+    ptr += _hook_emit_jump(ptr, jmpaddr, relative);
+
+    ptr += asm_jump_32bit(ptr, h->addr + h->stub_used);
+
+    va_end(args);
+
+    h->handler = (FARPROC) h->func_stub;
+
+    if((uintptr_t)(ptr - h->func_stub) >= slab_size(&g_function_stubs)) {
+        pipe(
+            "ERROR:The stub created for hook %z used too much space, space "
+            "should be enlarged to accommodate such usage.", h->funcname
+        );
+        return -1;
+    }
+    return 0;
 }
 
 int hook(hook_t *h, void *module_handle)
@@ -750,7 +888,7 @@ int hook(hook_t *h, void *module_handle)
         }
     }
 
-    if(_hook_determine_start(h) < 0) {
+    if(h->type == HOOK_TYPE_NORMAL && _hook_determine_start(h) < 0) {
         pipe("CRITICAL:Error determining start of function %z!%z.",
             h->library, h->funcname);
         return -1;
@@ -828,23 +966,27 @@ int hook(hook_t *h, void *module_handle)
         *h->orig = (FARPROC) h->func_stub;
     }
 
-    if(h->insn == 0) {
+    if(h->type == HOOK_TYPE_NORMAL) {
         // Create the original function stub.
         h->stub_used = hook_create_stub(h->func_stub,
             h->addr, ASM_JUMP_32BIT_SIZE + h->skip);
-        if(h->stub_used < 0) {
-            pipe(
-                "CRITICAL:Error creating function stub for %z!%z.",
-                h->library, h->funcname
-            );
-            return -1;
-        }
     }
-    else {
+    else if(h->type == HOOK_TYPE_INSN) {
         h->stub_used = hook_insn(h, h->insn_signature);
     }
+    else if(h->type == HOOK_TYPE_GUARD) {
+        hook_hotpatch_guardpage(h, h->insn_signature);
+    }
 
-    uint8_t region_original[32];
+    if(h->stub_used < 0) {
+        pipe(
+            "CRITICAL:Error creating function stub for %z!%z.",
+            h->library, h->funcname
+        );
+        return -1;
+    }
+
+    uint8_t region_original[FUNCTIONSTUBSIZE];
     memcpy(region_original, h->addr, h->stub_used);
 
     // Patch the original function.
