@@ -154,7 +154,7 @@ Pre::
         }
 
         if(exploit_is_guard_page_referer_whitelisted(addrs, count) == 0) {
-            if(exploit_hotpatch_guard_page_referer(memaddr, pc) == 0) {
+            if(exploit_hotpatch_guard_page_referer(pc) == 0) {
                 Context->Dr0 = Context->Dr7 = 0;
             }
             return TRUE;

@@ -100,6 +100,24 @@ int asm_jregz(uint8_t *stub, register_t reg, int8_t offset)
 
 #endif
 
+int asm_push_register(uint8_t *stub, register_t reg)
+{
+#if __x86_64__
+    if(reg >= R_R8) {
+        *stub++ = 0x41;
+        *stub++ = 0x50 + (reg - R_R8);
+        return 2;
+    }
+    else {
+        *stub++ = 0x50 + reg;
+        return 1;
+    }
+#else
+    *stub++ = 0x50 + reg;
+    return 1;
+#endif
+}
+
 int asm_add_regimm(uint8_t *stub, register_t reg, uint32_t value)
 {
 #if __x86_64__

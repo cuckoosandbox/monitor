@@ -114,6 +114,30 @@ void test_path_native()
     free_unicode_buffer(path);
 }
 
+#define LEAREWR(in, len, out) \
+    memset(buf, 0, sizeof(buf)); memset(hex, 0, sizeof(hex)); \
+    assert(exploit_insn_rewrite_to_lea(buf, (uint8_t *) in) == len); \
+    hexdump(hex, buf, len); \
+    assert(strcmp(hex, out) == 0); \
+    if(strcmp(hex, out) != 0) { \
+        hexdump(hex2, in, sizeof(in)-1); \
+        pipe("INFO:failing instruction %z => %z (%z%z)", \
+            hex2, hex, hex2, hex); \
+    }
+
+void test_exploit_lea_rewrite()
+{
+    uint8_t buf[16]; char hex[40], hex2[40];
+
+    LEAREWR("\x8b\x00", 6, "8d8000000000");
+    LEAREWR("\x66\x39\x06", 6, "8d8600000000");
+    LEAREWR("\x8b\x46\x3c", 6, "8d863c000000");
+    LEAREWR("\x0f\xb7\x41\x18", 6, "8d8118000000");
+    LEAREWR("\x3b\x48\x74", 6, "8d8074000000");
+    LEAREWR("\x8b\x54\xc8\x78", 7, "8d84c878000000");
+    LEAREWR("\x8b\x4c\xc8\x7c", 7, "8d84c87c000000");
+}
+
 int main()
 {
     static char buf[0x1000]; static wchar_t bufW[0x1000];
@@ -207,5 +231,6 @@ int main()
     assert(wcsicmp(path, L"C:\\cuckoomonitor\\HEY") == 0);
 
     test_path_native();
+    test_exploit_lea_rewrite();
     return 0;
 }

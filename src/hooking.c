@@ -668,9 +668,10 @@ static int _hook_call_method_arguments(
 }
 
 static int _hook_copy_insns(
-    hook_t *h, uint8_t **ptr, uintptr_t *jmpaddr, int *relative)
+    hook_t *h, uint8_t **ptr, uintptr_t *jmpaddr, int *relative,
+    uintptr_t *spoff)
 {
-    uint8_t *addr = h->addr; *jmpaddr = *relative = 0;
+    uint8_t *addr = h->addr; *jmpaddr = *relative = *spoff = 0;
     while (addr - h->addr < 5) {
         if(*addr == 0xe8) {
             pipe("ERROR:call not yet supported");
@@ -702,6 +703,9 @@ static int _hook_copy_insns(
             addr += 6;
             continue;
         }
+        if(*addr >= 0x50 && *addr < 0x58) {
+            *spoff += 4;
+        }
 
         uint32_t len = lde(addr);
 
@@ -728,7 +732,7 @@ static int _hook_emit_jump(uint8_t *ptr, uintptr_t jmpaddr, int relative)
 
 int hook_insn(hook_t *h, uint32_t signature, ...)
 {
-    uint8_t *ptr = h->func_stub; int r, relative; uintptr_t jmpaddr;
+    uint8_t *ptr = h->func_stub; int r, relative; uintptr_t jmpaddr, spoff;
 
     ptr += asm_sub_esp_imm(ptr, 0x1000);
     ptr += asm_push_context(ptr);
@@ -756,7 +760,7 @@ int hook_insn(hook_t *h, uint32_t signature, ...)
     ptr += asm_pop_context(ptr);
     ptr += asm_add_esp_imm(ptr, 0x1000);
 
-    r = _hook_copy_insns(h, &ptr, &jmpaddr, &relative);
+    r = _hook_copy_insns(h, &ptr, &jmpaddr, &relative, &spoff);
     if(r < 0) {
         return r;
     }
@@ -778,54 +782,53 @@ int hook_insn(hook_t *h, uint32_t signature, ...)
     return r;
 }
 
-int hook_hotpatch_guardpage(hook_t *h, uint32_t signature, ...)
+int hook_hotpatch_guardpage(hook_t *h)
 {
-    uint8_t *ptr = h->func_stub; int r, relative; uintptr_t jmpaddr;
-
-    va_list args;
-    va_start(args, signature);
+    uint8_t *ptr = h->func_stub; int r, relative; uintptr_t jmpaddr, spoff;
 
     ptr += asm_sub_esp_imm(ptr, 0x1000);
     ptr += asm_push_context(ptr);
 
-    r = _hook_call_method_arguments(ptr, signature, args);
+    r = exploit_insn_rewrite_to_lea(ptr, h->addr);
     if(r < 0) {
-        va_end(args);
         return r;
     }
 
     ptr += r;
-    ptr += asm_call(ptr, &exploit_unset_guard_page_wrapper);
+
+#if __x86_64__
+    ptr += asm_push_register(ptr, R_RAX);
+#else
+    ptr += asm_push_register(ptr, R_EAX);
+#endif
+
+    ptr += asm_call(ptr, &exploit_unset_guard_page);
 
     ptr += asm_pop_context(ptr);
     ptr += asm_add_esp_imm(ptr, 0x1000);
 
-    h->stub_used = r = _hook_copy_insns(h, &ptr, &jmpaddr, &relative);
+    h->stub_used = r = _hook_copy_insns(h, &ptr, &jmpaddr, &relative, &spoff);
     if(r < 0) {
-        va_end(args);
         return r;
     }
 
-    ptr += asm_sub_esp_imm(ptr, 0x1000);
+    ptr += asm_sub_esp_imm(ptr, 0x1000 - spoff);
     ptr += asm_push_context(ptr);
 
-    r = _hook_call_method_arguments(ptr, signature, args);
-    if(r < 0) {
-        va_end(args);
-        return r;
-    }
-
-    ptr += r;
-    ptr += asm_call(ptr, &exploit_set_guard_page_wrapper);
+    // Black magic incoming. Because the register containing the address of
+    // the guard page may be changed during the emitted instructions just
+    // above here, we are required to use the address set earlier. We'll be
+    // using the address that was set earlier through a kind of "unitialized
+    // stack variable" method. Seems to work just fine though.
+    ptr += asm_sub_esp_imm(ptr, 4);
+    ptr += asm_call(ptr, &exploit_set_guard_page);
 
     ptr += asm_pop_context(ptr);
-    ptr += asm_add_esp_imm(ptr, 0x1000);
+    ptr += asm_add_esp_imm(ptr, 0x1000 - spoff);
 
     ptr += _hook_emit_jump(ptr, jmpaddr, relative);
 
     ptr += asm_jump_32bit(ptr, h->addr + h->stub_used);
-
-    va_end(args);
 
     h->handler = (FARPROC) h->func_stub;
 
@@ -975,7 +978,7 @@ int hook(hook_t *h, void *module_handle)
         h->stub_used = hook_insn(h, h->insn_signature);
     }
     else if(h->type == HOOK_TYPE_GUARD) {
-        hook_hotpatch_guardpage(h, h->insn_signature);
+        hook_hotpatch_guardpage(h);
     }
 
     if(h->stub_used < 0) {

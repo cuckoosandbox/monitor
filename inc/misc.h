@@ -216,26 +216,20 @@ void *copy_ptr(const void *ptr);
 void copy_return();
 
 void exploit_init();
-int exploit_set_guard_page(void *addr);
-int exploit_unset_guard_page(void *addr);
+int WINAPI exploit_set_guard_page(void *addr);
+int WINAPI exploit_unset_guard_page(void *addr);
 void *exploit_get_last_guard_page();
 void exploit_set_last_guard_page(void *addr);
 int exploit_is_guard_page_referer_whitelisted(
     uintptr_t *addrs, uint32_t count);
-int exploit_hotpatch_guard_page_referer(uintptr_t memaddr, uintptr_t pc);
-
-int WINAPI exploit_set_guard_page_wrapper(
-    void *addr, uint32_t unused1, uint32_t unused2, uint32_t unused3
-);
-int WINAPI exploit_unset_guard_page_wrapper(
-    void *addr, uint32_t unused1, uint32_t unused2, uint32_t unused3
-);
+int exploit_hotpatch_guard_page_referer(uintptr_t pc);
 
 int exploit_is_stack_pivoted();
 int exploit_makes_stack_executable(
     HANDLE process_handle, PVOID addr, DWORD new_protection);
 int exploit_makes_heap_executable(
     HANDLE process_handle, PVOID addr, DWORD new_protection);
+int exploit_insn_rewrite_to_lea(uint8_t *buf, uint8_t *insn);
 
 #define OBJECT_NAME_INFORMATION_REQUIRED_SIZE \
     sizeof(OBJECT_NAME_INFORMATION) + sizeof(wchar_t) * MAX_PATH_W
