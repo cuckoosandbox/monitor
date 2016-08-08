@@ -136,6 +136,7 @@ void test_exploit_lea_rewrite()
     LEAREWR("\x3b\x48\x74", 6, "8d8074000000");
     LEAREWR("\x8b\x54\xc8\x78", 7, "8d84c878000000");
     LEAREWR("\x8b\x4c\xc8\x7c", 7, "8d84c87c000000");
+    LEAREWR("\x66\x8b\x3c\x13", 7, "8d841300000000");
 }
 
 int main()
@@ -183,6 +184,9 @@ int main()
 
     assert(wcscmp(extract_unicode_string_unistr(&unistr), L"HELLO") == 0);
     assert(wcscmp(extract_unicode_string_objattr(&objattr), L"HELLO") == 0);
+
+    assert(strcmp((hexdump(buf, "hehe", 4), buf), "68656865") == 0);
+    assert(strcmp((hexdump(buf, "\x00\x01\x02", 3), buf), "000102") == 0);
 
     struct sockaddr_in addr; const char *ip; int port;
     addr.sin_family = AF_INET;
