@@ -420,7 +420,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
 
         if(*fmt == 's') {
             const char *s = va_arg(args, const char *);
-            log_string(&b, idx, s, copy_strlen(s));
+            log_string(&b, idx, s, s != NULL ? copy_strlen(s) : 0);
         }
         else if(*fmt == 'S') {
             int len = va_arg(args, int);
@@ -429,7 +429,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
         }
         else if(*fmt == 'u') {
             const wchar_t *s = va_arg(args, const wchar_t *);
-            log_wstring(&b, idx, s, copy_strlenW(s));
+            log_wstring(&b, idx, s, s != NULL ? copy_strlenW(s) : 0);
         }
         else if(*fmt == 'U') {
             int len = va_arg(args, int);
