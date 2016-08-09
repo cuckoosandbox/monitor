@@ -68,5 +68,12 @@ int main(int argc, char *argv[])
         assert(addr == GetProcAddress((HMODULE) module, "LoadLibraryW"));
     }
 
+    uint32_t t = GetTickCount();
+    for (uint32_t idx = 0; idx < 0x1000; idx++) {
+        char ch = module[idx % 0x1000];
+        assert(ch == (ch ^ 0x41 ^ 0x41));
+    }
+    // Under normal load this should take up to 5 to 10 seconds.
+    assert(GetTickCount() - t < 20000);
     return 0;
 }

@@ -137,6 +137,13 @@ void test_exploit_lea_rewrite()
     LEAREWR("\x8b\x54\xc8\x78", 7, "8d84c878000000");
     LEAREWR("\x8b\x4c\xc8\x7c", 7, "8d84c87c000000");
     LEAREWR("\x66\x8b\x3c\x13", 7, "8d841300000000");
+    LEAREWR("\xf3\xa5", 2, "8d06");
+    LEAREWR("\x83\x78\x28\x00", 6, "8d8028000000");
+    LEAREWR("\x0f\xb6\x40\xfc", 6, "8d80fcffffff");
+    LEAREWR("\x8a\x50\xfd", 6, "8d80fdffffff");
+    LEAREWR("\x85\x48\x16", 6, "8d8016000000");
+    LEAREWR("\x8a\x10", 6, "8d8000000000");
+    LEAREWR("\x80\x38\x00", 6, "8d8000000000");
 }
 
 int main()
