@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "hooking.h"
 #include "ignore.h"
+#include "memory.h"
 #include "misc.h"
 #include "pipe.h"
 
@@ -39,10 +40,11 @@ typedef struct _module_t {
     ((value) == HASH_INTERESTING || (value) == HASH_IGNORE ? \
         HASH_INTERESTING+2 : (value))
 
-static uint32_t g_module_count, g_list_length;
+static uint32_t g_module_count;
 static module_t g_modules[MAX_MODULE_COUNT];
-static uint64_t *g_list;
 static int g_diffing_enabled;
+
+static dnq_t g_list;
 
 static uint64_t _get_module_hash(HMODULE module_handle)
 {
@@ -180,41 +182,6 @@ static uint64_t _parameter_hash(const char *fmt, va_list args)
     return ENSURE_HASH_NOT_SPECIAL(ret);
 }
 
-static int _value_in_list(uint64_t value, uint64_t *list, uint32_t length)
-{
-    uint32_t low = 0, high = length - 1;
-
-    while (high - low > 1) {
-        uint32_t index = low + (high - low) / 2;
-        if(value == list[index]) {
-            return 1;
-        }
-
-        if(value > list[index]) {
-            low = index;
-            continue;
-        }
-
-        if(value < list[index]) {
-            high = index;
-            continue;
-        }
-    }
-
-    if(value == list[low] || value == list[high]) {
-        return 1;
-    }
-
-    return 0;
-}
-
-static int _sort_uint64(const void *a, const void *b)
-{
-    uint64_t _a = *(const uint64_t *) a;
-    uint64_t _b = *(const uint64_t *) b;
-    return _a - _b;
-}
-
 void diffing_init(const char *path, int enable)
 {
     FILE *fp = fopen(path, "rb");
@@ -223,13 +190,15 @@ void diffing_init(const char *path, int enable)
         uint32_t filesize = ftell(fp);
         fseek(fp, 0, SEEK_SET);
 
-        g_list = (uint64_t *) VirtualAlloc(NULL, filesize,
-            MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
-        if(g_list != NULL) {
-            fread(g_list, filesize, 1, fp);
+        uint64_t *list = (uint64_t *) VirtualAlloc(
+            NULL, filesize, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE
+        );
+        if(list != NULL) {
+            fread(list, filesize, 1, fp);
 
-            g_list_length = filesize / sizeof(uint64_t);
-            qsort(g_list, g_list_length, sizeof(uint64_t), &_sort_uint64);
+            dnq_init(
+                &g_list, list, sizeof(uint64_t), filesize / sizeof(uint64_t)
+            );
         }
 
         fclose(fp);
@@ -243,7 +212,7 @@ uint64_t call_hash(const char *fmt, ...)
 {
     // If no diffing list has been initialized and diffing has not been
     // explicitly enabled, then ignore all call_hash() calls.
-    if(g_list_length == 0 && g_diffing_enabled == 0) {
+    if(dnq_isempty(&g_list) != 0 && g_diffing_enabled == 0) {
         return HASH_INTERESTING;
     }
 
@@ -277,9 +246,9 @@ int is_interesting_hash(uint64_t hash)
     }
 
     // No diffing list available - everything is interesting.
-    if(g_list == NULL || g_list_length == 0) {
+    if(dnq_isempty(&g_list) != 0) {
         return 1;
     }
 
-    return _value_in_list(hash, g_list, g_list_length);
+    return dnq_has64(&g_list, hash);
 }

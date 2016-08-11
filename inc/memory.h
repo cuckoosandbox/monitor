@@ -64,6 +64,22 @@ static inline uintptr_t array_geti(array_t *array, uintptr_t index)
 void slab_init(slab_t *slab, uint32_t size, uint32_t count,
     uint32_t memory_protection);
 void *slab_getmem(slab_t *slab);
+void slab_return_last(slab_t *slab);
 uint32_t slab_size(const slab_t *slab);
+
+typedef struct _dnq_t {
+    void *list;
+    uint32_t size;
+    uint32_t length;
+} dnq_t;
+
+int dnq_init(dnq_t *dnq, void *list, uint32_t size, uint32_t length);
+uint32_t *dnq_iter32(dnq_t *dnq);
+uint64_t *dnq_iter64(dnq_t *dnq);
+uintptr_t *dnq_iterptr(dnq_t *dnq);
+int dnq_isempty(dnq_t *dnq);
+int dnq_has32(dnq_t *dnq, uint32_t value);
+int dnq_has64(dnq_t *dnq, uint64_t value);
+int dnq_hasptr(dnq_t *dnq, uintptr_t value);
 
 #endif

@@ -216,6 +216,7 @@ void *copy_ptr(const void *ptr);
 void copy_return();
 
 void exploit_init();
+int exploit_is_registered_guard_page(uintptr_t addr);
 int WINAPI exploit_set_guard_page(void *addr);
 int WINAPI exploit_unset_guard_page(void *addr);
 void *exploit_get_last_guard_page();

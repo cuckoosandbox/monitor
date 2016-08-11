@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Maximum length of a buffer so we try to avoid polluting logs with garbage.
 #define BUFFER_LOG_MAX 4096
-#define EXCEPTION_MAXCOUNT 1024
+#define EXCEPTION_MAXCOUNT 0x10000
 
 static CRITICAL_SECTION g_mutex;
 static uint32_t g_starttick;
@@ -800,9 +800,18 @@ void log_action(const char *action)
     log_api(sig_index_action(), 1, 0, 0, NULL, action);
 }
 
-void log_guardrw(uintptr_t addr)
+void WINAPI log_guardrw(uintptr_t addr)
 {
-    log_api(sig_index_guardrw(), 1, 0, 0, NULL, addr);
+    if(exploit_is_registered_guard_page(addr) == 0) {
+        return;
+    }
+
+    uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
+    count = stacktrace(NULL, addrs, RETADDRCNT);
+
+    if(exploit_is_guard_page_referer_whitelisted(addrs, count) == 0) {
+        log_api(sig_index_guardrw(), 1, 0, 0, NULL, addr);
+    }
 }
 
 static void *_bson_malloc(size_t length)

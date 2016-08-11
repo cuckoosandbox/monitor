@@ -281,7 +281,10 @@ int disasm(const void *addr, char *str)
         cs_disasm_ex(g_capstone, addr, 16, (uintptr_t) addr, 1, &insn);
     if(count == 0) return -1;
 
-    our_snprintf(str, DISASM_BUFSIZ, "%s %s", insn->mnemonic, insn->op_str);
+    int len = our_snprintf(str, DISASM_BUFSIZ, "%s", insn->mnemonic);
+    if(insn->op_str[0] != 0) {
+        our_snprintf(str + len, DISASM_BUFSIZ - len, " %s", insn->op_str);
+    }
 
     cs_free(insn, count);
     return 0;
@@ -707,6 +710,13 @@ static int _hook_copy_insns(
             *spoff += 4;
         }
 
+        if(*relative == 0 && *jmpaddr != 0) {
+            char hex[40]; hexdump(hex, h->addr, 16);
+            pipe("CRITICAL:Unable to create Page Guard hotpatch for 0x%x due "
+                "to a limited memory availability (%z).", h->addr, hex);
+            return -1;
+        }
+
         uint32_t len = lde(addr);
 
         memcpy(*ptr, addr, len);
@@ -795,14 +805,10 @@ int hook_hotpatch_guardpage(hook_t *h)
     }
 
     ptr += r;
-
-#if __x86_64__
-    ptr += asm_push_register(ptr, R_RAX);
-#else
-    ptr += asm_push_register(ptr, R_EAX);
-#endif
-
+    ptr += asm_push_register(ptr, R_R0);
+    ptr += asm_push_register(ptr, R_R0);
     ptr += asm_call(ptr, &exploit_unset_guard_page);
+    ptr += asm_call(ptr, &log_guardrw);
 
     ptr += asm_pop_context(ptr);
     ptr += asm_add_esp_imm(ptr, 0x1000);
@@ -978,7 +984,9 @@ int hook(hook_t *h, void *module_handle)
         h->stub_used = hook_insn(h, h->insn_signature);
     }
     else if(h->type == HOOK_TYPE_GUARD) {
-        hook_hotpatch_guardpage(h);
+        if(hook_hotpatch_guardpage(h) < 0) {
+            return -1;
+        }
     }
 
     if(h->stub_used < 0) {

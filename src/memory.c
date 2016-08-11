@@ -219,7 +219,136 @@ void *slab_getmem(slab_t *slab)
     return NULL;
 }
 
+void slab_return_last(slab_t *slab)
+{
+    if(slab->offset != 0) {
+        slab->offset--;
+    }
+}
+
 uint32_t slab_size(const slab_t *slab)
 {
     return slab->size;
+}
+
+static int _sort_uint32(const void *a, const void *b)
+{
+    uint32_t _a = *(const uint32_t *) a;
+    uint32_t _b = *(const uint32_t *) b;
+    return _a - _b;
+}
+
+static int _sort_uint64(const void *a, const void *b)
+{
+    uint64_t _a = *(const uint64_t *) a;
+    uint64_t _b = *(const uint64_t *) b;
+    return _a - _b;
+}
+
+int dnq_init(dnq_t *dnq, void *list, uint32_t size, uint32_t length)
+{
+    dnq->list = list;
+    dnq->size = size;
+    dnq->length = length;
+
+    switch (size) {
+    case sizeof(uint32_t):
+        qsort(list, length, size, &_sort_uint32);
+        break;
+
+    case sizeof(uint64_t):
+        qsort(list, length, size, &_sort_uint64);
+        break;
+    }
+
+    return 0;
+}
+
+uint32_t *dnq_iter32(dnq_t *dnq)
+{
+    return (uint32_t *) dnq->list;
+}
+
+uint64_t *dnq_iter64(dnq_t *dnq)
+{
+    return (uint64_t *) dnq->list;
+}
+
+uintptr_t *dnq_iterptr(dnq_t *dnq)
+{
+    return (uintptr_t *) dnq->list;
+}
+
+int dnq_isempty(dnq_t *dnq)
+{
+    return dnq->list == NULL || dnq->length == 0;
+}
+
+int dnq_has32(dnq_t *dnq, uint32_t value)
+{
+    uint32_t low = 0, high = dnq->length - 1;
+    uint32_t *list = dnq_iter32(dnq);
+
+    while (high - low > 1) {
+        uint32_t index = low + (high - low) / 2;
+        if(value == list[index]) {
+            return 1;
+        }
+
+        if(value > list[index]) {
+            low = index;
+            continue;
+        }
+
+        if(value < list[index]) {
+            high = index;
+            continue;
+        }
+    }
+
+    if(value == list[low] || value == list[high]) {
+        return 1;
+    }
+
+    return 0;
+}
+
+int dnq_has64(dnq_t *dnq, uint64_t value)
+{
+    uint32_t low = 0, high = dnq->length - 1;
+    uint64_t *list = dnq_iter64(dnq);
+
+    while (high - low > 1) {
+        uint32_t index = low + (high - low) / 2;
+        if(value == list[index]) {
+            return 1;
+        }
+
+        if(value > list[index]) {
+            low = index;
+            continue;
+        }
+
+        if(value < list[index]) {
+            high = index;
+            continue;
+        }
+    }
+
+    if(value == list[low] || value == list[high]) {
+        return 1;
+    }
+
+    return 0;
+}
+
+int dnq_hasptr(dnq_t *dnq, uintptr_t value)
+{
+    switch (sizeof(uintptr_t)) {
+    case sizeof(uint32_t):
+        return dnq_has32(dnq, value);
+
+    case sizeof(uint64_t):
+        return dnq_has64(dnq, value);
+    }
 }

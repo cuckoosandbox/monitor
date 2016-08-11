@@ -141,26 +141,23 @@ Pre::
 
     // Is this a guard page violation in one of our registered guard pages?
     if(exception_code == STATUS_GUARD_PAGE_VIOLATION) {
-        uintptr_t addrs[RETADDRCNT]; uint32_t count = 0;
-        count = stacktrace(Context, addrs, RETADDRCNT);
-
-        uintptr_t memaddr = ExceptionRecord->ExceptionInformation[1];
+        int used = exploit_hotpatch_guard_page_referer(pc);
 
         if(Context->Dr7 == 0) {
-            Context->Dr0 = Context->Eip + lde((void *) pc);
-            Context->Dr7 = 1;
+            exploit_set_last_guard_page(
+                (void *) ExceptionRecord->ExceptionInformation[1]
+            );
 
-            exploit_set_last_guard_page((void *) memaddr);
-        }
-
-        if(exploit_is_guard_page_referer_whitelisted(addrs, count) == 0) {
-            if(exploit_hotpatch_guard_page_referer(pc) == 0) {
-                Context->Dr0 = Context->Dr7 = 0;
+            if(used < 0) {
+                log_guardrw(ExceptionRecord->ExceptionInformation[1]);
+                pipe("CRITICAL:Error instantiating Guard Page hotpatch");
+                return TRUE;
             }
+
+            Context->Dr0 = Context->Eip + used;
+            Context->Dr7 = 1;
             return TRUE;
         }
-
-        log_guardrw(memaddr);
         return TRUE;
     }
 
