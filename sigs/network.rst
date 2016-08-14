@@ -239,7 +239,7 @@ Interesting::
 
 Logging::
 
-    b headers (uintptr_t) headers_length, lpszHeaders
+    S headers headers_length, lpszHeaders
 
 
 InternetOpenUrlW
@@ -274,7 +274,7 @@ Interesting::
 
 Logging::
 
-    b headers (uintptr_t) headers_length, lpszHeaders
+    U headers headers_length, lpszHeaders
 
 
 InternetQueryOptionA
