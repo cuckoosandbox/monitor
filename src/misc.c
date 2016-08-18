@@ -1502,6 +1502,10 @@ uint8_t *our_memmem(
         idx = &_idx;
     }
 
+    if (haylength < needlength) {
+        return NULL;
+    }
+
     for (; *idx < haylength - needlength + 1; *idx += 1) {
         if(memcmp(&haystack[*idx], needle, needlength) == 0) {
             return &haystack[*idx];
