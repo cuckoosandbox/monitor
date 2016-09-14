@@ -51,16 +51,8 @@ else
 	RELMODE = release
 endif
 
-all: dirs bin/inject-x86.exe bin/inject-x64.exe bin/is32bit.exe \
+all: bin/inject-x86.exe bin/inject-x64.exe bin/is32bit.exe \
 		bin/monitor-x86.dll bin/monitor-x64.dll
-
-dirs: | objects/
-
-objects/:
-	mkdir -p objects/code/
-	mkdir -p objects/x86/code/ objects/x64/code/
-	mkdir -p objects/x86/src/bson/ objects/x64/src/bson/
-	mkdir -p objects/x86/src/sha1/ objects/x64/src/sha1/
 
 $(HOOKSRC): $(SIGS) $(FLAGS) $(JINJA2) $(HOOKREQ) $(YAML)
 	python2  utils/process.py $(RELMODE) --apis=$(APIS)
@@ -125,7 +117,10 @@ bin/is32bit.exe: bin/is32bit.c
 	$(CC32) -o $@ $^ $(CFLAGS)
 
 clean:
-	rm -rf objects/ $(DLL32) $(DLL64)
+	rm -rf $(HOOKSRC) $(HOOKOBJ32) $(HOOKOBJ64) $(FLAGSRC) $(FLAGOBJ32) \
+		$(FLAGOBJ64) $(INSNSSRC) $(INSNSOBJ32) $(INSNSOBJ64) $(SRCOBJ32) \
+		$(SRCOBJ64) $(BSONOBJ32) $(BSONOBJ64) $(SHA1OBJ32) $(SHA1OBJ64) \
+		$(DLL32) $(DLL64)
 
 clean-capstone:
 	rm -rf $(LIBCAPSTONE32) $(LIBCAPSTONE64)
