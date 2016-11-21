@@ -41,6 +41,7 @@ typedef struct _dump_t {
 } dump_t;
 
 static int verbose = 0;
+static int silent  = 0;
 
 void error(const char *fmt, ...)
 {
@@ -49,8 +50,14 @@ void error(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
-    MessageBox(NULL, buf, "inject error", 0);
     va_end(args);
+
+    if (silent) {
+        fprintf(stderr, "%s", buf);
+    }
+    else {
+        MessageBox(NULL, buf, "inject error", 0);
+    }
 
     exit(1);
 }
@@ -548,6 +555,7 @@ int main()
             "Dump process memory with --pid to filepath\n"
             "  --dump-block <addr> <length> "
             "Restrict process memory dump to a particular block\n"
+            "  --silent               Errors go to stderr instead of MessageBox\n",
             "  --verbose              Verbose switch\n",
             argv[0]
         );
@@ -659,6 +667,11 @@ int main()
 
         if(wcscmp(argv[idx], L"--verbose") == 0) {
             verbose = 1;
+            continue;
+        }
+
+        if(wcscmp(argv[idx], L"--silent") == 0) {
+            silent = 1;
             continue;
         }
 
