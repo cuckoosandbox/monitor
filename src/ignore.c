@@ -126,7 +126,7 @@ int monitor_mode_should_propagate(const wchar_t *cmdline, uint32_t *mode)
             MEMMEMW(L"iexplore.exe") != NULL &&
             MEMMEMW(L"SCODEF:") != NULL &&
             MEMMEMW(L"CREDAT:") != NULL) {
-        *mode |= g_monitor_mode & HOOK_MODE_IEXPLORE;
+        *mode |= g_monitor_mode & (HOOK_MODE_IEXPLORE|HOOK_MODE_EXPLOIT);
         pipe("DEBUG:Following legitimate iexplore process: %Z!", cmdline);
         return 0;
     }
