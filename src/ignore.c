@@ -120,14 +120,24 @@ int monitor_mode_should_propagate(const wchar_t *cmdline, uint32_t *mode)
 
     uint32_t length = lstrlenW(cmdline) * sizeof(wchar_t);
 
-    // Assuming the following is a legitimate process in iexplore monitoring
-    // mode; "iexplore.exe SCODEF:1234 CREDAT:5678".
+    // Assuming the following are legitimate processes in iexplore monitoring
+    // mode; "iexplore.exe SCODEF:1234 CREDAT:5678" (IE8) and
+    // "IEXPLORE.EXE SCODEF:1234 CREDAT:5678 /prefetch:2" (IE11).
     if((g_monitor_mode & HOOK_MODE_IEXPLORE) == HOOK_MODE_IEXPLORE &&
             MEMMEMW(L"iexplore.exe") != NULL &&
             MEMMEMW(L"SCODEF:") != NULL &&
             MEMMEMW(L"CREDAT:") != NULL) {
         *mode |= g_monitor_mode & (HOOK_MODE_IEXPLORE|HOOK_MODE_EXPLOIT);
-        pipe("DEBUG:Following legitimate iexplore process: %Z!", cmdline);
+        pipe("DEBUG:Following legitimate IE8 process: %Z!", cmdline);
+        return 0;
+    }
+    if((g_monitor_mode & HOOK_MODE_IEXPLORE) == HOOK_MODE_IEXPLORE &&
+            MEMMEMW(L"IEXPLORE.EXE") != NULL &&
+            MEMMEMW(L"SCODEF:") != NULL &&
+            MEMMEMW(L"CREDAT:") != NULL &&
+            MEMMEMW(L"/prefetch:2") != NULL) {
+        *mode |= g_monitor_mode & (HOOK_MODE_IEXPLORE|HOOK_MODE_EXPLOIT);
+        pipe("DEBUG:Following legitimate IE11 process: %Z!", cmdline);
         return 0;
     }
 
