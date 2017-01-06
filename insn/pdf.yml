@@ -1,0 +1,26 @@
+global:
+  module: escript.api
+  category: pdf
+  mode: pdf
+
+pdf_eval:
+  offsets:
+    0x4850e6cb:
+      offset: 0xbb73c
+      register: eax
+      logging: u script eax
+    0x5412b330:
+      offset: 0xef1e1
+      register: eax
+      logging: u script eax
+
+pdf_unescape:
+  offsets:
+    0x4850e6cb:
+      offset: 0xbccf0
+      register: edi
+      logging: u string edi
+    0x5412b330:
+      offset: 0xf024a
+      register: edi
+      logging: u string edi
