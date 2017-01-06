@@ -639,14 +639,10 @@ static int _hook_call_method_arguments(
     for (uint32_t idx = 0; idx < 4; idx++) {
         uint8_t arg = signature & 0xff; signature >>= 8;
         if(arg >= HOOK_INSN_STK(0)) {
-            uint32_t offset = 36 + 4 * (arg - HOOK_INSN_STK(0));
-            if(offset >= 0x80) {
-                pipe("ERROR:Stack offset is too high");
-                return -1;
-            }
-
             // push dword [esp+X]
-            ptr += asm_push_stack_offset(ptr, offset);
+            ptr += asm_push_stack_offset(
+                ptr, 0x1000 + 36 + 4 * idx + (arg - HOOK_INSN_STK(0))
+            );
         }
         else if(arg == HOOK_INSN_VAR32) {
             // push dword value
@@ -666,7 +662,6 @@ static int _hook_call_method_arguments(
         }
     }
 
-    va_end(args);
     return ptr - base;
 }
 

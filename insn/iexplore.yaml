@@ -1,0 +1,15 @@
+global:
+  category: iexplore
+  mode: iexplore
+
+JsGlobalObjectDefaultEvalHelper:
+  module: jscript9
+  offsets:
+    0x555fea21:
+      offset: 0xca520
+      stack: 8
+      logging: u script stk0
+    0x525b806a:
+      offset: 0x14c30a
+      stack: 8
+      logging: u script stk0

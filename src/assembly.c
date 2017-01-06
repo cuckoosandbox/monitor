@@ -302,9 +302,17 @@ int asm_push_stack_offset(uint8_t *stub, uint32_t offset)
     uint8_t *base = stub;
 
     *stub++ = 0xff;
-    *stub++ = 0x74;
-    *stub++ = 0x24;
-    *stub++ = offset;
+    if(offset < 0x80) {
+        *stub++ = 0x74;
+        *stub++ = 0x24;
+        *stub++ = offset;
+    }
+    else {
+        *stub++ = 0xb4;
+        *stub++ = 0x24;
+        *(uint32_t *) stub = offset;
+        stub += 4;
+    }
 
     return stub - base;
 }

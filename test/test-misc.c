@@ -146,6 +146,20 @@ void test_exploit_lea_rewrite()
     LEAREWR("\x80\x38\x00", 6, "8d8000000000");
 }
 
+void test_asm()
+{
+    uint8_t buf[32];
+
+    assert(asm_push_stack_offset(buf, 0x7f) == 4);
+    assert(memcmp(buf, "\xff\x74\x24\x7f", 4) == 0);
+
+    assert(asm_push_stack_offset(buf, 0x80) == 7);
+    assert(memcmp(buf, "\xff\xb4\x24\x80\x00\x00\x00", 7) == 0);
+
+    assert(asm_push_stack_offset(buf, 0x11223344) == 7);
+    assert(memcmp(buf, "\xff\xb4\x24\x44\x33\x22\x11", 7) == 0);
+}
+
 int main()
 {
     static char buf[0x1000]; static wchar_t bufW[0x1000];
@@ -243,5 +257,6 @@ int main()
 
     test_path_native();
     test_exploit_lea_rewrite();
+    test_asm();
     return 0;
 }
