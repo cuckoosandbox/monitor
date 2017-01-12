@@ -743,7 +743,7 @@ if __name__ == '__main__':
 
     insnfiles = []
     for filename in os.listdir("insn"):
-        if filename.endswith(".yaml"):
+        if filename.endswith(".yml"):
             insnfiles.append(os.path.join("insn", filename))
 
     ip = InsnProcess("objects/code/insns.c", insnfiles)
