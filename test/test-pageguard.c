@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2016 Cuckoo Foundation.
+Copyright (C) 2010-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -75,5 +75,6 @@ int main(int argc, char *argv[])
     }
     // Under normal load this should take up to 5 to 10 seconds.
     assert(GetTickCount() - t < 20000);
+    pipe("INFO:Test finished!");
     return 0;
 }

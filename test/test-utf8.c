@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2010-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -78,4 +78,6 @@ int main()
     assert(utf8_bytecnt_unicode(L"\u8081", 1) == 3);
     assert(memcmp(utf8_string("\x81", 1), "\x02\x00\x00\x00\xc2\x81", 6) == 0);
     assert(memcmp(utf8_wstring(L"\u8081", 1), "\x03\x00\x00\x00\xe8\x82\x81", 7) == 0);
+    pipe("INFO:Test finished!");
+    return 0;
 }

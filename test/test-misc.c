@@ -259,5 +259,6 @@ int main()
     test_path_native();
     test_exploit_lea_rewrite();
     test_asm();
+    pipe("INFO:Test finished!");
     return 0;
 }

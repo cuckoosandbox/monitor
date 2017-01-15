@@ -98,10 +98,12 @@ def compile_file(fname, arch):
     compiler = kw.CC86 if arch == 'x86' else kw.CC64
     files = ' '.join(kw.OBJECTS)
     args = ' '.join(kw.CFLAGS + kw.LDFLAGS + kw.INC)
+    options = ','.join(kw.OPTIONS)
     ALL.append(output_exe)
+
     SUBMIT.append(
-        'cuckoo submit %s -o unittest=1,%s' %
-        (output_exe, ",".join(kw.OPTIONS))
+        'cuckoo submit %s -o unittest=%s,unittest.finish=%s,%s' %
+        (output_exe, fname[5:-2], int('pipe=cuckoo' in options), options)
     )
     return [
         '%s: %s %s' % (output_exe, fname, files),
