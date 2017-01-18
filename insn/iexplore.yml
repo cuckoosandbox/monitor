@@ -13,3 +13,15 @@ JsGlobalObjectDefaultEvalHelper:
       offset: 0x14c30a
       stack: 8
       logging: u script stk0
+    0x555f7a9e:
+      offset: 0x14c31c
+      stack: 8
+      logging: u script stk0
+
+CDocumentWriteIteratorCurrent:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x46264A
+      stack: 16
+      logging: u write stk0
