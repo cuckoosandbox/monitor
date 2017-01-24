@@ -25,3 +25,11 @@ CDocumentWriteIteratorCurrent:
       offset: 0x46264A
       stack: 16
       logging: u write stk0
+
+CScriptDataOnSrcChange:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x15FFB5
+      stack: 4
+      logging: u src *(wchar_t **) stk0
