@@ -33,3 +33,11 @@ CScriptDataOnSrcChange:
       offset: 0x15FFB5
       stack: 4
       logging: u src *(wchar_t **) stk0
+
+CImgElement_putSrc:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x487770
+      stack: 8
+      logging: u src stk0
