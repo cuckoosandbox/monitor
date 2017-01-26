@@ -2,7 +2,7 @@ global:
   category: iexplore
   mode: iexplore
 
-JsGlobalObjectDefaultEvalHelper:
+JsGlobalObject_DefaultEvalHelper:
   module: jscript9
   offsets:
     0x555fea21:
@@ -18,7 +18,7 @@ JsGlobalObjectDefaultEvalHelper:
       stack: 8
       logging: u script stk0
 
-CDocumentWriteIteratorCurrent:
+CDocument_WriteIterator_current:
   module: mshtml
   offsets:
     0x5565CF99:
@@ -26,7 +26,7 @@ CDocumentWriteIteratorCurrent:
       stack: 16
       logging: u write stk0
 
-CScriptDataOnSrcChange:
+CScriptData_onSrcChange:
   module: mshtml
   offsets:
     0x5565CF99:
@@ -39,5 +39,21 @@ CImgElement_putSrc:
   offsets:
     0x5565CF99:
       offset: 0x487770
+      stack: 8
+      logging: u src stk0
+
+CElement_InjectHTML:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x1242CC
+      stack: 0xC
+      logging: u written stk0
+
+CFrameElement_putSrc:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x1611B0
       stack: 8
       logging: u src stk0
