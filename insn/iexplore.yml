@@ -57,3 +57,11 @@ CFrameElement_putSrc:
       offset: 0x1611B0
       stack: 8
       logging: u src stk0
+
+CWindow_Navigate:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x363CB0
+      stack: 0x40
+      logging: u url stk0
