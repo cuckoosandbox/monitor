@@ -65,3 +65,11 @@ CWindow_Navigate:
       offset: 0x363CB0
       stack: 0x40
       logging: u url stk0
+
+CWindow_SaveHistory:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x456971
+      register: ecx
+      logging: u savedEntry ecx
