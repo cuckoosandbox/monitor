@@ -137,7 +137,7 @@ Pre::
         copy_return();
     }
 
-    #if !__x86_64__
+    #if EXPLOIT_GUARD_SUPPORT_ENABLED
 
     // Is this a guard page violation in one of our registered guard pages?
     if(exception_code == STATUS_GUARD_PAGE_VIOLATION) {
