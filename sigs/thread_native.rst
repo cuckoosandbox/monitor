@@ -291,9 +291,9 @@ Signature::
 Parameters::
 
     ** HANDLE ThreadHandle thread_handle
-    *  PIO_APC_ROUTINE ApcRoutine
-    ** PVOID ApcRoutineContext function_address
-    ** PIO_STATUS_BLOCK ApcStatusBlock parameter
+    *  PIO_APC_ROUTINE ApcRoutine function_address
+    ** PVOID ApcRoutineContext parameter
+    ** PIO_STATUS_BLOCK ApcStatusBlock
     *  ULONG ApcReserved
 
 Pre::
