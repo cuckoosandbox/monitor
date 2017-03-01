@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -160,7 +160,7 @@ int monitor_mode_should_propagate(const wchar_t *cmdline, uint32_t *mode)
         return -1;
     }
 
-    pipe("CRITICAL:Encountered an unknown process while in "
-        "monitoring mode: %Z!", cmdline);
+    // An unknown process is being started in this process. I.e., an exploit
+    // attempt appears to have succeeded. Yes, monitor this process.
     return 0;
 }

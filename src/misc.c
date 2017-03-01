@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1727,16 +1727,6 @@ uint8_t *module_addr_timestamp(
         }
     }
 
-#if __x86_64__
-    uint32_t bitsize = 64;
-#else
-    uint32_t bitsize = 32;
-#endif
-
-    pipe("WARNING:Unable to find the correct offsets for functions "
-        "of: %d-bit %Z (with timestamp 0x%x)",
-        bitsize, get_module_file_name((HMODULE) module_address), timestamp
-    );
     log_action("gatherer");
     return NULL;
 }
@@ -1765,16 +1755,6 @@ insnoff_t *module_addr_timestamp2(uint8_t *module_address, insnoff_t *io)
         }
     }
 
-#if __x86_64__
-    uint32_t bitsize = 64;
-#else
-    uint32_t bitsize = 32;
-#endif
-
-    pipe("WARNING:Unable to find the correct offsets for functions "
-        "of: %d-bit %Z (with timestamp 0x%x)",
-        bitsize, get_module_file_name((HMODULE) module_address), timestamp
-    );
     log_action("gatherer");
     return NULL;
 }

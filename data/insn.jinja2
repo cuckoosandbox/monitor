@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2016 Cuckoo Foundation.
+Copyright (C) 2016-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -88,10 +88,10 @@ uint8_t *hook_modulecb_{{ info.clean }}(
     h->addr = module_address + io->offset;
     h->handler = (FARPROC) io->callback;
 
-    pipe(
-        "INFO:type=%d, signature=0x%x, addr=0x%x, handler=0x%x",
-        h->type, h->insn_signature, h->addr, h->handler
-    );
+    // pipe(
+        // "INFO:type=%d, signature=0x%x, addr=0x%x, handler=0x%x",
+        // h->type, h->insn_signature, h->addr, h->handler
+    // );
 
     return h->addr;
 }
