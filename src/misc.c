@@ -1502,7 +1502,7 @@ uint8_t *our_memmem(
         idx = &_idx;
     }
 
-    if (haylength < needlength) {
+    if(haylength < needlength) {
         return NULL;
     }
 
