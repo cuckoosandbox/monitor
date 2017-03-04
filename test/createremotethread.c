@@ -16,31 +16,27 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// FINISH= yes
-/// PIPE= yes
+// Should show two CreateRemoteThread() calls.
 
-#include <stdio.h>
+/// OBJECTS=
+
 #include <windows.h>
-#include "pipe.h"
 
-#define assert(expr) \
-    if((expr) == 0) { \
-        pipe("CRITICAL:Test didn't pass: %z", #expr); \
-    } \
-    else { \
-        pipe("INFO:Test passed: %z", #expr); \
-    }
+DWORD WINAPI dummy_thread(LPVOID param)
+{
+    (void) param;
+    return 0;
+}
 
 int main()
 {
-    pipe_init("\\\\.\\PIPE\\cuckoo", 0);
+    HANDLE thread_handle = CreateThread(
+        NULL, 0, &dummy_thread, NULL, 0, NULL);
+    CloseHandle(thread_handle);
 
-    FARPROC pObtainUserAgentString =
-        GetProcAddress(LoadLibrary("urlmon"), "ObtainUserAgentString");
-
-    char buf[512]; DWORD size = sizeof(buf);
-    assert(pObtainUserAgentString(0, buf, &size) == NOERROR);
-    assert(strncmp(buf, "Mozilla", 7) == 0);
-    pipe("INFO:Test finished!");
+    thread_handle = CreateRemoteThread(
+        GetCurrentProcess(), NULL, 0, &dummy_thread, NULL, 0, NULL);
+    CloseHandle(thread_handle);
     return 0;
 }
+

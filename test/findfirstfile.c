@@ -16,31 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// FINISH= yes
-/// PIPE= yes
+/// OBJECTS=
 
-#include <stdio.h>
-#include <windows.h>
-#include "pipe.h"
-
-#define assert(expr) \
-    if((expr) == 0) { \
-        pipe("CRITICAL:Test didn't pass: %z", #expr); \
-    } \
-    else { \
-        pipe("INFO:Test passed: %z", #expr); \
-    }
+#include <winsock2.h>
 
 int main()
 {
-    pipe_init("\\\\.\\PIPE\\cuckoo", 0);
-
-    FARPROC pObtainUserAgentString =
-        GetProcAddress(LoadLibrary("urlmon"), "ObtainUserAgentString");
-
-    char buf[512]; DWORD size = sizeof(buf);
-    assert(pObtainUserAgentString(0, buf, &size) == NOERROR);
-    assert(strncmp(buf, "Mozilla", 7) == 0);
-    pipe("INFO:Test finished!");
-    return 0;
+    WIN32_FIND_DATA wfd;
+    FindFirstFile("C:\\helloworld", &wfd);
 }

@@ -23,7 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Code based on sunlikr's https://gist.github.com/sunilkr/dec259379b9496b4b63a
 
 /// FINISH= yes
-/// FREE= yes
 /// PIPE= yes
 
 #include <stdio.h>
