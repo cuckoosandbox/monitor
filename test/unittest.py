@@ -97,9 +97,9 @@ def compile_file(fname, arch):
             continue
 
     # Write extra configuration to the config.yml file.
-    with open("config-%s.yml" % arch, "a+b") as f:
+    with open(os.path.join(arch, "config.yml"), "a+b") as f:
         if kw.FINISH == 'yes' or kw.PIPE == 'yes' or kw.FREE == 'yes':
-            f.write("%s-%s:\n" % (fname[:-2], arch))
+            f.write("%s:\n" % fname[:-2])
             f.write("  options:\n")
             if kw.FINISH == 'yes':
                 f.write('    "unittest.finish": "1"\n')
@@ -109,7 +109,7 @@ def compile_file(fname, arch):
                 f.write('    "free": "yes"\n')
             f.write('\n')
 
-    output_exe = fname.replace('.c', '-%s.%s' % (arch, kw.EXTENSION))
+    output_exe = os.path.join(arch, fname.replace('.c', '.%s' % kw.EXTENSION))
 
     compiler = kw.CC86 if arch == 'x86' else kw.CC64
     files = ' '.join(kw.OBJECTS)
