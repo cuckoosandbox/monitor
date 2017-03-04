@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2017 Cuckoo Foundation.
+Copyright (C) 2015-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // trying to get a handle to it. Normally the monitor should unlink itself
 // from the PEB rendering this particular approach useless.
 
-/// OPTIONS= pipe=cuckoo
+/// FINISH= yes
+/// PIPE= yes
 
 #include <windows.h>
 #include "hooking.h"

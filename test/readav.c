@@ -25,8 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 int main()
 {
-    char *ptr =
-        VirtualAlloc(NULL, 0x1000, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
+    char *ptr = VirtualAlloc(
+        NULL, 0x1000, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE
+    );
 
     memcpy(ptr+0x1000-11, "hello world", 11);
 

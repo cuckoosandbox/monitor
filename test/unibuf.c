@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Tests the unicode buffer functionality.
 
-/// OPTIONS= free=yes,pipe=cuckoo
+/// FINISH= yes
+/// FREE= yes
+/// PIPE= yes
 
 #include <stdio.h>
 #include <stdint.h>

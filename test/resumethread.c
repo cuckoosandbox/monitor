@@ -23,7 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Tests very basic process following logic.
 
-/// OPTIONS= pipe=cuckoo
+/// FINISH= yes
+/// PIPE= yes
 
 #define assert(expr) \
     if((expr) == 0) { \

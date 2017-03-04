@@ -33,9 +33,11 @@ MULTIPLE = {
     'CFLAGS': True,
     'INC': True,
     'OBJECTS': True,
-    'OPTIONS': True,
     'MODES': True,
     'EXTENSION': False,
+    'FREE': False,
+    'FINISH': False,
+    'PIPE': False,
 }
 
 DEFAULTS = {
@@ -49,9 +51,11 @@ DEFAULTS = {
         bson/bson.o bson/numbers.o bson/encoding.o disguise.o copy.o office.o
         ../src/capstone/capstone-%(arch)s.lib""".split(),
     'LDFLAGS': ['-lws2_32', '-lshlwapi', '-lole32'],
-    'OPTIONS': [],
     'MODES': ['winxp', 'win7', 'win7x64'],
     'EXTENSION': 'exe',
+    'FINISH': '',
+    'FREE': '',
+    'PIPE': '',
 }
 
 ALL = []
@@ -92,12 +96,24 @@ def compile_file(fname, arch):
             kw.OBJECTS[idx] = path
             continue
 
+    # Write extra configuration to the config.yml file.
+    with open("config-%s.yml" % arch, "a+b") as f:
+        if kw.FINISH == 'yes' or kw.PIPE == 'yes' or kw.FREE == 'yes':
+            f.write("%s-%s:\n" % (fname[:-2], arch))
+            f.write("  options:\n")
+            if kw.FINISH == 'yes':
+                f.write('    "unittest.finish": "1"\n')
+            if kw.PIPE == 'yes':
+                f.write('    "pipe": "cuckoo"\n')
+            if kw.FREE == 'yes':
+                f.write('    "free": "yes"\n')
+            f.write('\n')
+
     output_exe = fname.replace('.c', '-%s.%s' % (arch, kw.EXTENSION))
 
     compiler = kw.CC86 if arch == 'x86' else kw.CC64
     files = ' '.join(kw.OBJECTS)
     args = ' '.join(kw.CFLAGS + kw.LDFLAGS + kw.INC)
-    options = ','.join(kw.OPTIONS)
     ALL.append(output_exe)
 
     return [

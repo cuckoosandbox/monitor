@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2017 Cuckoo Foundation.
+Copyright (C) 2015-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // This program tests unicode filename support for the initial process.
 // See also: https://github.com/cuckoobox/cuckoo/issues/502
 
-/// OPTIONS= free=yes,pipe=cuckoo
+/// FINISH= yes
+/// FREE= yes
+/// PIPE= yes
 
 #include <stdio.h>
 #include <string.h>
@@ -50,9 +52,9 @@ int main()
     }
 
 #if __x86_64__
-    assert(wcscmp(ptr, L"test-unicode-fname-\u202e-x64.exe") == 0);
+    assert(wcscmp(ptr, L"unicode-fname-\u202e-x64.exe") == 0);
 #else
-    assert(wcscmp(ptr, L"test-unicode-fname-\u202e-x86.exe") == 0);
+    assert(wcscmp(ptr, L"unicode-fname-\u202e-x86.exe") == 0);
 #endif
 
     pipe("DEBUG:Filename -> %Z", ptr);

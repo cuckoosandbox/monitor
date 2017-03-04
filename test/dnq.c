@@ -19,7 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // This program tests some functionality of our divide-and-conquer
 // implementation.
 
-/// OPTIONS= free=yes,pipe=cuckoo
+/// FREE= yes
+/// PIPE= yes
 
 #include <stdio.h>
 #include <stdint.h>

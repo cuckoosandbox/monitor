@@ -16,7 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// OPTIONS= free=yes,pipe=cuckoo
+/// FINISH= yes
+/// FREE=yes
+/// PIPE= yes
 
 #include <stdio.h>
 #include <stdint.h>

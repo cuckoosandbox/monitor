@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2015-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // while inside the LdrLoadDll hook. Since a recent commit they are,
 // naturally. Same goes for the exported function, although those were already
 // logged successfully.
-// The report should show two calls to MessageBoxInternalA.
+// The report should show two calls to MessageBoxTimeoutA.
+// OPTIONS += function=exported_function
 
 /// CFLAGS += -shared
-/// OPTIONS += function=exported_function
 /// EXTENSION = dll
 /// OBJECTS =
 

@@ -19,7 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Due to integer size issues in 64-bit DLLs we're going to check bitsize of
 // various data types so to help us decide which logging data type to use.
 
-/// OPTIONS= pipe=cuckoo,free=yes
+/// FREE= yes
+/// PIPE= yes
 
 #include <stdio.h>
 #include <stdint.h>
