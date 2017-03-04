@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Cuckoo Sandbox - Automated Malware Analysis
-Copyright (C) 2010-2017 Cuckoo Foundation
+Copyright (C) 2015-2017 Cuckoo Foundation
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -55,7 +55,6 @@ DEFAULTS = {
 }
 
 ALL = []
-SUBMIT = []
 
 class Dict(dict):
     def __init__(self, value):
@@ -101,10 +100,6 @@ def compile_file(fname, arch):
     options = ','.join(kw.OPTIONS)
     ALL.append(output_exe)
 
-    SUBMIT.append(
-        'cuckoo submit %s -o unittest=%s,unittest.finish=%s,%s' %
-        (output_exe, fname[5:-2], int('pipe=cuckoo' in options), options)
-    )
     return [
         '%s: %s %s' % (output_exe, fname, files),
         '\t%s -o %s %s %s %s' % (compiler, output_exe, fname, files, args),
@@ -116,7 +111,7 @@ if __name__ == '__main__':
 
     lines = []
     for fname in os.listdir(curdir):
-        if not fname.startswith('test-') or not fname.endswith('.c'):
+        if not fname.endswith('.c'):
             continue
 
         lines += compile_file(fname, 'x86')
@@ -125,5 +120,4 @@ if __name__ == '__main__':
     with open(os.path.join(curdir, 'Makefile'), 'wb') as f:
         f.write('all: %s\n' % ' '.join(ALL))
         f.write('clean:\n\trm -f %s\n\n' % ' '.join(ALL))
-        f.write('submit:\n\t%s\n\n' % '\n\t'.join(SUBMIT))
         f.write('\n'.join(lines))
