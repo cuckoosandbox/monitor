@@ -206,8 +206,8 @@ point the stub has covered the instructions::
 
 .. _components-hook:
 
-Hook Defitions
---------------
+Hook Definitions
+----------------
 
 The Monitor features a unique and dynamic templating engine to `create API
 hooks <hook-create>`. These API hooks are based on a simple to use text format
