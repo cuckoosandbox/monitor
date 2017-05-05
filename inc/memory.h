@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2015-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,11 +38,15 @@ typedef struct _slab_t {
     uint32_t memprot;
 } slab_t;
 
+// Memory alignment compatible with XMM/YMM instructions on x86_64.
+#define MEM_ALIGNMENT 0x10
+
 uintptr_t roundup2(uintptr_t value);
 uintptr_t mem_suggested_size(uintptr_t size);
 
 void mem_init();
 void *mem_alloc(uint32_t length);
+void *mem_alloc_aligned(uint32_t length);
 void *mem_realloc(void *ptr, uint32_t length);
 void mem_free(void *ptr);
 

@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2015-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -84,6 +84,12 @@ void *mem_alloc(uint32_t length)
 
     *(uintptr_t *) ptr = length;
     return (uintptr_t *) ptr + 1;
+}
+
+void *mem_alloc_aligned(uint32_t length)
+{
+    void *ptr = mem_alloc(length + MEM_ALIGNMENT);
+    return (void *)(((uintptr_t) ptr + MEM_ALIGNMENT-1) & ~(MEM_ALIGNMENT-1));
 }
 
 void *mem_realloc(void *ptr, uint32_t length)
