@@ -171,6 +171,7 @@ int main()
     WSAStartup(MAKEWORD(2, 2), &wsa);
     pipe_init("\\\\.\\PIPE\\cuckoo", 0);
 
+    copy_init();
     hook_init(GetModuleHandle(NULL));
     assert(native_init() == 0);
     misc_init("hoi");

@@ -165,6 +165,14 @@ static int _prepend_pid(char *buf, ...)
 
 int pipe(const char *fmt, ...)
 {
+#if DEBUG_STANDALONE
+    va_list _args;
+    va_start(_args, fmt);
+    vprintf(fmt, _args);
+    va_end(_args);
+    return 0;
+#endif
+
     if(g_pipe_name[0] == 0) {
         message_box(NULL, "Pipe has not been initialized yet!", "Error", 0);
         return -1;
@@ -195,6 +203,14 @@ int pipe(const char *fmt, ...)
 
 int32_t pipe2(void *out, uint32_t outlen, const char *fmt, ...)
 {
+#if DEBUG_STANDALONE
+    va_list _args;
+    va_start(_args, fmt);
+    vprintf(fmt, _args);
+    va_end(_args);
+    return 0;
+#endif
+
     if(g_pipe_name[0] == 0) {
         message_box(NULL, "Pipe has not been initialized yet!", "Error", 0);
         return -1;

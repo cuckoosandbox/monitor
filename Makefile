@@ -51,6 +51,10 @@ else
 	RELMODE = release
 endif
 
+ifdef DEBUG_STANDALONE
+	CFLAGS += -DDEBUG_STANDALONE=1
+endif
+
 all: bin/inject-x86.exe bin/inject-x64.exe bin/is32bit.exe \
 		bin/monitor-x86.dll bin/monitor-x64.dll
 
