@@ -872,10 +872,11 @@ int hook(hook_t *h, void *module_handle)
 
         h->addr = h->addrcb(h, (uint8_t *) h->module_handle, module_size);
 
-        if(h->addr == NULL &&
-                (h->report & HOOK_PRUNE_RESOLVERR) != HOOK_PRUNE_RESOLVERR) {
-            pipe("DEBUG:Error resolving function %z!%z through our "
-                "custom callback.", h->library, h->funcname);
+        if(h->addr == NULL) {
+            if((h->report & HOOK_PRUNE_RESOLVERR) != HOOK_PRUNE_RESOLVERR) {
+                pipe("DEBUG:Error resolving function %z!%z through our "
+                    "custom callback.", h->library, h->funcname);
+            }
             return -1;
         }
     }
