@@ -1621,6 +1621,13 @@ static NTSTATUS g_exception_whitelist[] = {
     0xe0000001, // STATUS_INSUFFICIENT_MEM
     0xe0000002, // STATUS_FILE_BAD_FORMAT
     0xe0434f4d, // .NET Exception (0xe0000000 | "COM")
+    0x406d1388, // MSDEV_SET_THREAD_NAME
+
+#if DEBUG == 0
+    // TODO Should we perhaps add some logging for this exception? This simply
+    // happens every now and then, even without our additional code.
+    EXCEPTION_STACK_OVERFLOW,
+#endif
 };
 
 int is_exception_code_whitelisted(NTSTATUS exception_code)
