@@ -25,11 +25,10 @@ static BOOL (WINAPI *pIsWow64Process)(HANDLE hProcess, PBOOL Wow64Process);
 
 void error(const char *fmt, ...)
 {
-    char buf[2048]; va_list args;
+    va_list args;
 
     va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    MessageBox(NULL, buf, "is32bit error", 0);
+    vprintf(fmt, args);
     va_end(args);
 
     exit(1);
@@ -112,7 +111,7 @@ static int determine_pe_file(const wchar_t *filepath)
         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
     );
     if(file_handle == INVALID_HANDLE_VALUE) {
-        error("Error opening filepath\n");
+        error("Error opening filepath");
     }
 
     static uint8_t buf[0x1000]; DWORD size; LARGE_INTEGER li;
@@ -123,7 +122,7 @@ static int determine_pe_file(const wchar_t *filepath)
     IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) buf;
     if(image_dos_header->e_magic != IMAGE_DOS_SIGNATURE) {
         CloseHandle(file_handle);
-        error("Invalid DOS file\n");
+        error("Invalid DOS file");
     }
 
     // If e_lfanew is larger than the file itself, then we're going to assume
