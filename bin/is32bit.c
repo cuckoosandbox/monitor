@@ -23,14 +23,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 static BOOL (WINAPI *pIsWow64Process)(HANDLE hProcess, PBOOL Wow64Process);
 
+static int silent = 0;
+
 void error(const char *fmt, ...)
 {
-    char buf[2048]; va_list args;
+    char buf[2048];
 
+    va_list args;
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
-    MessageBox(NULL, buf, "is32bit error", 0);
     va_end(args);
+
+    if (silent) {
+        fprintf(stderr, "%s", buf);
+    }
+    else {
+        MessageBox(NULL, buf, "is32bit error", 0);
+    }
 
     exit(1);
 }
@@ -153,13 +162,14 @@ int main()
         error("Error parsing commandline options!\n");
     }
 
-    if(argc != 3) {
+    if(argc < 3) {
         error(
             "Usage: %S <option..>\n"
             "Options:\n"
             "  -p --pid          <pid>\n"
             "  -n --process-name <process-name>\n"
             "  -f --file         <path>\n"
+            "  -s --silent       \n"
             "\n"
             "Examples:\n"
             "%S -p 1234\n"
@@ -172,19 +182,57 @@ int main()
     *(FARPROC *) &pIsWow64Process =
         GetProcAddress(GetModuleHandle("kernel32"), "IsWow64Process");
 
-    if(wcscmp(argv[1], L"-p") == 0 || wcscmp(argv[1], L"--pid") == 0) {
-        uint32_t pid = wcstoul(argv[2], NULL, 10);
+    BOOL determinePid = FALSE;
+    BOOL determineFile = FALSE;
+
+    uint32_t pid = 0;
+    LPWSTR fileName = NULL;
+
+    for (int idx = 1; idx < argc; idx++) {
+
+        if(wcscmp(argv[idx], L"-p") == 0 ||
+            wcscmp(argv[idx], L"--pid") == 0) {
+            if (argc - idx > 1) {
+                determinePid = TRUE;
+                pid = wcstoul(argv[++idx], NULL, 10);
+            }
+            continue;
+        }
+
+        if(wcscmp(argv[idx], L"-n") == 0 ||
+            wcscmp(argv[idx], L"--process-name") == 0) {
+            if (argc - idx > 1) {
+                determinePid = TRUE;
+                pid = pid_from_process_name(argv[++idx]);
+            }
+            continue;
+        }
+
+        if(wcscmp(argv[idx], L"-f") == 0 ||
+            wcscmp(argv[idx], L"--file") == 0) {
+            if (argc - idx > 1) {
+                determineFile = TRUE;
+                fileName = argv[++idx];
+            }
+            continue;
+        }
+
+        if(wcscmp(argv[idx], L"-s") == 0 ||
+            wcscmp(argv[idx], L"--silent") == 0) {
+            silent = 1;
+            continue;
+        }
+
+        error("[-] Found unsupported argument: %S\n", argv[idx]);
+        return 1;
+    }
+
+    if (determinePid) {
         return determine_process_identifier(pid);
     }
 
-    if(wcscmp(argv[1], L"-n") == 0 ||
-            wcscmp(argv[1], L"--process-name") == 0) {
-        uint32_t pid = pid_from_process_name(argv[2]);
-        return determine_process_identifier(pid);
-    }
-
-    if(wcscmp(argv[1], L"-f") == 0 || wcscmp(argv[1], L"--file") == 0) {
-        return determine_pe_file(argv[2]);
+    if (determineFile) {
+        return determine_pe_file(fileName);
     }
 
     error("Invalid action specified..\n");
