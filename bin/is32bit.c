@@ -66,6 +66,9 @@ HANDLE open_process(uint32_t pid)
 {
     HANDLE process_handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
     if(process_handle == NULL) {
+        if(GetLastError() == ERROR_ACCESS_DENIED) {
+            error("process access denied");
+        }
         error("[-] Error getting access to process: %ld!\n", GetLastError());
     }
 
