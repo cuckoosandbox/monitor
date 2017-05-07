@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2015-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -107,40 +107,53 @@ static int determine_process_identifier(uint32_t pid)
 
 static int determine_pe_file(const wchar_t *filepath)
 {
-    FILE *fp = _wfopen(filepath, L"rb");
-    if(fp == NULL) {
+    HANDLE file_handle = CreateFileW(
+        filepath, GENERIC_READ, FILE_SHARE_READ, NULL,
+        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
+    );
+    if(file_handle == INVALID_HANDLE_VALUE) {
         error("Error opening filepath\n");
     }
 
-    static uint8_t buf[0x2000];
+    static uint8_t buf[0x1000]; DWORD size; LARGE_INTEGER li;
 
-    fread(buf, 1, sizeof(buf), fp);
-    fclose(fp);
+    GetFileSizeEx(file_handle, &li);
+    ReadFile(file_handle, buf, sizeof(buf), &size, NULL);
 
     IMAGE_DOS_HEADER *image_dos_header = (IMAGE_DOS_HEADER *) buf;
     if(image_dos_header->e_magic != IMAGE_DOS_SIGNATURE) {
+        CloseHandle(file_handle);
         error("Invalid DOS file\n");
-        return 1;
     }
 
-    IMAGE_NT_HEADERS *image_nt_headers =
-        (IMAGE_NT_HEADERS *)(buf + image_dos_header->e_lfanew);
-    if(image_nt_headers->Signature != IMAGE_NT_SIGNATURE) {
-        error("Invalid PE file\n");
-    }
-
-    switch (image_nt_headers->FileHeader.Machine) {
-    case IMAGE_FILE_MACHINE_I386:
+    // If e_lfanew is larger than the file itself, then we're going to assume
+    // this is a MZ-DOS file rather than a PE file.
+    if(image_dos_header->e_lfanew >= li.QuadPart) {
+        CloseHandle(file_handle);
         printf("32");
         return 0;
+    }
 
-    case IMAGE_FILE_MACHINE_AMD64:
+    SetFilePointer(file_handle, image_dos_header->e_lfanew, NULL, FILE_BEGIN);
+    ReadFile(file_handle, buf, sizeof(buf), &size, NULL);
+    CloseHandle(file_handle);
+
+    IMAGE_NT_HEADERS *image_nt_headers = (IMAGE_NT_HEADERS *) buf;
+
+    // If this doesn't match, then we're assuming a MZ-DOS file.
+    if(image_nt_headers->Signature != IMAGE_NT_SIGNATURE) {
+        printf("32");
+        return 0;
+    }
+
+    // Handle 64-bit PE files.
+    if(image_nt_headers->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64) {
         printf("64");
         return 0;
-
-    default:
-        error("Invalid PE file: not a 32-bit or 64-bit\n");
     }
+
+    // Everything else we assume to be either a MZ-DOS or 32-bit PE file.
+    printf("32");
     return 0;
 }
 
