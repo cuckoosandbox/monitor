@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -203,7 +203,12 @@ int symbol(const uint8_t *addr, char *sym, uint32_t length)
         return -1;
     }
 
-    const wchar_t *module_name = get_module_file_name((HMODULE) mod);
+    const wchar_t *module_name = NULL;
+
+    const UNICODE_STRING *unistr = get_module_file_name((HMODULE) mod);
+    if(unistr != NULL) {
+        module_name = unistr->Buffer;
+    }
 
     symbol_t s;
 

@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 
 void monitor_init(HMODULE module_handle);
-void monitor_hook(const char *library, void *module_handle);
-void monitor_unhook(const char *library, void *module_handle);
+void monitor_hook(const wchar_t *library, void *module_handle);
+void monitor_unhook(const wchar_t *library, void *module_handle);
 
 extern uint32_t g_monitor_mode;
 

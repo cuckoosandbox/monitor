@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 typedef struct _hook_t {
     // Library and function name.
-    const char *library;
+    const wchar_t *library;
     const char *funcname;
 
     // Hook handler.
@@ -126,7 +126,8 @@ int lde(const void *addr);
 
 int hook_in_monitor();
 
-int hook(hook_t *h, void *module_handle);
+int hook_resolve(hook_t *h);
+int hook_apply(hook_t *h, void *module_handle);
 int hook_insn(hook_t *h, uint32_t signature, ...);
 int hook_missing_hooks(HMODULE module_handle);
 

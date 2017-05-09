@@ -1,0 +1,5 @@
+Changes the library names from ASCII to Unicode to simplify comparison in
+LdrLoadDll callbacks and related. Also moves the MAX_PATH-sized stack unicode
+string used for translating a library to ASCII to the heap (in case
+STATUS_STACK_OVERFLOW remain to be a thing).
+

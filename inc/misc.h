@@ -27,15 +27,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // TODO Enable Guard Page tracking when implemented correctly.
 #define EXPLOIT_GUARD_SUPPORT_ENABLED 0
 
-typedef void (*monitor_hook_t)(const char *library, void *module_handle);
+typedef void (*monitor_hook_t)(const wchar_t *library, void *module_handle);
 
 int misc_init(const char *shutdown_mutex);
 int misc_init2(monitor_hook_t monitor_hook, monitor_hook_t monitor_unhook);
 
 // Call functions from monitor.c indirectly so that we don't have to include
 // it by default when doing unittests.
-void hook_library(const char *library, void *module_handle);
-void unhook_library(const char *library, void *module_handle);
+void hook_library(const wchar_t *library, void *module_handle);
+void unhook_library(const wchar_t *library, void *module_handle);
 
 void misc_set_monitor_options(uint32_t track, uint32_t mode,
     const char *trigger);
@@ -58,7 +58,7 @@ uint32_t path_get_full_path_objattr(
 void wcsncpyA(wchar_t *dst, const char *src, uint32_t length);
 
 void hide_module_from_peb(HMODULE module_handle);
-const wchar_t *get_module_file_name(HMODULE module_handle);
+const UNICODE_STRING *get_module_file_name(HMODULE module_handle);
 void loaded_modules_enumerate(bson *b);
 void destroy_pe_header(HANDLE module_handle);
 
@@ -90,10 +90,8 @@ void get_ip_port(const struct sockaddr *addr, const char **ip, int *port);
 
 int is_shutting_down();
 
-void library_from_asciiz(const char *str, char *library, uint32_t length);
-void library_from_unicodez(const wchar_t *str, char *library, int32_t length);
-void library_from_unicode_string(const UNICODE_STRING *us,
-    char *library, int32_t length);
+wchar_t *libname(const wchar_t *filepath, uint32_t length);
+wchar_t *libname_uni(const UNICODE_STRING *uni);
 
 int stacktrace(CONTEXT *ctx, uintptr_t *addrs, uint32_t length);
 

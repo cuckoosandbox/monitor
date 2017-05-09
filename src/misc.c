@@ -107,12 +107,12 @@ int misc_init2(monitor_hook_t monitor_hook, monitor_hook_t monitor_unhook)
     return 0;
 }
 
-void hook_library(const char *library, void *module_handle)
+void hook_library(const wchar_t *library, void *module_handle)
 {
     g_hook_library(library, module_handle);
 }
 
-void unhook_library(const char *library, void *module_handle)
+void unhook_library(const wchar_t *library, void *module_handle)
 {
     g_unhook_library(library, module_handle);
 }
@@ -173,9 +173,11 @@ wchar_t *get_unicode_buffer()
         }
     }
 
+#if DEBUG
     // If we get here there is probably a memory leak going on somewhere.
     pipe("CRITICAL:We probably encountered a memory leak with regards to "
         "unicode buffers somewhere");
+#endif
 
     // However, just in case, return some memory in order not to crash.
     return virtual_alloc_rw(NULL, (MAX_PATH_W+1) * sizeof(wchar_t));
@@ -314,7 +316,7 @@ void hide_module_from_peb(HMODULE module_handle)
     }
 }
 
-const wchar_t *get_module_file_name(HMODULE module_handle)
+const UNICODE_STRING *get_module_file_name(HMODULE module_handle)
 {
     LDR_MODULE *mod, *first_mod; PEB *peb = get_peb();
 
@@ -326,7 +328,7 @@ const wchar_t *get_module_file_name(HMODULE module_handle)
     // Furthermore stop iterating if the first node is found again.
     for (uint32_t idx = 0; idx < 0x1000 && mod->BaseAddress != NULL; idx++) {
         if(mod->BaseAddress == module_handle) {
-            return mod->BaseDllName.Buffer;
+            return &mod->BaseDllName;
         }
 
         mod = (LDR_MODULE *) mod->InLoadOrderModuleList.Flink;
@@ -1034,68 +1036,36 @@ int is_shutting_down()
     return 0;
 }
 
-void library_from_asciiz(const char *str, char *library, uint32_t length)
+wchar_t *libname(const wchar_t *filepath, uint32_t length)
 {
-    memset(library, 0, length);
-
-    if(str != NULL) {
-        const char *libname = str;
-
-        // Follow through all directories.
-        for (const char *ptr = libname; *ptr != 0; ptr++) {
-            if(*ptr == '\\' || *ptr == '/') {
-                libname = ptr + 1;
-            }
-        }
-
-        // Copy the library name into our ascii library buffer.
-        length = MIN(length - 1, strlen(libname));
-        for (uint32_t idx = 0; idx < length; idx++) {
-            library[idx] = libname[idx];
-        }
-
-        // Strip off any remaining ".dll".
-        if(stricmp(&library[length - 4], ".dll") == 0) {
-            library[length - 4] = 0;
-        }
-    }
-}
-
-void library_from_unicodez(const wchar_t *str, char *library, int32_t length)
-{
-    memset(library, 0, length);
-
-    if(str == NULL) {
-        return;
-    }
+    wchar_t *ret = get_unicode_buffer();
 
     // Follow through all directories.
-    for (const wchar_t *ptr = str; *ptr != 0; ptr++) {
+    for (const wchar_t *ptr = filepath; *ptr != 0; ptr++) {
         if(*ptr == '\\' || *ptr == '/') {
-            str = ptr + 1;
+            length -= ptr + 1 - filepath;
+            filepath = ptr + 1;
         }
     }
 
-    // Copy the library name into our ascii library buffer.
-    length = MIN(length - 1, lstrlenW(str));
-    for (int32_t idx = 0; idx < length; idx++) {
-        library[idx] = (char) str[idx];
-    }
+    // Copy the library name into our return buffer.
+    memcpy(ret, filepath, length * sizeof(wchar_t));
+    ret[length] = 0;
 
     // Strip off any remaining ".dll".
-    if(stricmp(&library[length - 4], ".dll") == 0) {
-        library[length - 4] = 0;
+    if(wcsicmp(&ret[length - 4], L".dll") == 0) {
+        ret[length - 4] = 0;
     }
+
+    return ret;
 }
 
-void library_from_unicode_string(const UNICODE_STRING *us,
-    char *library, int32_t length)
+wchar_t *libname_uni(const UNICODE_STRING *uni)
 {
-    memset(library, 0, length);
-
-    if(us != NULL) {
-        return library_from_unicodez(us->Buffer, library, length);
+    if(uni == NULL || uni->Buffer == NULL || uni->Length == 0) {
+        return NULL;
     }
+    return libname(uni->Buffer, uni->Length / sizeof(wchar_t));
 }
 
 #if __x86_64__

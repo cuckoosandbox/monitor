@@ -44,6 +44,13 @@ static uint8_t *_h_fallthrough_addrcb(
     return NULL;
 }
 
+static uint8_t *_h2_addrcb(
+    hook_t *h, uint8_t *module_handle, uint32_t module_size)
+{
+    (void) h; (void) module_handle; (void) module_size;
+    return NULL;
+}
+
 int main()
 {
     WSADATA wsa;
@@ -61,14 +68,45 @@ int main()
     // thing being set. This may be demonstrated by having the later
     // GetProcAddress resolve the address of another function.
     hook_t h_fallthrough = {
+        .module_handle = GetModuleHandle("kernel32"),
         .funcname = "CreateFileA",
         .library = NULL,
         .addr = NULL,
         .addrcb = &_h_fallthrough_addrcb,
         .report = HOOK_PRUNE_RESOLVERR,
     };
-    assert(hook(&h_fallthrough, GetModuleHandle("kernel32")) < 0);
+    assert(hook_resolve(&h_fallthrough) < 0);
     assert(h_fallthrough.addr == NULL);
+
+    // "address callback" for "__wmi__" etc.
+    hook_t h1 = {
+        .module_handle = NULL,
+        .library = L"__wmi__",
+    };
+    assert(hook_resolve(&h1) == 0);
+    assert(h1.module_handle == NULL);
+
+    // Failure when the address hook returns a nullptr.
+    hook_t h2 = {
+        .module_handle = NULL,
+        .library = NULL,
+        .addr = NULL,
+        .addrcb = &_h2_addrcb,
+    };
+    assert(hook_resolve(&h2) < 0);
+    assert(h2.addr == NULL);
+
+    hook_t h3 = {
+        .type = 999,
+        .module_handle = GetModuleHandle("kernel32"),
+        .funcname = "CreateProcessA",
+        .addrcb = NULL,
+    };
+    assert(hook_resolve(&h3) == 1);
+    assert(h3.addr == (uint8_t *) GetProcAddress(
+        GetModuleHandle("kernel32"), "CreateProcessA"
+    ));
+
     pipe("INFO:Test finished!");
     return 0;
 }

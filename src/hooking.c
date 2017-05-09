@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -94,14 +94,13 @@ static void CALLBACK _ldr_dll_notification(ULONG reason,
 {
     (void) param;
 
-    char library[MAX_PATH];
-
     // DLL loaded notification.
     if(reason == LDR_DLL_NOTIFICATION_REASON_LOADED && notification != NULL) {
-        library_from_unicode_string(notification->Loaded.BaseDllName,
-            library, sizeof(library));
-
-        hook_library(library, notification->Loaded.DllBase);
+        wchar_t *library = libname_uni(notification->Loaded.BaseDllName);
+        if(library != NULL) {
+            hook_library(library, notification->Loaded.DllBase);
+            free_unicode_buffer(library);
+        }
     }
 }
 
@@ -150,12 +149,15 @@ int hook_init2()
     return 0;
 }
 
-static uintptr_t WINAPI _hook_retaddr4(void *a, void *b, void *c, void *d)
+static uint32_t WINAPI _hook_retaddr4(void *a, void *b, void *c, void **d)
 {
-    (void) a; (void) b; (void) c; (void) d;
+    (void) a; (void) b; (void) c;
 
     // Probably gcc specific.
-    return (uintptr_t) __builtin_return_address(0);
+    *d = __builtin_return_address(0);
+
+    // Must return any failure to avoid recursively calling hook_library().
+    return STATUS_ACCESS_VIOLATION;
 }
 
 void hook_initcb_LdrLoadDll(hook_t *h)
@@ -164,7 +166,7 @@ void hook_initcb_LdrLoadDll(hook_t *h)
 
     *h->orig = (FARPROC) _hook_retaddr4;
 
-    g_Old_LdrLoadDll_address = (uintptr_t) h->handler(NULL, 0, NULL, NULL);
+    h->handler(NULL, 0, NULL, (HANDLE *) &g_Old_LdrLoadDll_address);
 
     *h->orig = fn;
 }
@@ -493,7 +495,7 @@ int hook_create_jump(hook_t *h)
     NTSTATUS status =
         virtual_protect(addr, stub_used, PAGE_EXECUTE_READWRITE);
     if(NT_SUCCESS(status) == FALSE) {
-        pipe("CRITICAL:Unable to change memory protection of %z!%z at "
+        pipe("CRITICAL:Unable to change memory protection of %Z!%z at "
             "0x%X %d to RWX (error code 0x%x)!",
             h->library, h->funcname, addr, stub_used, status);
         return -1;
@@ -533,7 +535,7 @@ int hook_create_jump(hook_t *h)
     NTSTATUS status =
         virtual_protect(addr, stub_used, PAGE_EXECUTE_READWRITE);
     if(NT_SUCCESS(status) == FALSE) {
-        pipe("CRITICAL:Unable to change memory protection of %z!%z at "
+        pipe("CRITICAL:Unable to change memory protection of %Z!%z at "
             "0x%X %d to RWX (error code 0x%x)!",
             h->library, h->funcname, addr, stub_used, status);
         return -1;
@@ -843,20 +845,15 @@ int hook_hotpatch_guardpage(hook_t *h)
     return 0;
 }
 
-int hook(hook_t *h, void *module_handle)
+int hook_resolve(hook_t *h)
 {
-    if(h->is_hooked != 0) {
-        return 0;
-    }
-
-    h->module_handle = module_handle;
     if(h->module_handle == NULL) {
-        h->module_handle = GetModuleHandle(h->library);
+        h->module_handle = GetModuleHandleW(h->library);
 
         // There is only one case in which a nullptr module handle is
         // allowed and that's when there is an address callback and the
         // library starts as well as ends with two underscores.
-        const char *end = h->library + strlen(h->library);
+        const wchar_t *end = h->library + lstrlenW(h->library);
         if(h->module_handle == NULL &&
                 (h->library[0] == '_' && h->library[1] == '_' &&
                 end[-1] == '_' && end[-2] == '_') == 0) {
@@ -874,7 +871,7 @@ int hook(hook_t *h, void *module_handle)
 
         if(h->addr == NULL) {
             if((h->report & HOOK_PRUNE_RESOLVERR) != HOOK_PRUNE_RESOLVERR) {
-                pipe("DEBUG:Error resolving function %z!%z through our "
+                pipe("DEBUG:Error resolving function %Z!%z through our "
                     "custom callback.", h->library, h->funcname);
             }
             return -1;
@@ -886,17 +883,34 @@ int hook(hook_t *h, void *module_handle)
         h->addr = (uint8_t *) GetProcAddress(h->module_handle, h->funcname);
         if(h->addr == NULL) {
             if((h->report & HOOK_PRUNE_RESOLVERR) != HOOK_PRUNE_RESOLVERR) {
-                pipe("DEBUG:Error resolving function %z!%z.",
+                pipe("DEBUG:Error resolving function %Z!%z.",
                     h->library, h->funcname);
             }
             return -1;
         }
     }
 
+    if(h->type == HOOK_TYPE_NORMAL)
+        pipe("INFO:determining start for %Z %z..", h->library, h->funcname);
     if(h->type == HOOK_TYPE_NORMAL && _hook_determine_start(h) < 0) {
-        pipe("CRITICAL:Error determining start of function %z!%z.",
+        pipe("CRITICAL:Error determining start of function %Z!%z.",
             h->library, h->funcname);
         return -1;
+    }
+    return 1;
+}
+
+int hook_apply(hook_t *h, void *module_handle)
+{
+    if(h->is_hooked != 0) {
+        return 0;
+    }
+
+    h->module_handle = module_handle;
+    int r = hook_resolve(h);
+    if(r < 1) {
+        pipe("INFO:ERR VALUE %d @ %z?", r, h->funcname);
+        return r;
     }
 
     // Handle delay loaded forwarders. In some situations an exported symbol
@@ -949,18 +963,22 @@ int hook(hook_t *h, void *module_handle)
     // null pointer (so it'll be resolved again), and return success.
     if(did != NULL) {
         // We cheat a little bit here but that should be fine.
-        char *library = slab_getmem(&g_function_stubs);
-        library_from_asciiz((const char *) h->module_handle + did->DllNameRVA,
-            library, slab_size(&g_function_stubs));
+        wchar_t *library = slab_getmem(&g_function_stubs);
+
+        copy_wcsncpyA(
+            library, (const char *) h->module_handle + did->DllNameRVA,
+            slab_size(&g_function_stubs) / sizeof(wchar_t)
+        );
 
         h->library = library;
-        h->module_handle = GetModuleHandle(library);
+        h->module_handle = GetModuleHandleW(library);
         h->addr = NULL;
 
         // We're having a special case here. When we return 1, the monitor
         // will attempt to re-apply the hook (but this time against the new
         // library). So we should only do this if the new module is already
         // in-memory.
+        pipe("INFO:DELAY IMPORT? lib=%Z", h->library);
         return h->module_handle != NULL ? 1 : 0;
     }
 
@@ -981,13 +999,15 @@ int hook(hook_t *h, void *module_handle)
     }
     else if(h->type == HOOK_TYPE_GUARD) {
         if(hook_hotpatch_guardpage(h) < 0) {
+            pipe("INFO:ERROR GUARD PAGE?");
             return -1;
         }
     }
 
     if(h->stub_used < 0) {
+        pipe("INFO:!!!");
         pipe(
-            "CRITICAL:Error creating function stub for %z!%z.",
+            "CRITICAL:Error creating function stub for %Z!%z.",
             h->library, h->funcname
         );
         return -1;
@@ -998,6 +1018,7 @@ int hook(hook_t *h, void *module_handle)
 
     // Patch the original function.
     if(hook_create_jump(h) < 0) {
+        pipe("INFO:ERROR CREATE JMP?");
         return -1;
     }
 
@@ -1007,6 +1028,11 @@ int hook(hook_t *h, void *module_handle)
     if(h->initcb != NULL) {
         h->initcb(h);
     }
+
+    pipe(
+        "INFO:monitor-hook of %z in %Z is now hooked!",
+        h->funcname, h->library
+    );
 
     h->is_hooked = 1;
     return 0;
@@ -1039,7 +1065,7 @@ static void _hook_missing_hooks_worker(
     h.handler = (FARPROC) handler;
     h.funcname = funcname;
 
-    if(hook(&h, module_handle) == 0) {
+    if(hook_apply(&h, module_handle) == 0) {
         ptr += asm_pushv(ptr, funcname);
         ptr += asm_call(ptr, &log_missing_hook);
         ptr += asm_jump(ptr, h.func_stub);

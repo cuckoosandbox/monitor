@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2015-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -216,11 +216,11 @@ int wmi_win32_process_create_pre(
 void ole_enable_hooks(REFCLSID clsid)
 {
     if(memcmp(clsid, &our_CLSID_WbemLocator, sizeof(CLSID)) == 0) {
-        hook_library("__wmi__", NULL);
+        hook_library(L"__wmi__", NULL);
     }
 
     if(memcmp(clsid, &our_CLSID_WbemAdministrativeLocator,
             sizeof(CLSID)) == 0) {
-        hook_library("__wmi__", NULL);
+        hook_library(L"__wmi__", NULL);
     }
 }

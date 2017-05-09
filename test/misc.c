@@ -149,6 +149,29 @@ void test_exploit_lea_rewrite()
     LEAREWR("\x80\x38\x00", 6, "8d8000000000");
 }
 
+void test_libname()
+{
+    assert(wcscmp(libname(L"hello", 5), L"hello") == 0);
+    assert(wcscmp(libname(L"Hello.DLL", 9), L"Hello") == 0);
+    assert(wcscmp(libname(L"C:\\hello.dll", 12), L"hello") == 0);
+    assert(wcscmp(libname(L"truncated", 6), L"trunca") == 0);
+
+    UNICODE_STRING us;
+    us.Buffer = L"FooBar!";
+    us.Length = 12;
+    us.MaximumLength = 12;
+    assert(wcscmp(libname_uni(&us), L"FooBar") == 0);
+}
+
+void test_getmodule()
+{
+    assert(get_module_file_name(NULL) != NULL);
+
+    const UNICODE_STRING *mod =
+        get_module_file_name(GetModuleHandle("kernel32"));
+    assert(mod != NULL && wcsicmp(mod->Buffer, L"kernel32") == 0);
+}
+
 void test_asm()
 {
     uint8_t buf[32];
@@ -261,6 +284,8 @@ int main()
 
     test_path_native();
     test_exploit_lea_rewrite();
+    test_libname();
+    test_getmodule();
     test_asm();
     pipe("INFO:Test finished!");
     return 0;

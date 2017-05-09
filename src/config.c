@@ -82,6 +82,10 @@ void config_read(config_t *cfg)
 
     memset(cfg, 0, sizeof(config_t));
 
+#if DEBUG_STANDALONE
+    return;
+#endif
+
     FILE *fp = fopen(config_fname, "rb");
     if(fp == NULL) {
         message_box(NULL, "Error fetching configuration file! This is a "

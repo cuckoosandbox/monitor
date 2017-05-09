@@ -52,6 +52,10 @@ static void log_raw(const char *buf, size_t length);
 
 static int open_handles()
 {
+#if DEBUG_STANDALONE
+    return 0;
+#endif
+
     do {
         // TODO Use NtCreateFile instead of CreateFileW.
         g_log_handle = CreateFileW(g_log_pipename, GENERIC_WRITE,
@@ -75,6 +79,10 @@ static int open_handles()
 
 static void log_raw(const char *buf, size_t length)
 {
+#if DEBUG_STANDALONE
+    return;
+#endif
+
     EnterCriticalSection(&g_mutex);
 
     while (length != 0) {

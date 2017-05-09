@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -274,7 +274,7 @@ static hook_t g_hooks[] = {
 {%- for hook in sigs if not hook.ignore: %}
     {%- if hook.is_hook: %}
     {
-        "{{ hook.signature.library }}",
+        L"{{ hook.signature.library }}",
         "{{ hook.apiname }}",
         {% if not hook.is_insn %}(FARPROC) New_{{ hook.library }}_{{ hook.apiname }}{% else %}NULL{% endif %},
         {% if not hook.is_insn %}(FARPROC *) &Old_{{ hook.library }}_{{ hook.apiname }}{% else %}NULL{% endif %},

@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -88,13 +88,13 @@ void monitor_init(HMODULE module_handle)
     misc_set_monitor_options(cfg.track, cfg.mode, cfg.trigger);
 }
 
-void monitor_hook(const char *library, void *module_handle)
+void monitor_hook(const wchar_t *library, void *module_handle)
 {
     // Initialize data about each hook.
     for (hook_t *h = sig_hooks(); h->funcname != NULL; h++) {
         // If a specific library has been specified then we skip all other
         // libraries. This feature is used in the special hook for LdrLoadDll.
-        if(library != NULL && stricmp(h->library, library) != 0) {
+        if(library != NULL && wcsicmp(h->library, library) != 0) {
             continue;
         }
 
@@ -110,11 +110,11 @@ void monitor_hook(const char *library, void *module_handle)
         // already have been loaded. In that case we want to hook the function
         // forwarder right away. (Note that the library member of the hook
         // object is updated in the case of retrying).
-        while (hook(h, module_handle) == 1);
+        while (hook_apply(h, module_handle) == 1);
     }
 }
 
-void monitor_unhook(const char *library, void *module_handle)
+void monitor_unhook(const wchar_t *library, void *module_handle)
 {
     (void) library;
 

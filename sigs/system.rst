@@ -100,14 +100,13 @@ Parameters::
 
 Pre::
 
-    char library[MAX_PATH];
+    wchar_t *library = libname_uni(ModuleFileName);
     wchar_t *module_name = extract_unicode_string_unistr(ModuleFileName);
-    library_from_unicode_string(ModuleFileName, library, sizeof(library));
 
 Logging::
 
     u module_name module_name
-    s basename library
+    u basename library
     i stack_pivoted exploit_is_stack_pivoted()
 
 Post::
@@ -117,6 +116,7 @@ Post::
     }
 
     free_unicode_buffer(module_name);
+    free_unicode_buffer(library);
 
 
 LdrUnloadDll
@@ -141,9 +141,7 @@ Pre::
 
     unhook_detect_disable();
 
-    char library[MAX_PATH+1];
-    library_from_unicodez(get_module_file_name(ModuleHandle),
-        library, sizeof(library));
+    wchar_t *library = libname_uni(get_module_file_name(ModuleHandle));
 
 Middle::
 
@@ -158,13 +156,14 @@ Middle::
 
 Logging::
 
-   s library library
+   u library library
 
 Post::
 
     if(range_is_readable(ModuleHandle, 0x1000) == 0) {
         unhook_library(library, ModuleHandle);
     }
+    free_unicode_buffer(library);
 
 
 LdrGetDllHandle
@@ -219,14 +218,15 @@ Parameters::
 
 Pre::
 
-    char library[MAX_PATH+1];
-
-    library_from_unicodez(get_module_file_name(ModuleHandle),
-        library, sizeof(library));
+    wchar_t *library = libname_uni(get_module_file_name(ModuleHandle));
 
 Logging::
 
-    s module library
+    u module library
+
+Post::
+
+    free_unicode_buffer(library);
 
 
 ExitWindowsEx
