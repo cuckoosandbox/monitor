@@ -544,6 +544,14 @@ uint32_t path_get_full_pathW(const wchar_t *in, wchar_t *out)
         return lstrlenW(out);
     }
 
+    // Ignore UNC paths.
+    if(wcsncmp(pathi, L"\\??\\UNC\\", 8) == 0) {
+        wcscpy(out, pathi);
+        free_unicode_buffer(buf1);
+        free_unicode_buffer(buf2);
+        return lstrlenW(out);
+    }
+
     // Normalize the input file path.
     if(wcsncmp(pathi, L"\\??\\", 4) == 0 ||
             wcsncmp(pathi, L"\\\\?\\", 4) == 0) {
