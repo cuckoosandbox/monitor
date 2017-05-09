@@ -49,7 +49,7 @@ DEFAULTS = {
         hooking.o unhook.o assembly.o log.o diffing.o sleep.o wmi.o exploit.o
         flags.o hooks.o config.o network.o iexplore.o sha1/sha1.o insns.o
         bson/bson.o bson/numbers.o bson/encoding.o disguise.o copy.o office.o
-        ../src/capstone/capstone-%(arch)s.lib""".split(),
+        ole.o bits.o ../src/capstone/capstone-%(arch)s.lib""".split(),
     'LDFLAGS': ['-lws2_32', '-lshlwapi', '-lole32'],
     'MODES': ['winxp', 'win7', 'win7x64'],
     'EXTENSION': 'exe',

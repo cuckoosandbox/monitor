@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2017 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <windows.h>
 #include <wbemidl.h>
+#include <bits.h>
 #include "monitor.h"
 
 #define RETADDRCNT 64
@@ -171,6 +172,12 @@ uint8_t *hook_addrcb_IWbemServices_ExecMethod(hook_t *h,
     uint8_t *module_address, uint32_t module_size);
 uint8_t *hook_addrcb_IWbemServices_ExecMethodAsync(hook_t *h,
     uint8_t *module_address, uint32_t module_size);
+uint8_t *hook_addrcb_IBackgroundCopyManager_CreateJob(
+    hook_t *h, uint8_t *module_address, uint32_t module_size);
+uint8_t *hook_addrcb_IBackgroundCopyJob_AddFile(
+    hook_t *h, uint8_t *module_address, uint32_t module_size);
+uint8_t *hook_addrcb_IBackgroundCopyJob_AddFileSet(
+    hook_t *h, uint8_t *module_address, uint32_t module_size);
 
 uint8_t *hook_modulecb_vbe6(
     hook_t *h, uint8_t *module_address, uint32_t module_size
@@ -206,6 +213,7 @@ int wmi_win32_process_create_pre(
     IWbemServices *services, IWbemClassObject *args, uint32_t *creation_flags
 );
 void ole_enable_hooks(REFCLSID refclsid);
+void bits_set_job_vtable(IBackgroundCopyJobVtbl *bgcj);
 
 extern uintptr_t g_monitor_start;
 extern uintptr_t g_monitor_end;

@@ -1,0 +1,5 @@
+It appears IBackgroundCopyManager_CreateJob points to a generic COM method
+rather than an implementation-specific one. Due to this a potential way
+forward would be to keep a track of X IBackgroundCopyManager this pointers.
+The QueryInterface approach (for determining whether an object implements
+IID_BackgroundCopyManager didn't seem to work so far).
