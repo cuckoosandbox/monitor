@@ -15,4 +15,4 @@ requirements.
 .. code-block:: bash
 
     sudo apt-get install mingw-w64 python-pip nasm
-    sudo pip install sphinx docutils
+    sudo pip install sphinx docutils pyyaml
