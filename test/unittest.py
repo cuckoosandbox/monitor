@@ -125,6 +125,10 @@ def compile_file(fname, arch):
 if __name__ == '__main__':
     curdir = os.path.abspath(os.path.dirname(__file__))
 
+    # Clear the config.yml files beforehand.
+    open("x86/config.yml", "wb").close()
+    open("x64/config.yml", "wb").close()
+
     lines = []
     for fname in os.listdir(curdir):
         if not fname.endswith('.c'):
@@ -134,6 +138,7 @@ if __name__ == '__main__':
         lines += compile_file(fname, 'x64')
 
     with open(os.path.join(curdir, 'Makefile'), 'wb') as f:
+        f.write('MAKEFLAGS = -j8\n')
         f.write('all: %s\n' % ' '.join(ALL))
         f.write('clean:\n\trm -f %s\n\n' % ' '.join(ALL))
         f.write('\n'.join(lines))
