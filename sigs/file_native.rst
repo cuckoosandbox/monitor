@@ -381,6 +381,24 @@ Pre::
         pipe("FILE_DEL:%Z", filepath);
         free_unicode_buffer(filepath);
     }
+    if(FileInformation != NULL && Length >= sizeof(FILE_RENAME_INFORMATION) &&
+            FileInformationClass == FileRenameInformation) {
+        FILE_RENAME_INFORMATION *rename_information =
+            (FILE_RENAME_INFORMATION *) FileInformation;
+        wchar_t *input = get_unicode_buffer(), *output = get_unicode_buffer();
+
+        path_get_full_path_handle(FileHandle, input);
+
+        UNICODE_STRING unistr;
+        unistr.Length = rename_information->FileNameLength;
+        unistr.MaximumLength = rename_information->FileNameLength;
+        unistr.Buffer = rename_information->FileName;
+        path_get_full_path_unistr(&unistr, output);
+
+        pipe("FILE_MOVE:%Z::%Z", input, output);
+        free_unicode_buffer(input);
+        free_unicode_buffer(output);
+    }
 
 Interesting::
 

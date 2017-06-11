@@ -232,6 +232,13 @@ typedef struct _FILE_BASIC_INFORMATION {
     ULONG FileAttributes;
 } FILE_BASIC_INFORMATION, *PFILE_BASIC_INFORMATION;
 
+typedef struct _FILE_RENAME_INFORMATION {
+    BOOLEAN ReplaceIfExists;
+    HANDLE RootDirectory;
+    ULONG FileNameLength;
+    WCHAR FileName[1];
+} FILE_RENAME_INFORMATION, *PFILE_RENAME_INFORMATION;
+
 typedef struct _RTL_DRIVE_LETTER_CURDIR {
     USHORT Flags;
     USHORT Length;
