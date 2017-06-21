@@ -44,12 +44,9 @@ static int verbose = 0;
 
 void error(const char *fmt, ...)
 {
-    char buf[2048];
-
     va_list args;
     va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    MessageBox(NULL, buf, "inject error", 0);
+    vprintf(fmt, args);
     va_end(args);
 
     exit(1);
