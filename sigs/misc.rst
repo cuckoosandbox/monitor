@@ -565,3 +565,25 @@ Parameters::
 Flags::
 
     modifiers
+
+
+SetStdHandle
+============
+
+Signature::
+
+    * Library: kernel32
+    * Return value: BOOL
+
+Parameters::
+
+    ** DWORD nStdHandle std_handle
+    ** HANDLE hHandle file_handle
+
+Middle::
+
+    set_std_handle(nStdHandle, hHandle);
+
+Flags::
+
+    std_handle

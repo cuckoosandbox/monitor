@@ -110,4 +110,7 @@ int message_box(HWND hwnd, const char *body, const char *title, int flags);
 HANDLE open_thread(uint32_t desired_mask, uint32_t thread_identifier);
 uint32_t resume_thread(HANDLE thread_handle);
 
+int set_std_handle(DWORD std_handle, HANDLE file_handle);
+int is_std_handle(HANDLE file_handle);
+
 #endif

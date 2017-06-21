@@ -224,8 +224,11 @@ Interesting::
 
 Middle::
 
-    wchar_t *filepath = get_unicode_buffer();
-    path_get_full_path_handle(FileHandle, filepath);
+    wchar_t *filepath = NULL;
+    if(is_std_handle(FileHandle) == 0) {
+        filepath = get_unicode_buffer();
+        path_get_full_path_handle(FileHandle, filepath);
+    }
 
 Logging::
 
@@ -234,7 +237,7 @@ Logging::
 
 Post::
 
-    if(NT_SUCCESS(ret) != FALSE) {
+    if(NT_SUCCESS(ret) != FALSE && filepath != NULL) {
         pipe("FILE_NEW:%Z", filepath);
     }
 

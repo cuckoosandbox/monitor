@@ -118,3 +118,12 @@ Enum::
     MOD_NOREPEAT
     MOD_SHIFT
     MOD_WIN
+
+SetStdHandle_nStdHandle
+=======================
+
+Value::
+
+    STD_INPUT_HANDLE
+    STD_OUTPUT_HANDLE
+    STD_ERROR_HANDLE

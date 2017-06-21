@@ -33,6 +33,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static HANDLE g_current_process;
 static uint32_t g_current_process_id;
 static HANDLE g_current_thread;
+static HANDLE g_stdin_handle;
+static HANDLE g_stdout_handle;
+static HANDLE g_stderr_handle;
 
 static int32_t g_win32_error_offset;
 static int32_t g_nt_status_offset;
@@ -219,6 +222,9 @@ int native_init()
     g_current_process = GetCurrentProcess();
     g_current_process_id = GetCurrentProcessId();
     g_current_thread = GetCurrentThread();
+    g_stdin_handle = GetStdHandle(STD_INPUT_HANDLE);
+    g_stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    g_stderr_handle = GetStdHandle(STD_ERROR_HANDLE);
 
     // TODO Use the slab allocator here as well.
     uint8_t *memory = VirtualAlloc(NULL, 0x1000,
@@ -653,4 +659,29 @@ uint32_t resume_thread(HANDLE thread_handle)
         return suspend_count;
     }
     return 0;
+}
+
+int set_std_handle(DWORD std_handle, HANDLE file_handle)
+{
+    if(std_handle == STD_INPUT_HANDLE) {
+        g_stdin_handle = file_handle;
+        return 0;
+    }
+    if(std_handle == STD_OUTPUT_HANDLE) {
+        g_stdout_handle = file_handle;
+        return 0;
+    }
+    if(std_handle == STD_ERROR_HANDLE) {
+        g_stderr_handle = file_handle;
+        return 0;
+    }
+    return -1;
+}
+
+int is_std_handle(HANDLE file_handle)
+{
+    return
+        file_handle == g_stdin_handle ||
+        file_handle == g_stdout_handle ||
+        file_handle == g_stderr_handle;
 }
