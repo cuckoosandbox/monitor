@@ -3,6 +3,39 @@ Signature::
     * Calling convention: WINAPI
     * Category: synchronisation
 
+NtOpenEvent
+===========
+
+Signature::
+
+    * Library: ntdll
+    * Return value: NTSTATUS
+
+Parameters::
+
+    ** PHANDLE EventHandle event_handle
+    ** ACCESS_MASK DesiredAccess desired_access
+    *  POBJECT_ATTRIBUTES ObjectAttributes
+
+Flags::
+
+    desired_access
+
+Pre::
+
+    wchar_t *event_name = NULL;
+    if(ObjectAttributes != NULL) {
+        event_name = extract_unicode_string_unistr(ObjectAttributes->ObjectName);
+    }
+
+Logging::
+
+    u event_name event_name
+
+Post::
+
+    free_unicode_buffer(event_name);
+
 
 NtCreateMutant
 ==============
