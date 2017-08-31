@@ -289,7 +289,7 @@ Logging::
     u string buf
 
 
-_CreateWindowExA
+CreateWindowExA
 ================
 
 Signature::
@@ -317,7 +317,7 @@ Flags::
     style
 
 
-_CreateWindowExW
+CreateWindowExW
 ================
 
 Signature::
