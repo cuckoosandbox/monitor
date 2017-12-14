@@ -1071,3 +1071,149 @@ int hook_missing_hooks(HMODULE module_handle)
     log_debug("Finished missing hooks @ %p\n", module_handle);
     return 0;
 }
+
+//
+// This is the second part of the UM hook protection
+// This VEH handler attempts to resume the AV triggered 
+// when the hook restoration is failed as we deliberately protect our
+// hooked API from being written via NtProtectVirtualMemory hook
+// 
+static LONG WINAPI vector_handler_skip( EXCEPTION_POINTERS *ExceptionInfo)
+{
+    PCONTEXT context;
+    uint32_t exception_code = 0;
+    
+    if(ExceptionInfo != NULL) 
+    {
+        context = ExceptionInfo->ContextRecord;
+        exception_code = ExceptionInfo->ExceptionRecord->ExceptionCode;
+    }
+
+    if(exception_code == STATUS_ACCESS_VIOLATION) 
+    {       
+        do
+        {
+            uintptr_t pc = 0;
+            #if __x86_64__
+            pc = context->Rip;
+            #else
+            pc = context->Eip;
+            #endif 
+
+            // Bail out if the exception address is from cuckoo's own monitor.dll
+            if (pc >= g_monitor_start && pc < g_monitor_end)
+                copy_return();
+
+            // TODO: We should cover all the MOV opcode instructions
+            // F3 A4: repe movsb byte ptr es:[edi], byte ptr [esi]
+            // F0 0F B0/B1: lock cmpxchg [mem], reg
+            // 86/87 : xchg [mem], reg
+            // 66 89 : mov [mem], regword
+            uint8_t *target = (uint8_t*)pc;
+            if (*target == 0xC6 || *target == 0xC7 || *target == 0xF3 || 
+               (*target == 0x66 && *(target+1) == 0x89) ||
+                *target == 0x86 || *target == 0x87 || *target == 0x88 || *target == 0x89 ||
+               (*target == 0xF0 && *(target+1) == 0x0F && (*(target+2) == 0xB0 || *(target+2) == 0xB1)))
+            {
+                // Determine if the AV faulty instruction is related to UM hooks bypass (ie: restore the UM hook by checking the destination address)
+                char insn[DISASM_BUFSIZ];
+                if (disasm((void*)pc, insn) == 0)
+                {
+                    MEMORY_BASIC_INFORMATION_CROSS mbi;
+                    BOOLEAN skipped = FALSE;
+                    void *write_to_address = NULL;
+                    char *temp_insn = strchr(insn, ',');
+                    *temp_insn = '\0';
+                    
+                    if (!strchr(insn, '[') && !strchr(insn, ']'))
+                        // Bail out
+                        break;
+
+                    memset(&mbi, 0, sizeof(mbi));
+
+                    if (strstr(insn, "eax") || strstr(insn, "rax"))
+                        #if __x86_64__
+                        write_to_address = (void *)context->Rax;
+                        #else
+                        write_to_address = (void *)context->Eax;
+                        #endif
+                    else if (strstr(insn, "ebx") || strstr(insn, "rbx"))
+                        #if __x86_64__
+                        write_to_address = (void *)context->Rbx;
+                        #else
+                        write_to_address = (void *)context->Ebx;
+                        #endif
+                    else if (strstr(insn, "ecx") || strstr(insn, "rcx"))
+                        #if __x86_64__
+                        write_to_address = (void *)context->Rcx;
+                        #else
+                        write_to_address = (void *)context->Ecx;
+                        #endif
+                    else if (strstr(insn, "edx") || strstr(insn, "rdx"))
+                        #if __x86_64__
+                        write_to_address = (void *)context->Rdx;
+                        #else
+                        write_to_address = (void *)context->Edx;
+                        #endif
+                    else if (strstr(insn, "esi") || strstr(insn, "rsi"))
+                        #if __x86_64__
+                        write_to_address = (void *)context->Rsi;
+                        #else
+                        write_to_address = (void *)context->Esi;
+                        #endif
+                    else if (strstr(insn, "edi") || strstr(insn, "rdi"))
+                        #if __x86_64__
+                        write_to_address = (void *)context->Rdi;
+                        #else
+                        write_to_address = (void *)context->Edi;
+                        #endif
+
+                    if (write_to_address != NULL)
+                    {
+                        if(virtual_query(write_to_address, &mbi))
+                        {
+                            if ((size_t)mbi.AllocationBase == (size_t)GetModuleHandle("ntdll.dll") ||
+                                (size_t)mbi.AllocationBase == (size_t)GetModuleHandle("kernel32.dll"))
+                                // TODO: Should we report it to front end about the UM hook bypass?
+                                skipped = TRUE;
+                        }
+                        
+                        // Finally we want to skip the UM hook bypass instruction
+                        if (skipped)
+                        {                       
+                            // Skip to next instruction
+                            int length = lde((void*)pc);
+                            #if __x86_64__
+                            context->Rip += length;
+                            #else
+                            context->Eip += length;
+                            #endif
+                            return EXCEPTION_CONTINUE_EXECUTION;
+                        }
+                    }
+                }
+                else
+                {
+                    // Failed in diassembly
+                    break;
+                }
+            }   
+
+        } while (0);     
+    }
+
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
+
+void register_veh()
+{
+    // We don't need to save the handle to the exception handler
+    //__debugbreak();
+    OutputDebugStringA("Entered register_veh");
+    if (AddVectoredExceptionHandler(1, vector_handler_skip) == NULL)
+    {
+        pipe("CRITICAL:Failed to register VEH");
+        return;
+    }
+}

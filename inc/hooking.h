@@ -206,6 +206,7 @@ int wmi_win32_process_create_pre(
     IWbemServices *services, IWbemClassObject *args, uint32_t *creation_flags
 );
 void ole_enable_hooks(REFCLSID refclsid);
+void register_veh();
 
 extern uintptr_t g_monitor_start;
 extern uintptr_t g_monitor_end;
