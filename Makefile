@@ -9,7 +9,7 @@ MAKEFLAGS = -j8
 SIGS = $(wildcard sigs/*.rst)
 FLAGS = $(wildcard flags/*.rst)
 JINJA2 = $(wildcard data/*.jinja2)
-YAML = $(wildcard insn/*.yaml)
+YAML = $(wildcard insn/*.yml)
 
 # Dependencies for the auto-generated hook files.
 HOOKREQ = utils/process.py $(wildcard data/*.json) $(wildcard data/*.conf)

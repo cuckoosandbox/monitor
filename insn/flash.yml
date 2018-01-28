@@ -1,0 +1,19 @@
+global:
+  category: flash
+  mode: flash
+
+BaseExecMgr_setNative32:
+  module: flash32_20_0_0_228
+  init: flash_init
+  offsets:
+    0x565123f2:
+      offset: 0x6d7900
+      stack: 4
+      logging: s method_name name
+      pre: |
+          const char *name = NULL;
+          flash_string_t *name_ = flash_get_method_name(stk0);
+
+          if(name_ != NULL) {
+              name = name_->str;
+          }

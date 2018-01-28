@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -557,7 +557,7 @@ static int _hook_determine_start(hook_t *h)
 {
     // Under Windows 7 some functions have been replaced by a function stub
     // which in turn calls the original function. E.g., a lot of functions
-    // which originaly went through kernel32.dll now make a pass through
+    // which originally went through kernel32.dll now make a pass through
     // kernelbase.dll before reaching kernel32.dll.
     // We follow these jumps and add the regions to the list for unhook
     // detection.
@@ -1010,6 +1010,11 @@ int hook(hook_t *h, void *module_handle)
 
     h->is_hooked = 1;
     return 0;
+}
+
+uint8_t *hook_get_mem()
+{
+    return slab_getmem(&g_function_stubs);
 }
 
 static void _hook_missing_hooks_worker(

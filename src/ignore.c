@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2014-2017 Cuckoo Foundation.
+Copyright (C) 2014-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -127,7 +127,7 @@ int monitor_mode_should_propagate(const wchar_t *cmdline, uint32_t *mode)
             MEMMEMW(L"iexplore.exe") != NULL &&
             MEMMEMW(L"SCODEF:") != NULL &&
             MEMMEMW(L"CREDAT:") != NULL) {
-        *mode |= g_monitor_mode & (HOOK_MODE_IEXPLORE|HOOK_MODE_EXPLOIT);
+        *mode |= g_monitor_mode & HOOK_MODE_BROWSER;
         pipe("DEBUG:Following legitimate IE8 process: %Z!", cmdline);
         return 0;
     }
@@ -136,7 +136,7 @@ int monitor_mode_should_propagate(const wchar_t *cmdline, uint32_t *mode)
             MEMMEMW(L"SCODEF:") != NULL &&
             MEMMEMW(L"CREDAT:") != NULL &&
             MEMMEMW(L"/prefetch:2") != NULL) {
-        *mode |= g_monitor_mode & (HOOK_MODE_IEXPLORE|HOOK_MODE_EXPLOIT);
+        *mode |= g_monitor_mode & HOOK_MODE_BROWSER;
         pipe("DEBUG:Following legitimate IE11 process: %Z!", cmdline);
         return 0;
     }

@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,17 +28,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define HOOK_PRUNE_RESOLVERR 1
 
-#define HOOK_MODE_ALL      0
-#define HOOK_MODE_DUMPTLS  1
-#define HOOK_MODE_IEXPLORE 2
-#define HOOK_MODE_EXPLOIT  4
-#define HOOK_MODE_OFFICE   8
-#define HOOK_MODE_PDF      16
+#define HOOK_MODE_ALL      (0 << 0)
+#define HOOK_MODE_DUMPTLS  (1 << 0)
+#define HOOK_MODE_IEXPLORE (1 << 1)
+#define HOOK_MODE_EXPLOIT  (1 << 2)
+#define HOOK_MODE_OFFICE   (1 << 3)
+#define HOOK_MODE_PDF      (1 << 4)
+#define HOOK_MODE_FLASH    (1 << 5)
+
+#define HOOK_MODE_BROWSER \
+    (HOOK_MODE_IEXPLORE | HOOK_MODE_EXPLOIT | HOOK_MODE_FLASH)
 
 #define HOOK_INSN_NONE     0
 #define HOOK_INSN_EAX      1
 #define HOOK_INSN_ECX      2
 #define HOOK_INSN_EDX      3
+#define HOOK_INSN_RDX      3
 #define HOOK_INSN_EBX      4
 #define HOOK_INSN_ESP      5
 #define HOOK_INSN_EBP      6
@@ -128,6 +133,7 @@ int hook_in_monitor();
 
 int hook(hook_t *h, void *module_handle);
 int hook_insn(hook_t *h, uint32_t signature, ...);
+uint8_t *hook_get_mem();
 int hook_missing_hooks(HMODULE module_handle);
 
 #define DISASM_BUFSIZ 128
@@ -194,9 +200,15 @@ uint8_t *hook_modulecb_escript_api(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );
 
+uint8_t *hook_modulecb_flash32_20_0_0_228(
+    hook_t *h, uint8_t *module_address, uint32_t module_size
+);
+
 uint8_t *hook_modulecb_jscript9(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );
+
+void flash_init(hook_t *h, uint8_t *module_address, uint32_t module_size);
 
 typedef void VAR;
 

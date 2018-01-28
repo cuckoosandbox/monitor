@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Cuckoo Sandbox - Automated Malware Analysis
-Copyright (C) 2010-2015 Cuckoo Foundation
+Copyright (C) 2014-2018 Cuckoo Foundation
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -692,6 +692,7 @@ class InsnProcess(object):
                         "arguments": arguments,
                         "signature": signature,
                         "logging": logging,
+                        "pre": entry.get("pre"),
                     })
                     idx += 1
 
@@ -701,6 +702,8 @@ class InsnProcess(object):
                     "funcname": funcname,
                     "category": category,
                     "mode": mode,
+                    "init": info.get("init"),
+                    "bitmode": info.get("bitmode", 32),
                     "entries": entries,
                 })
 
@@ -710,6 +713,8 @@ class InsnProcess(object):
                 modules[method["module"]] = {
                     "module": method["module"],
                     "clean": method["module"].replace(".", "_"),
+                    "init": method["init"],
+                    "bitmode": method["bitmode"],
                     "methods": [],
                 }
 

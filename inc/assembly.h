@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -64,6 +64,7 @@ int asm_move_regimm(uint8_t *stub, register_t reg, uintptr_t value);
 int asm_push(uint8_t *stub, uintptr_t value);
 int asm_push32(uint8_t *stub, uintptr_t value);
 int asm_push_register(uint8_t *stub, register_t reg);
+int asm_pop_register(uint8_t *stub, register_t reg);
 int asm_jregz(uint8_t *stub, register_t reg, int8_t offset);
 int asm_jump_32bit(uint8_t *stub, const void *addr);
 int asm_jump_32bit_rel(uint8_t *stub, const void *addr, int relative);

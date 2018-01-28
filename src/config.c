@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2014-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ static uint32_t _parse_mode(const char *mode)
         }
 
         if(strnicmp(mode, "iexplore", 8) == 0) {
-            ret |= HOOK_MODE_IEXPLORE | HOOK_MODE_EXPLOIT;
+            ret |= HOOK_MODE_BROWSER;
             mode += 8;
             continue;
         }

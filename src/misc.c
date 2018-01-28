@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2014-2017 Cuckoo Foundation.
+Copyright (C) 2014-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1082,8 +1082,9 @@ void library_from_unicodez(const wchar_t *str, char *library, int32_t length)
         library[idx] = (char) str[idx];
     }
 
-    // Strip off any remaining ".dll".
-    if(stricmp(&library[length - 4], ".dll") == 0) {
+    // Strip off any remaining ".dll" or ".ocx" parts.
+    if(stricmp(&library[length - 4], ".dll") == 0 ||
+            stricmp(&library[length - 4], ".ocx") == 0) {
         library[length - 4] = 0;
     }
 }

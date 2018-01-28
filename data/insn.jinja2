@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2016-2017 Cuckoo Foundation.
+Copyright (C) 2016-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <stdint.h>
+#include "flash.h"
 #include "hooking.h"
 #include "hook-info.h"
 #include "log.h"
@@ -42,6 +43,10 @@ static void __stdcall _cb_{{ method.module_clean }}_{{ method.funcname }}_{{ ent
     last_error_t lasterror;
     get_last_error(&lasterror);
 
+    {% if entry.pre %}
+    {{ entry.pre }}
+    {% endif %}
+
     log_api(
         SIG_{{ method.module_clean }}_{{ method.funcname }},
         1, 0, 0, &lasterror
@@ -58,9 +63,15 @@ static void __stdcall _cb_{{ method.module_clean }}_{{ method.funcname }}_{{ ent
 
 {% for method in methods %}
 static insnoff_t _{{ method.module_clean }}_{{ method.funcname }}[] = {
+{%- if method.bitmode == 64 %}
+#if __x86_64__
+{%- else %}
+#if !__x86_64__
+{% endif %}
     {%- for entry in method.entries %}
     {{ "{" }}{{ entry.timestamp }}, {{ entry.offset }}, {{ entry.signature }}, &_cb_{{ method.module_clean }}_{{ entry.funcname }}_{{ entry.index }}{{ "}" }},
     {%- endfor %}
+#endif
     {{ "{" }}0, 0, 0, NULL{{ "}" }},
 };
 {% endfor %}
@@ -87,6 +98,14 @@ uint8_t *hook_modulecb_{{ info.clean }}(
     h->insn_signature = io->signature;
     h->addr = module_address + io->offset;
     h->handler = (FARPROC) io->callback;
+
+    {% if info.init %}
+    static int first = 1;
+    if(first != 0) {
+        {{ info.init }}(h, module_address, module_size);
+        first = 0;
+    }
+    {% endif %}
 
     // pipe(
         // "INFO:type=%d, signature=0x%x, addr=0x%x, handler=0x%x",
