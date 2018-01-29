@@ -36,10 +36,14 @@ static flash_string_t *(__stdcall *g_flash_get_method_name)(
     uintptr_t method_name
 );
 
+static uint8_t *g_module_address;
+
 void flash_init(
     hook_t *h, uint8_t *module_address, uint32_t module_size)
 {
-    (void) h; (void) module_address; (void) module_size;
+    (void) h; (void) module_size;
+
+    g_module_address = module_address;
 
     FARPROC addr = (FARPROC) module_addr_timestamp(
         module_address, module_size, _MethodInfo_getMethodName_ts, NULL
@@ -70,4 +74,9 @@ void flash_init(
 flash_string_t *flash_get_method_name(uintptr_t method_name)
 {
     return g_flash_get_method_name(method_name);
+}
+
+uint32_t flash_module_offset(uintptr_t addr)
+{
+    return (uint8_t *) addr - g_module_address;
 }

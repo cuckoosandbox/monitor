@@ -27,5 +27,6 @@ typedef struct _flash_string_t {
 } flash_string_t;
 
 flash_string_t *flash_get_method_name(uintptr_t method_name);
+uint32_t flash_module_offset(uintptr_t addr);
 
 #endif
