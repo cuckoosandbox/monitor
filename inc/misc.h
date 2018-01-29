@@ -220,6 +220,8 @@ uint32_t copy_uint32(const void *value);
 uint64_t copy_uint64(const void *value);
 uintptr_t copy_uintptr(const void *value);
 void *copy_ptr(const void *ptr);
+void *deref(const void *ptr, uint32_t length);
+uintptr_t derefi(uintptr_t ptr, uint32_t offset);
 void copy_return();
 
 void exploit_init();

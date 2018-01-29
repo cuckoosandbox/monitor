@@ -42,3 +42,15 @@ BaseExecMgr_setJit:
           if(name_ != NULL) {
               name = name_->str;
           }
+
+Loader__loadBytes:
+  module: flash32_20_0_0_228
+  init: flash_init
+  offsets:
+    0x565123f2:
+      offset: 0x299d6a
+      stack: 12
+      logging: '!b blob len, buf'
+      pre: |
+          uintptr_t buf = derefi(derefi(derefi(stk0, 4), 0x44), 8);
+          uintptr_t len = derefi(derefi(derefi(stk0, 4), 0x44), 12);
