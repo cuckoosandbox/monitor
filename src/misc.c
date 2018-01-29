@@ -1956,3 +1956,58 @@ void logging_file_trigger(const wchar_t *filepath)
         }
     }
 }
+
+#define BUFSZ 128
+
+static void _search_helper(
+    uint8_t *addr, int depth, int maxdepth, void *pattern, uint32_t length,
+    uint32_t *stack, uint8_t *bufptr
+) {
+    uint8_t *buf = bufptr + depth * BUFSZ;
+
+    if(copy_bytes(buf, addr, BUFSZ) < 0) {
+        return;
+    }
+
+    for (uint32_t idx = 0; idx < BUFSZ - sizeof(uintptr_t); idx += 4) {
+        if(idx + length < BUFSZ && memcmp(buf + idx, pattern, length) == 0) {
+            stack[depth] = idx;
+
+            uint8_t *ptr = bufptr + maxdepth * BUFSZ; char *hexptr = NULL;
+            if(copy_bytes(ptr, buf + idx, BUFSZ) == 0) {
+                hexptr = (char *) bufptr + maxdepth * BUFSZ + BUFSZ;
+                hexdump(hexptr, ptr, BUFSZ - 1);
+            }
+
+            pipe(
+                "DEBUG:pattern 0x%x 0x%x 0x%x 0x%x "
+                "0x%x 0x%x 0x%x 0x%x addr=%p -> %z",
+                stack[0], stack[1], stack[2], stack[3], stack[4],
+                stack[5], stack[6], stack[7], addr + idx, hexptr
+            );
+
+            stack[depth] = 0;
+        }
+        else if(depth < maxdepth && *(uint8_t **)(buf + idx) != NULL) {
+            stack[depth] = idx;
+            _search_helper(
+                *(uint8_t **)(buf + idx), depth + 1, maxdepth,
+                pattern, length, stack, bufptr
+            );
+        }
+    }
+}
+
+void search_deref(uint8_t *addr, int depth, void *pattern, uint32_t length)
+{
+    uint32_t stack[8]; uint8_t *buf = mem_alloc(BUFSZ * depth + BUFSZ * 3);
+
+    // Maximum depth is 8, maximum pattern length is 32.
+    depth = depth < 8 ? depth : 8;
+    length = length < 32 ? length : 32;
+
+    memset(stack, 0, sizeof(stack));
+    _search_helper(addr, 0, depth, pattern, length, stack, buf);
+
+    mem_free(buf);
+}

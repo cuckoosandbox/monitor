@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2014-2017 Cuckoo Foundation.
+Copyright (C) 2014-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -198,6 +198,10 @@ uint32_t first_tid_from_pid(uint32_t process_identifier);
 int resume_thread_identifier(uint32_t thread_identifier);
 
 void logging_file_trigger(const wchar_t *filepath);
+
+// Searches for patterns in-memory while attempting to dereference any
+// pointers found along the way. Useful during R&D.
+void search_deref(uint8_t *addr, int depth, void *pattern, uint32_t length);
 
 extern uint32_t g_extra_virtual_memory;
 

@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2012-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // d  -> (int) -> integer
 // x  -> (int) -> hexadecimal integer
 // X  -> (uint64_t) -> 64-bit hexadecimal integer
+// p  -> (void *) -> pointer as hexadecimal
 //
 
 #include <stdint.h>

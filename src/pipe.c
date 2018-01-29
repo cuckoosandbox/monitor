@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2012-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -120,6 +120,17 @@ static int _pipe_sprintf(char *out, const char *fmt, va_list args)
             char s[32]; uint64_t value = va_arg(args, uint64_t);
             ultostr((uint32_t)(value >> 32), s, 16);
             ultostr((uint32_t) value, s + strlen(s), 16);
+            ret += _pipe_ascii(&out, s, strlen(s));
+        }
+        else if(*fmt == 'p') {
+            char s[32]; uintptr_t value = va_arg(args, uintptr_t);
+            s[0] = '0', s[1] = 'x';
+#if __x86_64__
+            ultostr((uint32_t)(value >> 32), s + 2, 16);
+            ultostr((uint32_t) value, s + strlen(s), 16);
+#else
+            ultostr(value, s + 2, 16);
+#endif
             ret += _pipe_ascii(&out, s, strlen(s));
         }
         fmt++;
