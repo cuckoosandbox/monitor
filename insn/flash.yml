@@ -13,17 +13,8 @@ BaseExecMgr_setNative:
       offset: 0x705230
       stack: 4 8
       logging:
-        - s method_name name
-        - p offset offset
-      pre: |
-          const char *name = NULL;
-
-          flash_string_t *name_ = flash_get_method_name(stk0);
-          if(name_ != NULL) {
-              name = name_->str;
-          }
-
-          uint32_t offset = flash_module_offset(stk1);
+        - s method_name flash_get_method_name(stk0)
+        - p offset flash_module_offset(stk1)
 
 BaseExecMgr_setJit:
   module: flash32_20_0_0_228
@@ -33,15 +24,8 @@ BaseExecMgr_setJit:
       offset: 0x7052b0
       stack: 4 8
       logging:
-        - s method_name name
+        - s method_name flash_get_method_name(stk0)
         - p address stk1
-      pre: |
-          const char *name = NULL;
-
-          flash_string_t *name_ = flash_get_method_name(stk0);
-          if(name_ != NULL) {
-              name = name_->str;
-          }
 
 Loader__loadBytes:
   module: flash32_20_0_0_228

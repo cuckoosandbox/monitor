@@ -32,9 +32,7 @@ static funcoff_t _MethodInfo_getMethodName_ts[] = {
     {0, 0, 0},
 };
 
-static flash_string_t *(__stdcall *g_flash_get_method_name)(
-    uintptr_t method_name
-);
+static void *(__stdcall *g_flash_get_method_name)(uintptr_t method_name);
 
 static uint8_t *g_module_address;
 
@@ -71,12 +69,13 @@ void flash_init(
 #endif
 }
 
-flash_string_t *flash_get_method_name(uintptr_t method_name)
+const char *flash_get_method_name(uintptr_t method_name)
 {
-    return g_flash_get_method_name(method_name);
+    // TODO May need tweaking on 64-bit.
+    return deref(g_flash_get_method_name(method_name), 8);
 }
 
-uint32_t flash_module_offset(uintptr_t addr)
+uintptr_t flash_module_offset(uintptr_t addr)
 {
     return (uint8_t *) addr - g_module_address;
 }

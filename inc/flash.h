@@ -21,12 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 
-typedef struct _flash_string_t {
-    uint32_t unk1, unk2;
-    const char *str;
-} flash_string_t;
-
-flash_string_t *flash_get_method_name(uintptr_t method_name);
-uint32_t flash_module_offset(uintptr_t addr);
+const char *flash_get_method_name(uintptr_t method_name);
+uintptr_t flash_module_offset(uintptr_t addr);
 
 #endif
