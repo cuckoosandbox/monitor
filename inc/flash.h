@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 
-const char *flash_get_method_name(uintptr_t method_name);
+const char *flash_get_method_name(uintptr_t method_name, uint32_t *length);
 uintptr_t flash_module_offset(uintptr_t addr);
 
 #endif

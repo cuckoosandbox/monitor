@@ -39,7 +39,7 @@ static uint8_t *g_module_address;
 void flash_init(
     hook_t *h, uint8_t *module_address, uint32_t module_size)
 {
-    (void) h; (void) module_size;
+    (void) h;
 
     g_module_address = module_address;
 
@@ -69,10 +69,13 @@ void flash_init(
 #endif
 }
 
-const char *flash_get_method_name(uintptr_t method_name)
+const char *flash_get_method_name(uintptr_t method_name, uint32_t *length)
 {
+    void *ptr = g_flash_get_method_name(method_name);
+
     // TODO May need tweaking on 64-bit.
-    return deref(g_flash_get_method_name(method_name), 8);
+    *length = (uintptr_t) deref(ptr, 16);
+    return deref(ptr, 8);
 }
 
 uintptr_t flash_module_offset(uintptr_t addr)
