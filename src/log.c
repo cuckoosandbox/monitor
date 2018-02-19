@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2012-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -873,6 +873,9 @@ void log_init(const char *pipe_name, int track)
     wcsncpyA(g_log_pipename, pipe_name, MAX_PATH);
     open_handles();
 
-    log_raw("BSON\n", 5);
+    char header[64]; uint32_t process_identifier = get_current_process_id();
+    our_snprintf(header, sizeof(header), "BSON %d\n", process_identifier);
+
+    log_raw(header, strlen(header));
     log_new_process(track);
 }
