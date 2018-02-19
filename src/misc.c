@@ -1622,6 +1622,7 @@ static NTSTATUS g_exception_whitelist[] = {
     0xe0000001, // STATUS_INSUFFICIENT_MEM
     0xe0000002, // STATUS_FILE_BAD_FORMAT
     0xe0434f4d, // .NET Exception (0xe0000000 | "COM")
+    0xe0434352, // COM+ Exception (0xe0000000 | "CCR")
     0x406d1388, // MSDEV_SET_THREAD_NAME
     0xc004f012, // SL_E_VALUE_NOT_FOUND
 
