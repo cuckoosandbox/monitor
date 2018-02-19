@@ -464,7 +464,7 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
             log_int32(&b, idx, value);
         }
         else if(*fmt == 'I') {
-            uint32_t *value = va_arg(args, int *);
+            uint32_t *value = va_arg(args, uint32_t *);
             log_int32(&b, idx, value != NULL ? copy_uint32(value) : 0);
         }
         else if(*fmt == 'l' || *fmt == 'p') {

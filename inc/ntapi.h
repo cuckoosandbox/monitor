@@ -735,7 +735,10 @@ typedef enum _SHUTDOWN_ACTION {
 
 #define ProcessBasicInformation 0
 #define ThreadBasicInformation 0
+
+#ifndef UNW_FLAG_NHANDLER
 #define UNW_FLAG_NHANDLER 0
+#endif
 
 #define FILE_PIPE_QUEUE_OPERATION           0x00000000
 #define FILE_PIPE_COMPLETE_OPERATION        0x00000001
