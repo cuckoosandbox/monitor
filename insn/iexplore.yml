@@ -2,7 +2,7 @@ global:
   category: iexplore
   mode: iexplore
 
-JsGlobalObjectDefaultEvalHelper:
+JsGlobalObject_DefaultEvalHelper:
   module: jscript9
   offsets:
     0x555fea21:
@@ -13,3 +13,63 @@ JsGlobalObjectDefaultEvalHelper:
       offset: 0x14c30a
       stack: 8
       logging: u script stk0
+    0x555f7a9e:
+      offset: 0x14c31c
+      stack: 8
+      logging: u script stk0
+
+CDocument_WriteIterator_current:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x46264A
+      stack: 16
+      logging: u write stk0
+
+CScriptData_onSrcChange:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x15FFB5
+      stack: 4
+      logging: u src *(wchar_t **) stk0
+
+CImgElement_putSrc:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x487770
+      stack: 8
+      logging: u src stk0
+
+CElement_InjectHTML:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x1242CC
+      stack: 0xC
+      logging: u written stk0
+
+CFrameElement_putSrc:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x1611B0
+      stack: 8
+      logging: u src stk0
+
+CWindow_Navigate:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x363CB0
+      stack: 0x40
+      logging: u url stk0
+
+CWindow_SaveHistory:
+  module: mshtml
+  offsets:
+    0x5565CF99:
+      offset: 0x456971
+      register: ecx
+      logging: u savedEntry ecx
