@@ -1,0 +1,11 @@
+language: python
+
+python: 2.7
+
+install:
+  - sudo apt-get install mingw-w64 python-pip
+  - pip install sphinx docutils pyyaml
+
+script:
+  - make
+  - cd test && ./unittest.py && make

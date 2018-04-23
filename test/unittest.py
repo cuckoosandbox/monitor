@@ -47,7 +47,7 @@ DEFAULTS = {
     'INC': ['-I', '../inc', '-I', '../objects/code', '-I', '../src/bson'],
     'OBJECTS': """pipe.o misc.o native.o memory.o utf8.o symbol.o ignore.o
         hooking.o unhook.o assembly.o log.o diffing.o sleep.o wmi.o exploit.o
-        flags.o hooks.o config.o network.o iexplore.o sha1/sha1.o insns.o
+        flags.o hooks.o config.o flash.o iexplore.o sha1/sha1.o insns.o
         bson/bson.o bson/numbers.o bson/encoding.o disguise.o copy.o office.o
         ../src/capstone/capstone-%(arch)s.lib""".split(),
     'LDFLAGS': ['-lws2_32', '-lshlwapi', '-lole32'],
