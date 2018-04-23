@@ -118,7 +118,7 @@ void unhook_library(const char *library, void *module_handle)
 }
 
 void misc_set_monitor_options(uint32_t track, uint32_t mode,
-    const char *trigger)
+    const wchar_t *trigger)
 {
     g_monitor_track = track;
     g_monitor_mode = mode;
@@ -126,10 +126,10 @@ void misc_set_monitor_options(uint32_t track, uint32_t mode,
 
     g_monitor_trigger_mode = CONFIG_TRIGGER_NONE;
 
-    if(strncmp(trigger, "file:", 5) == 0) {
+    if(wcsncmp(trigger, L"file:", 5) == 0) {
         g_monitor_logging = 0;
         g_monitor_trigger_mode = CONFIG_TRIGGER_FILE;
-        path_get_full_pathA(&trigger[5], g_monitor_trigger);
+        path_get_full_pathW(&trigger[5], g_monitor_trigger);
     }
 }
 

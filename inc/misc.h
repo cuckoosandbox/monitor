@@ -38,7 +38,7 @@ void hook_library(const char *library, void *module_handle);
 void unhook_library(const char *library, void *module_handle);
 
 void misc_set_monitor_options(uint32_t track, uint32_t mode,
-    const char *trigger);
+    const wchar_t *trigger);
 
 wchar_t *get_unicode_buffer();
 void free_unicode_buffer(wchar_t *ptr);

@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2012-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 
 int utf8_encode(uint32_t x, uint8_t *out);
+int utf8_decode_strn(const char *in, wchar_t *out, uint32_t len);
 int utf8_length(uint32_t x);
 
 int utf8_bytecnt_ascii(const char *s, int len);

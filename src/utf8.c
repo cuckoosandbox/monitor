@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2012-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -66,6 +66,38 @@ int utf8_encode(uint32_t c, uint8_t *out)
         return 6;
     }
     return -1;
+}
+
+int utf8_decode_strn(const char *in, wchar_t *out, uint32_t len)
+{
+    const uint8_t *in_ = (const uint8_t *) in;
+    const wchar_t *base = out; uint16_t ch;
+    while (*in_ != 0 && --len != 0) {
+        if((*in_ & 0x80) == 0) {
+            *out++ = *in_++;
+            continue;
+        }
+        if((*in_ & 0xe0) == 0xc0) {
+            ch = *in_++ & 0x1f;
+        }
+        else if((*in_ & 0xf0) == 0xe0) {
+            ch = *in_++ & 0xf;
+        }
+        else if((*in_ & 0xf8) == 0xf0) {
+            ch = *in_++ & 0x7;
+        }
+        else {
+            return -1;
+        }
+
+        // We assume validity.. ;-)
+        while ((*in_ & 0xc0) == 0x80) {
+            ch = (ch << 6) | (*in_++ & 0x3f);
+        }
+        *out++ = ch;
+    }
+    *out = 0;
+    return out - base;
 }
 
 int utf8_length(uint32_t c)

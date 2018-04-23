@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2012-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ typedef struct _config_t {
     int pipe_pid;
 
     // Dynamic triggers that start the logging for this analysis.
-    char trigger[MAX_PATH+16];
+    wchar_t trigger[MAX_PATH+16];
 } config_t;
 
 void config_read(config_t *cfg);
