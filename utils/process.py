@@ -28,7 +28,6 @@ import os
 import sys
 import yaml
 
-
 class DefinitionProcessor(object):
     def __init__(self, data_dir):
         fs_loader = jinja2.FileSystemLoader(data_dir)
@@ -488,7 +487,7 @@ class SignatureProcessor(object):
 
         self.sigs = sigs
 
-    def render(self, apis=[], debug=False):
+    def render(self, apis, debug=False):
         # If set, only hook the specified functions.
         for sig in self.sigs:
             if apis and sig['apiname'] not in apis and \
@@ -723,14 +722,18 @@ class InsnProcess(object):
         self.methods = methods
         self.modules = modules
 
-    def write(self):
-        content = self.render("insn", {
+    def write(self, apis):
+        content = self.render("insn", apis, {
             "methods": self.methods,
             "modules": self.modules,
         })
         open(self.outfile, "wb").write(content)
 
-    def render(self, docname, variables, dirpath="data/"):
+    def render(self, docname, apis, variables, dirpath="data/"):
+        for method in self.methods:
+            if apis and method["funcname"] not in apis:
+                method["ignore"] = True
+
         fs_loader = jinja2.FileSystemLoader(dirpath)
         templ_env = jinja2.Environment(loader=fs_loader)
         templ = templ_env.get_template("%s.jinja2" % docname)
@@ -769,12 +772,12 @@ if __name__ == '__main__':
 
     if args.action == 'release':
         fp.write()
-        dp.render(apis=apis)
-        ip.write()
+        dp.render(apis)
+        ip.write(apis)
     elif args.action == 'debug':
         fp.write()
-        dp.render(apis=apis, debug=True)
-        ip.write()
+        dp.render(apis, debug=True)
+        ip.write(apis)
     elif args.action == 'list-categories':
         dp.list_categories()
     elif args.action == 'list-apis':

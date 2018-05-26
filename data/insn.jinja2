@@ -26,8 +26,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "native.h"
 #include "pipe.h"
 
-{% for method in methods %}
+{% for method in methods if not method.ignore %}
 {% for entry in method.entries %}
+{%- if method.bitmode == 64 %}
+#if __x86_64__
+{%- else %}
+#if !__x86_64__
+{% endif %}
 static void __stdcall _cb_{{ method.module_clean }}_{{ method.funcname }}_{{ entry.index }}(
     uintptr_t {{ entry.arguments[0] or "arg1" }},
     uintptr_t {{ entry.arguments[1] or "arg2" }},
@@ -58,10 +63,12 @@ static void __stdcall _cb_{{ method.module_clean }}_{{ method.funcname }}_{{ ent
 
     set_last_error(&lasterror);
 }
+
+#endif
 {% endfor %}
 {% endfor %}
 
-{% for method in methods %}
+{% for method in methods if not method.ignore %}
 static insnoff_t _{{ method.module_clean }}_{{ method.funcname }}[] = {
 {%- if method.bitmode == 64 %}
 #if __x86_64__
@@ -78,8 +85,8 @@ static insnoff_t _{{ method.module_clean }}_{{ method.funcname }}[] = {
 
 {% for module, info in modules.items() %}
 static mod2insnoff_t _{{ info.clean }}[] = {
-    {%- for func in info.methods %}
-    {{ "{" }}"{{ func.funcname }}", _{{ info.clean }}_{{ func.funcname }}{{ "}" }},
+    {%- for method in info.methods if not method.ignore %}
+    {{ "{" }}"{{ method.funcname }}", _{{ info.clean }}_{{ method.funcname }}{{ "}" }},
     {%- endfor %}
     {{ "{" }}NULL, NULL{{ "}" }},
 };
