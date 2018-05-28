@@ -24,6 +24,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #if __x86_64__
 
+static uint8_t g_pushaq_x64[] = {
+    // push r15 .. push rax
+    0x41, 0x57, 0x41, 0x56, 0x41, 0x55, 0x41, 0x54, 0x41, 0x53, 0x41, 0x52,
+    0x41, 0x51, 0x41, 0x50, 0x57, 0x56, 0x55, 0x54, 0x53, 0x52, 0x51, 0x50,
+};
+
+static uint8_t g_popaq_x64[] = {
+    // pop rax .. pop r15
+    // TODO Skip "pop rsp"?
+    0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x41, 0x58, 0x41, 0x59,
+    0x41, 0x5a, 0x41, 0x5b, 0x41, 0x5c, 0x41, 0x5d, 0x41, 0x5e, 0x41, 0x5f,
+};
+
+#endif
+
+#if __x86_64__
+
 int asm_move_regimm(uint8_t *stub, register_t reg, uintptr_t value)
 {
     uint8_t *base = stub;
@@ -190,7 +207,19 @@ int asm_lea_regregimm(
 {
 #if __x86_64__
     (void) stub; (void) dst; (void) src; (void) value;
-    return -1;
+
+    stub[0] = 0x48;
+    stub[1] = 0x8d;
+    stub[2] = 0x80 + dst * 8 + src;
+    if(src == R_RSP) {
+        stub[3] = 0x24;
+        *(uint32_t *)(stub + 4) = value;
+    }
+    else {
+        *(uint32_t *)(stub + 3) = value;
+        stub[7] = 0x90;
+    }
+    return 8;
 #else
     stub[0] = 0x8d;
     stub[1] = 0x80 + dst * 8 + src;
@@ -290,6 +319,11 @@ int asm_push_context(uint8_t *stub)
     uint8_t *base = stub;
 
 #if __x86_64__
+    // pushfq
+    *stub++ = 0x9c;
+    // pushaq
+    memcpy(stub, g_pushaq_x64, sizeof(g_pushaq_x64));
+    stub += sizeof(g_pushaq_x64);
 #else
     // pushfd
     *stub++ = 0x9c;
@@ -305,6 +339,11 @@ int asm_pop_context(uint8_t *stub)
     uint8_t *base = stub;
 
 #if __x86_64__
+    // popaq
+    memcpy(stub, g_popaq_x64, sizeof(g_popaq_x64));
+    stub += sizeof(g_popaq_x64);
+    // popfq
+    *stub++ = 0x9d;
 #else
     // popad
     *stub++ = 0x61;

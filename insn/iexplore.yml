@@ -13,3 +13,12 @@ JsGlobalObjectDefaultEvalHelper:
       offset: 0x14c30a
       stack: 8
       logging: u script stk0
+
+Math_random:
+  module: jscript
+  offsets:
+    0x4ce7c6df:
+      bitmode: 64
+      offset: 0x602e0
+      register: rsi
+      logging: q value *(uint64_t *)(rsi + 8)

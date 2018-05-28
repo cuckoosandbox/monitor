@@ -692,6 +692,7 @@ class InsnProcess(object):
                         "signature": signature,
                         "logging": logging,
                         "pre": entry.get("pre"),
+                        "bitmode": entry.get("bitmode", 32),
                     })
                     idx += 1
 
@@ -702,7 +703,6 @@ class InsnProcess(object):
                     "category": category,
                     "mode": mode,
                     "init": info.get("init"),
-                    "bitmode": info.get("bitmode", 32),
                     "entries": entries,
                 })
 
@@ -713,7 +713,6 @@ class InsnProcess(object):
                     "module": method["module"],
                     "clean": method["module"].replace(".", "_"),
                     "init": method["init"],
-                    "bitmode": method["bitmode"],
                     "methods": [],
                 }
 

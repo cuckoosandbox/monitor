@@ -28,11 +28,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 {% for method in methods if not method.ignore %}
 {% for entry in method.entries %}
-{%- if method.bitmode == 64 %}
+{%- if entry.bitmode == 64 %}
 #if __x86_64__
 {%- else %}
 #if !__x86_64__
-{% endif %}
+{%- endif %}
 static void __stdcall _cb_{{ method.module_clean }}_{{ method.funcname }}_{{ entry.index }}(
     uintptr_t {{ entry.arguments[0] or "arg1" }},
     uintptr_t {{ entry.arguments[1] or "arg2" }},
@@ -49,7 +49,7 @@ static void __stdcall _cb_{{ method.module_clean }}_{{ method.funcname }}_{{ ent
     get_last_error(&lasterror);
 
     {% if entry.pre %}
-    {{ entry.pre }}
+    {{ entry.pre|indent }}
     {% endif %}
 
     log_api(
@@ -63,22 +63,21 @@ static void __stdcall _cb_{{ method.module_clean }}_{{ method.funcname }}_{{ ent
 
     set_last_error(&lasterror);
 }
-
 #endif
 {% endfor %}
 {% endfor %}
 
 {% for method in methods if not method.ignore %}
 static insnoff_t _{{ method.module_clean }}_{{ method.funcname }}[] = {
-{%- if method.bitmode == 64 %}
-#if __x86_64__
-{%- else %}
-#if !__x86_64__
-{% endif %}
     {%- for entry in method.entries %}
+    {%- if entry.bitmode == 64 %}
+    #if __x86_64__
+    {%- else %}
+    #if !__x86_64__
+    {%- endif %}
     {{ "{" }}{{ entry.timestamp }}, {{ entry.offset }}, {{ entry.signature }}, &_cb_{{ method.module_clean }}_{{ entry.funcname }}_{{ entry.index }}{{ "}" }},
+    #endif
     {%- endfor %}
-#endif
     {{ "{" }}0, 0, 0, NULL{{ "}" }},
 };
 {% endfor %}
@@ -91,7 +90,7 @@ static mod2insnoff_t _{{ info.clean }}[] = {
     {{ "{" }}NULL, NULL{{ "}" }},
 };
 
-uint8_t *hook_modulecb_{{ info.clean }}(
+uint8_t *hook_insmodulecb_{{ info.clean }}(
     hook_t *h, uint8_t *module_address, uint32_t module_size)
 {
     insnoff_t *io = module_addr_timestamp_modinsn(

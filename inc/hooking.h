@@ -48,6 +48,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define HOOK_INSN_ESP      5
 #define HOOK_INSN_EBP      6
 #define HOOK_INSN_ESI      7
+#define HOOK_INSN_RSI      7
 #define HOOK_INSN_EDI      8
 #define HOOK_INSN_VAR32    9
 #define HOOK_INSN_STK(n)   (10+n)
@@ -186,6 +187,10 @@ uint8_t *hook_modulecb_jscript(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );
 
+uint8_t *hook_insmodulecb_jscript(
+    hook_t *h, uint8_t *module_address, uint32_t module_size
+);
+
 uint8_t *hook_modulecb_mshtml(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );
@@ -196,15 +201,15 @@ uint8_t *hook_modulecb_ncrypt(
 
 // Callback prototypes for instruction-level hooked libraries.
 
-uint8_t *hook_modulecb_escript_api(
+uint8_t *hook_insmodulecb_escript_api(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );
 
-uint8_t *hook_modulecb_flash32_20_0_0_228(
+uint8_t *hook_insmodulecb_flash32_20_0_0_228(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );
 
-uint8_t *hook_modulecb_jscript9(
+uint8_t *hook_insmodulecb_jscript9(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );
 

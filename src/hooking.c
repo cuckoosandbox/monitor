@@ -60,6 +60,14 @@ static const char *g_missing_blacklist[] = {
 // we are "inside" the monitor.
 static uintptr_t g_Old_LdrLoadDll_address;
 
+#if __x86_64__
+// 272 = 16*reg + eflags
+#define REG_CONTEXT_SIZE 272
+#else
+// 36 = 8*reg + eflags
+#define REG_CONTEXT_SIZE 36
+#endif
+
 static void *_cs_malloc(size_t size)
 {
     return mem_alloc(size);
@@ -639,9 +647,10 @@ static int _hook_call_method_arguments(
     for (uint32_t idx = 0; idx < 4; idx++) {
         uint8_t arg = signature & 0xff; signature >>= 8;
         if(arg >= HOOK_INSN_STK(0)) {
-            // push dword [esp+X]
+            // push d/qword [e/rsp+X]
             ptr += asm_push_stack_offset(
-                ptr, 0x1000 + 36 + 4 * idx + (arg - HOOK_INSN_STK(0))
+                ptr, 0x1000 + REG_CONTEXT_SIZE +
+                sizeof(void *) * idx + (arg - HOOK_INSN_STK(0))
             );
         }
         else if(arg == HOOK_INSN_VAR32) {
@@ -660,6 +669,18 @@ static int _hook_call_method_arguments(
             *ptr++ = 0x6a;
             *ptr++ = 0x00;
         }
+
+#if __x86_64__
+        // On 64-bit we have the fastcall calling convention, so we pop the
+        // arguments into the appropriate registers.
+        static uint16_t pop_reg[] = {
+            // "pop r9", "pop r8", "pop rdx ; nop", "pop rcx ; nop".
+            0x5941, 0x5841, 0x905a, 0x9059,
+        };
+
+        *ptr++ = pop_reg[idx] & 0xff;
+        *ptr++ = pop_reg[idx] >> 8;
+#endif
     }
 
     return ptr - base;
@@ -775,7 +796,7 @@ int hook_insn(hook_t *h, uint32_t signature, ...)
         return -1;
     }
 
-    ptr += asm_jump_32bit(ptr, h->addr + r);
+    ptr += asm_jump(ptr, h->addr + r);
 
     if((uintptr_t)(ptr - h->func_stub) >= slab_size(&g_function_stubs)) {
         pipe(
