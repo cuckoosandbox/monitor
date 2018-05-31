@@ -669,19 +669,16 @@ static int _hook_call_method_arguments(
             *ptr++ = 0x6a;
             *ptr++ = 0x00;
         }
+    }
 
 #if __x86_64__
-        // On 64-bit we have the fastcall calling convention, so we pop the
-        // arguments into the appropriate registers.
-        static uint16_t pop_reg[] = {
-            // "pop r9", "pop r8", "pop rdx ; nop", "pop rcx ; nop".
-            0x5941, 0x5841, 0x905a, 0x9059,
-        };
-
-        *ptr++ = pop_reg[idx] & 0xff;
-        *ptr++ = pop_reg[idx] >> 8;
+    // On 64-bit we have the fastcall calling convention, so we pop the
+    // arguments into the appropriate registers.
+    *ptr++ = 0x59;                // pop rcx
+    *ptr++ = 0x5a;                // pop rdx
+    *ptr++ = 0x41; *ptr++ = 0x58; // pop r8
+    *ptr++ = 0x41; *ptr++ = 0x59; // pop r9
 #endif
-    }
 
     return ptr - base;
 }
