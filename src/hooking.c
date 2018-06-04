@@ -659,10 +659,7 @@ static int _hook_call_method_arguments(
         }
         else if(arg >= HOOK_INSN_EAX) {
             // push register
-            // ptr += asm_push_register(ptr, arg);
-            // TODO For some reason the above throws a linking error..
-            // TODO This obviously doesn't support r8-r15 in 64-bit mode.
-            *ptr++ = 0x50 + (arg - HOOK_INSN_EAX);
+            ptr += asm_push_register(ptr, arg - HOOK_INSN_EAX + R_R0);
         }
         else {
             // Push null "push 0".

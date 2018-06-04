@@ -41,17 +41,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define HOOK_INSN_NONE     0
 #define HOOK_INSN_EAX      1
+#define HOOK_INSN_RAX      1
 #define HOOK_INSN_ECX      2
+#define HOOK_INSN_RCX      2
 #define HOOK_INSN_EDX      3
 #define HOOK_INSN_RDX      3
 #define HOOK_INSN_EBX      4
+#define HOOK_INSN_RBX      4
 #define HOOK_INSN_ESP      5
+#define HOOK_INSN_RSP      5
 #define HOOK_INSN_EBP      6
+#define HOOK_INSN_RBP      6
 #define HOOK_INSN_ESI      7
 #define HOOK_INSN_RSI      7
 #define HOOK_INSN_EDI      8
-#define HOOK_INSN_VAR32    9
-#define HOOK_INSN_STK(n)   (10+n)
+#define HOOK_INSN_RDI      8
+#define HOOK_INSN_R8       9
+#define HOOK_INSN_R9      10
+#define HOOK_INSN_R10     11
+#define HOOK_INSN_R11     12
+#define HOOK_INSN_R12     13
+#define HOOK_INSN_R13     14
+#define HOOK_INSN_R14     15
+#define HOOK_INSN_R15     16
+#define HOOK_INSN_VAR32   17
+#define HOOK_INSN_STK(n)  (18+n)
 
 #define HOOK_TYPE_NORMAL   0
 #define HOOK_TYPE_INSN     1
