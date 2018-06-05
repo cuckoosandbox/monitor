@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define HOOK_MODE_IEXPLORE (1 << 1)
 #define HOOK_MODE_EXPLOIT  (1 << 2)
 #define HOOK_MODE_OFFICE   (1 << 3)
+#define HOOK_MODE_CSCRIPT   (1 << 3)
 #define HOOK_MODE_PDF      (1 << 4)
 #define HOOK_MODE_FLASH    (1 << 5)
 
@@ -202,6 +203,10 @@ uint8_t *hook_modulecb_jscript(
 );
 
 uint8_t *hook_insmodulecb_jscript(
+    hook_t *h, uint8_t *module_address, uint32_t module_size
+);
+
+uint8_t *hook_insmodulecb_vbscript(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );
 

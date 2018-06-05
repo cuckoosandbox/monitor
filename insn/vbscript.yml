@@ -1,0 +1,12 @@
+global:
+  module: vbscript
+  category: cscript
+  mode: cscript
+
+Compile:
+  offsets:
+    0x4ce7c6df:
+      bitmode: 64
+      offset: 0x388C
+      register: r8
+      logging: u string *(uint16_t *)(r8)
