@@ -639,8 +639,7 @@ static int _hook_determine_start(hook_t *h)
     return 0;
 }
 
-static int _hook_call_method_arguments(
-    uint8_t *ptr, uint32_t signature, va_list args)
+static int _hook_call_method_arguments(uint8_t *ptr, uint32_t signature)
 {
     uint8_t *base = ptr;
 
@@ -652,10 +651,6 @@ static int _hook_call_method_arguments(
                 ptr, 0x1000 + REG_CONTEXT_SIZE +
                 sizeof(void *) * idx + (arg - HOOK_INSN_STK(0))
             );
-        }
-        else if(arg == HOOK_INSN_VAR32) {
-            // push dword value
-            ptr += asm_push32(ptr, va_arg(args, uint32_t));
         }
         else if(arg >= HOOK_INSN_EAX) {
             // push register
@@ -750,20 +745,14 @@ static int _hook_emit_jump(uint8_t *ptr, uintptr_t jmpaddr, int relative)
     }
 }
 
-int hook_insn(hook_t *h, uint32_t signature, ...)
+int hook_insn(hook_t *h, uint32_t signature)
 {
     uint8_t *ptr = h->func_stub; int r, relative; uintptr_t jmpaddr, spoff;
 
     ptr += asm_sub_esp_imm(ptr, 0x1000);
     ptr += asm_push_context(ptr);
 
-    va_list args;
-    va_start(args, signature);
-
-    r = _hook_call_method_arguments(ptr, signature, args);
-
-    va_end(args);
-
+    r = _hook_call_method_arguments(ptr, signature);
     if(r < 0) {
         return r;
     }

@@ -125,14 +125,9 @@ int asm_push_register(uint8_t *stub, register_t reg)
         *stub++ = 0x50 + (reg - R_R8);
         return 2;
     }
-    else {
-        *stub++ = 0x50 + reg;
-        return 1;
-    }
-#else
+#endif
     *stub++ = 0x50 + reg;
     return 1;
-#endif
 }
 
 int asm_pop_register(uint8_t *stub, register_t reg)

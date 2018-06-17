@@ -64,19 +64,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define HOOK_INSN_R13     14
 #define HOOK_INSN_R14     15
 #define HOOK_INSN_R15     16
-#define HOOK_INSN_VAR32   17
-#define HOOK_INSN_STK(n)  (18+n)
+#define HOOK_INSN_STK(n)  (17+n)
 
 #define HOOK_TYPE_NORMAL   0
 #define HOOK_TYPE_INSN     1
 #define HOOK_TYPE_GUARD    2
-
-#define HOOK_INSN_WRAPPER(a, b, c, d, ...) ( \
-    ((HOOK_INSN_##a) << 24) | ((HOOK_INSN_##b) << 16) | \
-    ((HOOK_INSN_##c) << 8) | ((HOOK_INSN_##d) << 0))
-
-#define HOOK_INSN(...) \
-    HOOK_INSN_WRAPPER(__VA_ARGS__, NONE, NONE, NONE, NONE)
 
 typedef struct _hook_t {
     // Library and function name.
@@ -147,7 +139,7 @@ int lde(const void *addr);
 int hook_in_monitor();
 
 int hook(hook_t *h, void *module_handle);
-int hook_insn(hook_t *h, uint32_t signature, ...);
+int hook_insn(hook_t *h, uint32_t signature);
 uint8_t *hook_get_mem();
 int hook_missing_hooks(HMODULE module_handle);
 

@@ -667,6 +667,8 @@ class InsnProcess(object):
         methods = []
         for filepath in self.insnfiles:
             doc = yaml.load(open(filepath, "rb"))
+            if not doc:
+                continue
             glob = doc.pop("global", {})
 
             for funcname, info in doc.items():
