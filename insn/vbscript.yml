@@ -7,6 +7,6 @@ Compile:
   offsets:
     0x4ce7c9e6:
       bitmode: 64
-      offset: 0x16290
+      offset: 0x16E90
       register: r8
-      logging: u string *(uint16_t *)(r8)
+      logging: u script r8
