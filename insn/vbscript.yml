@@ -3,7 +3,7 @@ global:
   category: cscript
   mode: cscript
 
-Compile:
+COleScript_Compile:
   offsets:
     0x4ce7c9e6:
       bitmode: 64
