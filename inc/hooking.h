@@ -197,6 +197,10 @@ uint8_t *hook_insmodulecb_jscript(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );
 
+uint8_t *hook_insmodulecb_vbscript(
+    hook_t *h, uint8_t *module_address, uint32_t module_size
+);
+
 uint8_t *hook_modulecb_mshtml(
     hook_t *h, uint8_t *module_address, uint32_t module_size
 );

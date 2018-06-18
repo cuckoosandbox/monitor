@@ -1,0 +1,11 @@
+COleScript_Compile:
+  module: vbscript
+  offsets:
+    0x4ce7c9e6:
+      bitmode: 64
+      offset: 0x16e90
+      register: r8
+      stack: 56
+      logging:
+      - u script r8
+      - u type stk0
