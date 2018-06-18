@@ -220,6 +220,7 @@ uint8_t *hook_insmodulecb_jscript9(
 );
 
 void flash_init(hook_t *h, uint8_t *module_address, uint32_t module_size);
+void jscript_init(hook_t *h, uint8_t *module_address, uint32_t module_size);
 
 typedef void VAR;
 

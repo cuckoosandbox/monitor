@@ -7,28 +7,6 @@ Signature::
     * Mode: iexplore
     * Special: true
 
-
-COleScript_Compile
-==================
-
-Signature::
-
-    * Is success: ret >= 0
-    * Library: jscript
-    * Return value: int
-
-Parameters::
-
-    *  void *this
-    *  void *script_body
-    ** const wchar_t *script
-    *  uintptr_t unk1
-    *  uintptr_t unk2
-    *  uintptr_t unk3
-    ** const wchar_t *type
-    *  void *exception
-
-
 CDocument_write
 ===============
 
@@ -204,32 +182,3 @@ Parameters::
 
     *  void *celement
     ** const wchar_t *src
-
-
-ActiveXObjectFncObj_Construct
-=============================
-
-Signature::
-
-    * Library: jscript
-    * Return value: HRESULT
-
-Parameters::
-
-    *  void *this
-    *  VAR *unk1
-    *  int unk2
-    *  VAR *args
-
-Pre::
-
-    wchar_t *objname = NULL; void *session = ((void **) this)[3];
-
-    VAR *value = iexplore_var_getvalue(args, session);
-    if(value != NULL) {
-        objname = *((wchar_t **) value + 1);
-    }
-
-Logging::
-
-    u objname objname

@@ -156,7 +156,7 @@ int asm_add_regimm(uint8_t *stub, register_t reg, uint32_t value)
         reg -= R_R8;
     }
     else {
-        stub[0] = 0x90;
+        stub[0] = 0x48;
     }
 #else
     stub[0] = 0x90;
@@ -185,7 +185,7 @@ int asm_sub_regimm(uint8_t *stub, register_t reg, uint32_t value)
         reg -= R_R8;
     }
     else {
-        stub[0] = 0x90;
+        stub[0] = 0x48;
     }
 #else
     stub[0] = 0x90;
@@ -264,13 +264,16 @@ int asm_jump_32bit_rel(uint8_t *stub, const void *addr, int relative)
 int asm_jump(uint8_t *stub, const void *addr)
 {
     uint8_t *base = stub;
-
-    // Push the address on the stack.
-    stub += asm_pushv(stub, addr);
-
-    // Pop the address into the instruction pointer.
-    *stub++ = 0xc3;
-
+#if __x86_64__
+    // jmp qword [rel $+0] ; qword addr
+    *stub++ = 0xff; *stub++ = 0x25;
+    *stub++ = 0x00; *stub++ = 0x00;
+    *stub++ = 0x00; *stub++ = 0x00;
+    memcpy(stub, &addr, sizeof(void *));
+    stub += sizeof(void *);
+#else
+    stub += asm_jump_32bit(stub, addr);
+#endif
     return stub - base;
 }
 

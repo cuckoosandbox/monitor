@@ -1,6 +1,6 @@
 /*
 Cuckoo Sandbox - Automated Malware Analysis.
-Copyright (C) 2010-2015 Cuckoo Foundation.
+Copyright (C) 2015-2018 Cuckoo Foundation.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -55,28 +55,11 @@ void chtmtag_attrs(const void *chtmtag, bson *b)
     }
 }
 
-static funcoff_t _COleScript_Compile[] = {
-    {0x4ce7c6df, 0x8570, 0},
-    {0, 0, 0},
-};
-
-
-static funcoff_t _ActiveXObjectFncObj_Construct[] = {
-    {0x4ce7c6df, 0x17d10, 0},
-    {0, 0, 0},
-};
-
 static FARPROC _var_getvalue;
 
 static funcoff_t _var_getvalue_ts[] = {
     {0x4ce7c6df, 0x107e0, 0},
     {0, 0, 0},
-};
-
-static mod2funcoff_t _jscript[] = {
-    {"COleScript_Compile", _COleScript_Compile},
-    {"ActiveXObjectFncObj_Construct", _ActiveXObjectFncObj_Construct},
-    {NULL, NULL},
 };
 
 static funcoff_t _CDocument_write[] = {
@@ -150,24 +133,6 @@ VAR *iexplore_var_getvalue(VAR *value, void *session)
     return value;
 }
 
-uint8_t *hook_modulecb_jscript(
-    hook_t *h, uint8_t *module_address, uint32_t module_size)
-{
-    static int first = 1;
-    if(first != 0) {
-        first = 0;
-
-        _var_getvalue = (FARPROC) module_addr_timestamp(
-            module_address, module_size, _var_getvalue_ts, NULL
-        );
-    }
-
-    h->addr = module_addr_timestamp_mod(
-        module_address, module_size, _jscript, h->funcname, &h->cconv
-    );
-    return h->addr;
-}
-
 uint8_t *hook_modulecb_mshtml(
     hook_t *h, uint8_t *module_address, uint32_t module_size)
 {
@@ -184,4 +149,13 @@ uint8_t *hook_modulecb_ncrypt(
         module_address, module_size, _ncrypt, h->funcname, &h->cconv
     );
     return h->addr;
+}
+
+void jscript_init(hook_t *h, uint8_t *module_address, uint32_t module_size)
+{
+    (void) h;
+
+    _var_getvalue = (FARPROC) module_addr_timestamp(
+        module_address, module_size, _var_getvalue_ts, NULL
+    );
 }

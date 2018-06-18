@@ -40,7 +40,7 @@ typedef enum _register_t {
 #define ASM_MOVE_REGIMM_SIZE 5
 #define ASM_PUSH_SIZE 5
 #define ASM_JREGZ 4
-#define ASM_JUMP_SIZE 6
+#define ASM_JUMP_SIZE ASM_JUMP_32BIT_SIZE
 
 typedef enum _register_t {
     R_EAX, R_ECX, R_EDX, R_EBX, R_ESP, R_EBP, R_ESI, R_EDI,

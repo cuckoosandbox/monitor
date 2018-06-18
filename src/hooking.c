@@ -60,14 +60,6 @@ static const char *g_missing_blacklist[] = {
 // we are "inside" the monitor.
 static uintptr_t g_Old_LdrLoadDll_address;
 
-#if __x86_64__
-// 272 = 16*reg + eflags
-#define REG_CONTEXT_SIZE 272
-#else
-// 36 = 8*reg + eflags
-#define REG_CONTEXT_SIZE 36
-#endif
-
 static void *_cs_malloc(size_t size)
 {
     return mem_alloc(size);
@@ -643,6 +635,14 @@ static int _hook_call_method_arguments(uint8_t *ptr, uint32_t signature)
 {
     uint8_t *base = ptr;
 
+#if __x86_64__
+// = 16*reg + eflags + 4*scratch_space_reg
+#define REG_CONTEXT_SIZE (16*8 + 8 + 4*8)
+#else
+// = 8*reg + eflags
+#define REG_CONTEXT_SIZE (8*4 + 4)
+#endif
+
     for (uint32_t idx = 0; idx < 4; idx++) {
         uint8_t arg = signature & 0xff; signature >>= 8;
         if(arg >= HOOK_INSN_STK(0)) {
@@ -687,6 +687,7 @@ static int _hook_copy_insns(
             // *jmpaddr = (uintptr_t) addr + *(uint32_t *)(addr + 1) + 5;
             return -1;
         }
+        // TODO Implement support for 64-bit jumps & RIP-relative addressing.
         if(*addr == 0xe9) {
             *relative = 0;
             *jmpaddr = (uintptr_t) addr + *(int32_t *)(addr + 1) + 5;
@@ -712,8 +713,13 @@ static int _hook_copy_insns(
             continue;
         }
         if(*addr >= 0x50 && *addr < 0x58) {
-            *spoff += 4;
+            *spoff += sizeof(void *);
         }
+#if __x86_64__
+        if(*addr == 0x41 && addr[1] >= 0x50 && addr[1] < 0x58) {
+            *spoff += sizeof(void *);
+        }
+#endif
 
         if(*relative == 0 && *jmpaddr != 0) {
             char hex[40]; hexdump(hex, h->addr, 16);
@@ -752,6 +758,11 @@ int hook_insn(hook_t *h, uint32_t signature)
     ptr += asm_sub_esp_imm(ptr, 0x1000);
     ptr += asm_push_context(ptr);
 
+#if __x86_64__
+    // Allocate 32 (= 8*4) bytes for the x86_64 scratch space.
+    ptr += asm_sub_regimm(ptr, R_RSP, 4 * sizeof(void *));
+#endif
+
     r = _hook_call_method_arguments(ptr, signature);
     if(r < 0) {
         return r;
@@ -765,6 +776,11 @@ int hook_insn(hook_t *h, uint32_t signature)
     // it to the function stub which in turn points to the original handler.
     ptr += asm_call(ptr, h->handler);
     h->handler = (FARPROC) h->func_stub;
+
+#if __x86_64__
+    // Deallocate 32 (= 8*4) bytes for the x86_64 scratch space.
+    ptr += asm_add_regimm(ptr, R_RSP, 4 * sizeof(void *));
+#endif
 
     ptr += asm_pop_context(ptr);
     ptr += asm_add_esp_imm(ptr, 0x1000);

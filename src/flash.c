@@ -36,8 +36,7 @@ static void *(__stdcall *g_flash_get_method_name)(uintptr_t method_name);
 
 static uint8_t *g_module_address;
 
-void flash_init(
-    hook_t *h, uint8_t *module_address, uint32_t module_size)
+void flash_init(hook_t *h, uint8_t *module_address, uint32_t module_size)
 {
     (void) h;
 
