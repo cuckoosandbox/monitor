@@ -553,7 +553,7 @@ Middle::
         // As it is non-trivial to extract the base address of the original
         // mapped section, we'll just go ahead and read the memory from the
         // remote process.
-        buffer = mem_alloc(buflen);
+        buffer = (uint8_t *)mem_alloc(buflen);
         if(buffer != NULL) {
             virtual_read_ex(ProcessHandle, *BaseAddress, buffer, &buflen);
         }

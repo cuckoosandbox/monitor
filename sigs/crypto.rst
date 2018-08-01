@@ -313,7 +313,7 @@ Pre::
         length += copy_uint32(&rgcbToBeHashed[idx]);
     }
 
-    uint8_t *buf = mem_alloc(length);
+    uint8_t *buf = (uint8_t *)mem_alloc(length);
     if(buf != NULL) {
         for (uint32_t idx = 0, offset = 0; idx < cToBeHashed; idx++) {
             copy_bytes(
@@ -564,7 +564,7 @@ Pre::
     if(pMessage != NULL && pMessage->pBuffers != NULL) {
         secbuf_get_buffer(pMessage->cBuffers,
             pMessage->pBuffers, &buf, &length);
-        buf = memdup(buf, length);
+        buf = (uint8_t *)memdup(buf, length);
     }
 
 Logging::
