@@ -25,7 +25,7 @@ Flags::
 
 Pre::
 
-    wchar_t *class = extract_unicode_string_unistr(Class);
+    wchar_t *classStr = extract_unicode_string_unistr(Class);
 
     wchar_t *regkey = get_unicode_buffer();
     reg_get_key_objattr(ObjectAttributes, regkey);
@@ -41,11 +41,11 @@ Interesting::
 Logging::
 
     u regkey regkey
-    u class class
+    u class classStr
 
 Post::
 
-    free_unicode_buffer(class);
+    free_unicode_buffer(classStr);
     free_unicode_buffer(regkey);
 
 
