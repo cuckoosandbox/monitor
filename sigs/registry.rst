@@ -13,7 +13,7 @@ RegOpenKeyExA
 Parameters::
 
     ** HKEY hKey base_handle
-    ** LPCTSTR lpSubKey regkey_r
+    ** LPCSTR lpSubKey regkey_r
     ** DWORD ulOptions options
     ** REGSAM samDesired access
     ** PHKEY phkResult key_handle
@@ -21,7 +21,7 @@ Parameters::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    reg_get_key_asciiz(hKey, lpSubKey, regkey);
+    reg_get_key_asciizA(hKey, lpSubKey, regkey);
 
 Interesting::
 
@@ -75,9 +75,9 @@ RegCreateKeyExA
 Parameters::
 
     ** HKEY hKey base_handle
-    ** LPCTSTR lpSubKey regkey_r
+    ** LPCSTR lpSubKey regkey_r
     *  DWORD Reserved
-    ** LPTSTR lpClass class
+    ** LPSTR lpClass class
     ** DWORD dwOptions options
     ** REGSAM samDesired access
     *  LPSECURITY_ATTRIBUTES lpSecurityAttributes
@@ -87,7 +87,7 @@ Parameters::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    reg_get_key_asciiz(hKey, lpSubKey, regkey);
+    reg_get_key_asciizA(hKey, lpSubKey, regkey);
 
 Interesting::
 
@@ -149,12 +149,12 @@ RegDeleteKeyA
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPCTSTR lpSubKey regkey_r
+    ** LPCSTR lpSubKey regkey_r
 
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    reg_get_key_asciiz(hKey, lpSubKey, regkey);
+    reg_get_key_asciizA(hKey, lpSubKey, regkey);
 
 Interesting::
 
@@ -231,10 +231,10 @@ Parameters::
 
     ** HKEY hKey key_handle
     ** DWORD dwIndex index
-    ** LPTSTR lpName key_name
+    ** LPSTR lpName key_name
     *  LPDWORD lpcName
     *  LPDWORD lpReserved
-    ** LPTSTR lpClass class
+    ** LPSTR lpClass class
     *  LPDWORD lpcClass
     *  PFILETIME lpftLastWriteTime
 
@@ -297,7 +297,7 @@ Parameters::
 
     ** HKEY hKey key_handle
     ** DWORD dwIndex index
-    ** LPTSTR lpValueName regkey_r
+    ** LPSTR lpValueName regkey_r
     *  LPDWORD lpcchValueName
     *  LPDWORD lpReserved
     ** LPDWORD lpType reg_type
@@ -316,7 +316,7 @@ Ensure::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    reg_get_key_asciiz(hKey, lpValueName, regkey);
+    reg_get_key_asciizA(hKey, lpValueName, regkey);
 
     *lpType = REG_NONE;
 
@@ -376,7 +376,7 @@ RegSetValueExA
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPCTSTR lpValueName regkey_r
+    ** LPCSTR lpValueName regkey_r
     *  DWORD Reserved
     ** DWORD dwType reg_type
     *  const BYTE *lpData
@@ -389,7 +389,7 @@ Flags::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    reg_get_key_asciiz(hKey, lpValueName, regkey);
+    reg_get_key_asciizA(hKey, lpValueName, regkey);
 
 Interesting::
 
@@ -450,7 +450,7 @@ RegQueryValueExA
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPCTSTR lpValueName regkey_r
+    ** LPCSTR lpValueName regkey_r
     *  LPDWORD lpReserved
     ** LPDWORD lpType reg_type
     *  LPBYTE lpData
@@ -468,7 +468,7 @@ Ensure::
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    reg_get_key_asciiz(hKey, lpValueName, regkey);
+    reg_get_key_asciizA(hKey, lpValueName, regkey);
 
     *lpType = REG_NONE;
 
@@ -534,12 +534,12 @@ RegDeleteValueA
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPCTSTR lpValueName regkey_r
+    ** LPCSTR lpValueName regkey_r
 
 Pre::
 
     wchar_t *regkey = get_unicode_buffer();
-    reg_get_key_asciiz(hKey, lpValueName, regkey);
+    reg_get_key_asciizA(hKey, lpValueName, regkey);
 
 Interesting::
 
@@ -586,7 +586,7 @@ RegQueryInfoKeyA
 Parameters::
 
     ** HKEY hKey key_handle
-    ** LPTSTR lpClass class
+    ** LPSTR lpClass class
     *  LPDWORD lpcClass
     *  LPDWORD lpReserved
     ** LPDWORD lpcSubKeys subkey_count

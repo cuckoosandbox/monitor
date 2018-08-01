@@ -15,7 +15,7 @@ Signature::
 Parameters::
 
     *  LPCSTR lpClassName
-    ** LPCTSTR lpWindowName window_name
+    ** LPCSTR lpWindowName window_name
 
 Pre::
 
@@ -72,8 +72,8 @@ Parameters::
 
     ** HWND hwndParent parent_hwnd
     ** HWND hwndChildAfter child_after_hwnd
-    *  LPCTSTR lpszClass
-    ** LPCTSTR lpszWindow window_name
+    *  LPCSTR lpszClass
+    ** LPCSTR lpszWindow window_name
 
 Pre::
 
@@ -140,8 +140,8 @@ Signature::
 Parameters::
 
     ** HWND hWnd window_handle
-    ** LPCTSTR lpText text
-    ** LPCTSTR lpCaption caption
+    ** LPCSTR lpText text
+    ** LPCSTR lpCaption caption
     ** UINT uType flags
     ** WORD wLanguageId language_identifier
     *  INT Unknown
@@ -299,8 +299,8 @@ Signature::
 Parameters::
 
     ** DWORD dwExStyle extended_style
-    ** LPCTSTR lpClassName class_name
-    ** LPCTSTR lpWindowName window_name
+    ** LPCSTR lpClassName class_name
+    ** LPCSTR lpWindowName window_name
     ** DWORD dwStyle style
     ** int x
     ** int y

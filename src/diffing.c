@@ -202,7 +202,7 @@ void diffing_init(const char *path, int enable)
         }
 
         fclose(fp);
-        DeleteFile(path);
+        DeleteFileA(path);
     }
 
     g_diffing_enabled = enable;

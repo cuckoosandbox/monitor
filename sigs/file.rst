@@ -77,7 +77,7 @@ Signature::
 
 Parameters::
 
-    *  LPCTSTR lpPathName
+    *  LPCSTR lpPathName
 
 Pre::
 
@@ -189,7 +189,7 @@ Signature::
 
 Parameters::
 
-    *  LPCTSTR lpFileName
+    *  LPCSTR lpFileName
     *  FINDEX_INFO_LEVELS fInfoLevelId
     *  LPVOID lpFindFileData
     *  FINDEX_SEARCH_OPS fSearchOp
@@ -251,8 +251,8 @@ Signature::
 
 Parameters::
 
-    *  LPCTSTR lpExistingFileName
-    *  LPCTSTR lpNewFileName
+    *  LPCSTR lpExistingFileName
+    *  LPCSTR lpNewFileName
     ** BOOL bFailIfExists fail_if_exists
 
 Pre::
@@ -577,7 +577,7 @@ Signature::
 
 Parameters::
 
-    *  LPTSTR lpBuffer
+    *  LPSTR lpBuffer
     *  UINT uSize
 
 Logging::
@@ -613,7 +613,7 @@ Signature::
 
 Parameters::
 
-    *  LPTSTR lpBuffer
+    *  LPSTR lpBuffer
     *  UINT uSize
 
 Logging::

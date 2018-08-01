@@ -111,7 +111,7 @@ int hook_init(HMODULE module_handle)
     g_monitor_end = g_monitor_start +
         module_image_size((const uint8_t *) module_handle);
 
-    g_ntdll_start = (uintptr_t) GetModuleHandle("ntdll");
+    g_ntdll_start = (uintptr_t) GetModuleHandleA("ntdll");
     g_ntdll_end = g_ntdll_start +
         module_image_size((const uint8_t *) g_ntdll_start);
 
@@ -871,7 +871,7 @@ int hook(hook_t *h, void *module_handle)
 
     h->module_handle = module_handle;
     if(h->module_handle == NULL) {
-        h->module_handle = GetModuleHandle(h->library);
+        h->module_handle = GetModuleHandleA(h->library);
 
         // There is only one case in which a nullptr module handle is
         // allowed and that's when there is an address callback and the
@@ -974,7 +974,7 @@ int hook(hook_t *h, void *module_handle)
             library, slab_size(&g_function_stubs));
 
         h->library = library;
-        h->module_handle = GetModuleHandle(library);
+        h->module_handle = GetModuleHandleA(library);
         h->addr = NULL;
 
         // We're having a special case here. When we return 1, the monitor
