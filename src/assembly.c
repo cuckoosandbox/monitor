@@ -233,9 +233,9 @@ int asm_lea_regregimm(
 int asm_sub_esp_imm(uint8_t *stub, uint32_t value)
 {
 #if __x86_64__
-    return asm_lea_regregimm(stub, R_RSP, R_RSP, -value);
+    return asm_lea_regregimm(stub, R_RSP, R_RSP, -((int32_t)value));
 #else
-    return asm_lea_regregimm(stub, R_ESP, R_ESP, -value);
+    return asm_lea_regregimm(stub, R_ESP, R_ESP, -((int32_t)value));
 #endif
 }
 
