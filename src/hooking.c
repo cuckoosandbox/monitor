@@ -154,8 +154,13 @@ static uintptr_t WINAPI _hook_retaddr4(void *a, void *b, void *c, void *d)
 {
     (void) a; (void) b; (void) c; (void) d;
 
-    // Probably gcc specific.
-    return (uintptr_t) __builtin_return_address(0);
+#ifdef _MSC_VER
+	// msvc specific
+	return (uintptr_t)_ReturnAddress();
+#else
+	// gcc specific
+	return (uintptr_t)__builtin_return_address(0);
+#endif
 }
 
 void hook_initcb_LdrLoadDll(hook_t *h)
