@@ -150,6 +150,7 @@ int hook_init2()
     return 0;
 }
 
+#pragma intrinsic(_ReturnAddress)
 static uintptr_t WINAPI _hook_retaddr4(void *a, void *b, void *c, void *d)
 {
     (void) a; (void) b; (void) c; (void) d;
