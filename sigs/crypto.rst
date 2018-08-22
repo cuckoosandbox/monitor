@@ -378,6 +378,21 @@ Flags::
 
     algorithm_identifier
 
+Middle::
+
+    uint8_t keybuf[256]; DWORD keysize = 0;
+
+    Old_advapi32_CryptExportKey(
+        *phKey, 0, PLAINTEXTKEYBLOB, 0, NULL, &keysize
+    );
+    Old_advapi32_CryptExportKey(
+        *phKey, 0, PLAINTEXTKEYBLOB, 0, keybuf, &keysize
+    );
+
+Logging::
+
+    b key (uintptr_t) keysize, keybuf
+
 
 CryptCreateHash
 ===============
