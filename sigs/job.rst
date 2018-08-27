@@ -15,7 +15,7 @@ Signature::
 Parameters::
 
     *  LPSECURITY_ATTRIBUTES lpJobAttributes
-    ** LPCTSTR lpName
+    ** LPCWSTR lpName
 
 Logging::
 

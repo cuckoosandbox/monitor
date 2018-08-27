@@ -14,8 +14,8 @@ Signature::
 
 Parameters::
 
-    ** LPCTSTR lpMachineName machine_name
-    ** LPCTSTR lpDatabaseName database_name
+    ** LPCSTR lpMachineName machine_name
+    ** LPCSTR lpDatabaseName database_name
     ** DWORD dwDesiredAccess desired_access
 
 Interesting::
@@ -55,18 +55,18 @@ Signature::
 Parameters::
 
     ** SC_HANDLE hSCManager service_manager_handle
-    ** LPCTSTR lpServiceName service_name
-    ** LPCTSTR lpDisplayName display_name
+    ** LPCSTR lpServiceName service_name
+    ** LPCSTR lpDisplayName display_name
     ** DWORD dwDesiredAccess desired_access
     ** DWORD dwServiceType service_type
     ** DWORD dwStartType start_type
     ** DWORD dwErrorControl error_control
-    *  LPCTSTR lpBinaryPathName
-    *  LPCTSTR lpLoadOrderGroup
+    *  LPCSTR lpBinaryPathName
+    *  LPCSTR lpLoadOrderGroup
     *  LPDWORD lpdwTagId
-    *  LPCTSTR lpDependencies
-    ** LPCTSTR lpServiceStartName service_start_name
-    ** LPCTSTR lpPassword password
+    *  LPCSTR lpDependencies
+    ** LPCSTR lpServiceStartName service_start_name
+    ** LPCSTR lpPassword password
 
 Pre::
 
@@ -157,7 +157,7 @@ Signature::
 Parameters::
 
     ** SC_HANDLE hSCManager service_manager_handle
-    ** LPCTSTR lpServiceName service_name
+    ** LPCSTR lpServiceName service_name
     ** DWORD dwDesiredAccess desired_access
 
 Interesting::
@@ -204,7 +204,7 @@ Parameters::
 
     ** SC_HANDLE hService service_handle
     *  DWORD dwNumServiceArgs
-    *  LPCTSTR *lpServiceArgVectors
+    *  LPCSTR *lpServiceArgVectors
 
 Logging::
 

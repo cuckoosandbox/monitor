@@ -110,10 +110,10 @@ Signature::
 
 Parameters::
 
-    ** LPCTSTR lpszAgent user_agent
+    ** LPCSTR lpszAgent user_agent
     ** DWORD dwAccessType access_type
-    ** LPCTSTR lpszProxyName proxy_name
-    ** LPCTSTR lpszProxyBypass proxy_bypass
+    ** LPCSTR lpszProxyName proxy_name
+    ** LPCSTR lpszProxyBypass proxy_bypass
     ** DWORD dwFlags flags
 
 Interesting::
@@ -161,10 +161,10 @@ Signature::
 Parameters::
 
     ** HINTERNET hInternet internet_handle
-    ** LPCTSTR lpszServerName hostname
+    ** LPCSTR lpszServerName hostname
     ** INTERNET_PORT nServerPort port
-    ** LPCTSTR lpszUsername username
-    ** LPCTSTR lpszPassword password
+    ** LPCSTR lpszUsername username
+    ** LPCSTR lpszPassword password
     ** DWORD dwService service
     ** DWORD dwFlags flags
     *  DWORD_PTR dwContext
@@ -219,8 +219,8 @@ Signature::
 Parameters::
 
     ** HINTERNET hInternet internet_handle
-    ** LPCTSTR lpszUrl url
-    *  LPCTSTR lpszHeaders
+    ** LPCSTR lpszUrl url
+    *  LPCSTR lpszHeaders
     *  DWORD dwHeadersLength
     ** DWORD dwFlags flags
     *  DWORD_PTR dwContext
@@ -329,11 +329,11 @@ Signature::
 Parameters::
 
     ** HINTERNET hConnect connect_handle
-    ** LPCTSTR lpszVerb http_method
-    ** LPCTSTR lpszObjectName path
-    ** LPCTSTR lpszVersion http_version
-    ** LPCTSTR lpszReferer referer
-    *  LPCTSTR *lplpszAcceptTypes
+    ** LPCSTR lpszVerb http_method
+    ** LPCSTR lpszObjectName path
+    ** LPCSTR lpszVersion http_version
+    ** LPCSTR lpszReferer referer
+    *  LPCSTR *lplpszAcceptTypes
     ** DWORD dwFlags flags
     *  DWORD_PTR dwContext
 
@@ -385,7 +385,7 @@ Signature::
 Parameters::
 
     ** HINTERNET hRequest request_handle
-    *  LPCTSTR lpszHeaders
+    *  LPCSTR lpszHeaders
     *  DWORD dwHeadersLength
     *  LPVOID lpOptional
     *  DWORD dwOptionalLength
@@ -837,7 +837,7 @@ Signature::
 Parameters::
 
     *  DWORD dwNetType
-    *  LPTSTR lpProviderName
+    *  LPWSTR lpProviderName
     *  LPDWORD lpBufferSize
 
 Ensure::

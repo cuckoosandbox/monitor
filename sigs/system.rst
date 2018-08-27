@@ -142,7 +142,7 @@ Pre::
     unhook_detect_disable();
 
     char library[MAX_PATH+1];
-    library_from_unicodez(get_module_file_name(ModuleHandle),
+    library_from_unicodez(get_module_file_name((HMODULE)ModuleHandle),
         library, sizeof(library));
 
 Middle::
@@ -221,7 +221,7 @@ Pre::
 
     char library[MAX_PATH+1];
 
-    library_from_unicodez(get_module_file_name(ModuleHandle),
+    library_from_unicodez(get_module_file_name((HMODULE)ModuleHandle),
         library, sizeof(library));
 
 Logging::

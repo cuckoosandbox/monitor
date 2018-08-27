@@ -88,7 +88,7 @@ Pre::
     MULTI_QI *multi_qi = pResults;
     for (uint32_t idx = 0; idx < dwCount; idx++, multi_qi++) {
         our_snprintf(index, sizeof(index), "%d", idx++);
-        clsid_to_string(copy_ptr(&multi_qi->pIID), clsid);
+        clsid_to_string((IID *)copy_ptr(&multi_qi->pIID), clsid);
         log_string(&b, index, clsid, our_strlen(clsid));
     }
 

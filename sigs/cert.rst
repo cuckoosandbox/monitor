@@ -42,7 +42,7 @@ Signature::
 Parameters::
 
     *  HCRYPTPROV hProv
-    ** LPCTSTR szSubsystemProtocol store_name
+    ** LPCSTR szSubsystemProtocol store_name
 
 
 CertOpenSystemStoreW
