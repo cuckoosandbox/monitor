@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "unhook.h"
 
 #define MISSING_HANDLE_COUNT 128
-#define FUNCTIONSTUBSIZE 128
+#define FUNCTIONSTUBSIZE 256
 
 static SYSTEM_INFO g_si;
 static csh g_capstone;
