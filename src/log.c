@@ -414,7 +414,6 @@ void log_api(uint32_t index, int is_success, uintptr_t return_value,
         // report we turn it into a buffer (much like the dropped files).
         if(*fmt == '!') {
             override = 1;
-            argnum--;
             fmt++;
         }
 
