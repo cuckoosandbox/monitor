@@ -86,6 +86,10 @@ void monitor_init(HMODULE module_handle)
     destroy_pe_header(module_handle);
 
     misc_set_monitor_options(cfg.track, cfg.mode, cfg.trigger);
+	
+	// This is the second part of the UM hook protection
+	// Register our exception handler
+	register_veh();
 }
 
 void monitor_hook(const char *library, void *module_handle)
