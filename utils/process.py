@@ -467,7 +467,7 @@ class SignatureProcessor(object):
             sigs.append({
                 "library": insn["module_clean"],
                 "apiname": insn["funcname"],
-                "ignore": last == insn["funcname"],
+                "ignore": last == insn["module"] + insn["funcname"],
                 "is_insn": True,
                 "is_hook": True,
                 "signature": {
@@ -479,7 +479,7 @@ class SignatureProcessor(object):
                 },
                 "logging": logging,
             })
-            last = insn["funcname"]
+            last = insn["module"] + insn["funcname"]
 
         # Assign hook indices accordingly (in a sorted manner).
         for idx, sig in enumerate(sigs):
