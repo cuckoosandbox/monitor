@@ -5,3 +5,9 @@ docs/_build/
 *.dll
 test/x86/
 test/x64/
+
+capstone-x86.lib
+capstone-x64.lib
+
+capstone.lib
+capstone.pc
