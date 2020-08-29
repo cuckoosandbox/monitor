@@ -453,7 +453,8 @@ class SignatureProcessor(object):
             sigs.extend(sorted(siglibs[library], key=lambda x: x['apiname']))
 
         # Add each instruction-level hook.
-        last = None
+        last_apiname = None
+        last_library = None
         for insn in self.insns.methods:
             logging = []
 
@@ -467,7 +468,7 @@ class SignatureProcessor(object):
             sigs.append({
                 "library": insn["module_clean"],
                 "apiname": insn["funcname"],
-                "ignore": last == insn["funcname"],
+                "ignore": last_apiname == insn["funcname"] and last_library == insn["module_clean"],
                 "is_insn": True,
                 "is_hook": True,
                 "signature": {
@@ -479,7 +480,8 @@ class SignatureProcessor(object):
                 },
                 "logging": logging,
             })
-            last = insn["funcname"]
+            last_apiname = insn["funcname"]
+            last_library = insn["module_clean"]
 
         # Assign hook indices accordingly (in a sorted manner).
         for idx, sig in enumerate(sigs):
