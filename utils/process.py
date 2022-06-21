@@ -27,6 +27,7 @@ import json
 import os
 import sys
 import yaml
+from yaml import Loader
 
 class DefinitionProcessor(object):
     def __init__(self, data_dir):
@@ -42,14 +43,15 @@ class DefinitionProcessor(object):
         doc = docutils.utils.new_document(os.path.basename(sig),
                                           self.parser_settings())
         parser = docutils.parsers.rst.Parser()
-        parser.parse(open(sig, 'rb').read(), doc)
+        with open(sig, 'r') as fin:
+            parser.parse(fin.read(), doc)
         return parser
 
     def template(self, name):
         return self.templ_env.get_template('%s.jinja2' % name)
 
     def render(self, template, path, **kwargs):
-        with open(path, 'wb') as f:
+        with open(path, 'w') as f:
             f.write(self.template(template).render(**kwargs))
 
 
@@ -77,22 +79,22 @@ class SignatureProcessor(object):
         self.sig_dirpath = sig_dirpath
 
         self.types = {}
-        for line in open(types_path, 'rb'):
+        for line in open(types_path, 'r'):
             key, value = line.split('=', 1)
             self.types[key.strip()] = value.strip()
 
         self.is_success = {}
-        for line in open(is_success_path, 'rb'):
+        for line in open(is_success_path, 'r'):
             key, value = line.split('=', 1)
             self.is_success[key.strip()] = value.strip()
 
         self.dereference = {}
-        for line in open(dereference_path, 'rb'):
+        for line in open(dereference_path, 'r'):
             key, value = line.split('=', 1)
             self.dereference[key.strip()] = value.strip()
 
         self.base_sigs = []
-        for entry in json.load(open(base_sigs_path, 'rb')):
+        for entry in json.load(open(base_sigs_path, 'r')):
             entry['is_hook'] = False
             entry['signature']['special'] = False
             for param in entry['parameters']:
@@ -295,15 +297,14 @@ class SignatureProcessor(object):
             children = entry.children
 
             if apiname.startswith('_'):
-                print>>sys.stderr, \
-                    'Skipping ignored API Signature:', apiname[1:]
+                print('Skipping ignored API Signature:', apiname[1:], file=sys.stderr)
                 continue
 
             row = copy.deepcopy(global_values)
 
             row['apiname'] = apiname
 
-            for x in xrange(1, len(children), 2):
+            for x in range(1, len(children), 2):
                 try:
                     key, value = self._parse_paragraph(children[x],
                                                        children[x+1])
@@ -506,11 +507,11 @@ class SignatureProcessor(object):
             category = sig['signature']['category']
             if category not in categories:
                 categories[category] = None
-                print category
+                print(category)
 
     def list_apis(self):
         for sig in self.sigs:
-            print sig['signature']['category'], sig['apiname']
+            print(sig['signature']['category'], sig['apiname'])
 
 class FlagsProcessor(object):
     def __init__(self, data_dir, output_directory):
@@ -556,7 +557,7 @@ class FlagsProcessor(object):
 
             row = dict(name=flagname, value=[], enum=[])
 
-            for x in xrange(1, len(children), 2):
+            for x in range(1, len(children), 2):
                 try:
                     key, value = self._parse_paragraph(children[x],
                                                        children[x+1])
@@ -627,7 +628,7 @@ class InsnProcess(object):
         if not l:
             return []
 
-        if isinstance(l, basestring):
+        if isinstance(l, str):
             l = [l]
 
         r = []
@@ -666,7 +667,7 @@ class InsnProcess(object):
     def process(self):
         methods = []
         for filepath in self.insnfiles:
-            doc = yaml.load(open(filepath, "rb"))
+            doc = yaml.load(open(filepath, "r"), Loader=Loader)
             if not doc:
                 continue
             glob = doc.pop("global", {})
@@ -728,7 +729,8 @@ class InsnProcess(object):
             "methods": self.methods,
             "modules": self.modules,
         })
-        open(self.outfile, "wb").write(content)
+        with open(self.outfile, "w") as fout:
+            fout.write(content)
 
     def render(self, docname, apis, variables, dirpath="data/"):
         for method in self.methods:
