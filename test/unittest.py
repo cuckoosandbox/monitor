@@ -69,7 +69,7 @@ class Dict(dict):
 
 def compile_file(fname, arch):
     kw = Dict(DEFAULTS)
-    for line in open(fname, 'rb'):
+    for line in open(fname, 'r'):
         if not line.startswith('///'):
             continue
 
@@ -97,7 +97,7 @@ def compile_file(fname, arch):
             continue
 
     # Write extra configuration to the config.yml file.
-    with open(os.path.join(arch, "config.yml"), "a+b") as f:
+    with open(os.path.join(arch, "config.yml"), "a+") as f:
         if kw.FINISH == 'yes' or kw.PIPE == 'yes' or kw.FREE == 'yes':
             f.write("%s:\n" % fname[:-2])
             f.write("  options:\n")
@@ -137,7 +137,7 @@ if __name__ == '__main__':
         lines += compile_file(fname, 'x86')
         lines += compile_file(fname, 'x64')
 
-    with open(os.path.join(curdir, 'Makefile'), 'wb') as f:
+    with open(os.path.join(curdir, 'Makefile'), 'w') as f:
         f.write('MAKEFLAGS = -j8\n')
         f.write('all: %s\n' % ' '.join(ALL))
         f.write('clean:\n\trm -f %s\n\n' % ' '.join(ALL))

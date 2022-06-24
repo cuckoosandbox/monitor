@@ -62,7 +62,7 @@ endif
 all: $(BINARIES)
 
 $(HOOKSRC): $(SIGS) $(FLAGS) $(JINJA2) $(HOOKREQ) $(YAML)
-	python2 utils/process.py $(RELMODE) --apis=$(APIS)
+	python utils/process.py $(RELMODE) --apis=$(APIS)
 
 $(INSNSSRC) $(FLAGSRC): $(HOOKSRC)
 
