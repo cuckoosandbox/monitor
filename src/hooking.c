@@ -571,12 +571,17 @@ static int _hook_determine_start(hook_t *h)
             continue;
         }
 
-        // jmp dword [addr]
-        if(*addr == 0xff && addr[1] == 0x25) {
-            unhook_detect_add_region(h->funcname, addr, addr, addr, 6);
-
+        // jmp dword [addr] / jmp qword [addr]
+        if((*addr == 0xff && addr[1] == 0x25) || (*addr == 0x48 && addr[1] == 0xff && addr[2] == 0x25)) {
+            if(*addr == 0xff)
+                unhook_detect_add_region(h->funcname, addr, addr, addr, 6);
+            else
+                unhook_detect_add_region(h->funcname, addr, addr, addr, 7);
 #if __x86_64__
-            addr += *(int32_t *)(addr + 2) + 6;
+            if(*addr == 0xff)
+                addr += *(int32_t *)(addr + 2) + 6;
+            else
+                addr += *(int32_t *)(addr + 3) + 7;     
 #else
             addr = *(uint8_t **)(addr + 2);
 #endif
